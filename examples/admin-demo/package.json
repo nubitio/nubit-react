@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/syne": "^5.2.7",
     "@nubitio/react-admin": "workspace:*",
     "@nubitio/ui": "workspace:*",
     "@phosphor-icons/web": "^2.1.2",

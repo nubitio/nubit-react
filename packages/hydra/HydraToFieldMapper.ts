@@ -243,10 +243,13 @@ export function mapHydraSchemaToFields(
       continue;
     }
 
-    // Prefer the backend-provided hydra:title (translated label) when present and
-    // non-empty; fall back to the auto-capitalised property name.
+    // Prefer the backend-provided hydra:title (translated label) when present —
+    // but only when it actually differs from the raw property name: API
+    // Platform defaults hydra:title to the property name itself, and showing
+    // "name"/"sku" as column headers reads as unstyled. Otherwise humanise.
     const hydraTitle = fieldSchema['hydra:title'];
-    const label = hydraTitle && hydraTitle.trim() !== '' ? hydraTitle : toLabel(name);
+    const label =
+      hydraTitle && hydraTitle.trim() !== '' && hydraTitle !== name ? hydraTitle : toLabel(name);
     const filterable = filterableProperties.size === 0 ? true : filterableProperties.has(name);
 
     // Rule 3 — display-only (writeable: false) → noneField

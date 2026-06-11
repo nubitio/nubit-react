@@ -1,6 +1,6 @@
-import { createScopedEventBus, type FormEventNames } from '@nubit/core';
+import { createScopedEventBus, type FormEventNames } from '@nubitio/core';
 import type { ResourceConfig } from './ResourceConfig';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export type ResolvedCrudResource<T extends DataRecord> = ResourceConfig<T> & {
   events: FormEventNames;

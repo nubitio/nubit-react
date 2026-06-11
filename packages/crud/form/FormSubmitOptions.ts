@@ -1,4 +1,4 @@
-import type { CoreHttpClient, FormEventNames } from '@nubit/core';
+import type { CoreHttpClient, FormEventNames } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 

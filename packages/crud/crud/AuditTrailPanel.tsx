@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useCoreHttpClient, getCoreLocale, getCoreTimezone, useCoreTranslation } from '@nubit/core';
+import { useCoreHttpClient, getCoreLocale, getCoreTimezone, useCoreTranslation } from '@nubitio/core';
 import type { AuditEntry } from './AuditTrail';
 
 export interface AuditTrailPanelProps {

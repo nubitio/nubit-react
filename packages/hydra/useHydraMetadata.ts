@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCoreHttpClient, type CoreHttpClient } from '@nubit/core';
-import { useCoreConfig } from '@nubit/core';
+import { useCoreHttpClient, type CoreHttpClient } from '@nubitio/core';
+import { useCoreConfig } from '@nubitio/core';
 import { parseHydraDoc, parseOpenApiDoc } from './openApiParser';
 import type { HydraApiDoc, OpenApiDoc, ApiDoc } from './types';
 

@@ -1,6 +1,6 @@
 import type { FormLayout } from './FormLayout';
 import type { FormPresentationContext } from './resolveFieldColSpan';
-import type { FormEventNames } from '@nubit/core';
+import type { FormEventNames } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { FormDataChangedHandler, FormDataRecord, FormDataSnapshot } from './FormDataSnapshot';
 import type { BackendAdapter } from '../adapter/BackendAdapter';

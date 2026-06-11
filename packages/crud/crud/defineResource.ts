@@ -1,5 +1,5 @@
 import type { ResourceConfig } from './ResourceConfig';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 const stringResourceCache = new Map<string, ResourceConfig>();
 

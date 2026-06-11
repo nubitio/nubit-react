@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResourceStoreProvider } from '@nubit/crud';
+import { ResourceStoreProvider } from '@nubitio/crud';
 import { createHydraResourceStore } from './HydraRemoteDataSource';
 
 export interface HydraResourceStoreProviderProps {

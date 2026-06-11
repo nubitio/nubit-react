@@ -1,5 +1,5 @@
 {
-  "name": "@nubit/react-admin",
+  "name": "@nubitio/react-admin",
   "version": "0.1.0",
   "type": "module",
   "description": "Batteries-included admin stack: core runtime, CRUD, Hydra adapter, and AdminShell.",
@@ -50,11 +50,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@nubit/admin": "workspace:^",
-    "@nubit/hydra": "workspace:^",
-    "@nubit/core": "workspace:^",
-    "@nubit/crud": "workspace:^",
-    "@nubit/ui": "workspace:^"
+    "@nubitio/admin": "workspace:^",
+    "@nubitio/hydra": "workspace:^",
+    "@nubitio/core": "workspace:^",
+    "@nubitio/crud": "workspace:^",
+    "@nubitio/ui": "workspace:^"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",

@@ -1,11 +1,11 @@
-import type { ResourceStoreFactory } from '@nubit/react-admin';
+import type { ResourceStoreFactory } from '@nubitio/react-admin';
 
 /**
  * Minimal REST ResourceStore for the demo: loads the full collection from a
  * plain-array endpoint (like JSONPlaceholder) and reports the array length as
  * the total count. A real backend would translate the grid's load options
  * (pagination, sort, filter) into query parameters here — this is the
- * extension point @nubit/crud exposes for non-Hydra backends.
+ * extension point @nubitio/crud exposes for non-Hydra backends.
  */
 export const restResourceStore: ResourceStoreFactory = ({ url }) => ({
   async load() {

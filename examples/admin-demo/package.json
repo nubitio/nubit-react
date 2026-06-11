@@ -11,8 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nubit/react-admin": "workspace:*",
-    "@nubit/ui": "workspace:*",
+    "@nubitio/react-admin": "workspace:*",
+    "@nubitio/ui": "workspace:*",
     "@phosphor-icons/web": "^2.1.2",
     "@tanstack/react-query": "^5.0.0",
     "i18next": "^23.16.8",

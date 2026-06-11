@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useDialogStoreContext } from './DialogStoreProvider';
 import { initialDialogState } from './dialogStore';
 import type { DialogMode, DialogSlice } from './dialogStore';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export function useCrudDialogStore(resourceId: string): DialogSlice {
   const { state, dispatch } = useDialogStoreContext();

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export interface SelectionState {
   selectedIds: (string | number)[];

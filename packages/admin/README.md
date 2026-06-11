@@ -1,11 +1,11 @@
-# @nubit/admin
+# @nubitio/admin
 
 Admin shell layout for Nubit apps: responsive sidebar with nested menus, header with action slots, and screen-size utilities.
 
 ## Install
 
 ```bash
-npm install @nubit/admin
+npm install @nubitio/admin
 ```
 
 ## Peer dependencies
@@ -19,8 +19,8 @@ npm install @nubit/admin
 ## Usage
 
 ```tsx
-import { AdminShell } from '@nubit/admin';
-import '@nubit/admin/style.css';
+import { AdminShell } from '@nubitio/admin';
+import '@nubitio/admin/style.css';
 
 const menu = [
   { text: 'Dashboard', icon: 'ph ph-house', path: '/' },

@@ -1,4 +1,4 @@
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { ResourceConfig, ResourceToolbarContext, ResourceToolbarItems } from './ResourceConfig';
 
 export function resolveResourceToolbar<T extends DataRecord>(

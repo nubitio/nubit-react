@@ -1,6 +1,6 @@
 /**
- * Aggregates the CSS from each @nubit/* package into a single
- * @nubit/react-admin/dist/style.css file.  Run after `tsdown` so that all
+ * Aggregates the CSS from each @nubitio/* package into a single
+ * @nubitio/react-admin/dist/style.css file.  Run after `tsdown` so that all
  * individual dist/style.css files are already built.
  *
  * Usage: node scripts/bundle-nubit-css.mjs

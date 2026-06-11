@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export interface GridCellContext<
   TData extends DataRecord = DataRecord,

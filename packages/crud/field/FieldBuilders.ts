@@ -1,7 +1,7 @@
-import { getCoreTimezone } from '@nubit/core';
+import { getCoreTimezone } from '@nubitio/core';
 import { BaseFieldBuilder } from './BaseFieldBuilder';
 import { FieldType } from './FieldType';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { Field } from './Field';
 
 /**

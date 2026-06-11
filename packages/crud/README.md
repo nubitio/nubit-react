@@ -1,11 +1,11 @@
-# @nubit/crud
+# @nubitio/crud
 
 The Nubit CRUD engine: declarative resource pages with a data grid, dialog form, field DSL, RBAC, conditional rules, URL routing, audit trail, and pluggable backend adapters.
 
 ## Install
 
 ```bash
-npm install @nubit/crud @nubit/core @nubit/ui
+npm install @nubitio/crud @nubitio/core @nubitio/ui
 ```
 
 ## Peer dependencies
@@ -23,16 +23,16 @@ npm install @nubit/crud @nubit/core @nubit/ui
 ## Setup
 
 ```ts
-import '@nubit/ui/tokens.css';   // design tokens
-import '@nubit/ui/style.css';    // UI primitives styles
-import '@nubit/crud/style.css';  // grid + form styles
+import '@nubitio/ui/tokens.css';   // design tokens
+import '@nubitio/ui/style.css';    // UI primitives styles
+import '@nubitio/crud/style.css';  // grid + form styles
 ```
 
 ## Quick start
 
 ```tsx
-import { SmartCrudPage, defineResource, textField, numberField } from '@nubit/crud';
-import { HydraAdapter } from '@nubit/crud';
+import { SmartCrudPage, defineResource, textField, numberField } from '@nubitio/crud';
+import { HydraAdapter } from '@nubitio/crud';
 
 const products = defineResource('/api/products', {
   title: 'Products',

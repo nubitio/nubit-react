@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, IconButton } from '@nubit/ui';
-import { useCoreTranslation } from '@nubit/core';
+import { Button, IconButton } from '@nubitio/ui';
+import { useCoreTranslation } from '@nubitio/core';
 import type { CrudFormShellProps } from './CrudFormShellProps';
 import './CrudPageShell.scss';
 

@@ -1,5 +1,5 @@
 import type { FilterRule } from '../field/FilterRule';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export interface GridHandle {
   showLoading: (message?: string) => void;

@@ -38,4 +38,4 @@ export type { ColumnPreset } from './ColumnPreset';
 export type { AuditTrailConfig, AuditEntry } from './AuditTrail';
 export { AuditTrailPanel } from './AuditTrailPanel';
 export type { AuditTrailPanelProps } from './AuditTrailPanel';
-export { createCrudEvents } from '@nubit/core';
+export { createCrudEvents } from '@nubitio/core';

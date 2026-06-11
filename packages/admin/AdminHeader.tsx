@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Badge, IconButton, useFloatingPanel } from '@nubit/ui';
+import { Badge, IconButton, useFloatingPanel } from '@nubitio/ui';
 
 export interface AdminHeaderAction {
   id: string;

@@ -1,5 +1,5 @@
 {
-  "name": "@nubit/crud",
+  "name": "@nubitio/crud",
   "version": "0.1.0",
   "type": "module",
   "description": "Declarative CRUD engine with field DSL, forms, datagrids, RBAC, conditional logic and pluggable adapters (Hydra/REST).",
@@ -50,8 +50,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@nubit/core": "workspace:^",
-    "@nubit/ui": "workspace:^",
+    "@nubitio/core": "workspace:^",
+    "@nubitio/ui": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     "i18next": "^23.0.0",
     "react": "^19.0.0",

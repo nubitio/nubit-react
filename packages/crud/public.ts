@@ -1,5 +1,5 @@
 /**
- * @nubit/crud — CRUD engine, field DSL, form/grid views.
+ * @nubitio/crud — CRUD engine, field DSL, form/grid views.
  *
  * Core entry point for building admin CRUD pages against any REST or Hydra backend.
  *
@@ -160,7 +160,7 @@ export type { BackendAdapter } from './adapter/BackendAdapter';
 export { HydraAdapter } from './adapter/HydraAdapter';
 export { RestAdapter } from './adapter/RestAdapter';
 
-// ── Extension points (for @nubit/hydra and adapter implementors) ──────────────
+// ── Extension points (for @nubitio/hydra and adapter implementors) ──────────────
 export { ResourceSchemaProvider } from './schema/ResourceSchema';
 export type {
   ResourceSchemaProviderProps,
@@ -182,6 +182,6 @@ export type {
   ResourceStoreProviderProps,
 } from './data/ResourceStore';
 
-// ── Base data types (convenience re-exports from @nubit/core) ─────────────────
-export type { DataRecord } from '@nubit/core';
-export type { GridData } from '@nubit/core';
+// ── Base data types (convenience re-exports from @nubitio/core) ─────────────────
+export type { DataRecord } from '@nubitio/core';
+export type { GridData } from '@nubitio/core';

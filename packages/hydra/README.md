@@ -1,20 +1,20 @@
-# @nubit/hydra
+# @nubitio/hydra
 
-Hydra / OpenAPI adapter for [`@nubit/crud`](https://www.npmjs.com/package/@nubit/crud): automatic schema discovery and remote data sources from API Platform docs.
+Hydra / OpenAPI adapter for [`@nubitio/crud`](https://www.npmjs.com/package/@nubitio/crud): automatic schema discovery and remote data sources from API Platform docs.
 
 Point it at an API Platform backend and it derives CRUD field definitions, filters, and pagination from the published Hydra/OpenAPI documentation — no hand-written schemas.
 
 ## Install
 
 ```bash
-npm install @nubit/hydra @nubit/crud @nubit/core
+npm install @nubitio/hydra @nubitio/crud @nubitio/core
 ```
 
 ## Peer dependencies
 
 ```json
-"@nubit/core": "^0.1.0",
-"@nubit/crud": "^0.1.0",
+"@nubitio/core": "^0.1.0",
+"@nubitio/crud": "^0.1.0",
 "@tanstack/react-query": "^5",
 "i18next": "^23",
 "react": "^19",
@@ -24,11 +24,11 @@ npm install @nubit/hydra @nubit/crud @nubit/core
 
 ## Usage
 
-Requires `CoreConfigProvider` from `@nubit/core` in the provider tree so data loading uses the right base URL, locale, and timezone.
+Requires `CoreConfigProvider` from `@nubitio/core` in the provider tree so data loading uses the right base URL, locale, and timezone.
 
 ```tsx
-import { CoreConfigProvider } from '@nubit/core';
-import { SchemaProvider, useResourceSchema, HydraRemoteDataSource } from '@nubit/hydra';
+import { CoreConfigProvider } from '@nubitio/core';
+import { SchemaProvider, useResourceSchema, HydraRemoteDataSource } from '@nubitio/hydra';
 
 export function App() {
   return (

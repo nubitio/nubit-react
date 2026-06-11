@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 
 /**
- * Built-in UI strings for @nubit/ui components (aria-labels, tooltips).
+ * Built-in UI strings for @nubitio/ui components (aria-labels, tooltips).
  *
  * English is the default. Localize once at the app root:
  *

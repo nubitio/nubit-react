@@ -1,8 +1,8 @@
 import './CrudDialogView.scss';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-import { AppDialog, Button } from '@nubit/ui';
-import { useCoreTranslation, useEvents, type DialogEventNames } from '@nubit/core';
+import { AppDialog, Button } from '@nubitio/ui';
+import { useCoreTranslation, useEvents, type DialogEventNames } from '@nubitio/core';
 
 const getIsXSmall = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 575.98px)').matches;
 

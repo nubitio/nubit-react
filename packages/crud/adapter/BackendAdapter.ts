@@ -1,4 +1,4 @@
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 

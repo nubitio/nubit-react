@@ -92,10 +92,10 @@ importers:
 
   examples/admin-demo:
     dependencies:
-      '@nubit/react-admin':
+      '@nubitio/react-admin':
         specifier: workspace:*
         version: link:../../packages/react-admin
-      '@nubit/ui':
+      '@nubitio/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@phosphor-icons/web':
@@ -138,7 +138,7 @@ importers:
 
   packages/admin:
     dependencies:
-      '@nubit/ui':
+      '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui
       react:
@@ -168,10 +168,10 @@ importers:
 
   packages/crud:
     dependencies:
-      '@nubit/core':
+      '@nubitio/core':
         specifier: workspace:^
         version: link:../core
-      '@nubit/ui':
+      '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui
       '@tanstack/react-query':
@@ -198,10 +198,10 @@ importers:
 
   packages/hydra:
     dependencies:
-      '@nubit/core':
+      '@nubitio/core':
         specifier: workspace:^
         version: link:../core
-      '@nubit/crud':
+      '@nubitio/crud':
         specifier: workspace:^
         version: link:../crud
       '@tanstack/react-query':
@@ -222,19 +222,19 @@ importers:
 
   packages/react-admin:
     dependencies:
-      '@nubit/admin':
+      '@nubitio/admin':
         specifier: workspace:^
         version: link:../admin
-      '@nubit/core':
+      '@nubitio/core':
         specifier: workspace:^
         version: link:../core
-      '@nubit/crud':
+      '@nubitio/crud':
         specifier: workspace:^
         version: link:../crud
-      '@nubit/hydra':
+      '@nubitio/hydra':
         specifier: workspace:^
         version: link:../hydra
-      '@nubit/ui':
+      '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui
       '@tanstack/react-query':

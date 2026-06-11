@@ -1,6 +1,6 @@
 import type { FieldDef } from '../field/Field';
 import type { SmartCrudFieldOperationBehavior } from './fieldOperationSemantics';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 export { SmartCrudFieldContractError, validateFieldContract } from './fieldValidation';
 import { validateFieldContract } from './fieldValidation';
 

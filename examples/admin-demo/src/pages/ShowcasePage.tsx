@@ -15,7 +15,7 @@ import {
   TextField,
   ThemeSwitcher,
   Toggle,
-} from '@nubit/react-admin';
+} from '@nubitio/react-admin';
 
 export function ShowcasePage() {
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 
-const NUBIT_PACKAGES = ['@nubit/core', '@nubit/crud', '@nubit/ui', '@nubit/admin', '@nubit/hydra'];
+const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra'];
 
 // Every runtime dependency/peer of any package must stay external — the root
 // package.json only has devDependencies, so tsdown cannot infer these itself.
@@ -37,7 +37,7 @@ const sharedConfig = {
 } satisfies Parameters<typeof defineConfig>[0];
 
 export default [
-  // ── @nubit/core ───────────────────────────────────────────────────────────
+  // ── @nubitio/core ───────────────────────────────────────────────────────────
   // Runtime primitives only: HTTP, Mercure, config, events, base data types.
   defineConfig({
     ...sharedConfig,
@@ -45,23 +45,23 @@ export default [
     outDir: 'packages/core/dist',
   }),
 
-  // ── @nubit/crud ───────────────────────────────────────────────────────────
-  // CRUD engine, field DSL, form/grid views. Depends on @nubit/core + @nubit/ui.
+  // ── @nubitio/crud ───────────────────────────────────────────────────────────
+  // CRUD engine, field DSL, form/grid views. Depends on @nubitio/core + @nubitio/ui.
   defineConfig({
     ...sharedConfig,
     entry: { index: 'packages/crud/public.ts' },
     outDir: 'packages/crud/dist',
   }),
 
-  // ── @nubit/admin ──────────────────────────────────────────────────────────
-  // AdminShell, AdminHeader, AdminSidebarMenu, useScreenSize. Depends on @nubit/ui.
+  // ── @nubitio/admin ──────────────────────────────────────────────────────────
+  // AdminShell, AdminHeader, AdminSidebarMenu, useScreenSize. Depends on @nubitio/ui.
   defineConfig({
     ...sharedConfig,
     entry: { index: 'packages/admin/public.ts' },
     outDir: 'packages/admin/dist',
   }),
 
-  // ── @nubit/ui ─────────────────────────────────────────────────────────────
+  // ── @nubitio/ui ─────────────────────────────────────────────────────────────
   // Visual primitives, theme system, UiStrings localization.
   defineConfig({
     ...sharedConfig,
@@ -69,15 +69,15 @@ export default [
     outDir: 'packages/ui/dist',
   }),
 
-  // ── @nubit/hydra ──────────────────────────────────────────────────────────
-  // Hydra/OpenAPI parser and data sources. @nubit/core references are external.
+  // ── @nubitio/hydra ──────────────────────────────────────────────────────────
+  // Hydra/OpenAPI parser and data sources. @nubitio/core references are external.
   defineConfig({
     ...sharedConfig,
     entry: { index: 'packages/hydra/public.ts' },
     outDir: 'packages/hydra/dist',
   }),
 
-  // ── @nubit/react-admin ────────────────────────────────────────────────────
+  // ── @nubitio/react-admin ────────────────────────────────────────────────────
   // Umbrella re-export: all sibling packages are external, near-zero bytes.
   defineConfig({
     ...sharedConfig,

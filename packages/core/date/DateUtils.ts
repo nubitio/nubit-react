@@ -1,7 +1,7 @@
 import { getCoreTimezone, getCoreLocale } from '../config/CoreConfig';
 
 /**
- * Recommended default for new projects using @nubit/core.
+ * Recommended default for new projects using @nubitio/core.
  * You should almost always override this via CoreConfigProvider.
  */
 export const DEFAULT_TIMEZONE = 'UTC';

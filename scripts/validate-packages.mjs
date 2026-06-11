@@ -16,7 +16,7 @@ let failed = false;
 
 for (const name of packages) {
   const dir = join(root, 'packages', name);
-  console.log(`\n━━━ @nubit/${name} ━━━`);
+  console.log(`\n━━━ @nubitio/${name} ━━━`);
 
   try {
     execSync('pnpm exec publint --strict', { cwd: dir, stdio: 'inherit' });

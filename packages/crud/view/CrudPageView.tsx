@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useCoreTranslation, useEvents, type DialogEventNames } from '@nubit/core';
+import { useCoreTranslation, useEvents, type DialogEventNames } from '@nubitio/core';
 import { CrudPageShell } from './CrudPageShell';
 
 export interface CrudPageViewOptions {

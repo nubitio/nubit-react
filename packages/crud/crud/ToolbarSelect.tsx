@@ -1,5 +1,5 @@
-import { AppDropdown } from '@nubit/ui';
-import type { AppDropdownOption } from '@nubit/ui';
+import { AppDropdown } from '@nubitio/ui';
+import type { AppDropdownOption } from '@nubitio/ui';
 
 export type ToolbarSelectOption = AppDropdownOption;
 
@@ -13,7 +13,7 @@ export interface ToolbarSelectProps {
   disabled?: boolean;
 }
 
-/** @deprecated Use `AppDropdown` with `variant="toolbar"` from `@nubit/ui`. */
+/** @deprecated Use `AppDropdown` with `variant="toolbar"` from `@nubitio/ui`. */
 export function ToolbarSelect({
   id,
   label,

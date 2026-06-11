@@ -16,12 +16,12 @@ export default defineConfig({
     environment: 'happy-dom',
     include: ['packages/**/*.test.ts', 'packages/**/*.test.tsx'],
     alias: {
-      '@nubit/react-admin': pkg('react-admin'),
-      '@nubit/core': pkg('core'),
-      '@nubit/ui': pkg('ui'),
-      '@nubit/admin': pkg('admin'),
-      '@nubit/crud': pkg('crud'),
-      '@nubit/hydra': pkg('hydra'),
+      '@nubitio/react-admin': pkg('react-admin'),
+      '@nubitio/core': pkg('core'),
+      '@nubitio/ui': pkg('ui'),
+      '@nubitio/admin': pkg('admin'),
+      '@nubitio/crud': pkg('crud'),
+      '@nubitio/hydra': pkg('hydra'),
     },
   },
 });

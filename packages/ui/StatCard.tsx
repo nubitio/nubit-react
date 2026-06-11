@@ -19,7 +19,7 @@ export interface StatCardProps {
 /**
  * General-purpose analytics / dashboard card.
  * Replaces the legacy `shared/ui/card-analytics/CardAnalytics` component.
- * Uses `ContextMenu` from `@nubit/ui` for the overflow menu.
+ * Uses `ContextMenu` from `@nubitio/ui` for the overflow menu.
  */
 export const StatCard = ({
   title,

@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { render, cleanup, screen } from '@testing-library/react';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { initCoreI18n } from '@nubit/core';
+import { initCoreI18n } from '@nubitio/core';
 import { CrudFormShell, resolveViewMode } from './index';
 
 beforeAll(() => {

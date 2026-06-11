@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ResourceSchemaProvider, type ResourceSchemaResolver } from '@nubit/crud';
+import { ResourceSchemaProvider, type ResourceSchemaResolver } from '@nubitio/crud';
 import { useResourceSchema } from './useResourceSchema';
 
 export interface HydraResourceSchemaProviderProps {

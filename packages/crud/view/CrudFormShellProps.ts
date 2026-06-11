@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DialogEventNames } from '@nubit/core';
+import type { DialogEventNames } from '@nubitio/core';
 import type { DialogMode } from '../crud/dialogStore';
 
 /**

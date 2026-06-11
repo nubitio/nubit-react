@@ -12,12 +12,12 @@ import React, {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { DatePicker, IconButton } from '@nubit/ui';
+import { DatePicker, IconButton } from '@nubitio/ui';
 
-import { useCoreHttpClient, useCoreRuntime, useEvents, getCoreLocale, getCoreTimezone, useCoreTranslation, type CoreHttpClient, type CoreTranslationKeys } from '@nubit/core';
+import { useCoreHttpClient, useCoreRuntime, useEvents, getCoreLocale, getCoreTimezone, useCoreTranslation, type CoreHttpClient, type CoreTranslationKeys } from '@nubitio/core';
 import { Field, type FieldButton } from '../field/Field';
 import { FieldType } from '../field/FieldType';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import { type ResourceStore, type ResourceStoreFactory, useResourceStoreFactory } from '../data/ResourceStore';
 import { FORM_ERRORS_EVENT, FORM_EVENTS } from './FormEvents';
 import { buildEmptyRow, normalizeFormData, type PrependDataMap } from './FormDataTransform';

@@ -1,4 +1,4 @@
-import { getCoreTimezone } from '@nubit/core';
+import { getCoreTimezone } from '@nubitio/core';
 import { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
 import type { UploadedFile } from './UploadedFile';

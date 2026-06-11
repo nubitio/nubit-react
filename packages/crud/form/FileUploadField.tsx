@@ -2,7 +2,7 @@ import './FileUploadField.scss';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone, type Accept } from 'react-dropzone';
-import type { CoreHttpClient, CoreTranslationKeys, DataRecord } from '@nubit/core';
+import type { CoreHttpClient, CoreTranslationKeys, DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
 import type { FormDataRecord } from './FormDataSnapshot';

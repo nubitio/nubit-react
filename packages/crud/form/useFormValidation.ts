@@ -1,4 +1,4 @@
-import { useCoreRuntime } from '@nubit/core';
+import { useCoreRuntime } from '@nubitio/core';
 import { validateDetailRows } from './FormDetailValidation';
 import type { UseFormValidationOptions } from './FormValidationOptions';
 

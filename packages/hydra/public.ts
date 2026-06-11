@@ -1,7 +1,7 @@
-// @nubit/hydra — Hydra/OpenAPI adapter for CRUD schema discovery and data loading.
+// @nubitio/hydra — Hydra/OpenAPI adapter for CRUD schema discovery and data loading.
 // Import from this facade only; do not reach into implementation paths.
 //
-// Requires: <CoreConfigProvider locale="..." timezone="..." apiBaseUrl="..."> from @nubit/core
+// Requires: <CoreConfigProvider locale="..." timezone="..." apiBaseUrl="..."> from @nubitio/core
 // in the app provider tree so that useHydraMetadata and data loading use the correct configuration.
 
 export { HydraRemoteDataSource, createHydraResourceStore } from './HydraRemoteDataSource';

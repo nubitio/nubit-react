@@ -1,4 +1,4 @@
-// @nubit/ui — visual primitives facade.
+// @nubitio/ui — visual primitives facade.
 // Static design tokens ship inside dist/style.css; theme-dependent color
 // tokens load at runtime via ThemeProvider (dist/themes/nb-theme-*.css).
 import './theme/styles/tokens.scss';

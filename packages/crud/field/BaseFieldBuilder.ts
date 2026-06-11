@@ -5,7 +5,7 @@ import type { FormLayoutHint } from '../form/resolveFieldColSpan';
 import { FilterRule } from './FilterRule';
 import { ValidationRule } from './ValidationRule';
 import { FormatterFn, GridCellContext, ItemFormatterFn, OnChangeFn } from './FieldCallbacks';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export class BaseFieldBuilder<TRecord extends DataRecord = DataRecord> {
   protected _field: Field;

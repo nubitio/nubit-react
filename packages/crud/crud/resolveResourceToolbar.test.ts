@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ResourceConfig, ResourceToolbarContext } from './ResourceConfig';
 import { resolveResourceToolbar } from './resolveResourceToolbar';
 import { textField } from '../field/FieldBuilders';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 const field = textField().name('id').label('ID').build();
 

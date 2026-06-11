@@ -22,5 +22,5 @@ for (const name of packages) {
   const pkg = JSON.parse(readFileSync(file, 'utf8'));
   pkg.version = version;
   writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n');
-  console.log(`@nubit/${name} → ${version}`);
+  console.log(`@nubitio/${name} → ${version}`);
 }

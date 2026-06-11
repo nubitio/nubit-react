@@ -1,11 +1,11 @@
-# @nubit/ui
+# @nubitio/ui
 
 Visual primitives and theme system for the Nubit admin stack: buttons, dialogs, drawers, cards, form controls, date pickers, badges, and a light/dark theme with density and accent-color support.
 
 ## Install
 
 ```bash
-npm install @nubit/ui
+npm install @nubitio/ui
 ```
 
 ## Peer dependencies
@@ -18,8 +18,8 @@ npm install @nubit/ui
 ## Usage
 
 ```tsx
-import { ThemeProvider, Button, AppDialog, Card } from '@nubit/ui';
-import '@nubit/ui/style.css';
+import { ThemeProvider, Button, AppDialog, Card } from '@nubitio/ui';
+import '@nubitio/ui/style.css';
 
 export function App() {
   return (
@@ -44,10 +44,10 @@ All components ship their styles in `dist/style.css`; import it once at the app 
 
 ## Theming
 
-Color/surface tokens live in runtime-switchable theme stylesheets shipped with the package (`@nubit/ui/themes/nb-theme-light.css` and `nb-theme-dark.css`). `ThemeProvider` loads them from `basePath` (default `/themes/`) and toggles a `data-theme` attribute plus a `nb-theme-{light,dark}` class on `<html>` — copy the two theme files into your public directory (or point `basePath` wherever you serve them):
+Color/surface tokens live in runtime-switchable theme stylesheets shipped with the package (`@nubitio/ui/themes/nb-theme-light.css` and `nb-theme-dark.css`). `ThemeProvider` loads them from `basePath` (default `/themes/`) and toggles a `data-theme` attribute plus a `nb-theme-{light,dark}` class on `<html>` — copy the two theme files into your public directory (or point `basePath` wherever you serve them):
 
 ```tsx
-import { ThemeProvider, ThemeSwitcher } from '@nubit/ui';
+import { ThemeProvider, ThemeSwitcher } from '@nubitio/ui';
 
 <ThemeProvider basePath="/themes/">
   <App />
@@ -61,7 +61,7 @@ import { ThemeProvider, ThemeSwitcher } from '@nubit/ui';
 Built-in strings (aria-labels, calendar buttons) default to English. Localize them once at the app root with `UiStringsProvider` — a Spanish preset ships with the package:
 
 ```tsx
-import { UiStringsProvider, ES_UI_STRINGS } from '@nubit/ui';
+import { UiStringsProvider, ES_UI_STRINGS } from '@nubitio/ui';
 
 <UiStringsProvider strings={ES_UI_STRINGS}>
   <App />

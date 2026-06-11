@@ -7,7 +7,7 @@ name: Release
 #      and creates a GitHub Release with auto-generated notes.
 #
 # Requires the NPM_TOKEN repository secret (npm automation token with publish
-# rights on the @nubit scope).
+# rights on the @nubitio scope).
 
 on:
   push:

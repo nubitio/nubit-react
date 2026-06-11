@@ -4,7 +4,7 @@ import { ValidationRule } from './ValidationRule';
 import { FormatterFn, GridOnChangeFn, ItemFormatterFn, OnChangeFn } from './FieldCallbacks';
 import type { FormLayoutHint } from '../form/resolveFieldColSpan';
 import React from 'react';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export type LoadOption = Record<string, any>;
 

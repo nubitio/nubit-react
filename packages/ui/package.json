@@ -1,5 +1,5 @@
 {
-  "name": "@nubit/ui",
+  "name": "@nubitio/ui",
   "version": "0.1.0",
   "type": "module",
   "description": "Visual primitives and theme system for the Nubit admin stack (dialogs, cards, toolbar, light/dark theme).",

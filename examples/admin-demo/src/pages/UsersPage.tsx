@@ -1,4 +1,4 @@
-import { CrudPage, RestAdapter, defineResource, textField } from '@nubit/react-admin';
+import { CrudPage, RestAdapter, defineResource, textField } from '@nubitio/react-admin';
 
 /**
  * CRUD page against the public JSONPlaceholder API.

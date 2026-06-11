@@ -3,7 +3,7 @@ import {
   collectOperationSemanticsIssues,
   type SmartCrudFieldOperationBehavior,
 } from './fieldOperationSemantics';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 type SmartCrudRecord = object;
 

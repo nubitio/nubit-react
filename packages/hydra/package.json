@@ -1,8 +1,8 @@
 {
-  "name": "@nubit/hydra",
+  "name": "@nubitio/hydra",
   "version": "0.1.0",
   "type": "module",
-  "description": "Hydra / OpenAPI adapter for @nubit/crud — automatic schema discovery and data source from API Platform docs.",
+  "description": "Hydra / OpenAPI adapter for @nubitio/crud — automatic schema discovery and data source from API Platform docs.",
   "license": "MIT",
   "keywords": [
     "react",
@@ -45,8 +45,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@nubit/core": "workspace:^",
-    "@nubit/crud": "workspace:^",
+    "@nubitio/core": "workspace:^",
+    "@nubitio/crud": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     "i18next": "^23.0.0",
     "react": "^19.0.0",

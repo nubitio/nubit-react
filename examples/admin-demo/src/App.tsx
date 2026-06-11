@@ -6,7 +6,7 @@ import {
   ResourceStoreProvider,
   ThemeProvider,
   type AdminMenuItem,
-} from '@nubit/react-admin';
+} from '@nubitio/react-admin';
 import { restResourceStore } from './restResourceStore';
 import { ShowcasePage } from './pages/ShowcasePage';
 import { UsersPage } from './pages/UsersPage';

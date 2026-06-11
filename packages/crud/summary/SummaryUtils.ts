@@ -1,5 +1,5 @@
-import { getCoreLocale } from '@nubit/core';
-import type { DataRecord } from '@nubit/core';
+import { getCoreLocale } from '@nubitio/core';
+import type { DataRecord } from '@nubitio/core';
 import type { SummaryItem, SummaryTextContext } from './SummaryTypes';
 
 function toFiniteNumber(value: unknown): number | null {

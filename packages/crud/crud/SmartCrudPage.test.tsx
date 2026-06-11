@@ -26,7 +26,7 @@ import {
   initCoreI18n,
   type CoreHttpClient,
   type CoreRuntime,
-} from '@nubit/core';
+} from '@nubitio/core';
 
 import { SmartCrudPage } from './SmartCrudPage';
 import { defineResource } from './defineResource';

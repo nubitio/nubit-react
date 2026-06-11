@@ -1,5 +1,5 @@
 {
-  "name": "@nubit/admin",
+  "name": "@nubitio/admin",
   "version": "0.1.0",
   "type": "module",
   "description": "Admin shell layout components: responsive sidebar, header, and screen size utilities for Nubit apps.",
@@ -49,7 +49,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@nubit/ui": "workspace:^",
+    "@nubitio/ui": "workspace:^",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.0.0"

@@ -9,7 +9,7 @@ import type { ResolvedPermissions } from './usePermissions';
 import type { SelectionState } from './useSelectionState';
 import type { ColumnPresetState } from './useColumnPreset';
 import { resolveCrudResource, type ResolvedCrudResource } from './resolveCrudResource';
-import type { DataRecord, FormEventNames } from '@nubit/core';
+import type { DataRecord, FormEventNames } from '@nubitio/core';
 
 export function useCrudPage<T extends DataRecord = DataRecord>(
   resource: ResourceConfig<T>,

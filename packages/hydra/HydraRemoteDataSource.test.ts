@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CoreHttpClient } from '@nubit/core';
+import type { CoreHttpClient } from '@nubitio/core';
 import { HydraRemoteDataSource } from './HydraRemoteDataSource';
 
 const makeSource = (overrides = {}) =>

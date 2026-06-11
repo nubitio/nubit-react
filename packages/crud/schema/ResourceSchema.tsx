@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { FieldOverride } from '../crud/resolveSmartCrudFields';
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';

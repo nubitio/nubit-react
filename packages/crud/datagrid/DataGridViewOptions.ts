@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { DataGridEventNames, DataRecord } from '@nubit/core';
+import type { DataGridEventNames, DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { FilterRule } from '../field/FilterRule';
 import type { GridHandle } from './GridHandle';

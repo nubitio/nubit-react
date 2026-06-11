@@ -13,7 +13,7 @@ import './Avatar.scss';
 // ---------------------------------------------------------------------------
 
 /**
- * 8 semantic hues aligned with the Fluent / @nubit design palette.
+ * 8 semantic hues aligned with the Fluent / @nubitio design palette.
  * Expressed as HSL so the lightness can be adjusted for dark mode via CSS.
  * The color is set as --avatar-hue on the element and consumed in Avatar.scss.
  */

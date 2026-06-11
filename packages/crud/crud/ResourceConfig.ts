@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { Field, FieldDef } from '../field/Field';
 import type { FilterRule } from '../field/FilterRule';
-import type { DataRecord, FormEventNames } from '@nubit/core';
+import type { DataRecord, FormEventNames } from '@nubitio/core';
 import type { FormHandle } from '../form/FormHandle';
 import type { GridHandle } from '../datagrid/GridHandle';
 import type { FormLayout } from '../form/FormLayout';

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './i18n';
 import '@phosphor-icons/web/regular';
-import '@nubit/react-admin/style.css';
+import '@nubitio/react-admin/style.css';
 import { App } from './App';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

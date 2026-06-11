@@ -1,4 +1,4 @@
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { ResourceConfig, ResourceFormDetail, ResourceGridDetail } from './ResourceConfig';
 
 export interface ResolvedResourceDetails {

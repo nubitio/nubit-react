@@ -1,5 +1,5 @@
 import type { FieldDef } from '../field/Field';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 
 export type SmartCrudOperation = 'create' | 'edit';
 export type SmartCrudFieldOperation = SmartCrudOperation;

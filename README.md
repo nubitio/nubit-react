@@ -2,21 +2,21 @@
 
 Opinionated React admin stack for API Platform / Hydra backends — and any REST API.
 
-Six packages, published lockstep under the `@nubit` npm scope:
+Six packages, published lockstep under the `@nubitio` npm scope:
 
 | Package | Description |
 | --- | --- |
-| [`@nubit/core`](packages/core) | Runtime foundation: HTTP client, event bus, i18n, Mercure SSE |
-| [`@nubit/ui`](packages/ui) | Visual primitives and theme system (light/dark, density, accent) |
-| [`@nubit/admin`](packages/admin) | Responsive admin shell: sidebar, header, screen-size utilities |
-| [`@nubit/crud`](packages/crud) | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
-| [`@nubit/hydra`](packages/hydra) | Schema discovery and data sources from Hydra/OpenAPI docs |
-| [`@nubit/react-admin`](packages/react-admin) | Batteries-included umbrella — install this one |
+| [`@nubitio/core`](packages/core) | Runtime foundation: HTTP client, event bus, i18n, Mercure SSE |
+| [`@nubitio/ui`](packages/ui) | Visual primitives and theme system (light/dark, density, accent) |
+| [`@nubitio/admin`](packages/admin) | Responsive admin shell: sidebar, header, screen-size utilities |
+| [`@nubitio/crud`](packages/crud) | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
+| [`@nubitio/hydra`](packages/hydra) | Schema discovery and data sources from Hydra/OpenAPI docs |
+| [`@nubitio/react-admin`](packages/react-admin) | Batteries-included umbrella — install this one |
 
 ## Quick start
 
 ```bash
-npm install @nubit/react-admin
+npm install @nubitio/react-admin
 ```
 
 See [`examples/admin-demo`](examples/admin-demo) for a complete app: admin shell, UI showcase, and a CRUD page running against a public REST API.

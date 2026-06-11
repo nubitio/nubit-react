@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import type { CoreHttpClient, DataRecord, GridData } from '@nubit/core';
+import type { CoreHttpClient, DataRecord, GridData } from '@nubitio/core';
 
 export type ResourceFilterDescriptor = unknown[];
 export type ResourceSortDescriptor = { selector?: string; desc?: boolean } | string;

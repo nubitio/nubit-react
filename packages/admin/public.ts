@@ -1,4 +1,4 @@
-// @nubit/admin — Admin panel shell: layout, header, sidebar, footer slots.
+// @nubitio/admin — Admin panel shell: layout, header, sidebar, footer slots.
 // Import from this facade only; do not reach into implementation paths.
 
 export { AdminShell } from './AdminShell';

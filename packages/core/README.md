@@ -1,11 +1,11 @@
-# @nubit/core
+# @nubitio/core
 
 Runtime foundation for the Nubit admin stack: HTTP client, event bus, i18n integration, date utilities, Mercure (SSE) support, and the CoreProvider.
 
 ## Install
 
 ```bash
-npm install @nubit/core
+npm install @nubitio/core
 ```
 
 ## Peer dependencies
@@ -20,7 +20,7 @@ npm install @nubit/core
 ## Quick start
 
 ```tsx
-import { CoreProvider } from '@nubit/core';
+import { CoreProvider } from '@nubitio/core';
 
 export function App() {
   return (

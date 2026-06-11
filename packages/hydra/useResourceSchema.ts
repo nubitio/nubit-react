@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DataRecord, Field, ResourceSchemaResolution } from '@nubit/crud';
+import type { DataRecord, Field, ResourceSchemaResolution } from '@nubitio/crud';
 import { mapHydraSchemaToFields } from './HydraToFieldMapper';
 import { parseHydraDoc, parseOpenApiDoc } from './openApiParser';
 import { useSchemaContext } from './SchemaContext';

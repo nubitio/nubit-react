@@ -1,7 +1,7 @@
 import { serializeFormFields, serializeDetailRows } from './serializeFormData';
 import type { UseFormSubmitAccessors } from './FormSubmitAccessors';
 import type { UseFormSubmitOptions } from './FormSubmitOptions';
-import { useCoreRuntime, useCoreTranslation } from '@nubit/core';
+import { useCoreRuntime, useCoreTranslation } from '@nubitio/core';
 import type { FormDataRecord } from './FormDataSnapshot';
 import { FORM_ERRORS_EVENT } from './FormEvents';
 import { HydraAdapter } from '../adapter/HydraAdapter';

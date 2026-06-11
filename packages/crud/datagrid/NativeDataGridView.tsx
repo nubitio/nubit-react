@@ -19,9 +19,9 @@ import {
   DateRangePicker,
   EmptyState,
   IconButton,
-} from '@nubit/ui';
+} from '@nubitio/ui';
 import { type ResourceLoadOptions, useResourceStoreFactory } from '../data/ResourceStore';
-import type { DataRecord } from '@nubit/core';
+import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
 import {
@@ -30,7 +30,7 @@ import {
   getCoreLocale,
   getCoreTimezone,
   useCoreTranslation,
-} from '@nubit/core';
+} from '@nubitio/core';
 import { DATA_GRID_EVENTS } from './DataGridEvents';
 import type { DataGridSummaryItem, DataGridViewOptions } from './DataGridViewOptions';
 import type { GridHandle } from './GridHandle';

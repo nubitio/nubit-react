@@ -1,10 +1,10 @@
 /**
- * @nubit/react-admin — batteries-included admin stack.
+ * @nubitio/react-admin — batteries-included admin stack.
  *
  * Umbrella re-export for fast project bootstrap. Import everything you need
  * for a typical API Platform admin app from this single package:
  *
- *   import { CoreProvider, CoreConfigProvider, CrudPage, AdminShell, SchemaProvider } from '@nubit/react-admin';
+ *   import { CoreProvider, CoreConfigProvider, CrudPage, AdminShell, SchemaProvider } from '@nubitio/react-admin';
  *
  * Peer dependencies: react, react-dom, react-router-dom, @tanstack/react-query,
  *                    i18next, react-i18next.
@@ -18,12 +18,12 @@ export {
   configureCore,
   configureCoreDate, // deprecated
   getCoreApiBaseUrl,
-} from '@nubit/core';
-export type { CoreProviderProps, CoreConfigProviderProps, CoreConfig } from '@nubit/core';
+} from '@nubitio/core';
+export type { CoreProviderProps, CoreConfigProviderProps, CoreConfig } from '@nubitio/core';
 
 // ── HTTP ──────────────────────────────────────────────────────────────────────
-export { useCoreHttpClient, createCoreHttpClient } from '@nubit/core';
-export type { CoreHttpClient, CoreHttpClientConfig } from '@nubit/core';
+export { useCoreHttpClient, createCoreHttpClient } from '@nubitio/core';
+export type { CoreHttpClient, CoreHttpClientConfig } from '@nubitio/core';
 
 // ── CRUD engine ───────────────────────────────────────────────────────────────
 export {
@@ -36,7 +36,7 @@ export {
   validateFieldContract,
   useSmartCrudRoles,
   AuditTrailPanel,
-} from '@nubit/crud';
+} from '@nubitio/crud';
 export type {
   ResourceConfig,
   ResourcePermissions,
@@ -69,7 +69,7 @@ export type {
   ResourceStore,
   ResourceStoreFactory,
   FieldOverride,
-} from '@nubit/crud';
+} from '@nubitio/crud';
 
 // ── Field DSL ─────────────────────────────────────────────────────────────────
 export {
@@ -94,52 +94,52 @@ export {
   identityField,
   noneField,
   FieldBuilder,
-} from '@nubit/crud';
-export type { Field, FieldDef, LoadOption, EnumOption } from '@nubit/crud';
+} from '@nubitio/crud';
+export type { Field, FieldDef, LoadOption, EnumOption } from '@nubitio/crud';
 export type {
   FormatterFn,
   GridCellContext,
   GridOnChangeFn,
   FormOnChangeFn,
   OnChangeFn,
-} from '@nubit/crud';
+} from '@nubitio/crud';
 
 // ── Form & grid handles ───────────────────────────────────────────────────────
-export type { FormHandle } from '@nubit/crud';
-export type { GridHandle } from '@nubit/crud';
-export { FormView, FORM_EVENTS } from '@nubit/crud';
-export { DataGridView, DATA_GRID_EVENTS } from '@nubit/crud';
-export { DialogView } from '@nubit/crud';
+export type { FormHandle } from '@nubitio/crud';
+export type { GridHandle } from '@nubitio/crud';
+export { FormView, FORM_EVENTS } from '@nubitio/crud';
+export { DataGridView, DATA_GRID_EVENTS } from '@nubitio/crud';
+export { DialogView } from '@nubitio/crud';
 
 // ── Event bus ─────────────────────────────────────────────────────────────────
-export { dispatch, useEvents } from '@nubit/core';
-export { createCrudEvents } from '@nubit/crud';
-export type { EventSubscription } from '@nubit/core';
+export { dispatch, useEvents } from '@nubitio/core';
+export { createCrudEvents } from '@nubitio/crud';
+export type { EventSubscription } from '@nubitio/core';
 
 // ── Locale / date ─────────────────────────────────────────────────────────────
-export { DateUtils, getCoreLocale, getCoreTimezone } from '@nubit/core';
-export { coreTranslationsEs, coreTranslationsEn } from '@nubit/core';
-export type { CoreTranslationKeys } from '@nubit/core';
+export { DateUtils, getCoreLocale, getCoreTimezone } from '@nubitio/core';
+export { coreTranslationsEs, coreTranslationsEn } from '@nubitio/core';
+export type { CoreTranslationKeys } from '@nubitio/core';
 
 // ── Data ──────────────────────────────────────────────────────────────────────
-export type { DataRecord } from '@nubit/core';
+export type { DataRecord } from '@nubitio/core';
 
 // ── Hydra Data Source ─────────────────────────────────────────────────────────
-export { HydraRemoteDataSource } from '@nubit/hydra';
+export { HydraRemoteDataSource } from '@nubitio/hydra';
 export type {
   RemoteDataSourceOptions,
   RemoteFilterDescriptor,
   RemoteLoadOptions,
   RemoteSortDescriptor,
-} from '@nubit/hydra';
+} from '@nubitio/hydra';
 
 // ── Mercure (real-time) ───────────────────────────────────────────────────────
-export { MercureProvider, useMercureHub, useMercureSubscription } from '@nubit/core';
-export type { MercureProviderProps } from '@nubit/core';
+export { MercureProvider, useMercureHub, useMercureSubscription } from '@nubitio/core';
+export type { MercureProviderProps } from '@nubitio/core';
 
 // ── UI primitives ─────────────────────────────────────────────────────────────
-export { AppDialog, AppDropdown, ConfirmDialog, AppToolbar, Card, ThemeProvider, ThemeContext, useTheme, ThemeSwitcher } from '@nubit/ui';
-export type { AppDialogProps, AppDropdownOption, AppDropdownProps, AppDropdownVariant, ConfirmDialogProps, AppToolbarProps, CardProps, ThemeProviderProps, ThemeContextValue, Theme, ThemeMode, ThemeSwitcherProps } from '@nubit/ui';
+export { AppDialog, AppDropdown, ConfirmDialog, AppToolbar, Card, ThemeProvider, ThemeContext, useTheme, ThemeSwitcher } from '@nubitio/ui';
+export type { AppDialogProps, AppDropdownOption, AppDropdownProps, AppDropdownVariant, ConfirmDialogProps, AppToolbarProps, CardProps, ThemeProviderProps, ThemeContextValue, Theme, ThemeMode, ThemeSwitcherProps } from '@nubitio/ui';
 
 // ── Hydra/OpenAPI adapter ─────────────────────────────────────────────────────
 export {
@@ -153,13 +153,13 @@ export {
   parseOpenApiDoc,
   mapHydraSchemaToFields,
   resolveRangeTag,
-} from '@nubit/hydra';
+} from '@nubitio/hydra';
 export type {
   UseSchemaContextResult,
   HydraApiDoc,
   OpenApiDoc,
   ApiDoc,
-} from '@nubit/hydra';
+} from '@nubitio/hydra';
 
 // ── Admin shell ───────────────────────────────────────────────────────────────
 export {
@@ -168,7 +168,7 @@ export {
   AdminSidebarMenu,
   useScreenSize,
   useScreenSizeClass,
-} from '@nubit/admin';
+} from '@nubitio/admin';
 export type {
   AdminShellProps,
   AdminMenuItem,
@@ -177,14 +177,14 @@ export type {
   AdminSidebarMenuProps,
   AdminMenuSubItem,
   AdminSidebarMenuSelectEvent,
-} from '@nubit/admin';
+} from '@nubitio/admin';
 
 // ── i18n bootstrap ────────────────────────────────────────────────────────────
-export { initCoreI18n } from '@nubit/core';
+export { initCoreI18n } from '@nubitio/core';
 
 // ── Backend adapters & data stores ────────────────────────────────────────────
-export { RestAdapter, HydraAdapter, ResourceStoreProvider } from '@nubit/crud';
-export type { BackendAdapter, ResourceStoreProviderProps } from '@nubit/crud';
+export { RestAdapter, HydraAdapter, ResourceStoreProvider } from '@nubitio/crud';
+export type { BackendAdapter, ResourceStoreProviderProps } from '@nubitio/crud';
 
 // ── UI primitives & localization ──────────────────────────────────────────────
 export {
@@ -216,7 +216,7 @@ export {
   useUiStrings,
   EN_UI_STRINGS,
   ES_UI_STRINGS,
-} from '@nubit/ui';
+} from '@nubitio/ui';
 export type {
   AvatarProps,
   BadgeProps,
@@ -244,4 +244,4 @@ export type {
   AccentPreset,
   UiStrings,
   UiStringsProviderProps,
-} from '@nubit/ui';
+} from '@nubitio/ui';

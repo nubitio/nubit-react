@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect } from 'react';
-import { useEvents, type EventSubscription as Subscription, type FormEventNames } from '@nubit/core';
+import { useEvents, type EventSubscription as Subscription, type FormEventNames } from '@nubitio/core';
 import type { SmartCrudOperation } from './fieldOperationSemantics';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 

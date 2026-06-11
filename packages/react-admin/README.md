@@ -1,11 +1,11 @@
-# @nubit/react-admin
+# @nubitio/react-admin
 
-Batteries-included admin stack for API Platform / Hydra backends. Umbrella package that re-exports [`@nubit/core`](https://www.npmjs.com/package/@nubit/core), [`@nubit/ui`](https://www.npmjs.com/package/@nubit/ui), [`@nubit/admin`](https://www.npmjs.com/package/@nubit/admin), [`@nubit/crud`](https://www.npmjs.com/package/@nubit/crud), and [`@nubit/hydra`](https://www.npmjs.com/package/@nubit/hydra) from a single install.
+Batteries-included admin stack for API Platform / Hydra backends. Umbrella package that re-exports [`@nubitio/core`](https://www.npmjs.com/package/@nubitio/core), [`@nubitio/ui`](https://www.npmjs.com/package/@nubitio/ui), [`@nubitio/admin`](https://www.npmjs.com/package/@nubitio/admin), [`@nubitio/crud`](https://www.npmjs.com/package/@nubitio/crud), and [`@nubitio/hydra`](https://www.npmjs.com/package/@nubitio/hydra) from a single install.
 
 ## Install
 
 ```bash
-npm install @nubit/react-admin
+npm install @nubitio/react-admin
 ```
 
 ## Peer dependencies
@@ -28,8 +28,8 @@ import {
   SchemaProvider,
   SmartCrudPage,
   defineResource,
-} from '@nubit/react-admin';
-import '@nubit/react-admin/style.css';
+} from '@nubitio/react-admin';
+import '@nubitio/react-admin/style.css';
 
 const products = defineResource('/api/products', { title: 'Products' });
 
@@ -52,11 +52,11 @@ export function App() {
 
 | Package | What it provides |
 | --- | --- |
-| `@nubit/core` | HTTP client, event bus, i18n, Mercure SSE, date utilities |
-| `@nubit/ui` | Visual primitives and theme system |
-| `@nubit/admin` | Responsive admin shell (sidebar, header) |
-| `@nubit/crud` | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
-| `@nubit/hydra` | Schema discovery and data sources from Hydra/OpenAPI docs |
+| `@nubitio/core` | HTTP client, event bus, i18n, Mercure SSE, date utilities |
+| `@nubitio/ui` | Visual primitives and theme system |
+| `@nubitio/admin` | Responsive admin shell (sidebar, header) |
+| `@nubitio/crud` | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
+| `@nubitio/hydra` | Schema discovery and data sources from Hydra/OpenAPI docs |
 
 Each package is also published separately if you only need part of the stack.
 

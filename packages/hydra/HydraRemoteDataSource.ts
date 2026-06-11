@@ -1,5 +1,5 @@
-import { createCoreHttpClient, type CoreHttpClient, type GridData } from '@nubit/core';
-import type { DataRecord } from '@nubit/core';
+import { createCoreHttpClient, type CoreHttpClient, type GridData } from '@nubitio/core';
+import type { DataRecord } from '@nubitio/core';
 import type {
   ResourceFilterDescriptor,
   ResourceFilterRule,
@@ -9,7 +9,7 @@ import type {
   ResourceStore,
   ResourceStoreFactory,
   ResourceStoreOptions,
-} from '@nubit/crud';
+} from '@nubitio/crud';
 
 export type RemoteFilterDescriptor = ResourceFilterDescriptor;
 export type RemoteSortDescriptor = ResourceSortDescriptor;

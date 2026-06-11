@@ -1,5 +1,6 @@
 import type {
   HydraApiDoc,
+  HydraEntrypointHrefs,
   HydraResourceSchema,
   HydraFieldSchema,
   HydraSupportedProperty,
@@ -236,9 +237,20 @@ function extractEntrypointCollectionOperations(doc: HydraApiDoc): Record<string,
  * Parse a raw `/api/docs.jsonld` Hydra JSON-LD response into a typed
  * Record<className, HydraResourceSchema>.
  *
+ * @param entrypointHrefs - Optional map of entrypoint property name → real
+ *   collection href, read from the API entrypoint document (`GET /api`).
+ *   When provided it is the **authoritative** source for resource URLs;
+ *   the dash-case + pluralize heuristic only fills the gaps. The heuristic
+ *   cannot know the backend's path segment generator (underscores vs dashes)
+ *   nor handle irregular plurals (Series, Settings, …), so always prefer
+ *   passing the real hrefs.
+ *
  * @throws Error if doc is not a valid Hydra ApiDocumentation.
  */
-export function parseHydraDoc(doc: HydraApiDoc): Record<string, HydraResourceSchema> {
+export function parseHydraDoc(
+  doc: HydraApiDoc,
+  entrypointHrefs?: HydraEntrypointHrefs,
+): Record<string, HydraResourceSchema> {
   const result: Record<string, HydraResourceSchema> = {};
   const collectionOperationsMap = extractEntrypointCollectionOperations(doc);
 
@@ -252,7 +264,8 @@ export function parseHydraDoc(doc: HydraApiDoc): Record<string, HydraResourceSch
       const propId = sp.property?.['@id']; // e.g. "#Entrypoint/branch"
       if (range && propId) {
         const className = range.replace('#', '');
-        urlMap[className] = deriveApiUrl(propId);
+        const propName = propId.split('/').pop() ?? '';
+        urlMap[className] = entrypointHrefs?.[propName] ?? deriveApiUrl(propId);
       }
     }
   }
@@ -283,6 +296,7 @@ export function parseHydraDoc(doc: HydraApiDoc): Record<string, HydraResourceSch
         'hydra:title': sp['title'] ?? sp['hydra:title'] ?? undefined,
         // Forward x-crud hints injected by TranslatedDocumentationNormalizer.
         crudHints: sp['x-crud'],
+        enumOptions: Array.isArray(sp['enum']) ? sp['enum'] : undefined,
       });
     }
 
@@ -329,6 +343,7 @@ export function parseOpenApiDoc(doc: OpenApiDoc): Record<string, HydraResourceSc
         required: required.has(fieldName),
         readable,
         writeable,
+        enumOptions: Array.isArray(prop.enum) ? prop.enum : undefined,
       });
     }
 

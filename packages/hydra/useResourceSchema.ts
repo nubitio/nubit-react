@@ -31,17 +31,34 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
     }
 
     const resourceMap =
-      data.format === 'hydra' ? parseHydraDoc(data.doc) : parseOpenApiDoc(data.doc);
+      data.format === 'hydra'
+        ? parseHydraDoc(data.doc, data.entrypointHrefs)
+        : parseOpenApiDoc(data.doc);
     const normalizedInput = normalizeUrl(apiUrl);
 
     const resourceSchema = Object.values(resourceMap).find(
       (r) => normalizeUrl(r.apiUrl) === normalizedInput,
     );
     if (!resourceSchema) {
+      const knownUrls = Object.values(resourceMap)
+        .map((r) => r.apiUrl)
+        .sort();
+      const slugMatch = knownUrls.find(
+        (url) => normalizeUrl(url).replace(/[-_]/g, '') === normalizedInput.replace(/[-_]/g, ''),
+      );
       return {
         fields: [],
         isLoading: false,
-        error: new Error(`No schema found for ${apiUrl} in API doc`),
+        error: new Error(
+          `No schema found for ${apiUrl} in API doc.` +
+            (slugMatch
+              ? ` Did you mean ${slugMatch}? If your backend generates underscore paths, ` +
+                `configure API Platform's dash generator (path_segment_name_generator: ` +
+                `api_platform.metadata.path_segment_name_generator.dash) or update the ` +
+                `frontend resource path to match.`
+              : '') +
+            ` Known resource URLs: ${knownUrls.join(', ') || '(none)'}`,
+        ),
         supportedOperations: [],
       };
     }

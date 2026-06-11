@@ -2,10 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useCoreHttpClient, type CoreHttpClient } from '@nubitio/core';
 import { useCoreConfig } from '@nubitio/core';
 import { parseHydraDoc, parseOpenApiDoc } from './openApiParser';
-import type { HydraApiDoc, OpenApiDoc, ApiDoc } from './types';
+import type { HydraApiDoc, HydraEntrypointHrefs, OpenApiDoc, ApiDoc } from './types';
 
 const JSONLD_URL = '/api/docs.jsonld';
 const JSON_URL = '/api/docs.json';
+const ENTRYPOINT_URL = '/api';
 const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
 
 /**
@@ -39,6 +40,33 @@ async function fetchOpenApiDoc(httpClient: CoreHttpClient, url: string): Promise
 }
 
 /**
+ * Fetch the API entrypoint (`GET /api`) and extract its property → collection
+ * href map: `{ "salesDocument": "/api/sales-documents", … }`.
+ *
+ * This is the canonical source for resource URLs — it reflects the backend's
+ * actual route generator instead of guessing via dash-case + pluralize.
+ * Returns `undefined` on any failure (auth-gated entrypoint, network error,
+ * unexpected shape) so the caller can fall back to the heuristic; URL
+ * discovery must never take the whole admin down.
+ */
+async function fetchEntrypointHrefs(
+  httpClient: CoreHttpClient,
+): Promise<HydraEntrypointHrefs | undefined> {
+  try {
+    const { data } = await httpClient.get<Record<string, unknown>>(ENTRYPOINT_URL);
+    if (!data || typeof data !== 'object') return undefined;
+    const hrefs: HydraEntrypointHrefs = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (key.startsWith('@')) continue; // JSON-LD keywords (@context, @id, @type)
+      if (typeof value === 'string' && value.startsWith('/')) hrefs[key] = value;
+    }
+    return Object.keys(hrefs).length > 0 ? hrefs : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Stable query key used by useHydraMetadata.
  * Export this so that consumers (e.g. SmartCrudPage retry button) can
  * invalidate exactly the right query without coupling to an internal string.
@@ -52,10 +80,14 @@ export const API_DOC_QUERY_KEY = ['api-doc-discovery'] as const;
  *   3. Throw an Error if both fail so React Query sets isError = true
  */
 async function fetchApiDoc(httpClient: CoreHttpClient): Promise<ApiDoc> {
-  // 1. Try Hydra JSON-LD first
+  // 1. Try Hydra JSON-LD first. The entrypoint hrefs are fetched in parallel:
+  //    they provide the real collection URLs (see fetchEntrypointHrefs).
   try {
-    const doc = await fetchHydraDoc(httpClient, JSONLD_URL);
-    return { format: 'hydra', doc };
+    const [doc, entrypointHrefs] = await Promise.all([
+      fetchHydraDoc(httpClient, JSONLD_URL),
+      fetchEntrypointHrefs(httpClient),
+    ]);
+    return { format: 'hydra', doc, entrypointHrefs };
   } catch {
     // fall through to OpenAPI
   }

@@ -32,12 +32,16 @@ export interface CrudHints {
   filterable?: boolean;
   /** Override whether the field can be sorted in the grid. */
   sortable?: boolean;
-  /** When true, the column is hidden from the grid by default. */
+  /** When true, the column is hidden from the grid by default (the form still shows the field). */
   hidden?: boolean;
+  /** When false, the field is excluded from the create/edit form (the grid still shows the column). */
+  visibleOnForm?: boolean;
   /** Column display order. */
   order?: number;
   /** Column width in pixels or as a CSS string. */
   width?: number;
+  /** Render hint for scalar fields. 'currency' maps decimals to a currency control. */
+  format?: 'currency';
 }
 
 export interface HydraSupportedProperty {
@@ -67,6 +71,12 @@ export interface HydraSupportedProperty {
    * `#[ApiProperty(openapiContext: ['x-crud' => [...]])]` on the PHP entity.
    */
   'x-crud'?: CrudHints;
+  /**
+   * Allowed values forwarded by `TranslatedDocumentationNormalizer` from
+   * `#[ApiProperty(openapiContext: ['enum' => [...]])]`. When present, the
+   * field mapper renders a select control instead of a free-text input.
+   */
+  enum?: Array<string | number>;
 }
 
 /**
@@ -148,6 +158,8 @@ export interface HydraFieldSchema {
    * When present, these values override inferred field properties in the mapper.
    */
   crudHints?: CrudHints;
+  /** Allowed values (renders as a select). From `enum` on the supported property. */
+  enumOptions?: Array<string | number>;
 }
 
 /**
@@ -210,4 +222,15 @@ export interface OpenApiDoc {
 // Discriminated union for the API discovery result
 // ---------------------------------------------------------------------------
 
-export type ApiDoc = { format: 'hydra'; doc: HydraApiDoc } | { format: 'openapi'; doc: OpenApiDoc };
+/**
+ * Map of entrypoint property name → real collection href, read from the API
+ * entrypoint document (`GET /api` → `{ "salesDocument": "/api/sales-documents", … }`).
+ * This is the canonical source for resource URLs: when present it overrides
+ * the dash-case + pluralize heuristic, which cannot know the backend's path
+ * generator or handle irregular plurals.
+ */
+export type HydraEntrypointHrefs = Record<string, string>;
+
+export type ApiDoc =
+  | { format: 'hydra'; doc: HydraApiDoc; entrypointHrefs?: HydraEntrypointHrefs }
+  | { format: 'openapi'; doc: OpenApiDoc };

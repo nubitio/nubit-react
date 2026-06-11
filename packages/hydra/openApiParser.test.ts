@@ -309,3 +309,70 @@ describe('parseHydraDoc', () => {
     expect(result['Item'].searchMappings?.[1].variable).toBe('status');
   });
 });
+
+// ── parseHydraDoc + entrypointHrefs ──────────────────────────────────────────
+
+describe('parseHydraDoc with entrypoint hrefs', () => {
+  const docWith = (className: string, propName: string): HydraApiDoc => ({
+    '@context': '/api/contexts/Entrypoint',
+    '@id': '/api',
+    '@type': 'hydra:ApiDocumentation',
+    supportedClass: [
+      {
+        '@id': '#Entrypoint',
+        '@type': 'hydra:Class',
+        title: 'Entrypoint',
+        supportedProperty: [
+          {
+            '@type': 'SupportedProperty',
+            title: propName,
+            property: {
+              '@id': `#Entrypoint/${propName}`,
+              '@type': 'Link',
+              label: propName,
+              range: `#${className}`,
+            },
+            readable: true,
+            writeable: false,
+            required: false,
+          },
+        ],
+        supportedOperation: [],
+      },
+      {
+        '@id': `#${className}`,
+        '@type': 'hydra:Class',
+        title: className,
+        supportedProperty: [],
+        supportedOperation: [],
+      },
+    ],
+  });
+
+  it('prefers the real href from the entrypoint over the heuristic', () => {
+    // Backend uses underscore paths — the heuristic would guess dashes.
+    const result = parseHydraDoc(docWith('SalesDocumentLine', 'salesDocumentLine'), {
+      salesDocumentLine: '/api/sales_document_lines',
+    });
+    expect(result['SalesDocumentLine'].apiUrl).toBe('/api/sales_document_lines');
+  });
+
+  it('resolves irregular plurals the heuristic cannot guess', () => {
+    const result = parseHydraDoc(docWith('DocumentSeries', 'documentSeries'), {
+      documentSeries: '/api/document-series',
+    });
+    expect(result['DocumentSeries'].apiUrl).toBe('/api/document-series');
+  });
+
+  it('falls back to the heuristic when the property has no href', () => {
+    const result = parseHydraDoc(docWith('Product', 'product'), {
+      somethingElse: '/api/something-else',
+    });
+    expect(result['Product'].apiUrl).toBe('/api/products');
+  });
+
+  it('falls back to the heuristic when hrefs are undefined', () => {
+    const result = parseHydraDoc(docWith('Product', 'product'), undefined);
+    expect(result['Product'].apiUrl).toBe('/api/products');
+  });
+});

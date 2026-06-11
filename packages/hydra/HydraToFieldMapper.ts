@@ -1,10 +1,12 @@
 import type { Field } from '@nubitio/crud';
 import type { HydraFieldSchema, HydraResourceSchema, CrudHints } from './types';
 import {
+  currencyField,
   textField,
   numberField,
   switchField,
   entityField,
+  enumField,
   noneField,
   datetimeField,
 } from '@nubitio/crud';
@@ -112,6 +114,7 @@ export function resolveRangeTag(range: string | undefined, propertyType: string)
  * Only properties that are explicitly set (`!== undefined`) are applied.
  *
  * `hidden: true` sets `visible: false` so the column is hidden in the grid.
+ * `visibleOnForm: false` excludes the field from the create/edit form only.
  * `order` maps to the `Field.order` property used by native grid column ordering.
  */
 function applyCrudHints(field: Field, hints: CrudHints | undefined): void {
@@ -119,6 +122,7 @@ function applyCrudHints(field: Field, hints: CrudHints | undefined): void {
   if (hints.filterable !== undefined) field.filterable = hints.filterable;
   if (hints.sortable !== undefined) field.sortable = hints.sortable;
   if (hints.hidden !== undefined && hints.hidden) field.visible = false;
+  if (hints.visibleOnForm !== undefined) field.visibleOnForm = hints.visibleOnForm;
   if (hints.order !== undefined) field.order = hints.order;
   if (hints.width !== undefined) field.width = hints.width;
 }
@@ -252,9 +256,15 @@ export function mapHydraSchemaToFields(
       hydraTitle && hydraTitle.trim() !== '' && hydraTitle !== name ? hydraTitle : toLabel(name);
     const filterable = filterableProperties.size === 0 ? true : filterableProperties.has(name);
 
-    // Rule 3 — display-only (writeable: false) → noneField
+    // Rule 3 — display-only (writeable: false) → noneField. A `format:
+    // 'currency'` hint still wins so computed money columns (totals) render
+    // formatted instead of as raw text; the field stays readonly.
     if (!writeable) {
-      const built = noneField().name(name).label(label).required(required).build();
+      const base =
+        fieldSchema.crudHints?.format === 'currency'
+          ? currencyField().readonly(true)
+          : noneField();
+      const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       applyCrudHints(field, fieldSchema.crudHints);
       fields.push(field);
@@ -262,6 +272,33 @@ export function mapHydraSchemaToFields(
     }
 
     const tag = resolveRangeTag(range, propertyType);
+
+    // Rule 3.5 — enum'd scalar → select control with the allowed values.
+    // The backend forwards `openapiContext: ['enum' => [...]]` into the docs;
+    // a free-text input for a closed value set is a validation error waiting
+    // to happen. Option labels are humanised ('credit_note' → 'Credit Note').
+    const enumOptions = fieldSchema.enumOptions;
+    if (
+      enumOptions &&
+      enumOptions.length > 0 &&
+      (tag === 'text' || tag === 'integer' || tag === 'decimal')
+    ) {
+      const built = enumField(
+        enumOptions.map((value) => ({
+          value,
+          // Title-case each word: 'credit_note' → 'Credit Note', 'PEN' → 'PEN'.
+          text: toLabel(String(value)).replace(/\b[a-z]/g, (c) => c.toUpperCase()),
+        })),
+      )
+        .name(name)
+        .label(label)
+        .required(required)
+        .build();
+      const field: Field = { ...built, filterable };
+      applyCrudHints(field, fieldSchema.crudHints);
+      fields.push(field);
+      continue;
+    }
 
     // Rule 4 — boolean → switchField
     if (tag === 'boolean') {
@@ -290,9 +327,11 @@ export function mapHydraSchemaToFields(
       continue;
     }
 
-    // Rule 7 — decimal → numberField
+    // Rule 7 — decimal → numberField (or currencyField when hinted via
+    // x-crud `format: 'currency'` — right-aligned, money formatting).
     if (tag === 'decimal') {
-      const built = numberField().name(name).label(label).required(required).build();
+      const base = fieldSchema.crudHints?.format === 'currency' ? currencyField() : numberField();
+      const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       applyCrudHints(field, fieldSchema.crudHints);
       fields.push(field);

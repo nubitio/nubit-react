@@ -1,0 +1,477 @@
+// ── Date picker ───────────────────────────────────────────────────────────────
+// Token-native calendar control. Trigger is a container div + text input +
+// icon buttons. Calendar panel is portalled to body to avoid clip issues.
+
+.nb-date-picker {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+// ── Trigger container ─────────────────────────────────────────────────────────
+.nb-date-picker__trigger {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--space-1);
+  min-height: var(--control-height, 30px);
+  padding: var(--space-1) var(--space-2);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
+  width: 100%;
+
+  &:hover:not(.nb-date-picker__trigger--disabled) {
+    background: var(--surface-1);
+  }
+
+  &.nb-date-picker__trigger--open {
+    background: var(--surface-1);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+  }
+}
+
+// Focus-within mirrors the open state so keyboard focus on the input also highlights
+.nb-date-picker__trigger:focus-within:not(.nb-date-picker__trigger--disabled):not(.nb-date-picker__trigger--readonly) {
+  background: var(--surface-1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring-color);
+}
+
+.nb-date-picker__trigger--invalid {
+  background: color-mix(in srgb, var(--error-color) 4%, var(--surface-1));
+  border-color: var(--error-color);
+}
+
+.nb-date-picker__trigger--readonly {
+  background: var(--surface-subtle);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.nb-date-picker__trigger--disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+// ── Text input ────────────────────────────────────────────────────────────────
+.nb-date-picker__input {
+  background: transparent;
+  border: none;
+  caret-color: var(--accent-color);
+  color: var(--text-primary);
+  flex: 1;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  outline: none;
+  padding: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  // Placeholder class for controlled display
+  &.nb-date-picker__input--placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+// ── Trailing icons ────────────────────────────────────────────────────────────
+.nb-date-picker__icons {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
+.nb-date-picker__calendar-btn {
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1rem;
+  height: var(--control-icon-size, 20px);
+  justify-content: center;
+  padding: 0 2px;
+  transition: color var(--transition-fast);
+  user-select: none;
+
+  &:hover {
+    color: var(--text-secondary);
+  }
+
+  .nb-date-picker__trigger--disabled & {
+    pointer-events: none;
+  }
+}
+
+.nb-date-picker__clear {
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.75rem;
+  height: var(--control-icon-size, 20px);
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+  width: var(--control-icon-size, 20px);
+
+  &:hover {
+    background: color-mix(in srgb, var(--error-color) 10%, transparent);
+    color: var(--error-color);
+  }
+}
+
+// Show clear on trigger hover or when open
+.nb-date-picker__trigger:hover .nb-date-picker__clear,
+.nb-date-picker__trigger--open .nb-date-picker__clear,
+.nb-date-picker__trigger:focus-within .nb-date-picker__clear {
+  opacity: 1;
+}
+
+// ── Panel shell ───────────────────────────────────────────────────────────────
+.nb-date-picker__panel {
+  animation: date-picker-in var(--transition-base) ease;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
+  color: var(--text-primary);
+  padding: var(--space-3);
+  position: fixed;
+  width: var(--calendar-width, 296px);
+  z-index: var(--z-picker-panel, 3000);
+}
+
+// ── Shared header ─────────────────────────────────────────────────────────────
+.nb-date-picker__header {
+  align-items: center;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 28px 1fr 28px;
+  margin-bottom: var(--space-3);
+}
+
+.nb-date-picker__month {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.nb-date-picker__month--clickable {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  gap: 4px;
+  justify-content: center;
+  letter-spacing: -0.01em;
+  outline: none;
+  padding: 2px var(--space-2);
+  text-transform: capitalize;
+  width: 100%;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    color: var(--accent-color);
+  }
+}
+
+.nb-date-picker__month-caret {
+  font-size: 0.625rem;
+  opacity: 0.6;
+}
+
+.nb-date-picker__nav {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  height: 28px;
+  justify-content: center;
+  outline: none;
+  width: 28px;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+  }
+}
+
+// ── Weekdays + day grid ───────────────────────────────────────────────────────
+.nb-date-picker__weekdays,
+.nb-date-picker__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.nb-date-picker__weekdays {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-1);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.nb-date-picker__day {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  height: var(--row-height, 34px);
+  justify-content: center;
+  outline: none;
+  position: relative;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--accent-color);
+    z-index: 1;
+  }
+
+  &:disabled {
+    color: var(--text-disabled, var(--text-tertiary));
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+.nb-date-picker__day--muted {
+  color: var(--text-tertiary);
+}
+
+.nb-date-picker__day--today::after {
+  background: var(--accent-color);
+  border-radius: 999px;
+  bottom: 3px;
+  content: '';
+  height: 3px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 12px;
+}
+
+.nb-date-picker__day--selected {
+  background: var(--accent-color);
+  color: var(--on-accent-color);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--accent-hover);
+    color: var(--on-accent-color);
+  }
+
+  &::after {
+    background: var(--on-accent-color);
+  }
+}
+
+// ── Months grid (viewMode = 'months') ─────────────────────────────────────────
+.nb-date-picker__months-grid {
+  display: grid;
+  gap: var(--space-1);
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: var(--space-2);
+}
+
+.nb-date-picker__month-cell {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  height: 36px;
+  justify-content: center;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--accent-color);
+  }
+}
+
+.nb-date-picker__month-cell--selected {
+  background: var(--accent-color);
+  color: var(--on-accent-color);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover { background: var(--accent-hover); }
+}
+
+.nb-date-picker__month-cell--current {
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent-color);
+
+  &.nb-date-picker__month-cell--selected {
+    color: var(--on-accent-color);
+  }
+}
+
+// ── Years grid (viewMode = 'years') ───────────────────────────────────────────
+.nb-date-picker__years-grid {
+  display: grid;
+  gap: var(--space-1);
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: var(--space-2);
+}
+
+.nb-date-picker__year-cell {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  height: 34px;
+  justify-content: center;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--accent-color);
+  }
+}
+
+.nb-date-picker__year-cell--selected {
+  background: var(--accent-color);
+  color: var(--on-accent-color);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover { background: var(--accent-hover); }
+}
+
+.nb-date-picker__year-cell--current {
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent-color);
+
+  &.nb-date-picker__year-cell--selected {
+    color: var(--on-accent-color);
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.nb-date-picker__footer {
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.nb-date-picker__text-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--accent-color);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  gap: 4px;
+  outline: none;
+  padding: var(--space-1) var(--space-2);
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  }
+}
+
+// ── Animation ─────────────────────────────────────────────────────────────────
+@keyframes date-picker-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+html[data-density="compact"] {
+  .nb-date-picker__panel {
+    padding: var(--space-2);
+    width: var(--calendar-width, 260px);
+  }
+
+  .nb-date-picker__header {
+    grid-template-columns: var(--control-height-form) 1fr var(--control-height-form);
+    margin-bottom: var(--space-2);
+  }
+
+  .nb-date-picker__nav {
+    height: var(--control-height-form);
+    width: var(--control-height-form);
+  }
+
+  .nb-date-picker__month-cell,
+  .nb-date-picker__year-cell {
+    height: var(--row-height);
+  }
+}

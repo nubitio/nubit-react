@@ -1,0 +1,56 @@
+{
+  "name": "@nubit/hydra",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Hydra / OpenAPI adapter for @nubit/crud — automatic schema discovery and data source from API Platform docs.",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "hydra",
+    "openapi",
+    "api-platform",
+    "crud"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nubitio/nubit-react.git",
+    "directory": "packages/hydra"
+  },
+  "bugs": {
+    "url": "https://github.com/nubitio/nubit-react/issues"
+  },
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/hydra#readme",
+  "source": "./public.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@nubit/core": "workspace:^",
+    "@nubit/crud": "workspace:^",
+    "@tanstack/react-query": "^5.0.0",
+    "i18next": "^23.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^14.0.0"
+  }
+}

@@ -1,0 +1,108 @@
+// ── Settings panel ─────────────────────────────────────────────────────────────
+// Compact popover for display preferences (accent color + density).
+// Designed to sit inside the existing nb-admin-header-popover__panel container.
+
+.nb-settings-panel {
+  padding: var(--space-4);
+  width: 236px;
+}
+
+.nb-settings-panel__heading {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-2);
+  text-transform: uppercase;
+}
+
+// ── Accent color section ───────────────────────────────────────────────────────
+
+.nb-settings-panel__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.nb-settings-panel__swatch {
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  height: 24px;
+  outline: none;
+  padding: 0;
+  position: relative;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  width: 24px;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
+  }
+
+  // Active swatch: white ring inside the colored circle.
+  &[aria-pressed='true'] {
+    box-shadow:
+      0 0 0 2px var(--surface-1),
+      0 0 0 4px currentcolor;
+  }
+}
+
+// ── Density section ────────────────────────────────────────────────────────────
+
+.nb-settings-panel__density {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.nb-settings-panel__density-btn {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 1;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  gap: var(--space-2);
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
+
+  i {
+    font-size: var(--font-size-md);
+    opacity: 0.7;
+  }
+
+  &:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  &[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: var(--font-weight-medium);
+
+    i { opacity: 1; }
+  }
+}
+
+// ── Divider ────────────────────────────────────────────────────────────────────
+
+.nb-settings-panel__divider {
+  background: var(--border-subtle);
+  border: 0;
+  height: 1px;
+  margin: var(--space-3) 0;
+}

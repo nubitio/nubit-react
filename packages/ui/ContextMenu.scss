@@ -1,0 +1,109 @@
+@use 'variables' as *;
+
+// ─── ContextMenu ──────────────────────────────────────────────────────────────
+// Three-dot overflow menu. Trigger button + floating dropdown list.
+// BEM: .nb-context-menu  /  .nb-context-menu__trigger
+//      .nb-context-menu__dropdown  /  .nb-context-menu__item
+//      .nb-context-menu__separator
+
+.nb-context-menu {
+  position: relative;
+  display: inline-flex;
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    right: 0;
+    z-index: var(--z-dropdown);
+    min-width: 190px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    list-style: none;
+    margin: 0;
+    padding: var(--space-1);
+
+    // enter animation
+    animation: nb-context-menu-enter 100ms ease both;
+  }
+
+  &__item {
+    align-items: center;
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: var(--space-2);
+    min-height: 32px;
+    width: 100%;
+    padding: 0 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    transition: background var(--transition-fast);
+
+    &:hover {
+      background: var(--control-bg-hover);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: -2px;
+    }
+
+    // destructive variant
+    &--danger {
+      color: var(--status-danger-text, var(--error-color));
+
+      &:hover {
+        background: var(--status-danger-bg, color-mix(in srgb, var(--error-color) 8%, transparent));
+      }
+    }
+
+    &:disabled,
+    &[aria-disabled='true'] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    // optional leading icon
+    > i {
+      margin-right: 0;
+      font-size: 1em;
+      opacity: 0.8;
+    }
+  }
+
+  &__separator {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: var(--space-1) 0;
+  }
+}
+
+html[data-density="compact"] .nb-context-menu {
+  &__dropdown {
+    min-width: 170px;
+    padding: var(--space-1);
+  }
+
+  &__item {
+    border-radius: var(--radius-sm);
+    min-height: 26px;
+    padding: 0 var(--space-2);
+  }
+}
+
+@keyframes nb-context-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

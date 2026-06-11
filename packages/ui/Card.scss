@@ -1,0 +1,66 @@
+@use 'variables' as *;
+
+// ── App card ───────────────────────────────────────────────────────────────────
+// Used primarily for auth/single-card layouts (login, password reset, setup).
+// Sits centered on the surface-0 page background.
+
+.nb-card {
+  display: flex;
+  height: 100%;
+
+  button,
+  .nb-button {
+    text-transform: none;
+  }
+
+  .nb-card__content {
+    background: var(--surface-1);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    flex-grow: 0;
+    margin: auto;
+    max-width: 380px;
+    overflow: hidden;
+    padding: var(--space-7) var(--space-6);
+    width: auto;
+
+    &.content {
+      height: auto;
+    }
+
+    // Full-bleed on very small screens — treat it as a full page.
+    .screen-x-small & {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      flex-grow: 1;
+      height: 100%;
+      margin: 0;
+      max-width: 100%;
+      padding: var(--space-6) var(--space-4);
+      width: 100%;
+    }
+
+    // Card header — title + supporting description.
+    .header {
+      margin-bottom: var(--space-6);
+      text-align: center;
+
+      .title {
+        color: var(--text-primary);
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-semibold);
+        letter-spacing: -0.02em;
+        line-height: var(--line-height-tight);
+      }
+
+      .description {
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-normal);
+        margin-top: var(--space-3);
+      }
+    }
+  }
+}

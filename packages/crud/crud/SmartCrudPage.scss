@@ -1,0 +1,46 @@
+// Self-contained styles for the SmartCrudPage loading/error fallbacks.
+// These previously relied on Tailwind utilities, which consumers of the
+// published package do not have.
+
+.nb-smart-crud-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.nb-smart-crud-fallback--error {
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+
+  .nb-smart-crud-fallback__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+  }
+
+  .nb-smart-crud-fallback__message {
+    margin: 0;
+    max-width: 42rem;
+  }
+
+  .nb-smart-crud-fallback__details {
+    max-width: 42rem;
+    font-size: 0.75rem;
+
+    summary {
+      cursor: pointer;
+    }
+
+    pre {
+      margin-top: 8px;
+      overflow: auto;
+      border: 1px solid var(--base-border-color, #d1d5db);
+      border-radius: 4px;
+      padding: 8px;
+      white-space: pre-wrap;
+    }
+  }
+}

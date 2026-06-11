@@ -1,0 +1,43 @@
+// ── Avatar ─────────────────────────────────────────────────────────────────────
+// Initials-based avatar. Background color is derived from a hue value set via
+// the --avatar-hue CSS custom property on the element.
+//
+// Light theme: medium-saturation, mid-lightness (readable with white text)
+// Dark theme: slightly desaturated, similar lightness (auto via oklch)
+//
+// The `.nb-avatar` element sets --avatar-hue; this file renders the color.
+
+.nb-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: oklch(50% 0.14 calc(var(--avatar-hue, 218) * 1deg));
+  // Ensure text is always readable against the medium-dark background (Fluent: on-accent)
+  color: var(--on-accent-color);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+  // Subtle ring to separate avatar from adjacent surfaces
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--on-accent-color) 18%, transparent);
+
+  // Square variant (rounded rectangle instead of circle)
+  &--square {
+    border-radius: var(--radius-md);
+  }
+}
+
+// Dark mode: reduce saturation slightly to avoid visual noise
+@media (prefers-color-scheme: dark) {
+  .nb-avatar {
+    background: oklch(48% 0.10 calc(var(--avatar-hue, 218) * 1deg));
+  }
+}
+
+// Dark theme — keyed off ThemeProvider's data-theme attribute (prefix-independent)
+[data-theme='dark'] .nb-avatar {
+  background: oklch(48% 0.10 calc(var(--avatar-hue, 218) * 1deg));
+}

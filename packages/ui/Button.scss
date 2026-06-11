@@ -1,0 +1,218 @@
+// ── Buttons ───────────────────────────────────────────────────────────────────
+// Fluent-inspired action primitives for toolbar and form contexts.
+//
+// Height system:
+//   .nb-button         min-height: --control-height (28px) — toolbar buttons
+//   .nb-button--form   min-height: --control-height-form (34px) — form submit actions
+//   .nb-button--sm     min-height: 22px — compact auxiliary actions
+//
+// Border-radius: --radius-md (6px) — unified with input controls for visual harmony.
+// Font-size: --font-size-md (14px) — matches form labels, clear scan at arm's length.
+
+.nb-button {
+  align-items: center;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-2);
+  justify-content: center;
+  letter-spacing: -0.01em;
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
+  white-space: nowrap;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.60;
+  }
+}
+
+// ── Secondary (default outlined) ───────────────────────────────────────────────
+// Used for secondary actions in toolbars and dialogs.
+
+.nb-button--secondary {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    background: var(--surface-1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+}
+
+// ── Ghost (no border) ──────────────────────────────────────────────────────────
+// Use for low-emphasis actions where the button should blend into the surface.
+
+.nb-button--ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    border-color: transparent;
+    color: var(--accent-color);
+  }
+}
+
+// ── Primary (accent filled) ────────────────────────────────────────────────────
+// Use for the single most important action on a surface or in a toolbar.
+
+.nb-button--primary {
+  background: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  color: var(--on-accent-color);
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+}
+
+// ── Success ────────────────────────────────────────────────────────────────────
+
+.nb-button--success {
+  background: var(--success-color);
+  border: 1px solid var(--success-color);
+  color: var(--on-success-color);
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    background: color-mix(in srgb, var(--success-color) 85%, #000);
+    border-color: color-mix(in srgb, var(--success-color) 85%, #000);
+  }
+}
+
+// ── Danger ─────────────────────────────────────────────────────────────────────
+
+.nb-button--danger {
+  background: var(--error-color);
+  border: 1px solid var(--error-color);
+  color: var(--on-error-color);
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    background: color-mix(in srgb, var(--error-color) 85%, #000);
+    border-color: color-mix(in srgb, var(--error-color) 85%, #000);
+  }
+}
+
+// ── Size modifiers ─────────────────────────────────────────────────────────────
+
+// Form context — taller to match --control-height-form and standalone inputs.
+// Use for submit/cancel actions inside dialog footers and form panels.
+.nb-button--form {
+  min-height: var(--control-height-form);
+  padding: 0 var(--space-4);
+}
+
+// Small — for compact auxiliary actions, table action cells, badge-level buttons.
+.nb-button--sm {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0;
+  min-height: 22px;
+  padding: 0 var(--space-2);
+}
+
+// Primary actions should remain visually discoverable even when a caller adds
+// --sm inside a toolbar. This keeps "New" / "Crear" at the control rhythm
+// while allowing secondary compact actions to stay 22px.
+.nb-button--primary.nb-button--sm,
+.nb-button--success.nb-button--sm,
+.nb-button--danger.nb-button--sm {
+  min-height: var(--control-height);
+}
+
+// Full-width — stretches to fill its container.
+.nb-button--full {
+  width: 100%;
+}
+
+// ── Icon button ────────────────────────────────────────────────────────────────
+// Square button for icon-only actions in toolbars, table headers, and cell actions.
+// Size matches --control-height so it aligns with adjacent text buttons.
+
+.nb-icon-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  font: inherit;
+  height: var(--control-height);
+  justify-content: center;
+  min-width: var(--control-height);
+  padding: 0 0.3rem;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
+
+  i {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.50;
+  }
+}
+
+.nb-icon-button--danger:hover {
+  background: color-mix(in srgb, var(--error-color) 12%, transparent);
+  color: var(--error-color);
+}
+
+// Larger icon button for form-context — matches --control-height-form.
+.nb-icon-button--form {
+  height: var(--control-height-form);
+  min-width: var(--control-height-form);
+}
+
+// ── Loading spinner ────────────────────────────────────────────────────────────
+
+.nb-button-spinner {
+  animation: app-spinner-rotate 700ms linear infinite;
+  border: 2px solid color-mix(in srgb, currentcolor 25%, transparent);
+  border-radius: 50%;
+  border-top-color: currentcolor;
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+}
+
+@keyframes app-spinner-rotate {
+  to { transform: rotate(360deg); }
+}

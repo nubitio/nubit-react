@@ -1,0 +1,56 @@
+{
+  "name": "@nubit/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Visual primitives and theme system for the Nubit admin stack (dialogs, cards, toolbar, light/dark theme).",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "theme",
+    "admin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nubitio/nubit-react.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/nubitio/nubit-react/issues"
+  },
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/ui#readme",
+  "source": "./public.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./themes/*": "./dist/themes/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

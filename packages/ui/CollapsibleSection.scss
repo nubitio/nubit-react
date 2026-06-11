@@ -1,0 +1,87 @@
+// ── CollapsibleSection ─────────────────────────────────────────────────────────
+// Full-width disclosure component with a header trigger and collapsible body.
+// Uses the HTML `hidden` attribute for accessibility (screen readers skip it).
+
+.nb-collapsible {
+  // No outer border by default — let the consumer add one if needed
+
+  &__header {
+    display: flex;
+    align-items: stretch;
+  }
+
+  // Full-width trigger button
+  &__trigger {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    text-align: left;
+    transition: background var(--transition-base), color var(--transition-base);
+
+    i { flex-shrink: 0; }
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: -2px;
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  // Chevron rotates when open
+  &__chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform var(--transition-base);
+  }
+
+  &--open &__chevron {
+    transform: rotate(180deg);
+  }
+
+  &--open &__trigger {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+  }
+
+  // Label: fills available space, truncates
+  &__label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Trailing slot (e.g. clear button)
+  &__trailing {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-right: var(--space-2);
+  }
+
+  // Body — hidden via HTML `hidden` attribute; browser handles accessibility
+  &__body {
+    // When visible, add a top padding so content breathes
+    padding: 0 var(--space-3) var(--space-2);
+  }
+
+  // `hidden` attribute makes it invisible; this is the revealed state
+  &__body:not([hidden]) {
+    display: block;
+  }
+}

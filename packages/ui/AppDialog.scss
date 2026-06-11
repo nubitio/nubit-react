@@ -1,0 +1,159 @@
+@use 'variables' as *;
+
+// ── Dialog enter animation ─────────────────────────────────────────────────────
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 12px)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes scrim-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────────
+
+.nb-dialog-root {
+  inset: 0;
+  position: fixed;
+  z-index: var(--z-dialog);
+}
+
+// ── Scrim (backdrop) ───────────────────────────────────────────────────────────
+
+.nb-dialog__scrim {
+  animation: scrim-enter var(--transition-slow) both;
+  background: var(--overlay-bg);
+  border: 0;
+  cursor: default;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+// ── Dialog panel ──────────────────────────────────────────────────────────────
+// surface-1 background so it sits one level above the page content.
+// border-radius: radius-lg (8px) — tighter than a card, crisper than a sheet.
+// shadow-lg provides maximum elevation — dialogs float above everything.
+
+.nb-dialog {
+  animation: dialog-enter var(--transition-slow) both;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  left: 50%;
+  max-height: calc(100dvh - var(--space-7));
+  max-width: calc(100vw - var(--space-7));
+  min-width: 300px;
+  overflow: hidden;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+// Full-screen variant — used for mobile or detail views.
+.nb-dialog--fullscreen {
+  animation: none;
+  border: 0;
+  border-radius: 0;
+  height: 100dvh !important;
+  inset: 0;
+  max-height: none;
+  max-width: none;
+  transform: none;
+  width: 100vw !important;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+// Matches the admin shell header height so dialogs feel like part of the system.
+// Uses border-subtle (not border-color) — keeps it light, avoids heavy dividers.
+
+.nb-dialog__header {
+  align-items: center;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  min-height: var(--toolbar-height);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+.nb-dialog__title {
+  color: var(--text-primary);
+  flex: 1;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: var(--line-height-tight);
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-dialog__close {
+  flex: 0 0 auto;
+}
+
+// ── Body ───────────────────────────────────────────────────────────────────────
+
+.nb-dialog__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-4);
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+// Action buttons live here. border-subtle keeps it subordinate to the header.
+
+.nb-dialog__footer {
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+  position: relative;
+  z-index: 1;
+}
+
+.nb-dialog__footer .nb-button {
+  min-height: var(--control-height-form);
+}
+
+html[data-density="compact"] {
+  .nb-dialog {
+    max-height: calc(100dvh - var(--space-5));
+    max-width: calc(100vw - var(--space-5));
+  }
+
+  .nb-dialog__header {
+    min-height: var(--toolbar-height);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  }
+
+  .nb-dialog__body {
+    padding: var(--space-3);
+  }
+
+  .nb-dialog__footer {
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+  }
+}

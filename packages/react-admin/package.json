@@ -1,0 +1,67 @@
+{
+  "name": "@nubit/react-admin",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Batteries-included admin stack: core runtime, CRUD, Hydra adapter, and AdminShell.",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "admin",
+    "crud",
+    "hydra",
+    "api-platform",
+    "openapi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nubitio/nubit-react.git",
+    "directory": "packages/react-admin"
+  },
+  "bugs": {
+    "url": "https://github.com/nubitio/nubit-react/issues"
+  },
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/react-admin#readme",
+  "source": "./public.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@nubit/admin": "workspace:^",
+    "@nubit/hydra": "workspace:^",
+    "@nubit/core": "workspace:^",
+    "@nubit/crud": "workspace:^",
+    "@nubit/ui": "workspace:^"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "i18next": "^23.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^14.0.0",
+    "react-router-dom": "^6.0.0"
+  }
+}

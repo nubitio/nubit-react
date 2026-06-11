@@ -1,0 +1,103 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CRUD Dialog — overrides on top of AppDialog for form/datagrid contexts.
+//
+// CrudDialogView sits at z-index 2500 (above AppDialog at 2000) to allow
+// nested dialogs (e.g. a lookup dialog opened from within a form dialog).
+// ─────────────────────────────────────────────────────────────────────────────
+
+.nb-crud-dialog-root {
+  z-index: 2500;
+}
+
+.nb-crud-dialog {
+  // Override header border to use the stronger structural colour — the form
+  // content below has many subtle borders, so the dialog header needs weight.
+  .nb-dialog__header {
+    border-bottom-color: var(--border-color);
+  }
+
+  .nb-dialog__title {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .nb-dialog__body {
+    overflow: auto;
+    padding: var(--space-4);
+    position: relative;
+  }
+
+  // Tabbed forms are flush with the dialog — tabs own their own inset padding.
+  .nb-dialog__body:has(.nb-form__tabs) {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  // fit-content variant — used when the body is a self-contained view
+  // (e.g. a datagrid lookup). Remove padding so the view fills edge-to-edge.
+  &.fit-content {
+    .nb-dialog__body {
+      padding: 0;
+
+      .view-wrapper {
+        margin: 0 !important;
+        padding: 0;
+      }
+    }
+  }
+}
+
+// When the form inside has a master-detail layout, let the dialog
+// size to content (AppDialog's max-height still caps it), and
+// enable body scroll for overflow.
+.nb-crud-dialog:has(.nb-form--with-detail) {
+  overflow: hidden;
+
+  .nb-dialog__body {
+    overflow: auto;
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+.nb-crud-dialog__footer {
+  .form-popup-buttons-container {
+    align-items: center;
+    display: flex;
+    gap: var(--space-2);
+    justify-content: flex-end;
+  }
+
+  .button-indicator {
+    display: inline-block;
+    height: 1em;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+    width: 1em;
+  }
+}
+
+// ── Loading overlay ────────────────────────────────────────────────────────────
+
+.nb-crud-dialog__loading {
+  align-items: center;
+  background: var(--overlay-bg-subtle);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  z-index: 3;
+}
+
+.nb-crud-dialog__loading-indicator {
+  animation: nb-crud-dialog-spin 700ms linear infinite;
+  border: 3px solid rgb(255 255 255 / 30%);
+  border-radius: 999px;
+  border-top-color: var(--accent-color);
+  height: 28px;
+  width: 28px;
+}
+
+@keyframes nb-crud-dialog-spin {
+  to { transform: rotate(360deg); }
+}

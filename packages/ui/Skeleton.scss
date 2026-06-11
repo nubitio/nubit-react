@@ -1,0 +1,49 @@
+// ── Skeleton loader ────────────────────────────────────────────────────────────
+// Shimmer animation using only design tokens.
+// Works correctly in both light and dark themes because surface-2 is
+// theme-aware and will be the appropriate subtle shade in each mode.
+
+@keyframes nb-skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.nb-skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    color-mix(in srgb, var(--surface-2) 50%, var(--surface-1)) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: nb-skeleton-shimmer 1.5s ease-in-out infinite;
+
+  // ── Variants ─────────────────────────────────────────────────────────────
+  &--circle {
+    border-radius: 50%;
+    // default size when not overridden
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  &--text {
+    height: var(--font-size-md);
+    border-radius: var(--radius-xs);
+    width: 100%;
+  }
+
+  &--rect {
+    // size is supplied via inline style from consumer
+  }
+}
+
+// Multi-line text skeleton container
+.nb-skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}

@@ -1,0 +1,89 @@
+@use 'variables' as *;
+
+// ── Page-level toolbar wrapper ─────────────────────────────────────────────────
+// Wraps the toolbar + the page content below it.
+
+.view-wrapper.view-wrapper-dashboard {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--space-4);
+  padding-bottom: var(--content-padding);
+  padding-top: var(--content-padding);
+  position: relative;
+
+  @media only screen and (max-width: 900px) {
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+    padding-top: var(--space-4);
+
+    .card .card-contents {
+      height: auto;
+    }
+  }
+}
+
+// ── App toolbar ────────────────────────────────────────────────────────────────
+// Fluent pattern: flat card sitting on surface-0, with a structural border.
+// No backdrop-filter — keeps rendering fast, avoids "glassy app" look.
+//
+// Vertical sizing:
+//   min-height: --toolbar-height (36px)
+//   padding: 4px top/bottom — leaves 28px inner = --control-height for buttons.
+//
+// This means buttons at --control-height (28px) sit flush in the toolbar
+// with 4px breathing room above and below, matching Fluent CommandBar precision.
+
+.nb-toolbar {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  display: flex;
+  gap: var(--space-2);
+  min-height: var(--toolbar-height);
+  padding: 4px 10px;          // 4px vertical gives 28px inner at 36px toolbar height
+
+  @media only screen and (max-width: 900px) {
+    border-radius: var(--radius-md);
+    min-height: 40px;
+    padding: var(--space-2);
+  }
+
+  &__start {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: var(--space-2);
+
+    i {
+      color: var(--accent-color);
+      font-size: var(--font-size-lg);
+    }
+  }
+
+  &__center {
+    align-items: center;
+    display: flex;
+    flex: 1;
+  }
+
+  &__end {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-1);
+  }
+
+  // Page title — sits in the toolbar start slot.
+  // Inter semibold at md size. No Syne — display font is reserved for the logo.
+  .toolbar-header {
+    color: var(--text-primary);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.015em;
+    line-height: var(--line-height-tight);
+  }
+}

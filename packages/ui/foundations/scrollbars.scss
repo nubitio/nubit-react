@@ -1,0 +1,14 @@
+// Global overlay scrollbars for @nubit/ui consumers.
+// Requires theme tokens (--border-color, --accent-color, --radius-sm, --transition-base).
+
+@use './overlay-scrollbar' as scrollbar;
+
+:root {
+  --scrollbar-size: 6px;
+  --scrollbar-thumb: var(--border-color);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--accent-color) 60%, var(--border-color) 40%);
+}
+
+* {
+  @include scrollbar.overlay-scrollbar;
+}

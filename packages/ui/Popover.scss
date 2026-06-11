@@ -1,0 +1,36 @@
+// ── Popover ───────────────────────────────────────────────────────────────────
+// Floating panel anchored to a trigger. The container is position: relative;
+// the panel is position: absolute below it.
+//
+// Alignment variants:
+//   .nb-popover--end  (default) — right edge of panel = right edge of container
+//   .nb-popover--start          — left edge of panel = left edge of container
+
+.nb-popover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  &__panel {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    z-index: var(--z-shell-popover, var(--z-popover));
+    background: var(--surface-1);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+
+    // Entrance animation — matches dialog token
+    animation: popover-in var(--transition-base) ease;
+  }
+
+  // Alignment
+  &--end   &__panel { right: 0; }
+  &--start &__panel { left: 0; }
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

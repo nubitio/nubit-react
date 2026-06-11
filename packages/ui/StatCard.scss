@@ -1,0 +1,115 @@
+@use 'variables' as *;
+
+// ─── StatCard ─────────────────────────────────────────────────────────────────
+// General-purpose analytics / dashboard KPI card.
+//
+// Typography hierarchy (Stripe/Linear pattern):
+//   __title      → label     xs / secondary / medium / uppercase  (what the number means)
+//   __value      → number    xl / primary / bold / mono           (the KPI itself)
+//   __delta      → trend     xs / colored / medium                (change indicator)
+//   __subtitle   → context   xs / tertiary                        (time period, unit)
+//   __body       → freeform  sm                                   (charts, sparklines)
+//
+// BEM: .nb-stat-card  /  __header  /  __title  /  __value  /  __delta
+//                      __subtitle  /  __extra  /  __menu  /  __body
+
+.nb-stat-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+
+  &__header {
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--content-padding) var(--content-padding) 0;
+  }
+
+  // Label — small, secondary, uppercase. Tells the user WHAT the number means.
+  // Pattern: Stripe, Linear, Notion analytics. Never use primary/large for the label.
+  &__title {
+    color: var(--text-secondary);
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.04em;
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--space-2);
+    padding-right: var(--space-6);
+    text-transform: uppercase;
+  }
+
+  // KPI value — large, mono, bold. The number is the hero.
+  // Uses --font-family-mono for metric alignment across cards.
+  &__value {
+    color: var(--text-primary);
+    display: block;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: var(--space-1);
+  }
+
+  &__value--2xl {
+    font-size: var(--font-size-2xl);
+  }
+
+  // Trend indicator — colored inline delta (e.g. "↑ 12.4% vs last month")
+  &__delta {
+    align-items: center;
+    display: inline-flex;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    gap: var(--space-1);
+    letter-spacing: 0.01em;
+    margin-bottom: var(--space-1);
+
+    &--up   { color: var(--success-color); }
+    &--down { color: var(--error-color); }
+    &--flat { color: var(--text-tertiary); }
+  }
+
+  // Supporting context — period, units, comparison basis
+  &__subtitle {
+    color: var(--text-tertiary);
+    display: block;
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+    margin-top: var(--space-1);
+  }
+
+  &__extra {
+    flex-shrink: 0;
+  }
+
+  &__menu {
+    position: absolute;
+    right: var(--space-2);
+    top: var(--space-2);
+  }
+
+  // Body — freeform content: sparklines, bar charts, progress bars.
+  &__body {
+    flex: 1 1 auto;
+    font-size: var(--font-size-sm);
+    min-height: 0;
+    padding: 0 var(--content-padding) var(--content-padding);
+  }
+
+  // ── Accent bar variant ─────────────────────────────────────────────────────
+  // Adds a 3px accent line on the left edge for visual grouping by category.
+  &--accented {
+    border-left: 3px solid var(--accent-color);
+  }
+
+  &--accented-success { border-left: 3px solid var(--success-color); }
+  &--accented-warning { border-left: 3px solid var(--warning-color); }
+  &--accented-danger  { border-left: 3px solid var(--error-color); }
+}

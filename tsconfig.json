@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nubit/core": ["packages/core/public.ts"],
+      "@nubit/ui": ["packages/ui/public.ts"],
+      "@nubit/admin": ["packages/admin/public.ts"],
+      "@nubit/crud": ["packages/crud/public.ts"],
+      "@nubit/hydra": ["packages/hydra/public.ts"],
+      "@nubit/react-admin": ["packages/react-admin/public.ts"]
+    }
+  },
+  "include": ["packages/**/*.ts", "packages/**/*.tsx", "global.d.ts", "vitest.config.ts", "tsdown.config.ts"],
+  "exclude": ["**/dist/**", "**/node_modules/**", "examples/**"]
+}

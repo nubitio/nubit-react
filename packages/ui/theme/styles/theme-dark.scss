@@ -1,0 +1,117 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Efact Dark Theme — color, surface, and shadow tokens.
+//
+// Static tokens (typography, spacing, radii, layout) are defined once in
+// tokens.scss and bundled into the main CSS entry. Do NOT add them here.
+//
+// Accent shifts to #60a5fa — lighter than light-mode cobalt to maintain
+// min 4.5:1 contrast against dark surfaces.
+//
+// Shadow technique: each shadow includes a 1px inset ring at rgba(white, 0.05)
+// so panels remain visually separated without needing explicit borders everywhere.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/* stylelint-disable */
+:root,
+[data-theme='dark'] {
+
+  // ── Color base ──────────────────────────────────────────────────────────────
+  // True neutral dark — no blue tint. Breaks association with VS Code / Tailwind dark.
+  --base-bg:               #1f1f1f;
+  --base-bg-darken-4:      #171717;
+  --base-bg-darken-5:      #0f0f0f;
+  --base-text-color:       #f5f5f5;
+  --base-text-color-alpha: rgba(245, 245, 245, 0.65);
+  --background-gray-color: rgba(245, 245, 245, 0.04);
+  --typography-bg:         var(--base-bg);
+
+  // ── Semantic / status colors ────────────────────────────────────────────────
+  --accent-color:       #60a5fa;
+  --accent-hover:       #7ab8fc;
+  --accent-pressed:     #4b8ef3;
+  --accent-subtle: color-mix(in srgb, var(--accent-color) 18%, var(--surface-0));
+  --success-color:      #4cc84c;
+  --info-color:         var(--accent-color);
+  --warning-color:      #e07530;
+  --dark-warning-color: #c5622a;
+  --error-color:        #ef5a5a;
+  --on-accent-color:    #05112a;
+  --on-success-color:   #031403;
+  --on-error-color:     #1f0707;
+
+  // ── Borders ─────────────────────────────────────────────────────────────────
+  // Pure neutral — no blue tint.
+  --border-color:      #404040;
+  --border-subtle:     #2e2e2e;
+  --base-border-color: var(--border-color);
+
+  // ── Text ────────────────────────────────────────────────────────────────────
+  --text-primary:           var(--base-text-color);
+  --text-secondary:         #c7c7c7;
+  --text-tertiary:          #969696;
+  --text-disabled:          #4d4d4d;
+  --text-on-accent:         var(--on-accent-color);
+
+  // Legacy aliases
+  --texteditor-edit-color:  var(--text-primary);
+  --texteditor-label-color: var(--text-secondary);
+  --subtitle-text-color:    var(--text-secondary);
+
+  // ── Surfaces (4-level elevation) ────────────────────────────────────────────
+  // Pure neutral dark — not Tailwind gray-900 (#111827). No blue tint.
+  --surface-0:  #0f0f0f;   // canvas / deepest background
+  --surface-1:  #1f1f1f;   // cards, panels, dialogs
+  --surface-2:  #2b2b2b;   // hover, secondary sections
+  --surface-3:  color-mix(in srgb, var(--accent-color) 16%, #0f0f0f);
+  --surface-canvas:    var(--surface-0);
+  --surface-card:      var(--surface-1);
+  --surface-elevated:  #333333;
+  --surface-subtle:    var(--surface-2);
+  --surface-selected:  var(--surface-3);
+  --card-background:       var(--surface-1);
+  --side-panel-background: #1a1a1a;
+
+  --control-bg:       var(--surface-1);
+  --control-bg-hover: #2b2b2b;
+  --control-border:   var(--border-color);
+
+  // ── Dense ERP surfaces ──────────────────────────────────────────────────────
+  --grid-header-bg:           #1a1a1a;
+  --grid-filter-bg:           #1f1f1f;
+  --grid-row-hover-bg:        #2e2e2e;
+  --grid-row-selected-bg:     color-mix(in srgb, var(--accent-color) 14%, #0f0f0f);
+  --grid-row-selected-border: color-mix(in srgb, var(--accent-color) 60%, #0f0f0f);
+  --grid-row-alt-bg:          color-mix(in srgb, var(--surface-0) 40%, var(--surface-1));
+
+  // ── Status palette ──────────────────────────────────────────────────────────
+  // Alpha backgrounds to prevent excessive colorization on dark surfaces.
+  --status-success-bg:     rgba(76, 200, 76, 0.14);
+  --status-success-text:   #7ddc7d;
+  --status-success-border: rgba(76, 200, 76, 0.32);
+  --status-warning-bg:     rgba(224, 117, 48, 0.14);
+  --status-warning-text:   #f0a070;
+  --status-warning-border: rgba(224, 117, 48, 0.32);
+  --status-danger-bg:      rgba(239, 90, 90, 0.14);
+  --status-danger-text:    #f79898;
+  --status-danger-border:  rgba(239, 90, 90, 0.34);
+  --status-info-bg:        rgba(96, 165, 250, 0.14);
+  --status-info-text:      #93c5fd;
+  --status-info-border:    rgba(96, 165, 250, 0.32);
+
+  // ── Shadows ───────────────────────────────────────────────────────────────
+  // Inset ring retains dark panel separation without explicit borders.
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.40), 0 0 0 1px rgba(255,255,255,.05);
+  --shadow-md:  0 4px 10px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lg:  0 12px 28px rgba(0,0,0,.55), 0 4px 8px rgba(0,0,0,.35),
+                0 0 0 1px rgba(255,255,255,.07);
+
+  // ── Effects ─────────────────────────────────────────────────────────────────
+  --focus-ring-color:  color-mix(in srgb, var(--accent-color) 45%, transparent);
+  --overlay-bg:        rgb(0 0 0 / 58%);
+  --overlay-bg-subtle: rgb(0 0 0 / 30%);
+  --tooltip-danger-button-color:  rgba(239, 90, 90, 0.12);
+  --tooltip-success-button-color: rgba(76, 200, 76, 0.12);
+}
+
+// Sentinel — allows JS/SCSS to detect the active theme class.
+[data-theme='dark'] { content: ''; }

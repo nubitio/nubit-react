@@ -1,0 +1,57 @@
+{
+  "name": "@nubit/admin",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Admin shell layout components: responsive sidebar, header, and screen size utilities for Nubit apps.",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "admin",
+    "layout",
+    "sidebar",
+    "shell"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nubitio/nubit-react.git",
+    "directory": "packages/admin"
+  },
+  "bugs": {
+    "url": "https://github.com/nubitio/nubit-react/issues"
+  },
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/admin#readme",
+  "source": "./public.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@nubit/ui": "workspace:^",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.0.0"
+  }
+}

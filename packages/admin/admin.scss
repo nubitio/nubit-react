@@ -1,0 +1,460 @@
+@use 'variables' as *;
+
+// ── Shell layout ───────────────────────────────────────────────────────────────
+
+.nb-admin-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.nb-admin-layout-header {
+  z-index: var(--z-shell-header);
+}
+
+.nb-admin-layout-body {
+  background-color: var(--surface-0);
+}
+
+.nb-admin-shell__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+// Sidebar panel — structural border, not subtle, so it's clearly visible in light mode.
+.nb-admin-shell__panel {
+  background-color: var(--side-panel-background);
+  border-right: 1px solid var(--border-color);
+  flex: 0 0 240px;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  transition:
+    flex-basis var(--transition-slow),
+    transform var(--transition-slow),
+    width var(--transition-slow);
+  width: 240px;
+  z-index: var(--z-shell-panel);
+}
+
+.nb-admin-shell__scrim {
+  background: var(--overlay-bg);
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  z-index: var(--z-shell-scrim);
+}
+
+.nb-admin-shell__body.is-large.is-compact {
+  .nb-admin-shell__panel {
+    flex-basis: var(--side-panel-min-width);
+    width: var(--side-panel-min-width);
+  }
+}
+
+.nb-admin-shell__body.is-overlay {
+  .nb-admin-shell__panel {
+    inset: 0 auto 0 0;
+    position: absolute;
+  }
+
+  // The collapsed rail is absolutely positioned, so the content must reserve
+  // its width — otherwise the rail covers the left edge of the page content.
+  // Opening the menu expands the panel OVER the content (with scrim) while
+  // the content keeps the rail offset.
+  &:not(.is-xsmall) {
+    .nb-admin-shell__content {
+      margin-left: var(--side-panel-min-width, 48px);
+    }
+  }
+
+  &.is-closed:not(.is-xsmall) {
+    .nb-admin-shell__panel {
+      width: var(--side-panel-min-width);
+    }
+  }
+
+  &.is-closed.is-xsmall {
+    .nb-admin-shell__panel {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0; // allow shrinking in the flex row
+  overflow-y: auto; // scroll here when view-wrapper-scroll overflows
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+// Structural border + shadow so the header clearly lifts above the content area.
+// border-color (not border-subtle) ensures visibility in light mode.
+
+.nb-admin-header-component {
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 0 var(--border-subtle);
+  flex: 0 0 auto;
+  position: relative;
+  z-index: var(--z-shell-header);
+}
+
+.nb-admin-header-toolbar {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-height: var(--toolbar-height);
+  padding: 0 var(--space-4) 0 0;
+}
+
+.nb-admin-header-toolbar__before,
+.nb-admin-header-toolbar__after {
+  align-items: center;
+  display: flex;
+}
+
+.nb-admin-header-toolbar__before {
+  flex: 1;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.nb-admin-header-toolbar__after {
+  flex: 0 0 auto;
+  gap: var(--space-1);
+}
+
+// App title — Syne gives it a distinctive brand feel at a legible size.
+.nb-admin-header-title {
+  color: var(--text-primary);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-admin-menu-button {
+  flex: 0 0 var(--side-panel-min-width);
+  width: var(--side-panel-min-width);
+}
+
+.nb-admin-messages {
+  position: relative;
+}
+
+// Popover panel — floats above the page; uses the full shadow tier.
+.nb-admin-header-popover {
+  position: relative;
+}
+
+.nb-admin-header-popover__panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  z-index: var(--z-shell-popover);
+}
+
+
+// Notification badge — sits on top of header icon buttons.
+.nb-admin-messages > .nb-badge {
+  align-items: center;
+  background: var(--accent-color);
+  border: 2px solid var(--surface-1);
+  border-radius: 10px;
+  color: #fff;
+  display: flex;
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  justify-content: center;
+  min-width: 18px;
+  padding: 1px 4px;
+  pointer-events: none;
+  position: absolute;
+  right: -4px;
+  top: -4px;
+}
+
+// ── Sidebar menu ───────────────────────────────────────────────────────────────
+
+.nb-admin-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  width: 240px !important;
+
+  .nb-admin-menu-container {
+    background-color: var(--side-panel-background);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    font-size: var(--font-size-sm);
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: var(--footer-height);
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  // Section — groups of related nav items.
+  // Bottom border acts as a visual breathing gap between groups.
+  &__section {
+    border-bottom: 1px solid var(--border-subtle);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  // Nav item — base styles shared by parent and child items.
+  &__item {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent; // reserve space to prevent layout shift on select
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    min-height: 36px;
+    padding: 0;
+    text-align: left;
+    transition:
+      background var(--transition-base),
+      color var(--transition-base),
+      border-color var(--transition-base);
+    width: 100%;
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    // Selected state — Fluent accent rail + tinted background.
+    &.is-selected {
+      background: var(--surface-2);
+      border-left-color: var(--accent-color);
+      color: var(--accent-color);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  // Parent item — slightly heavier weight for group labels.
+  &__item--parent {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  // Chevron — CSS-only expand/collapse indicator.
+  &__chevron {
+    border-bottom: 1.5px solid currentcolor;
+    border-right: 1.5px solid currentcolor;
+    display: inline-flex;
+    flex: 0 0 7px;
+    height: 7px;
+    margin-left: auto;
+    margin-right: var(--space-4);
+    opacity: 0.5;
+    transform: rotate(45deg);
+    transition: transform var(--transition-base), opacity var(--transition-base);
+    width: 7px;
+
+    &.is-expanded {
+      opacity: 0.8;
+      transform: rotate(225deg);
+    }
+  }
+
+  // Parent with an active child — tints the parent label.
+  &__section.has-selected-child > &__item--parent {
+    color: var(--accent-color);
+  }
+
+  // Icon column — fixed width creates the icon rail.
+  &__icon {
+    align-items: center;
+    color: inherit;
+    display: inline-flex;
+    flex: 0 0 var(--side-panel-min-width);
+    font-size: 1.1rem;
+    justify-content: center;
+    margin: 0 !important;
+    opacity: 0.75;
+    width: var(--side-panel-min-width) !important;
+
+    .is-selected & {
+      opacity: 1;
+    }
+  }
+
+  &__text {
+    overflow: hidden;
+    padding-right: var(--space-3);
+    text-overflow: ellipsis;
+  }
+
+  // Child item — indented; inherits icon rail width.
+  &__item--child {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    min-height: 32px;
+
+    .nb-admin-menu__text {
+      font-weight: var(--font-weight-regular);
+      padding-left: var(--side-panel-min-width);
+    }
+
+    &.is-selected {
+      color: var(--accent-color);
+    }
+  }
+
+  // Children container — slight indent for the sub-list.
+  &__children {
+    border-top: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface-0) 50%, var(--surface-1) 50%);
+    padding: var(--space-1) 0;
+  }
+
+  // Compact (icon-only) mode — hide text, center icon.
+  &.compact {
+    .nb-admin-menu__item {
+      border-left-color: transparent;
+
+      &.is-selected {
+        border-left-color: var(--accent-color);
+        background: var(--surface-2);
+      }
+    }
+
+    .nb-admin-menu__text,
+    .nb-admin-menu__chevron {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nb-admin-menu__icon {
+      opacity: 1;
+    }
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+.nb-admin-footer {
+  background-color: var(--side-panel-background);
+  border-top: 1px solid var(--border-subtle);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  transition: opacity var(--transition-slow);
+
+  .nb-admin-shell__body.is-open & {
+    opacity: 1;
+  }
+}
+
+// Footer nav items — same visual rhythm as sidebar nav items.
+.nb-admin-footer-nav {
+  display: flex;
+  flex-direction: column;
+
+  &__item {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    min-height: 36px;
+    padding: 0;
+    text-align: left;
+    transition:
+      background var(--transition-base),
+      color var(--transition-base);
+    width: 100%;
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    &.is-selected {
+      background: var(--surface-2);
+      border-left-color: var(--accent-color);
+      color: var(--accent-color);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  &__icon {
+    align-items: center;
+    color: inherit;
+    display: inline-flex;
+    flex: 0 0 var(--side-panel-min-width);
+    font-size: 1.1rem;
+    justify-content: center;
+    margin: 0 !important;
+    opacity: 0.75;
+    width: var(--side-panel-min-width) !important;
+
+    .is-selected & {
+      opacity: 1;
+    }
+  }
+
+  &__text {
+    overflow: hidden;
+    padding-right: var(--space-3);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Copyright line inside footer.
+.nb-admin-footer-copyright {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xxs);
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 var(--footer-left-padding);
+}
+
+// Compact (icon-only) mode — hide footer text.
+.nb-admin-shell__body.is-compact .nb-admin-footer-nav {
+  &__text {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

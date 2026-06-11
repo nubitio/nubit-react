@@ -1,0 +1,1082 @@
+@use './FileUploadField';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Native Form — enterprise-grade form control styling.
+//
+// Controls use --control-height-form (34px) for standalone fields, which aligns
+// with the datagrid row height and provides a comfortable touch target.
+// Inline spreadsheet cells override to var(--row-height) for grid alignment.
+// All colours reference design tokens — no hardcoded hex.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Form root ──────────────────────────────────────────────────────────────────
+
+.nb-form {
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: 20px 24px;
+}
+
+.nb-form:has(> .nb-form__tabs),
+.nb-form--with-detail {
+  padding: 0;
+}
+
+.nb-form--with-detail {
+  // Content-driven: the dialog sizes around the form, while the detail grid
+  // owns its internal scroll when line items exceed available space.
+}
+
+// ── Master-detail layout ───────────────────────────────────────────────────────
+
+.nb-form__master-detail {
+  align-items: stretch;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(280px, 332px) minmax(560px, 1fr);
+  min-height: 0;
+}
+
+.nb-form--with-detail .nb-form__master-detail {
+  overflow: visible;
+}
+
+// Page mode (CrudPageShell): fill viewport height, independent master scroll,
+// detail grid scrolls inside its panel.
+.nb-crud-page-shell__body .nb-form--with-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-crud-page-shell__body .nb-form__master-detail {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// Cabecera master-detail: contenido inset; el scrollbar overlay queda en el borde de columna.
+.nb-form--with-detail .nb-form__master-panel {
+  padding: 0 var(--space-5) 0 var(--space-4);
+}
+
+.nb-crud-page-shell__body .nb-form__master-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.nb-crud-page-shell__body .nb-form__detail-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.nb-crud-page-shell__body .nb-form__detail {
+  flex: 1 1 auto;
+  height: 100%;
+  max-height: none;
+  min-height: 0;
+}
+
+.nb-crud-page-shell__body .nb-form:has(> .nb-form__tabs) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-form__master-panel,
+.nb-form__detail-panel {
+  min-height: 0;
+  min-width: 0;
+}
+
+.nb-form__master-panel {
+  display: block;
+}
+
+.nb-form__detail-panel {
+  display: flex;
+}
+
+// ── Field grid ─────────────────────────────────────────────────────────────────
+
+.nb-form__grid {
+  display: grid;
+  gap: 16px 18px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.nb-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  grid-column: span var(--nb-form-col, 12);
+  min-width: 0;
+}
+
+// ── Labels ─────────────────────────────────────────────────────────────────────
+// Uppercase + letter-spacing at xs size is the Fluent label pattern —
+// clearly separates labels from values without needing bold weight.
+
+.nb-form__label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+}
+
+.nb-form__hint {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.nb-form__label--required::after {
+  color: var(--error-color);
+  content: ' *';
+}
+
+// ── Base control ───────────────────────────────────────────────────────────────
+
+.nb-form__control {
+  background: var(--control-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  min-height: var(--control-height-form, 34px);   // was 32px hardcoded
+  padding: 4px 8px;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
+  width: 100%;
+}
+
+.nb-form__control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring-color);
+  outline: none;
+}
+
+.nb-form__control--action {
+  cursor: pointer;
+}
+
+.nb-form__control--action[readonly] {
+  opacity: 1;
+}
+
+.nb-form__control.is-error {
+  border-color: var(--error-color);
+
+  &:focus {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--error-color) 20%, transparent);
+  }
+}
+
+// Disabled — genuinely unavailable state (full opacity reduction)
+.nb-form__control:disabled {
+  background: color-mix(in srgb, var(--surface-0) 72%, var(--surface-1));
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+// Readonly — intentional value, not unavailable (totals, auto-generated codes).
+// Surface-0 background signals non-editability without the "crossed-out" feel of disabled.
+.nb-form__control[readonly]:not(.nb-form__control--action) {
+  background: var(--surface-0);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+  cursor: default;
+  font-weight: var(--font-weight-medium);
+  opacity: 1;
+
+  &:focus {
+    border-color: var(--border-subtle);
+    box-shadow: none;
+  }
+}
+
+// ── Input group (control + inlined actions) ────────────────────────────────────
+
+.nb-form__input-group {
+  align-items: stretch;
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.nb-form__input-group .nb-form__control {
+  padding-right: 34px;
+}
+
+.nb-form__input-actions {
+  align-items: center;
+  bottom: 0;
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.nb-form__input-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--font-size-md);
+  height: 100%;
+  justify-content: center;
+  padding: 0;
+  transition: color var(--transition-base);
+  width: var(--control-height, 30px);
+
+  &:hover:not(:disabled) {
+    color: var(--accent-color);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// ── Lookup (combobox-style) ────────────────────────────────────────────────────
+
+.nb-form__lookup {
+  position: relative;
+}
+
+// Compensate for the absolutely positioned toggle (▼) and clear (×) buttons.
+// padding-right reserves space so text never scrolls under the buttons.
+.nb-form__lookup .nb-form__control {
+  padding-right: var(--control-height, 30px);
+  transition: padding-right var(--transition-fast);
+}
+
+.nb-form__lookup.has-value .nb-form__control {
+  padding-right: calc(var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1));
+}
+
+.nb-form__lookup-toggle,
+.nb-form__lookup-clear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  height: calc(var(--control-icon-size, 20px) + var(--space-1));
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: color var(--transition-base);
+  width: calc(var(--control-icon-size, 20px) + var(--space-1));
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.nb-form__lookup-toggle {
+  right: 4px;
+}
+
+.nb-form__lookup-clear {
+  right: 28px;
+}
+
+// Dropdown menu
+.nb-form__lookup-menu {
+  background: var(--surface-elevated, var(--surface-1));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  left: 0;
+  margin-top: var(--space-1);
+  max-height: 240px;
+  max-width: min(420px, calc(100vw - 16px));
+  min-width: 160px;
+  overflow: auto;
+  padding: var(--space-1);
+  position: absolute;
+  right: 0;
+  z-index: 20;
+
+}
+
+.nb-form__lookup-option,
+.nb-form__lookup-status {
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  display: block;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+  padding: 7px 9px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.nb-form__lookup-option {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background: var(--control-bg-hover, var(--surface-2));
+  }
+
+  &.is-active {
+    background: var(--control-bg-hover, var(--surface-2));
+  }
+
+  &[aria-selected='true'] {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+    font-weight: var(--font-weight-semibold, var(--font-weight-medium));
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+    }
+
+    &.is-active {
+      background: color-mix(in srgb, var(--accent-color) 16%, transparent);
+    }
+  }
+}
+
+.nb-form__lookup-status {
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
+// ── Textarea ───────────────────────────────────────────────────────────────────
+
+.nb-form__textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+// ── Checkbox / radio ───────────────────────────────────────────────────────────
+
+.nb-form__checkbox,
+.nb-form__radio-list {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-height: var(--control-height, 30px);
+}
+
+.nb-form__checkbox input,
+.nb-form__radio-item input {
+  accent-color: var(--accent-color);
+}
+
+// ── Toggle switch ──────────────────────────────────────────────────────────────
+// Used by FieldType.SWITCH — renders as a pill toggle with an inline label.
+
+.nb-form__switch {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--space-2);
+  min-height: var(--control-height, 30px);
+  user-select: none;
+
+  input[type='checkbox'] {
+    appearance: none;
+    background: var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    height: 22px;
+    position: relative;
+    transition: background var(--transition-base);
+    width: 40px;
+
+    &::after {
+      background: var(--surface-elevated);
+      border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+      content: '';
+      height: 16px;
+      left: 3px;
+      position: absolute;
+      top: 3px;
+      transition: transform var(--transition-base);
+      width: 16px;
+    }
+
+    &:checked {
+      background: var(--accent-color);
+
+      &::after {
+        transform: translateX(18px);
+      }
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--focus-ring-color);
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+  }
+}
+
+.nb-form__toggle-label {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.nb-form__radio-list {
+  flex-wrap: wrap;
+}
+
+.nb-form__radio-item {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+// ── HTML preview ───────────────────────────────────────────────────────────────
+
+.nb-form__html-preview {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  min-height: 80px;
+  padding: var(--space-3);
+}
+
+// ── Validation error ───────────────────────────────────────────────────────────
+
+.nb-form__error {
+  align-items: center;
+  color: var(--error-color);
+  display: flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-1);
+
+  i {
+    flex: 0 0 auto;
+    font-size: 13px;
+  }
+}
+
+// ── Section / tabs / detail panels ────────────────────────────────────────────
+// Bordered containers that group related fields. Tabs variant adds a nav row.
+
+.nb-form__section {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: visible;
+  padding: 18px 0 22px;
+}
+
+.nb-form__section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.nb-form__detail {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.nb-form__tabs {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.nb-form__detail {
+  height: auto;
+  max-height: min(calc(100dvh - 220px), 640px);
+  min-height: 0;
+  width: 100%;
+}
+
+.nb-form__section-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+// ── Collapsible sections ───────────────────────────────────────────────────────
+
+.nb-form__section--collapsible {
+  padding-bottom: 0;
+
+  &[open] {
+    padding-bottom: 22px;
+
+    .nb-form__section-caret {
+      transform: rotate(0deg);
+    }
+  }
+}
+
+.nb-form__section-summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  margin-bottom: 0;
+  padding: 2px 0 14px;
+  user-select: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover .nb-form__section-title {
+    color: var(--accent-color);
+  }
+
+  .nb-form__section-title {
+    margin: 0;
+    transition: color var(--transition-fast);
+  }
+}
+
+.nb-form__section-caret {
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+  font-size: 12px;
+  transform: rotate(-90deg);
+  transition: transform var(--transition-base);
+}
+
+.nb-form__section-body {
+  padding-top: 2px;
+}
+
+.nb-form__detail-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-3);
+}
+
+// Section/detail heading bar (sticky toolbar inside the panel)
+.nb-form__detail-heading {
+  align-items: center;
+  background: var(--grid-header-bg, var(--surface-0));
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  min-height: var(--toolbar-height);
+  padding: 0 var(--space-3);
+}
+
+.nb-form__detail-title {
+  margin: 0;
+}
+
+// ── Tabs (Fluent underline — integrated, no outer card chrome) ───────────────
+
+.nb-form__tabs-nav {
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+  margin-bottom: 0;
+  overflow-x: auto;
+  padding: 0 var(--space-4);
+  scrollbar-width: thin;
+}
+
+.nb-form__tab-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-2);
+  margin-bottom: -1px;
+  min-height: var(--toolbar-height);
+  padding: var(--space-2) var(--space-3);
+  position: relative;
+  transition:
+    border-color var(--transition-base),
+    color var(--transition-base);
+  white-space: nowrap;
+
+  i {
+    flex: 0 0 auto;
+    font-size: 15px;
+    opacity: 0.72;
+  }
+
+  &:hover:not(.nb-form__tab-button--active) {
+    color: var(--text-primary);
+
+    i {
+      opacity: 0.9;
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 -2px 0 var(--accent-color);
+    outline: none;
+  }
+}
+
+.nb-form__tab-button--active {
+  border-bottom-color: var(--accent-color);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+
+  i {
+    color: var(--accent-color);
+    opacity: 1;
+  }
+}
+
+.nb-form__tabs-body {
+  background: transparent;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+
+  .nb-form__grid {
+    gap: 16px 20px;
+  }
+
+  .nb-form__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.02em;
+    margin-bottom: var(--space-1);
+    text-transform: none;
+  }
+
+  .nb-form__file-upload-zone {
+    background: transparent;
+    border-color: var(--border-subtle);
+    min-height: 140px;
+
+    &:hover:not(.nb-form__file-upload-zone--disabled):not(.nb-form__file-upload-zone--filled) {
+      background: var(--surface-2);
+      border-color: color-mix(in srgb, var(--accent-color) 35%, var(--border-subtle));
+    }
+  }
+
+  .nb-form__file-upload-icon {
+    background: var(--surface-2);
+    font-size: 20px;
+    height: 40px;
+    width: 40px;
+  }
+
+  .nb-form__file-upload-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+// ── Detail inline table — spreadsheet-grade ────────────────────────────────────
+//
+// Design goals:
+//   • Controls fill cells edge-to-edge with no extra padding (spreadsheet feel)
+//   • Fixed-layout columns; the column without an explicit width fills remaining space
+//   • Resize handles on every header cell (drag-to-resize, like DevExtreme)
+//   • Compact 34px row height for dense data entry
+//   • Hover + focus highlights match the app's accent color
+
+.nb-form__detail-table-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-form__detail-table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.nb-form__detail-table {
+  border-collapse: collapse;
+  min-width: 600px;  // reduced — the fill column expands naturally
+  table-layout: fixed;
+  width: 100%;
+}
+
+.nb-form__col-actions-col {
+  width: 40px;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────────
+
+.nb-form__detail-table thead tr {
+  background: var(--grid-header-bg, var(--surface-0));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nb-form__detail-table th {
+  background: var(--grid-header-bg, var(--surface-0));
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  padding: 0 var(--grid-cell-padding-x, 8px);
+  position: sticky;
+  text-align: left;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  top: 0;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+// Resize handle — absolutely positioned on the right edge of each <th>
+.nb-form__col-header-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.nb-form__col-resize {
+  background: transparent;
+  bottom: 0;
+  cursor: col-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: background var(--transition-base);
+  width: 4px;
+  z-index: 2;
+
+  &:hover {
+    background: var(--accent-color);
+  }
+}
+
+// Actions column (delete button) — fixed narrow, centred, and sticky-right
+// so the delete button remains visible even if other columns cause overflow.
+.nb-form__detail-table th.nb-form__col-actions,
+.nb-form__detail-table td.nb-form__col-actions {
+  position: sticky;
+  right: 0;
+  text-align: center;
+  width: 40px;
+  z-index: 1;
+}
+
+// Header actions cell sits above body cells when both sticky axes overlap
+.nb-form__detail-table thead th.nb-form__col-actions {
+  background: var(--grid-header-bg, var(--surface-0));
+  z-index: 2;
+}
+
+// Body actions cell picks up the row background (zebra / hover) automatically
+// via `background: inherit`, but needs an explicit fallback for the base case.
+.nb-form__detail-table tbody td.nb-form__col-actions {
+  background: var(--surface-1);
+}
+
+.nb-form__detail-table tbody tr:nth-child(even) td.nb-form__col-actions {
+  background: var(--grid-row-alt-bg);
+}
+
+.nb-form__detail-table tbody tr:hover td.nb-form__col-actions {
+  background: color-mix(in srgb, var(--accent-color) 5%, var(--surface-1));
+}
+
+// ── Body rows ───────────────────────────────────────────────────────────────────
+
+.nb-form__detail-table td {
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: visible;  // allow dropdowns to escape the cell
+  padding: 0;         // controls fill the full cell
+  position: relative;
+  vertical-align: middle;
+}
+
+// Zebra striping — uses the explicit grid token for consistent perceptible contrast.
+.nb-form__detail-table tbody tr:nth-child(even) {
+  background: var(--grid-row-alt-bg);
+}
+
+.nb-form__detail-table tbody tr:hover {
+  background: var(--grid-row-hover-bg, color-mix(in srgb, var(--accent-color) 5%, transparent));
+}
+
+// ── Summary footer ─────────────────────────────────────────────────────────────
+
+.nb-form__detail-summary td {
+  background: var(--surface-2);
+  border-bottom: 0;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  min-height: 38px;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.nb-form__detail-summary tr,
+.nb-form__detail-summary td.nb-form__col-actions,
+.nb-form__detail-summary tr:nth-child(even),
+.nb-form__detail-summary tr:nth-child(even) td.nb-form__col-actions,
+.nb-form__detail-summary tr:hover,
+.nb-form__detail-summary tr:hover td.nb-form__col-actions {
+  background: var(--surface-2);
+}
+
+.nb-form__detail-summary-table tbody td.nb-form__col-actions,
+.nb-form__detail-summary-table tbody tr:nth-child(even) td.nb-form__col-actions,
+.nb-form__detail-summary-table tbody tr:hover td.nb-form__col-actions {
+  background: var(--surface-2);
+}
+
+.nb-form__detail-summary-wrap {
+  background: var(--surface-2);
+  border-top: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.nb-form__detail-summary-table {
+  background: var(--surface-2);
+  min-width: 600px;
+}
+
+.nb-form__detail-summary-cell {
+  align-items: baseline;
+  display: inline-flex;
+  gap: var(--space-2);
+  min-width: 100%;
+}
+
+.nb-form__detail-summary-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.nb-form__detail-summary-value {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+// ── Controls inside cells — flush, borderless, spreadsheet-like ────────────────
+
+.nb-form__detail-table td .nb-form__control,
+.nb-form__detail-table td input:not([type='checkbox']):not([type='radio']) {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: var(--row-height);
+  outline: none;
+  padding: 4px var(--grid-cell-padding-x, 8px);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+
+  &:focus {
+    background: color-mix(in srgb, var(--accent-color) 8%, var(--surface-1));
+    box-shadow: inset 0 -2px 0 var(--accent-color);
+    outline: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  // Disabled / readonly cells — show value without affordance
+  &:disabled,
+  &[readonly] {
+    background: transparent;
+    color: var(--text-primary);
+    cursor: default;
+    font-weight: var(--font-weight-medium);
+    opacity: 1;
+  }
+}
+
+// Lookup wrapper (NativeEntitySelect) must also fill the cell
+.nb-form__detail-table td .nb-form__lookup,
+.nb-form__detail-table td .nb-form__input-group {
+  display: block;
+  width: 100%;
+
+  .nb-form__control {
+    border-radius: 0;
+  }
+}
+
+// The detail-table cell rule ".nb-form__detail-table td .nb-form__control"
+// uses shorthand `padding: 4px 8px` (spec 0,2,1) which overrides the base
+// lookup padding-right rules (spec 0,2,0 and 0,3,0 in the case of has-value
+// when styles are applied in a different cascade order).
+// These higher-specificity rules (0,3,1 / 0,4,1) guarantee the correct
+// padding-right is applied so toggle/clear buttons don't overlap text.
+.nb-form__detail-table td .nb-form__lookup .nb-form__control {
+  padding-right: var(--control-height, 30px);
+}
+
+.nb-form__detail-table td .nb-form__lookup.has-value .nb-form__control {
+  padding-right: calc(var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1));
+}
+
+// Error state on cell controls
+.nb-form__detail-table td .nb-form__control.is-error {
+  box-shadow: inset 0 -2px 0 var(--error-color);
+}
+
+// Controls inherit text-align from their parent <td> — alignment is driven by
+// field.align on the <td> element (set in NativeFormView.tsx), not by CSS rules.
+.nb-form__detail-table td .nb-form__control,
+.nb-form__detail-table td input {
+  text-align: inherit;
+}
+
+// Icon-only cells (discount tag, delete trash)
+.nb-form__detail-table td .nb-icon-button {
+  align-items: center;
+  display: flex;
+  height: var(--row-height);
+  justify-content: center;
+  min-height: var(--row-height);
+  width: 100%;
+}
+
+// Empty state
+.nb-form__detail-empty {
+  height: 120px;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.nb-form__detail-empty-icon {
+  color: var(--text-disabled);
+  display: block;
+  font-size: 28px;
+  margin: 0 auto var(--space-2);
+}
+
+.nb-form__detail-empty-text {
+  color: var(--text-secondary);
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.nb-form__detail-empty-hint {
+  color: var(--text-tertiary);
+  display: block;
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-1);
+}
+
+.nb-form__detail-actions {
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
+  padding: var(--space-3);
+}
+
+.nb-form__detail-actions .nb-button {
+  min-width: 120px;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .nb-form {
+    padding: 16px;
+  }
+
+  .nb-form__master-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .nb-form__field {
+    grid-column: span 12 !important;
+  }
+}
+
+// ── Form-context control height overrides ──────────────────────────────────────
+// Date pickers and lookups rendered inside .nb-form__field (not inside
+// a detail table cell) should match --control-height-form, not --control-height.
+.nb-form__field .nb-date-picker__trigger {
+  min-height: var(--control-height-form, 34px);
+}
+
+.nb-form__field .nb-date-picker__trigger.nb-date-picker__trigger--open,
+.nb-form__field .nb-date-picker__trigger:focus-within {
+  min-height: var(--control-height-form, 34px);
+}

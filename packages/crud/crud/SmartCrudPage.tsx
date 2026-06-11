@@ -1,0 +1,252 @@
+import React, { useMemo, useEffect, useRef, type RefObject } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { CrudPage } from './CrudPage';
+import type { ResourceConfig } from './ResourceConfig';
+import type { Field } from '../field/Field';
+import type { FieldOverride } from './resolveSmartCrudFields';
+import { useRouting } from './routing/useRouting';
+import { logDevHint } from './devHint';
+import { useCoreTranslation, useMercureSubscription } from '@nubit/core';
+import { Button, Skeleton } from '@nubit/ui';
+import { resolveCrudResource } from './resolveCrudResource';
+import { useSmartCrudRoles } from './SmartCrudRolesContext';
+import { useSmartCrudOperation } from './useSmartCrudOperation';
+import { useSmartCrudFields } from './useSmartCrudFields';
+import type { DataRecord } from '@nubit/core';
+import type { FormHandle } from '../form/FormHandle';
+import type { GridHandle } from '../datagrid/GridHandle';
+import { useResolvedResourceFields } from '../schema/ResourceSchema';
+import './SmartCrudPage.scss';
+
+function CrudSkeleton() {
+  return (
+    <div className="nb-smart-crud-fallback">
+      <Skeleton variant="rect" height={32} width="33%" />
+      <Skeleton variant="rect" height={256} />
+    </div>
+  );
+}
+
+function CrudError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = useCoreTranslation();
+
+  return (
+    <div className="nb-smart-crud-fallback nb-smart-crud-fallback--error" role="alert">
+      <p className="nb-smart-crud-fallback__title">{t('crudPage.schemaErrorTitle')}</p>
+      <p className="nb-smart-crud-fallback__message">{t('crudPage.schemaErrorMessage')}</p>
+      <details className="nb-smart-crud-fallback__details">
+        <summary>{t('crudPage.schemaErrorDetails')}</summary>
+        <pre>{message}</pre>
+      </details>
+      <Button onClick={onRetry} variant="secondary" size="sm">
+        {t('crudPage.schemaErrorRetry')}
+      </Button>
+    </div>
+  );
+}
+
+interface SmartCrudPageProps<T extends DataRecord = DataRecord> {
+  resource: ResourceConfig<T>;
+  /**
+   * @deprecated Use `resource.fieldContract` (defineFieldContract) instead.
+   * Per-field overrides applied on top of auto-inferred Hydra fields.
+   * Ignored when `resource.fieldContract` is present.
+   */
+  fieldOverrides?: FieldOverride[];
+  /** External form ref forwarded to CrudPage — lets the parent call setFieldValue / getFieldValue. */
+  formRef?: RefObject<FormHandle | null>;
+  /** Called whenever grid row selection changes. Receives the full selected row objects. */
+  onSelectionChanged?: (rows: DataRecord[]) => void;
+  /** Disables the edit action on every grid row. */
+  editDisabled?: boolean;
+  /** Disables the delete action on every grid row. */
+  deleteDisabled?: boolean;
+  /** External ref forwarded to the DataGridView — allows the parent to call
+   *  showLoading / hideLoading / refresh / getSelectedRow imperatively. */
+  gridRef?: RefObject<GridHandle | null>;
+}
+
+type RoutingFilters = Record<string, string>;
+
+function formatRuntimeErrorMessage(error: Error): string {
+  const issues = 'issues' in error && Array.isArray(error.issues) ? error.issues : [];
+  return issues.length > 0 ? `${error.message} ${issues.join(' ')}` : error.message;
+}
+
+/**
+ * SmartCrudPage — wraps CrudPage with Hydra auto-discovery and declarative rules.
+ *
+ * ## Field resolution
+ * - If `resource.fields` is a non-empty array, it is used as-is (pass-through).
+ * - If `resource.fields` is empty / absent, fields are inferred from the Hydra
+ *   API spec at `/api/docs.json` via `useResourceSchema`.
+ * - While the schema loads: renders a skeleton loader.
+ * - If the schema fetch errors: renders a user-visible error with a retry button.
+ *
+ * ## Declarative rules pipeline (via `useSmartCrudFields`)
+ *   1. `useFieldPermissions` — RBAC: hides or disables fields based on user roles
+ *   2. `useConditionalRules` — evaluates visibleWhen / disabledWhen / computed
+ *   3. `useDependsOn`        — invalidates entity queries when dependency fields change
+ *
+ * ## Operation & form state (via `useSmartCrudOperation`)
+ *   Manages `activeOperation` + `formData` as a unified state pair, synced
+ *   from routing changes and the resource event bus (ADD/EDIT/CANCEL/SUCCESS).
+ *
+ * URL deep-linking is wired via `initialRecordId` / `initialIsNew` props on CrudPage.
+ */
+export function SmartCrudPage<T extends DataRecord = DataRecord>({
+  resource,
+  fieldOverrides,
+  formRef,
+  onSelectionChanged,
+  editDisabled,
+  deleteDisabled,
+  gridRef,
+}: SmartCrudPageProps<T>) {
+  const queryClient = useQueryClient();
+  const internalGridRef = useRef<GridHandle | null>(null);
+  const effectiveGridRef = gridRef ?? internalGridRef;
+
+  const resolvedBaseResource = useMemo(() => resolveCrudResource(resource), [resource]);
+
+  const hasManualFields =
+    !resource.fieldContract &&
+    Array.isArray(resource.fields) &&
+    resource.fields.length > 0;
+
+  const { fields, isLoading, error, supportedOperations } = useResolvedResourceFields({
+    apiUrl: resolvedBaseResource.apiUrl,
+    manualFields: hasManualFields ? (resource.fields as Field[]) : undefined,
+    overrides: hasManualFields ? undefined : fieldOverrides,
+    fieldContract: resource.fieldContract,
+  });
+
+  // Dev hint: log a defineResource() snippet once per resource URL when fields
+  // were auto-inferred. No-op in production.
+  const hintFiredRef = useRef(false);
+  useEffect(() => {
+    if (
+      !resource.fieldContract &&
+      !hasManualFields &&
+      !isLoading &&
+      !error &&
+      fields.length > 0 &&
+      !hintFiredRef.current
+    ) {
+      hintFiredRef.current = true;
+      logDevHint(resource.apiUrl, fields, supportedOperations);
+    }
+  }, [
+    resource.fieldContract,
+    hasManualFields,
+    isLoading,
+    error,
+    fields,
+    resource.apiUrl,
+    supportedOperations,
+  ]);
+
+  // Routing
+  const routingState = useRouting(resource.routing);
+
+  // Operation + form data state (unified)
+  const {
+    activeOperation,
+    formData,
+    handleFormDataChange,
+    startCreate,
+    startEdit,
+    resetOperation,
+  } = useSmartCrudOperation(undefined, routingState);
+
+  // Roles
+  const roles = useSmartCrudRoles();
+  const stableRoles = useMemo(() => roles ?? [], [roles]);
+
+  // Declarative rules pipeline
+  const { gridFields, processedFields, computedValues } = useSmartCrudFields(
+    fields,
+    activeOperation,
+    formData,
+    stableRoles,
+  );
+
+  // Real-time Mercure subscription
+  useMercureSubscription(
+    resource.apiUrl,
+    () => {
+      effectiveGridRef.current?.refresh();
+    },
+    resolvedBaseResource.mercure !== false,
+  );
+
+  // Normalize apiUrl — ensure it always starts with '/'
+  const normalizedApiUrl = resolvedBaseResource.apiUrl.startsWith('/')
+    ? resolvedBaseResource.apiUrl
+    : `/${resolvedBaseResource.apiUrl}`;
+
+  const resolvedResource = useMemo(
+    () =>
+      ({
+        ...resolvedBaseResource,
+        ...(!hasManualFields ? { fields: gridFields } : {}),
+        apiUrl: normalizedApiUrl,
+        fields: hasManualFields ? (resource.fields as Field[]) : gridFields,
+        formFields: processedFields,
+        _supportedOperations: supportedOperations,
+      }) as ResourceConfig<T>,
+    [
+      fields,
+      gridFields,
+      hasManualFields,
+      normalizedApiUrl,
+      processedFields,
+      resolvedBaseResource,
+      resource.fields,
+      supportedOperations,
+    ],
+  );
+
+  // --- Render ---
+
+  if (!hasManualFields && isLoading) {
+    return <CrudSkeleton />;
+  }
+
+  if (!hasManualFields && error) {
+    return (
+      <CrudError
+        message={formatRuntimeErrorMessage(error)}
+        onRetry={() => queryClient.invalidateQueries()}
+      />
+    );
+  }
+
+  return (
+    <CrudPage
+      resource={resolvedResource}
+      onFormDataChange={handleFormDataChange}
+      computedValues={computedValues}
+      initialRecordId={routingState.initialRecordId}
+      initialIsNew={routingState.initialIsNew}
+      initialFilters={routingState.initialFilters}
+      onFiltersChange={routingState.syncFilters as (filters: RoutingFilters) => void}
+      formRef={formRef}
+      onSelectionChanged={onSelectionChanged}
+      editDisabled={editDisabled}
+      deleteDisabled={deleteDisabled}
+      gridRef={effectiveGridRef}
+      onOperationChange={(operation) => {
+        if (operation === 'create') {
+          startCreate();
+          return;
+        }
+        if (operation === 'edit') {
+          startEdit();
+          return;
+        }
+        resetOperation();
+      }}
+    />
+  );
+}

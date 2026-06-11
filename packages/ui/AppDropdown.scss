@@ -1,0 +1,199 @@
+// ── AppDropdown — generic Fluent select (toolbar + form contexts) ─────────────
+
+.nb-dropdown {
+  min-width: 0;
+  position: relative;
+}
+
+.nb-dropdown--form {
+  width: 100%;
+}
+
+.nb-dropdown--toolbar {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 1 auto;
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+}
+
+.nb-dropdown__toolbar-label {
+  align-items: center;
+  color: var(--text-secondary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-1);
+  white-space: nowrap;
+
+  i {
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+}
+
+.nb-dropdown__trigger {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: var(--space-2);
+  justify-content: space-between;
+  min-width: 0;
+  outline: none;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    border-color: var(--text-tertiary);
+  }
+
+  &:focus-visible,
+  .nb-dropdown--open & {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.nb-dropdown--form .nb-dropdown__trigger {
+  font-size: var(--font-size-md);
+  min-height: var(--control-height-form);
+  padding: 0 var(--space-3);
+}
+
+.nb-dropdown--toolbar .nb-dropdown__trigger {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  max-width: min(280px, 42vw);
+  min-height: var(--control-height);
+  min-width: 180px;
+  padding: 0 var(--space-2);
+}
+
+.nb-dropdown--compact {
+  display: inline-flex;
+  width: auto;
+}
+
+.nb-dropdown--compact .nb-dropdown__trigger {
+  font-size: var(--font-size-xs);
+  min-height: var(--control-height);
+  min-width: 56px;
+  padding: 0 var(--space-2);
+  width: auto;
+}
+
+.nb-dropdown__menu--compact {
+  max-width: min(280px, 80vw);
+  min-width: 72px;
+}
+
+.nb-dropdown__menu--compact .nb-dropdown__option {
+  font-size: var(--font-size-xs);
+  min-height: 30px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.nb-dropdown__value {
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nb-dropdown__caret {
+  flex: 0 0 auto;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.nb-dropdown__menu {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  max-height: 280px;
+  max-width: min(360px, 80vw);
+  min-width: 0;
+  overflow: auto;
+  padding: var(--space-1);
+  /* position/top/left/z-index come from inline styles set by the portal */
+}
+
+.nb-dropdown__option {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: var(--control-bg-hover);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+.nb-dropdown__option-content {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.nb-dropdown__option-icon {
+  color: var(--text-tertiary);
+  flex: 0 0 28px;
+  font-family: var(--font-family-sans);
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  text-align: center;
+}
+
+.nb-dropdown__option--active .nb-dropdown__option-icon {
+  color: var(--accent-color);
+}
+
+@media (max-width: 720px) {
+  .nb-dropdown--toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nb-dropdown--toolbar .nb-dropdown__trigger {
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+}

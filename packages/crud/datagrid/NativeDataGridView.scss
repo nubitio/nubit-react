@@ -1,0 +1,1902 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Native DataGrid — enterprise-grade table styling.
+//
+// Design reference: Fluent UI DataGrid / DevExtreme grid density.
+// Row height: 34px normal / 28px compact / 40px comfortable (via --row-height).
+// All colours reference design tokens — no hardcoded hex.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Layout shell ───────────────────────────────────────────────────────────────
+
+// CrudPage renders <div id="wrapper"> as its root — it has no class and no
+// existing CSS. We must make it a flex column that fills main so that all
+// flex children below (view.datagrid-list → nb-datagrid → table-wrap)
+// can use flex-grow / height:100% correctly.
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.view.datagrid-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto; // grow to fill #wrapper instead of relying on height:100%
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-datagrid {
+  --nb-datagrid-header-height: var(--grid-header-height, 34px);
+
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.view-wrapper.view-wrapper-datagrid-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: var(--content-padding);
+  padding-top: var(--content-padding);
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────────
+// Matches AppToolbar visual weight — same surface, border, shadow tier.
+
+.nb-datagrid__toolbar {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  margin-bottom: var(--toolbar-margin-bottom);
+  min-height: var(--toolbar-height);
+  padding: 4px 10px; // 4px vertical: toolbar(36) − 4−4 = 28px inner = --control-height
+}
+
+.nb-datagrid__toolbar .grid-header {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.nb-datagrid__toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.nb-datagrid__actions-menu {
+  position: relative;
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.nb-datagrid__actions-popover {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  min-width: 190px;
+  padding: var(--space-1);
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  z-index: 20;
+}
+
+.nb-datagrid__actions-group:has(.nb-datagrid__actions-group-label)
+  + .nb-datagrid__actions-group:has(.nb-datagrid__actions-group-label) {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.nb-datagrid__actions-group-label {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  padding: var(--space-1) var(--space-2);
+  text-transform: uppercase;
+}
+
+.nb-datagrid__actions-item {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: 0 10px;
+  text-align: left;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: var(--control-bg-hover);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.nb-datagrid__actions-item--danger {
+  color: var(--status-danger-text, var(--error-color));
+
+  &:hover:not(:disabled) {
+    background: var(--status-danger-bg, color-mix(in srgb, var(--error-color) 8%, transparent));
+  }
+}
+
+.nb-datagrid__actions-danger-group {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.nb-datagrid__toolbar-icon-action + .nb-icon-button[aria-label] {
+  margin-left: var(--space-1);
+}
+
+// ── Column preset selector (Fluent segmented control) ───────────────────────────
+// Toolbar-height control that matches secondary buttons and DevExtreme view modes.
+
+.nb-datagrid__preset-control {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 1 auto;
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+  min-width: 0;
+}
+
+.nb-datagrid__preset-label {
+  align-items: center;
+  color: var(--text-secondary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-1);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  i {
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+}
+
+.nb-datagrid__preset-segments {
+  background: var(--surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  flex: 0 1 auto;
+  gap: 1px;
+  max-width: 100%;
+  min-height: var(--control-height);
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+}
+
+.nb-datagrid__preset-segment {
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-md) - 2px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  min-height: calc(var(--control-height) - 4px);
+  padding: 0 var(--space-2);
+  transition:
+    background var(--transition-base),
+    box-shadow var(--transition-base),
+    color var(--transition-base);
+
+  &:hover:not(.nb-datagrid__preset-segment--active) {
+    background: var(--control-bg-hover);
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+    outline: none;
+    z-index: 1;
+  }
+
+  &--active {
+    background: var(--surface-1);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+@media (max-width: 720px) {
+  .nb-datagrid__preset-control {
+    align-items: stretch;
+    flex-direction: column;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nb-datagrid__preset-segments {
+    width: 100%;
+  }
+}
+
+// ── Table wrapper ──────────────────────────────────────────────────────────────
+// Rounded container that clips the table's first/last rows to the border radius.
+
+.nb-datagrid__table-wrap {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--shadow-color, #0f172a) 8%, transparent);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative; // anchors the empty-state overlay
+}
+
+// Single table that fills the wrap and acts as a flex column:
+// thead + tfoot are fixed (flex: 0), tbody scrolls (flex: 1).
+.nb-datagrid__table {
+  border-collapse: separate;
+  border-spacing: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  table-layout: fixed;
+  width: 100%;
+}
+
+// thead/tfoot are block-level scroll containers synced to tbody.scrollLeft so
+// column headers stay aligned while the body scrolls horizontally.
+.nb-datagrid__table > thead {
+  display: block;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.nb-datagrid__table > thead > tr,
+.nb-datagrid__table > tbody > tr,
+.nb-datagrid__table > tfoot > tr {
+  display: table;
+  table-layout: fixed;
+  width: var(--nb-datagrid-layout-width, 100%);
+}
+
+// tbody scrolls vertically; horizontal scroll syncs with the footer bar.
+.nb-datagrid__table > tbody {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+
+  // Keep horizontal scrolling functional but hide the in-body horizontal bar.
+  &::-webkit-scrollbar:horizontal {
+    height: 0;
+  }
+}
+
+.nb-datagrid__detail-col {
+  width: 36px;
+}
+
+.nb-datagrid__checkbox-col {
+  width: 36px;
+}
+
+.nb-datagrid__actions-col {
+  width: 44px;
+}
+
+// tfoot is always visible at the bottom of the wrap (outside the vertical scroll).
+.nb-datagrid__table > tfoot {
+  display: block;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+// Shared horizontal scrollbar below the grid body (DevExtreme-style).
+.nb-datagrid__hscroll {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.nb-datagrid__hscroll-inner {
+  height: 1px;
+  pointer-events: none;
+}
+
+.nb-datagrid__hscroll--hidden {
+  display: none;
+}
+
+// ── Cells ──────────────────────────────────────────────────────────────────────
+
+.nb-datagrid__table th,
+.nb-datagrid__table td {
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: hidden;
+  padding: var(--grid-cell-padding-y, 0) var(--grid-cell-padding-x, var(--space-3));
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.nb-datagrid__table td {
+  height: var(--row-height); // explicit height (not min-height) enforces row density
+  line-height: 1; // prevents line-height from fighting with cell height
+}
+
+.nb-datagrid__table td .nb-badge {
+  font-size: var(--font-size-xxs);
+  line-height: 1;
+  padding: 0.2em 0.5em;
+}
+
+// ── Column headers ─────────────────────────────────────────────────────────────
+// Neutral surface — do NOT use accent tint here; blue headers in Fluent are
+// reserved for selected-column indicators, not the baseline header row.
+
+.nb-datagrid__table > thead > tr > th {
+  background: var(--grid-header-bg, var(--surface-0));
+  border-bottom: 1px solid var(--border-subtle); // stronger than cell borders
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  height: var(--nb-datagrid-header-height);
+  letter-spacing: 0.02em;
+  position: sticky;
+  text-align: left;
+  text-transform: uppercase;
+  top: 0;
+  z-index: 3;
+}
+
+.nb-datagrid__header-cell--sorted,
+.nb-datagrid__header-cell--filtered {
+  color: var(--text-primary) !important;
+}
+
+.nb-datagrid__header-cell--sorted {
+  box-shadow: inset 0 -1px 0 var(--border-color) !important;
+}
+
+.nb-datagrid__header-cell--filtered::after {
+  background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 28%, transparent);
+  border-radius: 999px;
+  bottom: 6px;
+  content: '';
+  height: 5px;
+  position: absolute;
+  right: 9px;
+  width: 5px;
+}
+
+.nb-datagrid__table > thead > tr:first-child > th {
+  box-shadow: inset 0 -1px 0 var(--border-color);
+}
+
+.nb-datagrid__col-resize {
+  background: transparent;
+  bottom: 0;
+  cursor: col-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: background var(--transition-base);
+  width: 4px;
+  z-index: 2;
+
+  &:hover {
+    background: var(--accent-color);
+  }
+
+  &::before {
+    background: color-mix(in srgb, var(--border-color) 65%, transparent);
+    bottom: 7px;
+    content: '';
+    opacity: 0;
+    position: absolute;
+    right: 1px;
+    top: 7px;
+    transition: opacity var(--transition-fast);
+    width: 1px;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+.nb-datagrid__table > thead > tr:first-child > th {
+  // top rounding clips to container border radius
+  &:first-child {
+    border-top-left-radius: calc(var(--radius-lg) - 1px);
+  }
+  &:last-child {
+    border-top-right-radius: calc(var(--radius-lg) - 1px);
+  }
+}
+
+// ── Data rows ──────────────────────────────────────────────────────────────────
+
+.nb-datagrid__row {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  outline: 0;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  .nb-datagrid--zebra &:nth-child(even) td {
+    // Use the explicit zebra token — ~3.5% darker than white, clearly visible at 13px.
+    // The old inline color-mix formula produced ~#fbfbfc which was imperceptible.
+    background: var(--grid-row-alt-bg);
+  }
+
+  &:hover td {
+    background: var(--grid-row-hover-bg, var(--surface-2));
+  }
+
+  &:focus-visible td {
+    background: color-mix(in srgb, var(--accent-color) 7%, var(--surface-1));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 34%, transparent);
+  }
+
+  &.nb-datagrid__row--selected td {
+    background: var(--grid-row-selected-bg, var(--surface-2));
+  }
+
+  &.nb-datagrid__row--selected td:first-child {
+    box-shadow: inset 2px 0 0 var(--grid-row-selected-border, var(--accent-color));
+  }
+
+  &.nb-datagrid__row--selected .nb-datagrid__actions-cell,
+  &.nb-datagrid__row--selected .nb-datagrid__detail-cell {
+    background: var(--grid-row-selected-bg, var(--surface-2));
+  }
+
+  &.nb-datagrid__row--expanded td {
+    background: var(--surface-2);
+    border-bottom-color: var(--border-color);
+  }
+
+  // Last row — remove bottom border so it doesn't double up with the container.
+  &:last-child td {
+    border-bottom: 0;
+  }
+}
+
+// ── Sort controls ──────────────────────────────────────────────────────────────
+
+.nb-datagrid__sort-button,
+.nb-datagrid__column-label {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  font-size: inherit;
+  gap: var(--space-1);
+  overflow: hidden;
+  padding: 0;
+  text-align: inherit;
+  width: 100%;
+}
+
+.nb-datagrid__sort-button {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  min-height: 22px;
+  transition: color var(--transition-fast);
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    color: var(--accent-color);
+  }
+}
+
+.nb-datagrid__column-label {
+  cursor: default;
+}
+
+.nb-datagrid__sort-icon {
+  color: var(--accent-color);
+  flex: 0 0 auto;
+  font-size: 10px;
+  opacity: 1;
+}
+
+.nb-datagrid__sort-hint {
+  flex: 0 0 auto;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+
+  .nb-datagrid__sort-button:hover & {
+    opacity: 0.45;
+  }
+}
+
+// ── Filter row ─────────────────────────────────────────────────────────────────
+
+.nb-datagrid__filter-row > td {
+  background: var(--grid-filter-bg, color-mix(in srgb, var(--surface-0) 70%, var(--surface-1)));
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: visible;
+  padding: 0;
+  position: sticky;
+  top: var(--nb-datagrid-header-height);
+  z-index: 2;
+}
+
+.nb-datagrid__filter-row > .nb-datagrid__filter-cell--active {
+  background: color-mix(in srgb, var(--accent-color) 5%, var(--surface-1));
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent-color) 65%, transparent);
+}
+
+.nb-datagrid__filter-row {
+  .nb-form__lookup {
+    width: 100%;
+
+    .nb-datagrid__filter-select {
+      padding-right: var(--control-height, 30px);
+      transition: padding-right var(--transition-fast);
+    }
+
+    &.has-value .nb-datagrid__filter-select {
+      padding-right: calc(
+        var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1)
+      );
+    }
+  }
+}
+
+.nb-datagrid__filter-wrap {
+  align-items: center;
+  display: flex;
+  position: relative;
+}
+
+.nb-datagrid__filter-wrap--between {
+  align-items: stretch;
+}
+
+.nb-datagrid__filter-icon {
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+  font-size: var(--font-size-xxs);
+  left: 6px;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.nb-datagrid__filter-input {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  height: var(--grid-filter-height, 32px);
+  min-width: 60px;
+  outline: none;
+  padding: 4px 22px 4px 6px;
+  width: 100%;
+
+  &:focus {
+    background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+    box-shadow: inset 0 -2px 0 var(--accent-color);
+    outline: none;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.nb-datagrid__filter-date {
+  .nb-date-picker__trigger {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: var(--font-size-xs);
+    height: var(--grid-filter-height, 32px);
+    min-height: var(--grid-filter-height, 32px);
+    padding: 4px 22px 4px 6px;
+
+    &:hover:not(:disabled) {
+      background: transparent;
+      border-color: transparent;
+    }
+
+    &:focus-visible,
+    &[aria-expanded='true'] {
+      background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+      border-color: transparent;
+      box-shadow: inset 0 -2px 0 var(--accent-color);
+    }
+  }
+
+  .nb-date-picker__icon {
+    font-size: var(--font-size-xs);
+  }
+}
+
+.nb-datagrid__filter-range {
+  min-width: 0;
+  width: 100%;
+
+  .nb-date-range-picker__trigger {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: var(--font-size-xs);
+    height: var(--grid-filter-height, 32px);
+    min-height: var(--grid-filter-height, 32px);
+    padding: 4px 22px 4px 42px;
+
+    &:hover:not(.nb-date-range-picker__trigger--disabled) {
+      background: transparent;
+    }
+
+    &:focus-within:not(.nb-date-range-picker__trigger--disabled):not(
+        .nb-date-range-picker__trigger--readonly
+      ),
+    &.nb-date-range-picker__trigger--open {
+      background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+      border-color: transparent;
+      box-shadow: inset 0 -2px 0 var(--accent-color);
+    }
+  }
+
+  .nb-date-range-picker__input {
+    font-size: var(--font-size-xs);
+    min-width: 0;
+  }
+
+  .nb-date-range-picker__sep {
+    font-size: 10px;
+  }
+
+  .nb-date-range-picker__icons {
+    margin-right: -18px;
+  }
+
+  .nb-date-range-picker__calendar-btn {
+    font-size: var(--font-size-xs);
+  }
+}
+
+.nb-datagrid__filter-operator {
+  left: 5px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  z-index: 2;
+
+  &.nb-dropdown .nb-dropdown__trigger {
+    appearance: none;
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
+    border-radius: 999px;
+    box-shadow: none;
+    color: var(--accent-color);
+    font-size: 10px;
+    height: 18px;
+    line-height: 1;
+    min-height: 18px;
+    min-width: 30px;
+    padding: 0 3px;
+    text-align: center;
+    width: 30px;
+  }
+
+  &.nb-dropdown .nb-dropdown__caret {
+    display: none;
+  }
+}
+
+.nb-datagrid__filter-operator + .nb-datagrid__filter-input {
+  padding-left: 42px;
+}
+
+.nb-datagrid__filter-operator + .nb-datagrid__filter-date .nb-date-picker__trigger {
+  padding-left: 42px;
+}
+
+.nb-datagrid__filter-operator + .nb-datagrid__filter-range .nb-date-range-picker__trigger {
+  padding-left: 42px;
+}
+
+.nb-datagrid__filter-between-inputs {
+  display: grid;
+  gap: 2px;
+  grid-template-rows: repeat(2, minmax(24px, auto));
+  padding-left: 42px;
+  width: 100%;
+
+  .nb-datagrid__filter-input {
+    min-width: 0;
+  }
+
+  .nb-datagrid__filter-date .nb-date-picker__trigger {
+    min-width: 0;
+  }
+}
+
+.nb-datagrid__filter-operator + .nb-datagrid__filter-between-inputs {
+  padding-left: 42px;
+}
+
+.nb-datagrid__filter-select {
+  width: 100%;
+
+  // AppDropdown-based filter (enum / select fields)
+  &.nb-dropdown .nb-dropdown__trigger {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    height: var(--grid-filter-height, 32px);
+    min-height: var(--grid-filter-height, 32px);
+    outline: none;
+    padding: 4px var(--space-2);
+    width: 100%;
+  }
+
+  &.nb-dropdown--open .nb-dropdown__trigger,
+  &.nb-dropdown .nb-dropdown__trigger:focus-visible {
+    background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+    border-color: transparent;
+    box-shadow: inset 0 -2px 0 var(--accent-color);
+    outline: none;
+  }
+
+  // Entity lookup input (NativeEntitySelect used as filter cell)
+  &:is(input) {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    height: var(--grid-filter-height, 32px);
+    outline: none;
+    padding: 4px var(--space-4) 4px var(--space-2);
+
+    &:focus-visible {
+      background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+      box-shadow: inset 0 -2px 0 var(--accent-color);
+      outline: none;
+    }
+  }
+}
+
+.nb-datagrid__filter-operator:focus {
+  border-color: var(--accent-color);
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 1px;
+}
+
+.nb-datagrid__filter-clear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 10px;
+  height: 16px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+  visibility: hidden;
+  width: 16px;
+
+  &.is-active {
+    visibility: visible;
+
+    &:focus-visible {
+      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      color: var(--accent-color);
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: 1px;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--error-color) 12%, transparent);
+      color: var(--error-color);
+    }
+  }
+}
+
+.nb-datagrid__error-row td {
+  background: color-mix(in srgb, var(--error-color, #d9534f) 8%, var(--surface-1));
+  border-bottom-color: color-mix(in srgb, var(--error-color, #d9534f) 24%, var(--border-subtle));
+  color: var(--error-color, #d9534f);
+  height: auto;
+  padding: 0;
+  white-space: normal;
+}
+
+.nb-datagrid__error-message {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: var(--space-2) var(--space-3);
+
+  > span {
+    flex: 1 1 auto;
+  }
+}
+
+.nb-datagrid__error-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 22px;
+  justify-content: center;
+  padding: 0;
+  width: 22px;
+
+  &:hover {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
+}
+
+// ── Select / expand cells ──────────────────────────────────────────────────────
+
+.nb-datagrid__select-cell,
+.nb-datagrid__detail-cell {
+  text-align: center;
+  width: 36px;
+}
+
+.nb-datagrid__detail-cell {
+  background: var(--surface-1);
+  box-shadow: 1px 0 0 var(--border-subtle);
+  left: 0;
+  min-width: 36px;
+  position: sticky;
+  z-index: 2;
+}
+
+.nb-datagrid__table > thead > tr > .nb-datagrid__detail-cell {
+  background: var(--grid-header-bg, var(--surface-0));
+  z-index: 5;
+}
+
+.nb-datagrid__filter-row > .nb-datagrid__detail-cell {
+  background: var(--grid-filter-bg, color-mix(in srgb, var(--surface-0) 70%, var(--surface-1)));
+  z-index: 4;
+}
+
+.nb-datagrid__summary-footer .nb-datagrid__detail-cell {
+  z-index: 4;
+}
+
+.nb-datagrid__table td.nb-datagrid__detail-cell,
+.nb-datagrid__table td.nb-datagrid__select-cell {
+  text-overflow: clip;
+}
+
+.nb-datagrid__expand-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
+  width: 24px;
+}
+
+.nb-datagrid__expand-button:hover,
+.nb-datagrid__expand-button.is-expanded {
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+  color: var(--accent-color);
+}
+
+.nb-datagrid__expand-button.is-expanded {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+
+.nb-datagrid__select-cell input {
+  accent-color: var(--accent-color);
+}
+
+// ── Detail / expanded row ──────────────────────────────────────────────────────
+
+.nb-datagrid__detail-row td {
+  background: var(--surface-0);
+  border-bottom-color: var(--border-subtle);
+  padding: var(--space-3) var(--space-4);
+}
+
+.nb-datagrid__detail-content {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.nb-datagrid__detail-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.nb-datagrid__detail-table th,
+.nb-datagrid__detail-table td {
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: hidden;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.nb-datagrid__detail-table th {
+  background: var(--surface-0);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.nb-datagrid__detail-table th:first-child {
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+}
+
+.nb-datagrid__detail-table th:last-child {
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
+}
+
+.nb-datagrid__detail-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.nb-datagrid__detail-table td {
+  font-size: var(--font-size-sm);
+}
+
+.nb-datagrid__detail-table td:first-child {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+// ── Badges in grid ─────────────────────────────────────────────────────────────
+// Status badges in grid cells use the base .nb-badge letter-spacing (0.05em).
+// No override needed — the base component is already correct for grid usage.
+
+.nb-datagrid .nb-badge {
+  border-width: 1px;
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  padding: 0.2em 0.5em;
+}
+
+html[data-density='compact'] .nb-datagrid .nb-badge {
+  font-size: 9px;
+  min-height: 14px;
+  padding: 0 5px;
+}
+
+// ── Row actions ────────────────────────────────────────────────────────────────
+// Always visible and sticky on the right so actions remain reachable in wide
+// tables with horizontal scrolling.
+
+.nb-datagrid__actions-cell {
+  background: var(--surface-1);
+  box-shadow: -1px 0 0 var(--border-subtle);
+  min-width: 44px;
+  position: sticky;
+  right: 0;
+  text-align: center;
+  width: 44px;
+  z-index: 2;
+}
+
+.nb-datagrid__table > thead > tr > .nb-datagrid__actions-cell {
+  background: var(--grid-header-bg, var(--surface-0));
+  z-index: 5;
+}
+
+.nb-datagrid__filter-row > .nb-datagrid__actions-cell {
+  background: var(--grid-filter-bg, color-mix(in srgb, var(--surface-0) 70%, var(--surface-1)));
+  z-index: 4;
+}
+
+.nb-datagrid__summary-footer .nb-datagrid__actions-cell {
+  z-index: 4;
+}
+
+.nb-datagrid__row-actions {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  opacity: 0.66;
+  transition: opacity var(--transition-fast);
+}
+
+.nb-datagrid__row:hover .nb-datagrid__row-actions,
+.nb-datagrid__row:focus-visible .nb-datagrid__row-actions,
+.nb-datagrid__row--selected .nb-datagrid__row-actions {
+  opacity: 1;
+}
+
+.nb-datagrid__row-actions-menu {
+  position: relative;
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.nb-datagrid__row-actions-popover {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  min-width: 190px;
+  padding: var(--space-1);
+  z-index: var(--z-popover); // was 9999 — must respect the z-index scale
+}
+
+// ── Empty / loading states ─────────────────────────────────────────────────────
+// Empty state is rendered as a sibling of <table> inside table-wrap (position:
+// relative). This lets it fill the full available height without fighting
+// table layout constraints.
+
+.nb-datagrid__empty-td {
+  padding: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.nb-datagrid__empty {
+  align-items: center;
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  .nb-empty-state {
+    padding-block: var(--space-5);
+    pointer-events: auto;
+  }
+}
+
+.nb-datagrid__loading {
+  color: var(--text-tertiary);
+  padding: var(--space-5);
+  text-align: center;
+}
+
+// ── Skeleton loading rows ──────────────────────────────────────────────────────
+
+.nb-datagrid__skeleton-row td {
+  padding: var(--space-2) var(--space-3);
+}
+
+.nb-datagrid__skeleton-cell {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border-subtle) 80%, transparent) 0%,
+    color-mix(in srgb, var(--surface-2) 90%, var(--border-subtle)) 50%,
+    color-mix(in srgb, var(--border-subtle) 80%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  height: 10px;
+  max-width: 80%;
+  width: 100%;
+}
+
+// Vary widths per column position to simulate real content lengths
+.nb-datagrid__skeleton-row td:nth-child(3n+1) .nb-datagrid__skeleton-cell { max-width: 75%; }
+.nb-datagrid__skeleton-row td:nth-child(3n+2) .nb-datagrid__skeleton-cell { max-width: 55%; }
+.nb-datagrid__skeleton-row td:nth-child(3n)   .nb-datagrid__skeleton-cell { max-width: 90%; }
+// Stagger the animation so rows shimmer at slightly different phases
+.nb-datagrid__skeleton-row:nth-child(2) .nb-datagrid__skeleton-cell { animation-delay: -0.3s; }
+.nb-datagrid__skeleton-row:nth-child(3) .nb-datagrid__skeleton-cell { animation-delay: -0.6s; }
+.nb-datagrid__skeleton-row:nth-child(4) .nb-datagrid__skeleton-cell { animation-delay: -0.9s; }
+.nb-datagrid__skeleton-row:nth-child(5) .nb-datagrid__skeleton-cell { animation-delay: -0.4s; }
+.nb-datagrid__skeleton-row:nth-child(6) .nb-datagrid__skeleton-cell { animation-delay: -1.1s; }
+.nb-datagrid__skeleton-row:nth-child(7) .nb-datagrid__skeleton-cell { animation-delay: -0.7s; }
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: 100% 0;
+    opacity: 0.72;
+  }
+  100% {
+    background-position: -100% 0;
+    opacity: 1;
+  }
+}
+
+// ── Pager ──────────────────────────────────────────────────────────────────────
+
+.nb-datagrid__pager {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.nb-datagrid__pager-status {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.nb-datagrid__pager-info {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.nb-datagrid__pager-selected,
+.nb-datagrid__pager-page-status {
+  align-items: center;
+  border-left: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  min-height: 16px;
+  padding-left: var(--space-2);
+}
+
+.nb-datagrid__pager-selected {
+  color: var(--accent-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.nb-datagrid__pager-nav {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+}
+
+.nb-datagrid__pager-btn {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  height: 26px;
+  justify-content: center;
+  min-width: 26px;
+  padding: 0 var(--space-1);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+    color: var(--accent-color);
+  }
+
+  &.is-current {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--accent-color) 32%, transparent);
+    color: var(--on-accent-color);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  &:disabled {
+    color: var(--text-disabled);
+    cursor: default;
+    opacity: 0.45;
+  }
+}
+
+.nb-datagrid__pager-ellipsis {
+  align-items: center;
+  color: var(--text-tertiary);
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  height: 26px;
+  justify-content: center;
+  width: 20px;
+}
+
+// ── Summary footer ─────────────────────────────────────────────────────────────
+
+.nb-datagrid__summary-footer td {
+  background: var(--surface-0);
+  border-bottom: 0;
+  border-top: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  height: 36px;
+}
+
+.nb-datagrid__summary-footer tr {
+  box-shadow: 0 -1px 0 var(--border-color);
+}
+
+.nb-datagrid__summary-footer tr,
+.nb-datagrid__summary-footer td.nb-datagrid__actions-cell,
+.nb-datagrid__summary-footer td.nb-datagrid__detail-cell,
+.nb-datagrid__summary-footer td.nb-datagrid__select-cell {
+  background: var(--surface-0);
+}
+
+.nb-datagrid__summary-cell {
+  align-items: baseline;
+  display: inline-flex;
+  gap: var(--space-2);
+  min-width: 100%;
+}
+
+.nb-datagrid__summary-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.nb-datagrid__summary-value {
+  white-space: nowrap;
+}
+
+// ── Page size selector ─────────────────────────────────────────────────────────
+
+.nb-datagrid__pager-size {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.nb-datagrid__pager-size-label {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+// ── Loading overlay ────────────────────────────────────────────────────────────
+
+.nb-datagrid__loading-overlay {
+  align-items: center;
+  background: color-mix(in srgb, var(--overlay-bg-subtle) 60%, transparent);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  z-index: 3;
+}
+
+.nb-datagrid__loading-card {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: inline-flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.nb-datagrid__loading-card::before {
+  animation: nb-datagrid-spinner 0.8s linear infinite;
+  border: 2px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  content: '';
+  height: 14px;
+  width: 14px;
+}
+
+@keyframes nb-datagrid-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Mobile pager: keep a single compact row — prev/next + record range only.
+// Numbered page buttons and the page-size selector are desktop affordances.
+// (Placed after the pager base styles so the cascade favours these overrides.)
+@media (max-width: 767.98px) {
+  .nb-datagrid__pager {
+    flex-wrap: nowrap;
+  }
+
+  .nb-datagrid__pager-btn--page,
+  .nb-datagrid__pager-ellipsis,
+  .nb-datagrid__pager-selected,
+  .nb-datagrid__pager-size {
+    display: none;
+  }
+
+  .nb-datagrid__pager-btn {
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .nb-datagrid__pager-status {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+
+// ── Mobile card list (rendered instead of the table below 768px) ──────────────
+
+.nb-datagrid__cards {
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.nb-datagrid__card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  flex: 0 0 auto;
+  overflow: hidden;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.nb-datagrid__card--selected {
+  background: var(--grid-row-selected-bg, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent-color) 45%, var(--border-subtle));
+  box-shadow: inset 2px 0 0 var(--grid-row-selected-border, var(--accent-color));
+}
+
+.nb-datagrid__card--skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+
+  .nb-datagrid__skeleton-cell {
+    max-width: none;
+  }
+}
+
+.nb-datagrid__card-body {
+  align-items: flex-start;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-3);
+  outline: 0;
+  padding: var(--space-3);
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 34%, transparent);
+  }
+}
+
+.nb-datagrid__card-check {
+  flex: 0 0 auto;
+  height: 18px;
+  margin-top: 1px;
+  width: 18px;
+}
+
+.nb-datagrid__card-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nb-datagrid__card-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.nb-datagrid__card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.nb-datagrid__card-meta-row {
+  display: flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-3);
+  justify-content: space-between;
+
+  dt {
+    color: var(--text-tertiary);
+    flex: 0 0 auto;
+    font-weight: var(--font-weight-medium);
+  }
+
+  dd {
+    color: var(--text-secondary);
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+}
+
+.nb-datagrid__card-side {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.nb-datagrid__card-detail {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-2) var(--space-3);
+}
+
+// Master-detail rows render as stacked label/value blocks on mobile — a wide
+// nested table inside a card is unreadable and awkward to scroll.
+.nb-datagrid__detail-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nb-datagrid__detail-card {
+  background: var(--surface-0, var(--surface-2));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 6px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.nb-datagrid__detail-card-row {
+  display: flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.nb-datagrid__detail-card-label {
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+  font-weight: var(--font-weight-medium);
+}
+
+.nb-datagrid__detail-card-value {
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.nb-datagrid__card-more {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--accent-color);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding: var(--space-1) 0;
+}
+
+.nb-datagrid__card-summary {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.nb-datagrid__card-summary-item {
+  align-items: baseline;
+  display: flex;
+  gap: var(--space-2);
+}
+
+// ── Mobile toolbar additions ───────────────────────────────────────────────────
+
+.nb-datagrid__mobile-filter {
+  display: inline-flex;
+  position: relative;
+}
+
+.nb-datagrid__mobile-filter-badge {
+  align-items: center;
+  background: var(--accent-color);
+  border-radius: 999px;
+  color: var(--text-on-accent, #fff);
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  height: 14px;
+  justify-content: center;
+  min-width: 14px;
+  padding: 0 3px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: -2px;
+}
+
+@media (max-width: 767.98px) {
+  .nb-datagrid__toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+// ── Bottom sheets (mobile filter sheet + row actions) ─────────────────────────
+
+.nb-datagrid__sheet-root {
+  inset: 0;
+  position: fixed;
+  z-index: var(--z-popover);
+}
+
+.nb-datagrid__sheet-scrim {
+  background: color-mix(in srgb, #000 40%, transparent);
+  border: 0;
+  cursor: default;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+}
+
+%nb-datagrid-sheet-panel {
+  animation: nb-datagrid-sheet-in 0.18s ease-out;
+  border-bottom: 0;
+  border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+  bottom: 0;
+  left: 0;
+  max-height: 80dvh;
+  position: absolute;
+  right: 0;
+}
+
+.nb-datagrid__row-actions-popover--sheet {
+  @extend %nb-datagrid-sheet-panel;
+
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+
+  .nb-datagrid__actions-item {
+    min-height: 44px;
+  }
+}
+
+.nb-datagrid__sheet {
+  @extend %nb-datagrid-sheet-panel;
+
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+}
+
+.nb-datagrid__sheet-header {
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+}
+
+.nb-datagrid__sheet-title {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.nb-datagrid__sheet-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.nb-datagrid__sheet-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  // FilterCell is styled for borderless table cells — give it a bordered,
+  // touch-sized container inside the sheet.
+  .nb-datagrid__filter-wrap,
+  .nb-datagrid__filter-select {
+    background: var(--surface-1);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md, 6px);
+    width: 100%;
+  }
+
+  .nb-datagrid__filter-input,
+  .nb-datagrid__filter-date .nb-date-picker__trigger {
+    font-size: var(--font-size-sm);
+    height: 38px;
+    min-height: 38px;
+  }
+}
+
+.nb-datagrid__sheet-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.nb-datagrid__sheet-sort {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+
+  > :first-child {
+    flex: 1 1 auto;
+  }
+}
+
+.nb-datagrid__sheet-footer {
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+}
+
+@keyframes nb-datagrid-sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0.6;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// ── Mobile quick search bar ────────────────────────────────────────────────────
+
+.nb-datagrid__quick-search {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-3);
+}
+
+.nb-datagrid__quick-search-icon {
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+}
+
+.nb-datagrid__quick-search-input {
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  flex: 1 1 auto;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  height: 40px;
+  min-width: 0;
+  outline: none;
+
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.nb-datagrid__quick-search-clear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+
+  &:hover {
+    background: var(--control-bg-hover);
+    color: var(--text-primary);
+  }
+}
+
+// ── Mobile FAB (primary "New" action) ──────────────────────────────────────────
+
+.nb-datagrid__fab {
+  align-items: center;
+  background: var(--accent-color);
+  border: 0;
+  border-radius: 50%;
+  // Sits above the pager row so it never covers the prev/next buttons.
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--shadow-lg, 0 6px 16px rgb(15 23 42 / 28%));
+  color: var(--text-on-accent, #fff);
+  cursor: pointer;
+  display: flex;
+  font-size: 22px;
+  height: 52px;
+  justify-content: center;
+  position: fixed;
+  right: var(--space-4);
+  width: 52px;
+  z-index: var(--z-sticky, 30);
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// Column presets relocate into the filter sheet on mobile — make the
+// segmented control stack full-width there.
+.nb-datagrid__sheet-presets {
+  .nb-datagrid__preset-control {
+    align-items: stretch;
+    flex-direction: column;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nb-datagrid__preset-segments {
+    width: 100%;
+  }
+}
+
+// On mobile the cards carry their own surface — drop the table-wrap chrome so
+// they sit directly on the app background (no double border).
+@media (max-width: 767.98px) {
+  .nb-datagrid__table-wrap {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

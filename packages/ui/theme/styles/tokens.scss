@@ -1,0 +1,200 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Efact Design System — static tokens (theme-independent).
+//
+// These tokens NEVER change between light and dark themes.
+// They are bundled into the main CSS entry (via styles.scss → Vite) so they
+// are available immediately, before the dynamic theme stylesheet loads.
+//
+// Theme-sensitive tokens (colors, surfaces, shadows) live in:
+//   theme-light.scss  /  theme-dark.scss
+//
+// Density tiers (runtime-switchable via DensityProvider):
+//   default (normal)                      — balanced for daily ERP work
+//   html[data-density="compact"]          — high-density / power-user mode
+//   html[data-density="comfortable"]      — large monitors / accessibility
+//
+// Vertical rhythm rule:
+//   toolbar-height = row-height + 2px     (header aligns with data rows)
+//   control-height = toolbar-height − 8px (4px breathing room above/below)
+//   control-height-form = row-height      (form inputs are as tall as grid rows)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/* stylelint-disable */
+:root {
+
+  // ── Typography ──────────────────────────────────────────────────────────────
+  --font-family-sans:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono:    'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+  --font-family-display: 'Syne', var(--font-family-sans);
+
+  // Scale: 11 → 12 → 13 → 14 → 16 → 20 → 24 → 28 → 32 → 40
+  --font-size-xxs: 11px;   // timestamps, badge labels, filter operators
+  --font-size-xs:  12px;   // column headers (uppercase), secondary metadata, labels
+  --font-size-sm:  13px;   // grid rows, form field values, dropdown options
+  --font-size-md:  14px;   // form labels, toolbar titles, button text
+  --font-size-lg:  16px;   // body-lg, section intro
+  --font-size-xl:  20px;   // page subtitle, card title
+  --font-size-2xl: 24px;   // page title, dialog title, KPI numbers
+  --font-size-3xl: 28px;   // dashboard section titles
+  --font-size-4xl: 32px;   // hero titles
+  --font-size-5xl: 40px;   // large KPI hero values
+
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:   1.25;
+  --line-height-normal:  1.5;
+  --line-height-relaxed: 1.65;
+
+  // ── Spacing (4 px base scale) ───────────────────────────────────────────────
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  48px;
+  --space-10: 64px;
+
+  // ── Border radius ───────────────────────────────────────────────────────────
+  --radius-xs: 3px;    // status badges (rectangular, reads as state indicator)
+  --radius-sm: 4px;    // pager buttons, small controls
+  --radius-md: 6px;    // buttons, inputs, selects (unified control radius)
+  --radius-lg: 8px;    // cards, panels, toolbars, dialogs
+  --radius-xl: 14px;   // pill badges, tags, chip filters
+
+  // ── Layout / shell dimensions ───────────────────────────────────────────────
+  //
+  // Vertical rhythm (normal density):
+  //   toolbar-height  36px  app toolbar, dialog header, grid column header
+  //   row-height      34px  datagrid body rows, inline spreadsheet cells
+  //   control-height  28px  buttons and small controls inside toolbars/grids
+  //   control-height-form  34px  standalone form inputs (larger touch target)
+  //
+  // Toolbar inner sizing: toolbar(36) − padding(4+4) = 28px inner → control-height(28). ✓
+
+  --toolbar-height:      36px;
+  --row-height:          34px;
+  --control-height:      28px;
+  --control-height-form: 34px;
+  --control-icon-size:   20px;
+  --footer-height:       48px;
+  --side-panel-min-width:  48px;
+  --content-padding:     16px;
+  --page-padding:        24px;
+  --calendar-width:      292px;
+  --toolbar-margin-bottom: var(--content-padding);
+  --footer-left-padding:   calc((var(--side-panel-min-width) - 16px) / 2);
+
+  // ── ERP grid density helpers ─────────────────────────────────────────────────
+  --grid-header-height:  34px;   // matches --toolbar-height for visual cadence
+  --grid-filter-height:  28px;   // matches --control-height
+  --grid-cell-padding-x: 10px;
+  --grid-cell-padding-y: 0px;
+
+  // ── Overlays ────────────────────────────────────────────────────────────────
+  --overlay-bg: rgb(0 0 0 / 42%);
+
+  // ── Motion ──────────────────────────────────────────────────────────────────
+  // Rules:
+  //   - Data never animates (rows appear instantly — no transition on grid inserts)
+  //   - Structure animates (panels slide, dialogs scale in)
+  //   - No animation on repeated fast actions (adding 20 line items)
+  --transition-fast: 100ms ease;                              // hover, focus ring
+  --transition-base: 150ms ease;                              // most UI transitions
+  --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);     // panels, dialogs
+
+  // ── Z-index scale ───────────────────────────────────────────────────────────
+  // Tier 1 — in-page floating elements
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-popover:   500;
+  --z-toast:     600;
+
+  // Tier 2 — app shell (header, sidebar, their sub-popovers)
+  --z-shell-panel:    1500;
+  --z-shell-scrim:    1499;
+  --z-shell-header:   1501;
+  --z-shell-popover:  1700;
+  --z-shell-dropdown: 1600;
+
+  // Tier 3 — full-screen overlays (dialogs, nested CRUD, loading screens)
+  // Max is 3000 — never exceed this value.
+  --z-dialog:       2000;
+  --z-picker-panel: 3000;
+
+  // ── @deprecated ─────────────────────────────────────────────────────────────
+  // Legacy tokens retained for backward compatibility with pre-refactor code.
+  // Do NOT use in new components. Candidates for removal in the next cleanup sprint.
+  --list-padding-left:               8px;
+  --list-padding-vertical:           4px;
+  --popup-toolbar-item-spacing:      8px;
+  --drop-down-gnrc-button-height:    24px;
+  --theme-padding:                   8px;
+  --button-height-theme-difference:  calc((var(--theme-padding) - 10px) / 3);
+  --button-height:                   calc(26px + var(--button-height-theme-difference));
+  --nb-admin-header-toolbar-vertical-padding: 10px;
+  --toolbar-vertical-padding:        16px;
+}
+
+// ── Compact density ────────────────────────────────────────────────────────────
+// Reduces layout dimensions for high-density displays and power users.
+// All spacing tokens scale proportionally to maintain visual harmony.
+html[data-density="compact"] {
+  --font-size-xs:  11px;
+  --font-size-sm:  12px;
+  --font-size-md:  13px;
+
+  --space-1:  2px;
+  --space-2:  5px;
+  --space-3:  8px;
+  --space-4:  12px;
+  --space-5:  16px;
+  --space-6:  20px;
+
+  --toolbar-height:      30px;
+  --row-height:          28px;
+  --control-height:      24px;
+  --control-height-form: 28px;
+  --control-icon-size:   16px;
+  --content-padding:     12px;
+  --page-padding:        16px;
+
+  --grid-header-height:  28px;
+  --grid-filter-height:  24px;
+  --grid-cell-padding-x: 8px;
+}
+
+// ── Comfortable density ────────────────────────────────────────────────────────
+// Enlarges layout dimensions for large monitors (27"+ ) and accessibility needs.
+// Intended for administrators reviewing reports on external displays.
+html[data-density="comfortable"] {
+  --font-size-xs:  13px;
+  --font-size-sm:  14px;
+  --font-size-md:  15px;
+
+  --space-1:  6px;
+  --space-2:  10px;
+  --space-3:  16px;
+  --space-4:  20px;
+  --space-5:  28px;
+  --space-6:  36px;
+
+  --toolbar-height:      44px;
+  --row-height:          40px;
+  --control-height:      34px;
+  --control-height-form: 40px;
+  --control-icon-size:   22px;
+  --content-padding:     20px;
+  --page-padding:        28px;
+
+  --grid-header-height:  40px;
+  --grid-filter-height:  34px;
+  --grid-cell-padding-x: 14px;
+}

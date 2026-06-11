@@ -1,0 +1,140 @@
+@mixin separator() {
+  .h-separator {
+    height: 1px;
+    width: auto;
+    background: var(--border-color);
+  }
+
+  .separator {
+    height: 24px;
+    width: 1px;
+    background: var(--border-color);
+  }
+}
+
+@mixin shadow() {
+  box-shadow: var(--shadow-sm);
+}
+
+@mixin header {
+  font-size: 22px;
+  font-weight: var(--font-weight-regular);
+  padding-right: 25px;
+}
+
+@mixin user-info {
+  .user-info {
+    margin-bottom: var(--space-5);
+    display: flex;
+
+    .photo {
+      width: 124px;
+      height: 124px;
+      margin-right: var(--space-5);
+      border-radius: var(--radius-lg);
+      background-repeat: no-repeat;
+      background-size: cover;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+  }
+
+  .title {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+
+    &:not(:first-child) {
+      padding-top: 10px;
+    }
+  }
+
+  .value {
+    font-size: var(--font-size-md);
+    color: var(--accent-color);
+
+    &.black {
+      color: var(--text-primary);
+    }
+
+    &.small {
+      font-size: var(--font-size-xs);
+    }
+  }
+}
+
+@mixin message-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+@mixin message-text {
+  padding-top: var(--space-1);
+  line-height: var(--line-height-normal);
+}
+
+@mixin status-contact($status-color) {
+  color: $status-color;
+
+  span {
+    &::before {
+      background-color: $status-color;
+    }
+  }
+}
+
+@mixin calendar-items-text {
+  font-family: var(--font-family-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  font-size: 13px;
+  line-height: var(--line-height-tight);
+}
+
+@mixin description-text($opacity) {
+  font-family: var(--font-family-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  opacity: $opacity;
+}
+
+@mixin h1-header-text {
+  font-family: var(--font-family-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+}
+
+@mixin h2-header-text {
+  font-family: var(--font-family-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+}
+
+@mixin subtext($opacity: 1) {
+  font-family: var(--font-family-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  opacity: $opacity;
+}
+
+@mixin card-shadow() {
+  box-shadow: var(--shadow-md);
+}
+
+@mixin toolbar-panel() {
+  background-color: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  padding: var(--space-2) var(--content-padding);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, transparent);
+  box-shadow: var(--shadow-sm);
+}

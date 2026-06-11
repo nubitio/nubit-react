@@ -300,6 +300,20 @@ export function mapHydraSchemaToFields(
       continue;
     }
 
+    // Rule 3.6 — `format: 'currency'` hint → currencyField regardless of the
+    // range: API Platform serializes Doctrine DECIMAL columns as xsd:string,
+    // so the hint (not the range) is the reliable signal for money fields.
+    if (
+      fieldSchema.crudHints?.format === 'currency' &&
+      (tag === 'text' || tag === 'integer' || tag === 'decimal')
+    ) {
+      const built = currencyField().name(name).label(label).required(required).build();
+      const field: Field = { ...built, filterable };
+      applyCrudHints(field, fieldSchema.crudHints);
+      fields.push(field);
+      continue;
+    }
+
     // Rule 4 — boolean → switchField
     if (tag === 'boolean') {
       const built = switchField().name(name).label(label).required(required).build();
@@ -327,11 +341,10 @@ export function mapHydraSchemaToFields(
       continue;
     }
 
-    // Rule 7 — decimal → numberField (or currencyField when hinted via
-    // x-crud `format: 'currency'` — right-aligned, money formatting).
+    // Rule 7 — decimal → numberField (currency-hinted decimals were already
+    // taken by Rule 3.6).
     if (tag === 'decimal') {
-      const base = fieldSchema.crudHints?.format === 'currency' ? currencyField() : numberField();
-      const built = base.name(name).label(label).required(required).build();
+      const built = numberField().name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       applyCrudHints(field, fieldSchema.crudHints);
       fields.push(field);

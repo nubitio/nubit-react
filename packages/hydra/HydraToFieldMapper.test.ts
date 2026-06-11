@@ -68,6 +68,33 @@ describe('x-crud format: currency', () => {
     expect(fields.find((f) => f.name === 'qty')?.type).toBe('number');
   });
 
+  it('maps hinted string-ranged decimals to currency fields', () => {
+    // API Platform serializes Doctrine DECIMAL columns as xsd:string, so this
+    // is the range real backends emit for money fields.
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        { name: 'price', range: 'xsd:string', crudHints: { format: 'currency' } },
+        { name: 'sku', range: 'xsd:string' },
+      ]),
+    );
+    expect(fields.find((f) => f.name === 'price')?.type).toBe('currency');
+    expect(fields.find((f) => f.name === 'sku')?.type).toBe('text');
+  });
+
+  it('prefers the enum select over the currency hint', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        {
+          name: 'fee',
+          range: 'xsd:string',
+          enumOptions: ['0.00', '5.00'],
+          crudHints: { format: 'currency' },
+        },
+      ]),
+    );
+    expect(fields.find((f) => f.name === 'fee')?.type).toBe('enum');
+  });
+
   it('maps hinted read-only decimals to readonly currency fields', () => {
     const fields = mapHydraSchemaToFields(
       schemaWith([

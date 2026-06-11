@@ -211,7 +211,20 @@ function getCellText(
     return getEnumDisplayValue(field, value);
   if (field.type === FieldType.DATE) return getDateDisplay(value);
   if (field.type === FieldType.DATETIME) return getDateTimeDisplay(value);
+  if (field.type === FieldType.CURRENCY) return getCurrencyDisplay(value);
   return getPrimitiveDisplay(value, yesLabel, noLabel);
+}
+
+function getCurrencyDisplay(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '';
+  const num = Number(value);
+  if (!Number.isFinite(num)) return String(value);
+  // Money formatting without assuming a currency code (that is row data):
+  // locale-aware thousands separators and exactly two decimals.
+  return num.toLocaleString(getCoreLocale(), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function renderCell(
@@ -233,6 +246,7 @@ function renderCell(
   }
   if (field.type === FieldType.DATE) return getDateDisplay(value);
   if (field.type === FieldType.DATETIME) return getDateTimeDisplay(value);
+  if (field.type === FieldType.CURRENCY) return getCurrencyDisplay(value);
   return getPrimitiveDisplay(value, yesLabel, noLabel);
 }
 
@@ -1318,8 +1332,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
   };
 
+  const rowEditable = (row: DataRecord): boolean => options.canEditRow?.(row) !== false;
+  const rowDeletable = (row: DataRecord): boolean => options.canDeleteRow?.(row) !== false;
+
   const buildRowActions = (row: DataRecord): ResourceToolbarAction[] => [
-    ...(options.allowEdit && (options.onEdit || options.events?.EDIT)
+    ...(options.allowEdit && rowEditable(row) && (options.onEdit || options.events?.EDIT)
       ? [
           {
             text: t('grid.buttonEdit'),
@@ -1342,7 +1359,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         ]
       : []),
     ...getResolvedRowActions(row, options.rowActions),
-    ...(options.allowDelete && (options.onDelete || options.events?.DELETE)
+    ...(options.allowDelete && rowDeletable(row) && (options.onDelete || options.events?.DELETE)
       ? [
           {
             text: t('grid.buttonDelete'),
@@ -1356,7 +1373,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   ];
 
   const openRow = (row: DataRecord) => {
-    if (options.allowEdit && (options.onEdit || options.events?.EDIT)) {
+    if (options.allowEdit && rowEditable(row) && (options.onEdit || options.events?.EDIT)) {
       if (options.onEdit) options.onEdit(row);
       else emit(options.events!.EDIT!, { row });
       return;

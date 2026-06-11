@@ -1,4 +1,4 @@
-import { getCoreLocale } from '@nubitio/core';
+import { getCoreCurrency, getCoreLocale } from '@nubitio/core';
 import type { DataRecord } from '@nubitio/core';
 import type { SummaryItem, SummaryTextContext } from './SummaryTypes';
 
@@ -44,10 +44,17 @@ export function formatSummaryValue(value: unknown, item: SummaryItem): string {
   };
 
   if (item.valueFormat === 'currency') {
+    // Resolution order: explicit item currency → app-wide CoreConfig currency.
+    // A public library must not assume a country: with neither configured,
+    // fall back to plain fixed-point formatting (no symbol).
+    const currency = item.currency ?? getCoreCurrency();
+    if (currency === undefined) {
+      return new Intl.NumberFormat(getCoreLocale(), baseOptions).format(value);
+    }
     return new Intl.NumberFormat(getCoreLocale(), {
       ...baseOptions,
       style: 'currency',
-      currency: item.currency ?? 'PEN',
+      currency,
       currencyDisplay: item.currencyDisplay ?? 'narrowSymbol',
     }).format(value);
   }

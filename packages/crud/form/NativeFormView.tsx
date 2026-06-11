@@ -305,6 +305,7 @@ function LookupDropdown({
   setDraftQuery: (q: string | null) => void;
   setOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
 }) {
+  const { t } = useCoreTranslation();
   const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   return (
@@ -332,12 +333,12 @@ function LookupDropdown({
         onKeyDown={onKeyDown}
       />
       {!disabled && !readOnly && normalizedValue !== '' && (
-        <button type="button" className="nb-form__lookup-clear" aria-label={`Limpiar ${label}`} onMouseDown={(e) => e.preventDefault()} onClick={onClear}>
+        <button type="button" className="nb-form__lookup-clear" aria-label={t('form.lookupClear', { label })} onMouseDown={(e) => e.preventDefault()} onClick={onClear}>
           <i className="ph ph-x" aria-hidden="true" />
         </button>
       )}
       {!disabled && !readOnly && (
-        <button type="button" className="nb-form__lookup-toggle" aria-label={`Abrir ${label}`} onMouseDown={(e) => e.preventDefault()} onClick={() => { clearTimeout(blurTimer.current); setOpen((prev) => !prev); }}>
+        <button type="button" className="nb-form__lookup-toggle" aria-label={t('form.lookupOpen', { label })} onMouseDown={(e) => e.preventDefault()} onClick={() => { clearTimeout(blurTimer.current); setOpen((prev) => !prev); }}>
           <i className="ph ph-caret-down" aria-hidden="true" style={{ transition: 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
         </button>
       )}
@@ -1530,7 +1531,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
 
       return (
         <div className="nb-form__tabs">
-          <div className="nb-form__tabs-nav" role="tablist" aria-label="Secciones del formulario">
+          <div className="nb-form__tabs-nav" role="tablist" aria-label={t('form.tabsAriaLabel')}>
             {groups.map((group, index) => {
               const tabIcon = resolveTabIcon(group.icon);
               const isActive = index === activeTab;

@@ -88,6 +88,9 @@ export interface CoreTranslationKeys {
   'form.searchButton': string;
   'form.actionButton': string;
   'form.detailTitle': string;
+  'form.lookupClear': string;
+  'form.lookupOpen': string;
+  'form.tabsAriaLabel': string;
   'form.lookupSearching': string;
   'form.lookupNoResults': string;
   'form.lookupLoadingMore': string;

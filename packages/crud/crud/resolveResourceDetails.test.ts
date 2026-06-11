@@ -45,6 +45,25 @@ describe('resolveResourceDetails', () => {
     expect(resolved.formDetail).toBeUndefined();
   });
 
+  it('builds builder instances passed directly in detail fields', () => {
+    const resolved = resolveResourceDetails(baseResource({
+      gridDetail: { url: '/grid/{id}/items', fields: [textField().name('a').label('A')] },
+      formDetail: { fields: [textField().name('b').label('B')] },
+    }));
+
+    expect(resolved.gridDetail?.fields).toEqual([textField().name('a').label('A').build()]);
+    expect(resolved.formDetail?.fields).toEqual([textField().name('b').label('B').build()]);
+  });
+
+  it('builds builder instances returned by a gridDetail fields function', () => {
+    const resolved = resolveResourceDetails(baseResource({
+      gridDetail: { url: '/grid/{id}/items', fields: () => [textField().name('c').label('C')] },
+    }));
+
+    const fieldsFn = resolved.gridDetail?.fields as (row: Record<string, unknown>) => unknown;
+    expect(fieldsFn({})).toEqual([textField().name('c').label('C').build()]);
+  });
+
   it('passes through formDetail with all optional fields', () => {
     const formField = field('item');
 

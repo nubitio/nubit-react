@@ -18,6 +18,7 @@ export {
   configureCore,
   configureCoreDate, // deprecated
   getCoreApiBaseUrl,
+  getCoreCurrency,
 } from '@nubitio/core';
 export type { CoreProviderProps, CoreConfigProviderProps, CoreConfig } from '@nubitio/core';
 
@@ -28,6 +29,7 @@ export type { CoreHttpClient, CoreHttpClientConfig } from '@nubitio/core';
 // ── CRUD engine ───────────────────────────────────────────────────────────────
 export {
   CrudPage,
+  crudRoute,
   SmartCrudPage,
   SmartCrudRolesProvider,
   defineResource,
@@ -74,6 +76,7 @@ export type {
 // ── Field DSL ─────────────────────────────────────────────────────────────────
 export {
   textField,
+  buildFields,
   textareaField,
   numberField,
   currencyField,
@@ -95,7 +98,8 @@ export {
   noneField,
   FieldBuilder,
 } from '@nubitio/crud';
-export type { Field, FieldDef, LoadOption, EnumOption } from '@nubitio/crud';
+export type { Field,
+  FieldInput, FieldDef, LoadOption, EnumOption } from '@nubitio/crud';
 export type {
   FormatterFn,
   GridCellContext,

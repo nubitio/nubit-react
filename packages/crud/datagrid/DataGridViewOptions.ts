@@ -35,6 +35,10 @@ export interface DataGridViewOptions {
   addDisabled?: boolean;
   editDisabled?: boolean;
   deleteDisabled?: boolean;
+  /** Per-row gate for the Edit action (and row-click editing). Absent = allowed. */
+  canEditRow?: (row: DataRecord) => boolean;
+  /** Per-row gate for the Delete action. Absent = allowed. */
+  canDeleteRow?: (row: DataRecord) => boolean;
   summaryFields?: DataGridSummaryItem[];
   filter?: FilterRule[];
   sort?: Array<{ selector: string; desc: boolean }>;

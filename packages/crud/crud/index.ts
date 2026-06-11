@@ -1,5 +1,6 @@
 export { defineResource } from './defineResource';
 export { CrudPage } from './CrudPage';
+export { crudRoute } from './crudRoute';
 export { SmartCrudPage } from './SmartCrudPage';
 export { SmartCrudRolesProvider, useSmartCrudRoles } from './SmartCrudRolesContext';
 export type {

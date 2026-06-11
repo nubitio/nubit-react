@@ -13,6 +13,7 @@
 // ── CRUD engine ───────────────────────────────────────────────────────────────
 export {
   CrudPage,
+  crudRoute,
   SmartCrudPage,
   SmartCrudRolesProvider,
   useSmartCrudRoles,
@@ -74,6 +75,8 @@ export {
   textareaField,
 } from './field/FieldBuilders';
 export type { EnumOption } from './field/FieldBuilders';
+export { buildFields } from './field/buildFields';
+export type { FieldInput } from './field/buildFields';
 export { FieldBuilder } from './field/FieldBuilder';
 export { FieldType } from './field/FieldType';
 export type { Field, FieldDef, LoadOption } from './field/Field';

@@ -13,6 +13,7 @@ export {
   getCoreLocale,
   getCoreTimezone,
   getCoreApiBaseUrl,
+  getCoreCurrency,
   useCoreConfig,
 } from './config/CoreConfig';
 export type { CoreConfig, CoreConfigProviderProps } from './config/CoreConfig';

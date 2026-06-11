@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import type { Field, FieldDef } from '../field/Field';
+import type { FieldInput } from '../field/buildFields';
 import type { FilterRule } from '../field/FilterRule';
 import type { DataRecord, FormEventNames } from '@nubitio/core';
 import type { FormHandle } from '../form/FormHandle';
@@ -11,6 +12,7 @@ import type { AuditTrailConfig } from './AuditTrail';
 import type { SmartCrudFieldContract } from './fieldContract';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { CrudDrawerSize } from '../view/drawerSizes';
+import type { DetailSummaryOptions, SummaryItem } from '../summary';
 
 /**
  * URL-based deep-linking and filter sync configuration for SmartCrudPage.
@@ -39,6 +41,14 @@ export interface ResourcePermissions {
   canDelete?: boolean | (() => boolean);
   canExport?: boolean | (() => boolean);
   canBulkDelete?: boolean | (() => boolean);
+  /**
+   * Per-row gate for editing: rows where this returns false hide the Edit
+   * action and open read-only (View) on row click. Use it to lock records
+   * that are immutable by domain rule (issued documents, closed periods, …).
+   */
+  canEditRow?: (row: DataRecord) => boolean;
+  /** Per-row gate for the Delete action. */
+  canDeleteRow?: (row: DataRecord) => boolean;
 }
 
 export type ResourceToolbarActionVariant = string;
@@ -84,12 +94,22 @@ export type ResourceToolbar<T extends DataRecord = DataRecord> =
 
 export interface ResourceGridDetail {
   url: string;
-  fields: Field[] | ((parentRow: DataRecord) => Field[]);
+  /** Built Fields or builder instances — `.build()` is called for you. */
+  fields: FieldInput[] | ((parentRow: DataRecord) => FieldInput[]);
 }
 
 export interface ResourceFormDetail {
+  /**
+   * Source for existing detail rows when editing. Must contain an `{id}`
+   * placeholder replaced with the parent record id, e.g.
+   * `/api/sales-document-lines?document={id}`. Without it the edit form
+   * cannot reload rows and shows an empty detail grid.
+   */
   url?: string;
-  fields: Field[];
+  /** Footer summary for the detail grid (e.g. sum of line totals). */
+  summary?: DetailSummaryOptions;
+  /** Built Fields or builder instances — `.build()` is called for you. */
+  fields: FieldInput[];
   propertyName?: string;
   allowAdding?: boolean;
   allowDeleting?: boolean;
@@ -148,13 +168,13 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
    * Omit (or pass an empty array) to let SmartCrudPage auto-infer fields from
    * the Hydra/OpenAPI schema. Prefer `fieldContract` for augmenting inferred fields.
    */
-  fields?: Field[] | FieldDef<T>[];
+  fields?: FieldInput[] | FieldDef<T>[];
   /**
    * Form-only field definitions. When set, the grid uses `fields` and the
    * create/edit form uses `formFields` — avoids re-fetching the grid on every
    * reactive form rule evaluation (e.g. visibleWhen while typing).
    */
-  formFields?: Field[];
+  formFields?: FieldInput[];
   /**
    * Canonical production field contract for SmartCrud.
    * SmartCrud runtime treats this as authoritative over legacy
@@ -198,6 +218,12 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   onSaveError?: (error?: unknown) => void;
   onDeleteSuccess?: (response: T) => void;
   onDeleteError?: (error?: unknown) => void;
+  /**
+   * Footer summaries for the main grid, aligned to their `column`. Computed
+   * client-side over the **loaded page**, not the full filtered dataset.
+   * e.g. `[{ column: 'total', summaryType: 'sum', valueFormat: 'currency' }]`
+   */
+  summaryFields?: SummaryItem[];
   /** Bulk actions rendered in the bulk toolbar when rows are selected. */
   bulkActions?: BulkAction[];
   /**

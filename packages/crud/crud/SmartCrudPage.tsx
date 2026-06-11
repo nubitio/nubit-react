@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CrudPage } from './CrudPage';
 import type { ResourceConfig } from './ResourceConfig';
 import type { Field } from '../field/Field';
+import { buildFields } from '../field/buildFields';
+import type { FieldInput } from '../field/buildFields';
 import type { FieldOverride } from './resolveSmartCrudFields';
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
@@ -116,7 +118,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
 
   const { fields, isLoading, error, supportedOperations } = useResolvedResourceFields({
     apiUrl: resolvedBaseResource.apiUrl,
-    manualFields: hasManualFields ? (resource.fields as Field[]) : undefined,
+    manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
     overrides: hasManualFields ? undefined : fieldOverrides,
     fieldContract: resource.fieldContract,
   });
@@ -191,7 +193,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
         ...resolvedBaseResource,
         ...(!hasManualFields ? { fields: gridFields } : {}),
         apiUrl: normalizedApiUrl,
-        fields: hasManualFields ? (resource.fields as Field[]) : gridFields,
+        fields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : gridFields,
         formFields: processedFields,
         _supportedOperations: supportedOperations,
       }) as ResourceConfig<T>,

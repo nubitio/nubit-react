@@ -37,7 +37,11 @@ export interface SummaryItem {
   customizeText?: (cellInfo: SummaryTextContext) => string;
   /** Decimal digits used by number presets. Defaults to 2 for currency/fixedPoint. */
   precision?: number;
-  /** ISO currency used by the currency preset. Defaults to PEN. */
+  /**
+   * ISO currency used by the currency preset. Defaults to the app-wide
+   * `currency` from CoreConfig; with neither set, the preset falls back to
+   * plain fixed-point formatting (no currency symbol).
+   */
   currency?: string;
   /** Intl currency display for the currency preset. Defaults to narrowSymbol. */
   currencyDisplay?: Intl.NumberFormatOptions['currencyDisplay'];

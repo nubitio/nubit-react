@@ -176,6 +176,12 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     () => fields.filter((field) => field.isIdentity || field.visible !== false),
     [fields],
   );
+  // Per-row gates are taken from the raw resource permissions: they are
+  // predicates, not booleans, so they bypass the boolean resolution above.
+  const rawPermissions =
+    typeof resolvedResource.permissions === 'function'
+      ? undefined
+      : resolvedResource.permissions;
   const routeAwareGridFields = useMemo(
     () =>
       datagridFields.map((field) => {
@@ -514,6 +520,9 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         allowExport={permissions.canExport}
         editDisabled={editDisabled}
         deleteDisabled={deleteDisabled}
+        canEditRow={rawPermissions?.canEditRow}
+        canDeleteRow={rawPermissions?.canDeleteRow}
+        summaryFields={resolvedResource.summaryFields}
         sort={resolvedResource.sort}
         filter={routeAwareFilters}
         paging={resolvedResource.paging}
@@ -557,6 +566,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
             events={events}
             detailFields={formDetail?.fields}
             detailUrl={formDetail?.url}
+            detailSummary={formDetail?.summary}
             detailPropertyName={formDetail?.propertyName}
             allowAdding={dialogMode !== 'view' && formDetail?.allowAdding}
             allowDeleting={dialogMode !== 'view' && formDetail?.allowDeleting}

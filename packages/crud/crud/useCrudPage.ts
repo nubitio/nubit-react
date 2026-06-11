@@ -9,6 +9,8 @@ import type { ResolvedPermissions } from './usePermissions';
 import type { SelectionState } from './useSelectionState';
 import type { ColumnPresetState } from './useColumnPreset';
 import { resolveCrudResource, type ResolvedCrudResource } from './resolveCrudResource';
+import { buildFields } from '../field/buildFields';
+import type { FieldInput } from '../field/buildFields';
 import type { DataRecord, FormEventNames } from '@nubitio/core';
 
 export function useCrudPage<T extends DataRecord = DataRecord>(
@@ -32,12 +34,15 @@ export function useCrudPage<T extends DataRecord = DataRecord>(
   const formRef = externalFormRef ?? _internalFormRef;
 
   const fields = useMemo(
-    () => (resolvedResource.fields ?? []) as Field[],
+    () => buildFields((resolvedResource.fields ?? []) as FieldInput[]),
     [resolvedResource.fields],
   );
 
   const formFields = useMemo(
-    () => (resolvedResource.formFields ?? fields) as Field[],
+    () =>
+      resolvedResource.formFields
+        ? buildFields(resolvedResource.formFields as FieldInput[])
+        : fields,
     [fields, resolvedResource.formFields],
   );
 

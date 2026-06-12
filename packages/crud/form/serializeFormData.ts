@@ -151,12 +151,20 @@ function serializeNumericField(formData: FormDataRecord, field: Field): void {
   // UUID / string keys must reach the URL builder as-is (BUG-011).
   if (field.isIdentity) return;
 
-  if (field.sendAsString) {
-    const val = formData[field.name];
-    formData[field.name] = val != null ? Number(val).toFixed(field.precision || 2) : null;
-  } else {
-    formData[field.name] = Number(formData[field.name]);
+  const val = formData[field.name];
+
+  // An untouched/cleared numeric field is OMITTED, not null/0: backends with
+  // string-decimal columns reject null ("must be string, NULL given") and
+  // Number(null) would silently write 0. Omission lets server defaults apply
+  // (required fields are stopped earlier by validation).
+  if (val === null || val === undefined || val === '') {
+    delete formData[field.name];
+    return;
   }
+
+  formData[field.name] = field.sendAsString
+    ? Number(val).toFixed(field.precision || 2)
+    : Number(val);
 }
 
 /**
@@ -186,12 +194,17 @@ export function serializeDetailRows(
 
     if (field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY) {
       details.forEach((detail) => {
-        if (field.sendAsString) {
-          const val = detail[field.name];
-          detail[field.name] = val != null ? Number(val).toFixed(field.precision || 2) : null;
-        } else {
-          detail[field.name] = Number(detail[field.name]);
+        const val = detail[field.name];
+        // Same rule as the main form: empty numerics are omitted so server
+        // defaults apply instead of null (rejected by string-decimal
+        // columns) or a silent 0.
+        if (val === null || val === undefined || val === '') {
+          delete detail[field.name];
+          return;
         }
+        detail[field.name] = field.sendAsString
+          ? Number(val).toFixed(field.precision || 2)
+          : Number(val);
       });
     }
   });

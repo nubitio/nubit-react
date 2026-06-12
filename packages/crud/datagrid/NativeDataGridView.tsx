@@ -2242,6 +2242,13 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 <div className="nb-datagrid__hscroll-inner" style={{ width: layoutWidth }} />
               </div>
             )}
+            {isGridLoading && rows.length > 0 && (
+              <div className="nb-datagrid__loading-overlay" aria-live="polite">
+                <div className="nb-datagrid__loading-card">
+                  {loadingMessage || t('grid.loading')}
+                </div>
+              </div>
+            )}
           </div>
           {isMobile && (options.summaryFields?.length ?? 0) > 0 && rows.length > 0 && (
             <div className="nb-datagrid__card-summary">
@@ -2369,14 +2376,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             onCancel={() => setConfirmRow(null)}
             onConfirm={confirmDelete}
           />
-          {isGridLoading && rows.length > 0 && (
-            <div className="nb-datagrid__loading-overlay" aria-live="polite">
-              <div className="nb-datagrid__loading-card">
-                {loadingMessage || t('grid.loading')}
-              </div>
-            </div>
-          )}
-
           {openRowMenu &&
             createPortal(
               isMobile ? (

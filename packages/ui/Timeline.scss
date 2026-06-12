@@ -216,6 +216,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  // Reset the base rule: with row direction the main axis is horizontal, so
+  // the inherited justify-content: center pushed the heading to the middle.
+  justify-content: flex-start;
   min-height: 18px;
 }
 

@@ -116,7 +116,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     Array.isArray(resource.fields) &&
     resource.fields.length > 0;
 
-  const { fields, isLoading, error, supportedOperations } = useResolvedResourceFields({
+  const { fields, isLoading, error, supportedOperations, formLayout: inferredFormLayout } = useResolvedResourceFields({
     apiUrl: resolvedBaseResource.apiUrl,
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
     overrides: hasManualFields ? undefined : fieldOverrides,
@@ -195,12 +195,15 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
         apiUrl: normalizedApiUrl,
         fields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : gridFields,
         formFields: processedFields,
+        // Backend-declared layout from the API doc; explicit config wins.
+        formLayout: resolvedBaseResource.formLayout ?? inferredFormLayout,
         _supportedOperations: supportedOperations,
       }) as ResourceConfig<T>,
     [
       fields,
       gridFields,
       hasManualFields,
+      inferredFormLayout,
       normalizedApiUrl,
       processedFields,
       resolvedBaseResource,

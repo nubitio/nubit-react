@@ -376,3 +376,30 @@ describe('parseHydraDoc with entrypoint hrefs', () => {
     expect(result['Product'].apiUrl).toBe('/api/products');
   });
 });
+
+describe('parseHydraDoc x-crud-layout', () => {
+  it('captures the class-level form layout', () => {
+    const doc: HydraApiDoc = {
+      '@id': '/api',
+      '@type': 'hydra:ApiDocumentation',
+      supportedClass: [
+        {
+          '@id': '#Thing',
+          '@type': 'hydra:Class',
+          title: 'Thing',
+          supportedProperty: [],
+          supportedOperation: [],
+          'x-crud-layout': {
+            type: 'sections',
+            sections: [{ label: 'Main', fields: ['a', 'b'], collapsible: true }],
+          },
+        },
+      ],
+    };
+    const result = parseHydraDoc(doc);
+    expect(result['Thing'].formLayout).toEqual({
+      type: 'sections',
+      sections: [{ label: 'Main', fields: ['a', 'b'], collapsible: true }],
+    });
+  });
+});

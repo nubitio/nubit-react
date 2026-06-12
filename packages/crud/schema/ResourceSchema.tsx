@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
+import type { FormLayout } from '../form/FormLayout';
 import type { FieldOverride } from '../crud/resolveSmartCrudFields';
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';
 import type { SmartCrudFieldContract } from '../crud/fieldContract';
@@ -14,6 +15,11 @@ export interface ResourceSchemaResolution {
   isLoading: boolean;
   error: Error | undefined;
   supportedOperations: string[];
+  /**
+   * Backend-declared form layout (sections/tabs) from the API doc, when the
+   * resource publishes one. Explicit `ResourceConfig.formLayout` wins.
+   */
+  formLayout?: FormLayout;
 }
 
 export interface ResourceSchemaResolver {
@@ -45,6 +51,7 @@ export function ResourceSchemaProvider({ children, resolver }: ResourceSchemaPro
 function resolveWithRuntimeErrors(
   resolver: () => Field[],
   supportedOperations: string[] = [],
+  formLayout?: FormLayout,
 ): ResourceSchemaResolution {
   try {
     return {
@@ -52,6 +59,7 @@ function resolveWithRuntimeErrors(
       isLoading: false,
       error: undefined,
       supportedOperations,
+      formLayout,
     };
   } catch (runtimeError) {
     return {
@@ -59,6 +67,7 @@ function resolveWithRuntimeErrors(
       isLoading: false,
       error: runtimeError instanceof Error ? runtimeError : new Error(String(runtimeError)),
       supportedOperations,
+      formLayout,
     };
   }
 }
@@ -131,6 +140,7 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
           legacyOverrides: fieldContract ? undefined : overrides,
         }),
       baseline.supportedOperations,
+      baseline.formLayout,
     );
   }, [baseline, fieldContract, overrides]);
 }

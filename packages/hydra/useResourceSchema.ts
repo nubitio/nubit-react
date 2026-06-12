@@ -74,6 +74,7 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
       isLoading: false,
       error: undefined,
       supportedOperations: resourceSchema.supportedOperations ?? [],
+      formLayout: resourceSchema.formLayout,
     };
   }, [data, isLoading, error, apiUrl]);
 }

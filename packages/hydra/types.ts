@@ -4,6 +4,8 @@
  * These are pure data types — no React, no hooks, no side effects.
  */
 
+import type { FormLayout } from '@nubitio/crud';
+
 // ---------------------------------------------------------------------------
 // Raw Hydra JSON-LD shapes (from /api/docs.jsonld)
 // ---------------------------------------------------------------------------
@@ -103,6 +105,12 @@ export interface HydraClass {
   title: string;
   supportedProperty: HydraSupportedProperty[];
   /**
+   * Class-level UI hints injected by TranslatedDocumentationNormalizer from
+   * the ApiResource's extraProperties['x-crud']['formLayout']. Mirrors
+   * @nubitio/crud's FormLayout shape.
+   */
+  'x-crud-layout'?: FormLayout;
+  /**
    * Hydra search template describing server-side filterable query params.
    * Present on collection operations in API Platform JSON-LD responses.
    */
@@ -184,6 +192,8 @@ export interface HydraResourceSchema {
   className: string; // e.g. "Branch"
   apiUrl: string; // e.g. "/api/branches"
   fields: HydraFieldSchema[];
+  /** Backend-declared form layout (sections/tabs), when published. */
+  formLayout?: FormLayout;
   /**
    * Filters discoverable from `hydra:search.hydra:mapping` on the collection
    * operation. Absent/empty means no server-side filter info was found.

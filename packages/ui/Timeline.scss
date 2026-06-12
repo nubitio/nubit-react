@@ -77,7 +77,7 @@
   }
 
   &--error .nb-timeline__label {
-    color: var(--danger-color);
+    color: var(--status-danger-text, var(--error-color));
   }
 
   &--error:not(:last-child)::before {
@@ -158,9 +158,9 @@
 }
 
 .nb-timeline__marker--error {
-  background: var(--danger-color);
-  border: 2px solid var(--danger-color);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger-color) 20%, transparent);
+  background: var(--error-color);
+  border: 2px solid var(--error-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--error-color) 20%, transparent);
   color: var(--surface-1);
   font-size: 12px;
   font-weight: 700;
@@ -184,7 +184,7 @@
 }
 
 .nb-timeline__item--tone-danger .nb-timeline__marker--dot {
-  border-color: var(--danger-color);
+  border-color: var(--error-color);
 }
 
 .nb-timeline__item--tone-warning .nb-timeline__marker--dot {

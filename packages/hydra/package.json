@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/hydra",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "type": "module",
   "description": "Hydra / OpenAPI adapter for @nubitio/crud — automatic schema discovery and data source from API Platform docs.",
   "license": "MIT",

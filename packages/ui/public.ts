@@ -57,5 +57,13 @@ export { useFloatingPanel } from './useFloatingPanel';
 export type { UseFloatingPanelOptions, UseFloatingPanelResult } from './useFloatingPanel';
 export { Drawer } from './Drawer';
 export type { DrawerProps, DrawerSide } from './Drawer';
+export { Timeline, TimelineItem } from './Timeline';
+export type {
+  TimelineProps,
+  TimelineItemProps,
+  TimelineVariant,
+  TimelineItemStatus,
+  TimelineItemTone,
+} from './Timeline';
 export { UiStringsProvider, useUiStrings, EN_UI_STRINGS, ES_UI_STRINGS } from './UiStrings';
 export type { UiStrings, UiStringsProviderProps } from './UiStrings';

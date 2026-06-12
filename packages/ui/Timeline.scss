@@ -1,0 +1,215 @@
+.nb-timeline-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.nb-timeline-panel--card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+.nb-timeline-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.nb-timeline-panel__title {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.nb-timeline-panel__description {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.nb-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nb-timeline__item {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 24px 1fr;
+  padding-bottom: var(--space-4);
+  position: relative;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  &:not(:last-child)::before {
+    background: var(--border-color);
+    bottom: 0;
+    content: '';
+    left: 11px;
+    position: absolute;
+    top: 24px;
+    width: 2px;
+  }
+
+  &--complete:not(:last-child)::before {
+    background: var(--accent-color);
+  }
+
+  &--current:not(:last-child)::before {
+    background: var(--border-color);
+  }
+
+  &--pending .nb-timeline__label {
+    color: var(--text-tertiary);
+  }
+}
+
+.nb-timeline--log .nb-timeline__item {
+  gap: var(--space-2);
+  grid-template-columns: 16px 1fr;
+  padding: var(--space-3) 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-3);
+  }
+
+  &:not(:last-child)::before {
+    left: 7px;
+    top: 18px;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.nb-timeline__marker-col {
+  align-items: flex-start;
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.nb-timeline__marker {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+.nb-timeline__marker--complete {
+  background: var(--accent-color);
+  color: var(--surface-1);
+  font-size: 11px;
+  height: 20px;
+  width: 20px;
+}
+
+.nb-timeline__marker--current {
+  background: var(--surface-1);
+  border: 2px solid var(--accent-color);
+  height: 20px;
+  position: relative;
+  width: 20px;
+
+  &::after {
+    background: var(--accent-color);
+    border-radius: 50%;
+    content: '';
+    height: 8px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+  }
+}
+
+.nb-timeline__marker--pending {
+  background: var(--surface-1);
+  border: 2px solid var(--border-color);
+  height: 20px;
+  width: 20px;
+}
+
+.nb-timeline__marker--error {
+  background: var(--danger-color);
+  color: var(--surface-1);
+  font-size: 11px;
+  height: 20px;
+  width: 20px;
+}
+
+.nb-timeline__marker--dot {
+  background: var(--surface-2);
+  border: 2px solid var(--accent-color);
+  height: 12px;
+  width: 12px;
+}
+
+.nb-timeline__item--tone-success .nb-timeline__marker--dot {
+  border-color: var(--success-color);
+}
+
+.nb-timeline__item--tone-info .nb-timeline__marker--dot {
+  border-color: var(--info-color, var(--accent-color));
+}
+
+.nb-timeline__item--tone-danger .nb-timeline__marker--dot {
+  border-color: var(--danger-color);
+}
+
+.nb-timeline__item--tone-warning .nb-timeline__marker--dot {
+  border-color: var(--warning-color);
+}
+
+.nb-timeline__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.nb-timeline__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.nb-timeline--log .nb-timeline__heading {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nb-timeline__label {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.nb-timeline__timestamp {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-normal);
+}

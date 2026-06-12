@@ -6,7 +6,16 @@ import {
   useCoreHttpClient,
   useCoreTranslation,
 } from '@nubitio/core';
-import { Badge, Button, Drawer, EmptyState, Skeleton } from '@nubitio/ui';
+import {
+  Badge,
+  Button,
+  Drawer,
+  EmptyState,
+  Skeleton,
+  Timeline,
+  TimelineItem,
+  type TimelineItemTone,
+} from '@nubitio/ui';
 import type { AuditEntry, AuditFieldLabelResolver } from './AuditTrail';
 import { resolveDrawerWidth } from '../view/drawerSizes';
 import type { CrudDrawerSize } from '../view/drawerSizes';
@@ -28,6 +37,12 @@ const ACTION_BADGE: Record<AuditEntry['action'], 'success' | 'info' | 'danger'> 
   delete: 'danger',
 };
 
+const ACTION_TONE: Record<AuditEntry['action'], TimelineItemTone> = {
+  create: 'success',
+  update: 'info',
+  delete: 'danger',
+};
+
 function formatAuditValue(value: unknown, yesLabel: string, noLabel: string): string {
   if (value == null || value === '') return '—';
   if (typeof value === 'boolean') return value ? yesLabel : noLabel;
@@ -39,6 +54,48 @@ function formatAuditValue(value: unknown, yesLabel: string, noLabel: string): st
     }
   }
   return String(value);
+}
+
+function DefaultEntryContent({
+  entry,
+  resolveFieldLabel,
+  yesLabel,
+  noLabel,
+}: {
+  entry: AuditEntry;
+  resolveFieldLabel: AuditFieldLabelResolver;
+  yesLabel: string;
+  noLabel: string;
+}): React.JSX.Element {
+  const changeKeys = Object.keys(entry.changes);
+
+  if (changeKeys.length === 0) {
+    return <></>;
+  }
+
+  return (
+    <ul className="nb-audit-trail__changes">
+      {changeKeys.map((field) => {
+        const { before, after } = entry.changes[field];
+        return (
+          <li key={field} className="nb-audit-trail__change">
+            <span className="nb-audit-trail__field">{resolveFieldLabel(field)}</span>
+            <div className="nb-audit-trail__diff">
+              <span className="nb-audit-trail__value nb-audit-trail__value--before">
+                {formatAuditValue(before, yesLabel, noLabel)}
+              </span>
+              <span className="nb-audit-trail__arrow" aria-hidden="true">
+                →
+              </span>
+              <span className="nb-audit-trail__value nb-audit-trail__value--after">
+                {formatAuditValue(after, yesLabel, noLabel)}
+              </span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 function DefaultEntryRenderer({
@@ -64,46 +121,28 @@ function DefaultEntryRenderer({
     delete: t('auditTrail.action.delete'),
   };
 
-  const changeKeys = Object.keys(entry.changes);
-
   return (
-    <li className={`nb-audit-trail__entry nb-audit-trail__entry--${entry.action}`}>
-      <span className="nb-audit-trail__marker" aria-hidden="true" />
-      <div>
-        <div className="nb-audit-trail__meta">
-          <time className="nb-audit-trail__timestamp" dateTime={entry.timestamp}>
-            {formatted}
-          </time>
+    <TimelineItem
+      status="complete"
+      tone={ACTION_TONE[entry.action]}
+      title={
+        <span className="nb-audit-trail__meta">
           <span className="nb-audit-trail__user">{entry.user}</span>
           <Badge variant={ACTION_BADGE[entry.action]} size="sm" pill>
             {actionLabels[entry.action]}
           </Badge>
-        </div>
-        {changeKeys.length > 0 && (
-          <ul className="nb-audit-trail__changes">
-            {changeKeys.map((field) => {
-              const { before, after } = entry.changes[field];
-              return (
-                <li key={field} className="nb-audit-trail__change">
-                  <span className="nb-audit-trail__field">{resolveFieldLabel(field)}</span>
-                  <div className="nb-audit-trail__diff">
-                    <span className="nb-audit-trail__value nb-audit-trail__value--before">
-                      {formatAuditValue(before, yesLabel, noLabel)}
-                    </span>
-                    <span className="nb-audit-trail__arrow" aria-hidden="true">
-                      →
-                    </span>
-                    <span className="nb-audit-trail__value nb-audit-trail__value--after">
-                      {formatAuditValue(after, yesLabel, noLabel)}
-                    </span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    </li>
+        </span>
+      }
+      timestamp={formatted}
+      dateTime={entry.timestamp}
+    >
+      <DefaultEntryContent
+        entry={entry}
+        resolveFieldLabel={resolveFieldLabel}
+        yesLabel={yesLabel}
+        noLabel={noLabel}
+      />
+    </TimelineItem>
   );
 }
 
@@ -220,12 +259,10 @@ export function AuditTrailPanel({
 
     if (fetchState.status === 'success') {
       return (
-        <ul className="nb-audit-trail__timeline">
+        <Timeline variant="log" aria-label={t('auditTrail.title')}>
           {fetchState.entries.map((entry) =>
             renderEntry ? (
-              <li key={String(entry.id)} className="nb-audit-trail__entry">
-                {renderEntry(entry)}
-              </li>
+              <React.Fragment key={String(entry.id)}>{renderEntry(entry)}</React.Fragment>
             ) : (
               <DefaultEntryRenderer
                 key={String(entry.id)}
@@ -236,7 +273,7 @@ export function AuditTrailPanel({
               />
             ),
           )}
-        </ul>
+        </Timeline>
       );
     }
 

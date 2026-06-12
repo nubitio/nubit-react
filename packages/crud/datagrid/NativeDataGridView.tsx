@@ -11,37 +11,29 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import {
-  AppDropdown,
-  Button,
-  ConfirmDialog,
-  DatePicker,
-  DateRangePicker,
-  EmptyState,
-  IconButton,
-} from '@nubitio/ui';
+import { AppDropdown, Button, ConfirmDialog, IconButton } from '@nubitio/ui';
 import { type ResourceLoadOptions, useResourceStoreFactory } from '../data/ResourceStore';
 import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
-import {
-  useEvents,
-  useCoreHttpClient,
-  getCoreLocale,
-  getCoreTimezone,
-  useCoreTranslation,
-} from '@nubitio/core';
+import { useEvents, useCoreHttpClient, useCoreTranslation } from '@nubitio/core';
 import { DATA_GRID_EVENTS } from './DataGridEvents';
 import type { DataGridSummaryItem, DataGridViewOptions } from './DataGridViewOptions';
 import type { GridHandle } from './GridHandle';
 import type { FilterRule } from '../field/FilterRule';
-import type {
-  ResourceEmptyState,
-  ResourceToolbarAction,
-  ResourceToolbarItems,
-} from '../crud/ResourceConfig';
+import type { ResourceToolbarAction, ResourceToolbarItems } from '../crud/ResourceConfig';
 import { useSmartCrudRoles } from '../crud/SmartCrudRolesContext';
-import { NativeEntitySelect } from '../form/NativeFormView';
+import {
+  buildFilterExpression,
+  computeDefaultOperators,
+  FilterCell,
+  getDefaultFilterOperator,
+  joinBetweenValue,
+} from './FilterRow';
+import { getCellText, getIdField, renderCell } from './cellRendering';
+import { DetailGridSection } from './DetailGridSection';
+import { GridEmptyStateView } from './GridEmptyStateView';
+import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
 import { resolveSummaryText } from '../summary';
 import { useIsMobile } from './useIsMobile';
 
@@ -119,140 +111,13 @@ function getPageRange(current: number, total: number): (number | null)[] {
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
-function getIdField(fields: Field[]): string {
-  return fields.find((field) => field.isIdentity)?.name ?? 'id';
-}
-
-function GridEmptyStateView({
-  emptyState,
-  fallbackTitle,
-}: {
-  emptyState?: ResourceEmptyState;
-  fallbackTitle: string;
-}) {
-  return (
-    <div className="nb-datagrid__empty" aria-live="polite">
-      <EmptyState
-        title={emptyState?.title ?? fallbackTitle}
-        description={emptyState?.description}
-        icon={emptyState?.icon ?? 'database'}
-        variant={emptyState?.variant ?? 'default'}
-        size="sm"
-      />
-    </div>
-  );
-}
-
-function getPrimitiveDisplay(value: unknown, yesLabel = 'Yes', noLabel = 'No'): string {
-  if (value === null || value === undefined) return '';
-  if (value instanceof Date)
-    return value.toLocaleDateString(getCoreLocale(), { timeZone: getCoreTimezone() });
-  if (typeof value === 'boolean') return value ? yesLabel : noLabel;
-  if (typeof value === 'object') return '';
-  return String(value);
-}
-
-function getDateDisplay(value: unknown): string {
-  if (!value) return '';
-  const d = value instanceof Date ? value : new Date(String(value));
-  if (isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString(getCoreLocale(), { timeZone: getCoreTimezone() });
-}
-
-function getDateTimeDisplay(value: unknown): string {
-  if (!value) return '';
-  const d = value instanceof Date ? value : new Date(String(value));
-  if (isNaN(d.getTime())) return String(value);
-  return d.toLocaleString(getCoreLocale(), {
-    timeZone: getCoreTimezone(),
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
-}
-
-function getEntityDisplayValue(field: Field, value: unknown, entityOptions?: DataRecord[]): string {
-  if (value && typeof value === 'object') {
-    const record = value as DataRecord;
-    const display = record[field.textField] ?? record['name'] ?? record['businessName'];
-    return getPrimitiveDisplay(display);
-  }
-  // IRI string: look up display text from pre-loaded entity options
-  if (value && typeof value === 'string' && entityOptions) {
-    const match = entityOptions.find(
-      (item) => item[field.valueField] === value || item['@id'] === value || item['_iri'] === value,
-    );
-    if (match) {
-      const display = match[field.textField] ?? match['name'] ?? match['businessName'];
-      if (display != null) return getPrimitiveDisplay(display);
-    }
-  }
-  return getPrimitiveDisplay(value);
-}
-
-function getEnumDisplayValue(field: Field, value: unknown): string {
-  const match = Array.isArray(field.data)
-    ? field.data.find((item) => item['value'] === value || item[field.valueField] === value)
-    : undefined;
-
-  return getPrimitiveDisplay(match?.['text'] ?? match?.[field.textField] ?? value);
-}
-
-function getCellText(
-  field: Field,
-  row: DataRecord,
-  entityOptions?: DataRecord[],
-  yesLabel = 'Yes',
-  noLabel = 'No',
-): string {
-  if (field.formatter) return '';
-  const value = row[field.name];
-  if (field.type === FieldType.ENTITY) return getEntityDisplayValue(field, value, entityOptions);
-  if (field.type === FieldType.ENUM || field.type === FieldType.SWITCH)
-    return getEnumDisplayValue(field, value);
-  if (field.type === FieldType.DATE) return getDateDisplay(value);
-  if (field.type === FieldType.DATETIME) return getDateTimeDisplay(value);
-  if (field.type === FieldType.CURRENCY) return getCurrencyDisplay(value);
-  return getPrimitiveDisplay(value, yesLabel, noLabel);
-}
-
-function getCurrencyDisplay(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '';
-  const num = Number(value);
-  if (!Number.isFinite(num)) return String(value);
-  // Money formatting without assuming a currency code (that is row data):
-  // locale-aware thousands separators and exactly two decimals.
-  return num.toLocaleString(getCoreLocale(), {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function renderCell(
-  field: Field,
-  row: DataRecord,
-  rowIndex: number,
-  columnIndex: number,
-  entityOptions?: DataRecord[],
-  yesLabel = 'Yes',
-  noLabel = 'No',
-) {
-  const value = row[field.name];
-  if (field.formatter) {
-    return field.formatter({ value, data: row, rowIndex, columnIndex });
-  }
-  if (field.type === FieldType.ENTITY) return getEntityDisplayValue(field, value, entityOptions);
-  if (field.type === FieldType.ENUM || field.type === FieldType.SWITCH) {
-    return getEnumDisplayValue(field, value);
-  }
-  if (field.type === FieldType.DATE) return getDateDisplay(value);
-  if (field.type === FieldType.DATETIME) return getDateTimeDisplay(value);
-  if (field.type === FieldType.CURRENCY) return getCurrencyDisplay(value);
-  return getPrimitiveDisplay(value, yesLabel, noLabel);
-}
-
 function normalizeIcon(icon?: string): string | undefined {
   if (!icon) return undefined;
   return icon.includes('ph ') || icon.startsWith('ph-') ? icon : `ph-${icon}`;
+}
+
+function isDateLikeField(field: Field): boolean {
+  return field.type === FieldType.DATE || field.type === FieldType.DATETIME;
 }
 
 function getToolbarKey(action: ResourceToolbarAction, index: number): string {
@@ -471,360 +336,6 @@ function buildToolbar(
   };
 }
 
-type FilterOperator = { value: string; label: string };
-const FILTER_RESET_OPERATOR = '__reset_filter__';
-const BETWEEN_VALUE_SEPARATOR = '|';
-
-function isDateLikeField(field: Field): boolean {
-  return field.type === FieldType.DATE || field.type === FieldType.DATETIME;
-}
-
-function getDateStartOfDay(value: string): string {
-  return `${value} 00:00:00`;
-}
-
-function getDateEndOfDay(value: string): string {
-  return `${value} 23:59:59`;
-}
-
-function splitBetweenValue(value: string): [string, string] {
-  const [start = '', end = ''] = value.split(BETWEEN_VALUE_SEPARATOR);
-  return [start, end];
-}
-
-function joinBetweenValue(start: string, end: string): string {
-  if (!start && !end) return '';
-  return `${start}${BETWEEN_VALUE_SEPARATOR}${end}`;
-}
-
-function getDefaultFilterOperator(field: Field): string {
-  if (field.selectedFilterOperation) return field.selectedFilterOperation;
-  switch (field.type) {
-    case FieldType.NUMBER:
-    case FieldType.CURRENCY:
-    case FieldType.DATE:
-    case FieldType.DATETIME:
-    case FieldType.ENUM:
-    case FieldType.SELECT:
-    case FieldType.SWITCH:
-    case FieldType.ENTITY:
-      return '=';
-    default:
-      return 'contains';
-  }
-}
-
-function getFilterOperators(field: Field): FilterOperator[] {
-  switch (field.type) {
-    case FieldType.NUMBER:
-    case FieldType.CURRENCY:
-      return [
-        { value: '=', label: '=' },
-        { value: '<>', label: '≠' },
-        { value: '>', label: '>' },
-        { value: '>=', label: '≥' },
-        { value: '<', label: '<' },
-        { value: '<=', label: '≤' },
-      ];
-    case FieldType.DATE:
-    case FieldType.DATETIME:
-      return [
-        { value: '=', label: '=' },
-        { value: '<>', label: '≠' },
-        { value: '>', label: '>' },
-        { value: '>=', label: '≥' },
-        { value: '<', label: '<' },
-        { value: '<=', label: '≤' },
-        { value: 'between', label: '↔' },
-      ];
-    case FieldType.ENUM:
-    case FieldType.SELECT:
-    case FieldType.SWITCH:
-    case FieldType.ENTITY:
-      return [{ value: '=', label: '=' }];
-    default:
-      return [
-        { value: 'contains', label: '~' },
-        { value: 'notcontains', label: '!~' },
-        { value: 'startswith', label: '^' },
-        { value: '=', label: '=' },
-        { value: '<>', label: '≠' },
-      ];
-  }
-}
-
-function getFilterOperatorLabel(
-  value: string,
-  t: ReturnType<typeof useCoreTranslation>['t'],
-): string {
-  switch (value) {
-    case 'contains':
-      return t('grid.filterOperator.contains');
-    case 'notcontains':
-      return t('grid.filterOperator.notcontains');
-    case 'startswith':
-      return t('grid.filterOperator.startswith');
-    case '=':
-      return t('grid.filterOperator.equals');
-    case '<>':
-      return t('grid.filterOperator.notEquals');
-    case '>':
-      return t('grid.filterOperator.greaterThan');
-    case '>=':
-      return t('grid.filterOperator.greaterOrEqual');
-    case '<':
-      return t('grid.filterOperator.lessThan');
-    case '<=':
-      return t('grid.filterOperator.lessOrEqual');
-    case 'between':
-      return t('grid.filterOperator.between');
-    default:
-      return value;
-  }
-}
-
-function getFilterOperatorIcon(value: string): string {
-  switch (value) {
-    case 'contains':
-      return 'abc';
-    case 'notcontains':
-      return 'a̸bc';
-    case 'startswith':
-      return 'ab|';
-    case '=':
-      return '=';
-    case '<>':
-      return '≠';
-    case 'between':
-      return '↔';
-    default:
-      return value;
-  }
-}
-
-function computeDefaultOperators(fields: Field[]): Record<string, string> {
-  const defaults: Record<string, string> = {};
-  fields.forEach((field) => {
-    if (field.filterable) defaults[field.name] = getDefaultFilterOperator(field);
-  });
-  return defaults;
-}
-
-function buildFilterExpression(
-  filters: Record<string, string>,
-  operators: Record<string, string>,
-  fields: Field[],
-): unknown[] {
-  return Object.entries(filters)
-    .filter(([, value]) => value.trim() !== '')
-    .flatMap(([fieldName, value]) => {
-      const field = fields.find((candidate) => candidate.name === fieldName);
-      const operator = operators[fieldName] ?? 'contains';
-
-      if (field && isDateLikeField(field)) {
-        if (operator === 'between') {
-          const [start, end] = splitBetweenValue(value);
-          return [
-            ...(start
-              ? [
-                  [
-                    fieldName,
-                    '>=',
-                    field.type === FieldType.DATETIME ? getDateStartOfDay(start) : start,
-                  ],
-                ]
-              : []),
-            ...(end
-              ? [[fieldName, '<=', field.type === FieldType.DATETIME ? getDateEndOfDay(end) : end]]
-              : []),
-          ];
-        }
-
-        if (field.type === FieldType.DATETIME && operator === '=') {
-          return [
-            [fieldName, '>=', getDateStartOfDay(value)],
-            [fieldName, '<=', getDateEndOfDay(value)],
-          ];
-        }
-      }
-
-      return [[fieldName, operator, value]];
-    });
-}
-
-function FilterValueDropdown({
-  id,
-  value,
-  options,
-  placeholder,
-  className,
-  onChange,
-}: {
-  id: string;
-  value: string;
-  options: Array<{ value: string; label: string }>;
-  placeholder: string;
-  className?: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <AppDropdown
-      id={id}
-      value={value}
-      options={[{ value: '', label: placeholder }, ...options]}
-      onChange={onChange}
-      variant="compact"
-      showFieldLabel={false}
-      placeholder={placeholder}
-      className={className}
-    />
-  );
-}
-
-function FilterCell({
-  field,
-  operator,
-  remoteOptions,
-  value,
-  onClear,
-  onInputChange,
-  onBetweenInputChange,
-  onSelectChange,
-  onOperatorChange,
-}: {
-  field: Field;
-  operator: string;
-  remoteOptions: DataRecord[];
-  value: string;
-  onClear: () => void;
-  onInputChange: (value: string) => void;
-  onBetweenInputChange: (start: string, end: string) => void;
-  onSelectChange: (value: string) => void;
-  onOperatorChange: (operator: string) => void;
-}) {
-  const httpClient = useCoreHttpClient();
-  const { t } = useCoreTranslation();
-
-  if (field.type === FieldType.ENTITY) {
-    return (
-      <NativeEntitySelect
-        className="nb-datagrid__filter-select"
-        field={field}
-        httpClient={httpClient}
-        options={remoteOptions}
-        value={value}
-        onChange={(nextVal) => onSelectChange(nextVal ? String(nextVal) : '')}
-      />
-    );
-  }
-
-  const isDropdown =
-    field.type === FieldType.ENUM ||
-    field.type === FieldType.SELECT ||
-    field.type === FieldType.SWITCH;
-
-  if (isDropdown) {
-    const items = field.data ?? [];
-    return (
-      <FilterValueDropdown
-        id={`nb-datagrid-filter-${field.name}`}
-        value={value}
-        className="nb-datagrid__filter-select"
-        placeholder={t('grid.allFilter')}
-        options={items.map((item) => ({
-          value: String(item['value'] ?? ''),
-          label: String(item['text'] ?? item['value'] ?? ''),
-        }))}
-        onChange={onSelectChange}
-      />
-    );
-  }
-
-  const operators = getFilterOperators(field);
-  const inputType =
-    field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY ? 'number' : 'text';
-  const [betweenStart, betweenEnd] = splitBetweenValue(value);
-  const isBetween = isDateLikeField(field) && operator === 'between';
-
-  return (
-    <div
-      className={`nb-datagrid__filter-wrap${isBetween ? ' nb-datagrid__filter-wrap--between' : ''}`}
-    >
-      {operators.length > 1 ? (
-        <AppDropdown
-          id={`nb-datagrid-filter-op-${field.name}`}
-          value={operator}
-          options={[
-            ...operators.map((op) => ({
-              value: op.value,
-              label: getFilterOperatorLabel(op.value, t),
-              selectedLabel: op.label,
-              iconText: getFilterOperatorIcon(op.value),
-            })),
-            ...(value
-              ? [
-                  {
-                    value: FILTER_RESET_OPERATOR,
-                    label: t('grid.filterOperator.reset'),
-                    iconText: '⌕',
-                  },
-                ]
-              : []),
-          ]}
-          onChange={(nextOperator) => {
-            if (nextOperator === FILTER_RESET_OPERATOR) {
-              onClear();
-              return;
-            }
-            onOperatorChange(nextOperator);
-          }}
-          variant="compact"
-          showFieldLabel={false}
-          menuMinWidth={220}
-          className="nb-datagrid__filter-operator"
-        />
-      ) : (
-        <i className="ph ph-magnifying-glass nb-datagrid__filter-icon" aria-hidden="true" />
-      )}
-      {isBetween ? (
-        <DateRangePicker
-          className="nb-datagrid__filter-range"
-          locale={getCoreLocale()}
-          startValue={betweenStart}
-          endValue={betweenEnd}
-          ariaLabel={t('grid.filterColumn', { column: field.label })}
-          onChange={onBetweenInputChange}
-        />
-      ) : isDateLikeField(field) ? (
-        <DatePicker
-          className="nb-datagrid__filter-date"
-          clearable={false}
-          locale={getCoreLocale()}
-          value={value}
-          ariaLabel={t('grid.filterColumn', { column: field.label })}
-          onChange={onInputChange}
-        />
-      ) : (
-        <input
-          type={inputType}
-          className="nb-datagrid__filter-input"
-          value={value}
-          aria-label={t('grid.filterColumn', { column: field.label })}
-          onChange={(e) => onInputChange(e.target.value)}
-        />
-      )}
-      <button
-        type="button"
-        className={`nb-datagrid__filter-clear${value ? ' is-active' : ''}`}
-        aria-label={t('grid.clearFilter')}
-        tabIndex={value ? 0 : -1}
-        onClick={onClear}
-      >
-        <i className="ph ph-x" aria-hidden="true" />
-      </button>
-    </div>
-  );
-}
 
 function SummaryFooter({
   fields,
@@ -886,95 +397,6 @@ function SummaryFooter({
         {hasRowActions && <td className="nb-datagrid__actions-cell" />}
       </tr>
     </tfoot>
-  );
-}
-
-function DetailRows({ fields, url }: { fields: Field[]; url: string }) {
-  const httpClient = useCoreHttpClient();
-  const resourceStoreFactory = useResourceStoreFactory();
-  const { t } = useCoreTranslation();
-  const isMobile = useIsMobile();
-  const [rows, setRows] = useState<DataRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const source = resourceStoreFactory({ url, idField: getIdField(fields), httpClient });
-    setLoading(true);
-    source
-      .load({})
-      .then((result) => setRows(result.data))
-      .finally(() => setLoading(false));
-  }, [fields, httpClient, resourceStoreFactory, url]);
-
-  if (loading) return <div className="nb-datagrid__loading">{t('grid.loading')}</div>;
-  if (rows.length === 0) return <GridEmptyStateView fallbackTitle={t('grid.noRecords')} />;
-
-  if (isMobile) {
-    const visibleDetailFields = fields.filter((field) => field.visible && !field.hidden);
-    return (
-      <div className="nb-datagrid__detail-cards">
-        {rows.map((row, rowIndex) => (
-          <div
-            key={String(row[getIdField(fields)] ?? rowIndex)}
-            className="nb-datagrid__detail-card"
-          >
-            {visibleDetailFields.map((field, columnIndex) => (
-              <div key={field.name} className="nb-datagrid__detail-card-row">
-                <span className="nb-datagrid__detail-card-label">{field.label}</span>
-                <span className="nb-datagrid__detail-card-value">
-                  {renderCell(
-                    field,
-                    row,
-                    rowIndex,
-                    columnIndex,
-                    undefined,
-                    t('common.yes'),
-                    t('common.no'),
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="nb-datagrid__detail-content">
-      <table className="nb-datagrid__detail-table">
-        <thead>
-          <tr>
-            {fields
-              .filter((field) => field.visible && !field.hidden)
-              .map((field) => (
-                <th key={field.name}>{field.label}</th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={String(row[getIdField(fields)] ?? rowIndex)}>
-              {fields
-                .filter((field) => field.visible && !field.hidden)
-                .map((field, columnIndex) => (
-                  <td key={field.name}>
-                    {renderCell(
-                      field,
-                      row,
-                      rowIndex,
-                      columnIndex,
-                      undefined,
-                      t('common.yes'),
-                      t('common.no'),
-                    )}
-                  </td>
-                ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
@@ -1886,7 +1308,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                           </div>
                           {expanded && detailUrl && detailFields && (
                             <div className="nb-datagrid__card-detail">
-                              <DetailRows fields={detailFields} url={detailUrl} />
+                              <DetailGridSection fields={detailFields} url={detailUrl} />
                             </div>
                           )}
                         </li>
@@ -2205,7 +1627,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                         {expanded && detailUrl && detailFields && (
                           <tr className="nb-datagrid__detail-row">
                             <td colSpan={colSpan}>
-                              <DetailRows fields={detailFields} url={detailUrl} />
+                              <DetailGridSection fields={detailFields} url={detailUrl} />
                             </td>
                           </tr>
                         )}

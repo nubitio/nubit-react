@@ -1,6 +1,6 @@
-import { getCoreTimezone } from '@nubitio/core';
 import { Field } from '../field/Field';
-import { FieldType } from '../field/FieldType';
+import { getFieldTypeModule } from '../field/registry/registry';
+import type { SerializedFieldValue, SerializeFieldContext } from '../field/registry/FieldTypeModule';
 import type { UploadedFile } from './UploadedFile';
 import type { FormDataRecord } from './FormDataSnapshot';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
@@ -17,16 +17,24 @@ export interface SerializeFieldsContext {
   adapter?: BackendAdapter;
 }
 
+function applySerializedValue(
+  formData: FormDataRecord,
+  field: Field,
+  result: SerializedFieldValue,
+): void {
+  if (result.kind === 'set') {
+    formData[field.name] = result.value;
+  } else if (result.kind === 'omit') {
+    delete formData[field.name];
+  }
+}
+
 /**
  * Pure serialization of form data before HTTP submission.
  *
- * Transforms raw form field values into the shape expected by the API:
- * - Applies uploaded file references
- * - Evaluates computed fields
- * - Resolves ENTITY fields via the BackendAdapter (default: Hydra IRIs)
- * - Formats DATE fields as YYYY-MM-DD business dates, with no timezone conversion
- * - Coerces numeric fields
- * - Strips NONE/FILE fields as appropriate
+ * Applies uploaded file references and computed fields, then delegates the
+ * per-type wire format (entity refs, business dates, numeric coercion, file
+ * handling, NONE stripping) to each field's Field-Type module.
  *
  * This function is extracted from useFormSubmit for testability.
  */
@@ -52,119 +60,22 @@ export function serializeFormFields(
     }
   });
 
-  const adapter = ctx.adapter ?? HydraAdapter;
+  const moduleCtx: SerializeFieldContext = {
+    adapter: ctx.adapter ?? HydraAdapter,
+    format: ctx.format,
+    getFieldValue: ctx.getFieldValue,
+  };
 
   fields.forEach((field) => {
-    if (field.type === FieldType.ENTITY || field.type === FieldType.TAGS) {
-      serializeEntityField(formData, field, adapter);
-      return;
-    }
-
-    if (field.type === FieldType.FILE) {
-      serializeFileField(formData, field, ctx);
-      return;
-    }
-
-    if (field.type === FieldType.NONE) {
-      if (!field.isIdentity) {
-        delete formData[field.name];
-      }
-      return;
-    }
-
-    if (field.type === FieldType.DATE) {
-      serializeDateField(formData, field);
-      return;
-    }
-
-    if (field.type === FieldType.TEXT && field.valueType === 'number') {
-      formData[field.name] = Number(formData[field.name]);
-    }
-
-    if (field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY) {
-      serializeNumericField(formData, field);
-    }
+    const result = getFieldTypeModule(field.type).serializeFormValue(
+      field,
+      formData[field.name],
+      moduleCtx,
+    );
+    applySerializedValue(formData, field, result);
   });
 
   return formData;
-}
-
-function serializeEntityField(formData: FormDataRecord, field: Field, adapter: BackendAdapter): void {
-  const val = formData[field.name];
-
-  if (field.multiple) {
-    if (Array.isArray(val)) {
-      formData[field.name] = val.map((item) => adapter.serializeEntityRef(field, item));
-    } else if (val !== null && val !== undefined && val !== '') {
-      const serialized = adapter.serializeEntityRef(field, val);
-      formData[field.name] = serialized !== undefined ? [serialized] : [];
-    } else {
-      delete formData[field.name];
-    }
-    return;
-  }
-
-  const serialized = adapter.serializeEntityRef(field, val);
-  if (serialized === undefined) {
-    delete formData[field.name];
-  } else {
-    formData[field.name] = serialized;
-  }
-}
-
-function serializeFileField(formData: FormDataRecord, field: Field, ctx: SerializeFieldsContext): void {
-  if (ctx.format === 'multipart' && ctx.getFieldValue) {
-    const files = ctx.getFieldValue(field.name) as File[] | FileList | null | undefined;
-    if (files && files.length > 0) {
-      formData[field.name] = files[0];
-    } else {
-      delete formData[field.name];
-    }
-    return;
-  }
-  if (Array.isArray(formData[field.name])) {
-    delete formData[field.name];
-  }
-}
-
-function serializeDateField(formData: FormDataRecord, field: Field): void {
-  const val = formData[field.name];
-  if (val === null || val === undefined || val === '') {
-    delete formData[field.name];
-    return;
-  }
-  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
-    formData[field.name] = val;
-    return;
-  }
-  if (val instanceof Date) {
-    formData[field.name] = new Intl.DateTimeFormat('en-CA', {
-      timeZone: getCoreTimezone(),
-    }).format(val);
-    return;
-  }
-  formData[field.name] = String(val).slice(0, 10);
-}
-
-function serializeNumericField(formData: FormDataRecord, field: Field): void {
-  // Skip numeric coercion for the identity (primary key) field.
-  // UUID / string keys must reach the URL builder as-is (BUG-011).
-  if (field.isIdentity) return;
-
-  const val = formData[field.name];
-
-  // An untouched/cleared numeric field is OMITTED, not null/0: backends with
-  // string-decimal columns reject null ("must be string, NULL given") and
-  // Number(null) would silently write 0. Omission lets server defaults apply
-  // (required fields are stopped earlier by validation).
-  if (val === null || val === undefined || val === '') {
-    delete formData[field.name];
-    return;
-  }
-
-  formData[field.name] = field.sendAsString
-    ? Number(val).toFixed(field.precision || 2)
-    : Number(val);
 }
 
 /**
@@ -181,32 +92,10 @@ export function serializeDetailRows(
   const details = JSON.parse(JSON.stringify(rows)) as FormDataRecord[];
 
   detailFields.forEach((field) => {
-    if (field.type === FieldType.ENTITY) {
-      details.forEach((detail) => {
-        const serialized = adapter.serializeEntityRef(field, detail[field.name]);
-        if (serialized === undefined) {
-          delete detail[field.name];
-        } else {
-          detail[field.name] = serialized;
-        }
-      });
-    }
-
-    if (field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY) {
-      details.forEach((detail) => {
-        const val = detail[field.name];
-        // Same rule as the main form: empty numerics are omitted so server
-        // defaults apply instead of null (rejected by string-decimal
-        // columns) or a silent 0.
-        if (val === null || val === undefined || val === '') {
-          delete detail[field.name];
-          return;
-        }
-        detail[field.name] = field.sendAsString
-          ? Number(val).toFixed(field.precision || 2)
-          : Number(val);
-      });
-    }
+    const typeModule = getFieldTypeModule(field.type);
+    details.forEach((detail) => {
+      applySerializedValue(detail, field, typeModule.serializeDetailValue(field, detail[field.name], adapter));
+    });
   });
 
   // Remove identity field for new rows (string IDs are temp keys from ArrayStore)

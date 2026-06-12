@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/crud",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "type": "module",
   "description": "Declarative CRUD engine with field DSL, forms, datagrids, RBAC, conditional logic and pluggable adapters (Hydra/REST).",
   "license": "MIT",

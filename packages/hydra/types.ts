@@ -40,8 +40,12 @@ export interface CrudHints {
   order?: number;
   /** Column width in pixels or as a CSS string. */
   width?: number;
-  /** Render hint for scalar fields. 'currency' maps decimals to a currency control. */
-  format?: 'currency';
+  /**
+   * Render hint. 'currency' maps decimals to a money control; 'image'/'file'
+   * map media relations (nubitio/admin-bundle Media or compatible) to instant
+   * upload controls that submit the media IRI.
+   */
+  format?: 'currency' | 'image' | 'file';
 }
 
 export interface HydraSupportedProperty {

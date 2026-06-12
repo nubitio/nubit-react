@@ -7,6 +7,8 @@ import {
   switchField,
   entityField,
   enumField,
+  fileField,
+  imageField,
   noneField,
   datetimeField,
 } from '@nubitio/crud';
@@ -295,6 +297,22 @@ export function mapHydraSchemaToFields(
         .required(required)
         .build();
       const field: Field = { ...built, filterable };
+      applyCrudHints(field, fieldSchema.crudHints);
+      fields.push(field);
+      continue;
+    }
+
+    // Rule 3.55 — `format: 'image' | 'file'` hint → upload field. The
+    // property is a relation to a media resource (nubitio/admin-bundle's
+    // Media or compatible: POST {base}media multipart, `path` is the public
+    // URL, form submits the IRI). The upload URL derives from the resource's
+    // own apiUrl base ('/api/products' → '/api/media').
+    const formatHint = fieldSchema.crudHints?.format;
+    if (formatHint === 'image' || formatHint === 'file') {
+      const apiBase = schema.apiUrl.slice(0, schema.apiUrl.lastIndexOf('/') + 1);
+      const base = formatHint === 'image' ? imageField(apiBase) : fileField(apiBase);
+      const built = base.name(name).label(label).required(required).build();
+      const field: Field = { ...built, filterable: false, sortable: false };
       applyCrudHints(field, fieldSchema.crudHints);
       fields.push(field);
       continue;

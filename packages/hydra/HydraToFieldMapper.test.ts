@@ -56,6 +56,38 @@ describe('mapHydraSchemaToFields', () => {
   });
 });
 
+describe('x-crud format: image / file', () => {
+  it('maps image-hinted relations to an upload field targeting {base}media', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'photo', range: '#Media', crudHints: { format: 'image' } }]),
+    );
+
+    const photo = fields.find((f) => f.name === 'photo');
+    expect(photo?.type).toBe('file');
+    expect(photo?.url).toBe('/api/media');
+    expect(photo?.accept).toBe('image/*');
+  });
+
+  it('maps file-hinted relations without the image accept default', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'attachment', range: '#Media', crudHints: { format: 'file' } }]),
+    );
+
+    const attachment = fields.find((f) => f.name === 'attachment');
+    expect(attachment?.type).toBe('file');
+    expect(attachment?.url).toBe('/api/media');
+    expect(attachment?.accept ?? null).toBeNull();
+  });
+
+  it('keeps unhinted relations as entity selects', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'category', range: '#Category', propertyType: 'Link' }]),
+    );
+
+    expect(fields.find((f) => f.name === 'category')?.type).toBe('entity');
+  });
+});
+
 describe('x-crud format: currency', () => {
   it('maps hinted decimals to currency fields', () => {
     const fields = mapHydraSchemaToFields(

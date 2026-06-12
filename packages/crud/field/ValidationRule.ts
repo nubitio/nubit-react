@@ -37,14 +37,28 @@ type CompareRule = {
   };
 };
 
+/**
+ * What the form engine actually passes to custom/async callbacks
+ * (NativeFormView calls `validationCallback({ value, data })`).
+ */
+export interface ValidationCallbackContext {
+  /** Current value of the field being validated. */
+  value: unknown;
+  /** Full form data snapshot, for cross-field rules. */
+  data: Record<string, unknown>;
+}
+
 type CustomRule = {
   type: 'custom';
-  options: { validationCallback: (value: unknown) => boolean; message?: string };
+  options: { validationCallback: (ctx: ValidationCallbackContext) => boolean; message?: string };
 };
 
 type AsyncRule = {
   type: 'async';
-  options: { validationCallback: (value: unknown) => Promise<boolean>; message?: string };
+  options: {
+    validationCallback: (ctx: ValidationCallbackContext) => Promise<boolean>;
+    message?: string;
+  };
 };
 
 export type ValidationRule =

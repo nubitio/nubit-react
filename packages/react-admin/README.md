@@ -19,6 +19,20 @@ npm install @nubitio/react-admin
 "react-router-dom": "^6"
 ```
 
+Icons are [Phosphor](https://phosphoricons.com) CSS classes (`ph ph-*`) used
+throughout the shell, grids and forms — install and import the webfont once:
+
+```bash
+npm install @phosphor-icons/web
+```
+
+```ts
+// main.tsx
+import '@phosphor-icons/web/regular';
+```
+
+Without it, menu and toolbar icons render as empty squares.
+
 ## Quick start
 
 ```tsx

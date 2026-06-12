@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { consolidateAuditEntries, createAuditFieldLabelResolver } from './AuditTrail';
+import {
+  consolidateAuditEntries,
+  createAuditFieldLabelResolver,
+  prepareAuditEntries,
+} from './AuditTrail';
 import type { Field } from '../field/Field';
 
 describe('createAuditFieldLabelResolver', () => {
@@ -40,6 +44,20 @@ describe('consolidateAuditEntries', () => {
         user: 'demo_user',
         action: 'update',
         changes: { phone: { before: '999000111', after: null } },
+      },
+    ]);
+
+    expect(entries).toEqual([]);
+  });
+
+  it('prepareAuditEntries drops a single row whose diff is only null versus empty', () => {
+    const entries = prepareAuditEntries([
+      {
+        id: 1,
+        timestamp: '2026-06-12T11:24:06+00:00',
+        user: 'demo_user',
+        action: 'update',
+        changes: { phone: { before: null, after: '' } },
       },
     ]);
 

@@ -141,7 +141,28 @@ export function consolidateAuditEntries(entries: AuditEntry[]): AuditEntry[] {
   }
 
   flushGroup();
-  return consolidated;
+  return filterMeaningfulAuditEntries(consolidated);
+}
+
+function filterMeaningfulAuditEntries(entries: AuditEntry[]): AuditEntry[] {
+  return entries.flatMap((entry) => {
+    const changes = Object.fromEntries(
+      Object.entries(entry.changes).filter(
+        ([, change]) => !auditValuesEqual(change.before, change.after),
+      ),
+    );
+
+    if (Object.keys(changes).length === 0) {
+      return [];
+    }
+
+    return [{ ...entry, changes }];
+  });
+}
+
+/** Consolidates burst rows and removes fields whose net diff is empty. */
+export function prepareAuditEntries(entries: AuditEntry[]): AuditEntry[] {
+  return filterMeaningfulAuditEntries(consolidateAuditEntries(entries));
 }
 
 export function formatAuditValue(value: unknown): string {

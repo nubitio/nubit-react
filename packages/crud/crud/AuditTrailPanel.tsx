@@ -17,7 +17,7 @@ import {
   type TimelineItemTone,
 } from '@nubitio/ui';
 import type { AuditEntry, AuditFieldLabelResolver } from './AuditTrail';
-import { consolidateAuditEntries } from './AuditTrail';
+import { prepareAuditEntries } from './AuditTrail';
 import { resolveDrawerWidth } from '../view/drawerSizes';
 import type { CrudDrawerSize } from '../view/drawerSizes';
 import './AuditTrailPanel.scss';
@@ -190,7 +190,7 @@ export function AuditTrailPanel({
       .then((response) => {
         setFetchState({
           status: 'success',
-          entries: consolidateAuditEntries(response.data),
+          entries: prepareAuditEntries(response.data),
         });
       })
       .catch(() => {

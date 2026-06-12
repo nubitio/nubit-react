@@ -18,6 +18,8 @@ import {
   TextAreaField,
   TextField,
   ThemeSwitcher,
+  Timeline,
+  TimelineItem,
   Toggle,
 } from '@nubitio/react-admin';
 import './ShowcasePage.css';
@@ -140,6 +142,51 @@ export function ShowcasePage() {
               title="Nothing here yet"
               description="Empty state with icon, title and description."
             />
+          </section>
+
+          <section className="showcase__section showcase__section--wide">
+            <h2>Timelines</h2>
+            <div className="showcase__row" style={{ alignItems: 'flex-start', gap: 24 }}>
+              <Timeline
+                variant="stepper"
+                title="F001-672"
+                description="Document lifecycle"
+                aria-label="Document lifecycle"
+              >
+                <TimelineItem status="complete" title="Draft created" />
+                <TimelineItem status="complete" title="Sent to tax authority" />
+                <TimelineItem status="current" title="Awaiting acknowledgement" />
+                <TimelineItem status="error" title="Rejected · code 2017" />
+              </Timeline>
+              <Timeline
+                variant="log"
+                title="ACME Corp"
+                description="Change history"
+                aria-label="Change history"
+              >
+                <TimelineItem
+                  status="complete"
+                  tone="info"
+                  title="jane@example.com"
+                  timestamp="6/12/2026, 8:23 AM"
+                  dateTime="2026-06-12T08:23:00"
+                >
+                  <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                    Phone: <s style={{ color: 'var(--error-color)' }}>903 303 704</s>{' '}
+                    → <span style={{ color: 'var(--success-color)' }}>999 888 777</span>
+                  </p>
+                </TimelineItem>
+                <TimelineItem
+                  status="complete"
+                  tone="success"
+                  title="jane@example.com"
+                  timestamp="6/11/2026, 4:02 PM"
+                  dateTime="2026-06-11T16:02:00"
+                >
+                  <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Record created</p>
+                </TimelineItem>
+              </Timeline>
+            </div>
           </section>
 
           <section className="showcase__section showcase__section--wide">

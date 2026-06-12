@@ -5,11 +5,25 @@
   min-height: 0;
 }
 
-.nb-audit-trail__subtitle {
-  color: var(--text-secondary);
+.nb-audit-trail__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.nb-audit-trail__record {
+  color: var(--text-primary);
   font-size: var(--font-size-sm, 0.8125rem);
+  font-weight: 600;
   line-height: 1.4;
-  margin: calc(var(--space-1) * -1) 0 0;
+  margin: 0;
+}
+
+.nb-audit-trail__drawer-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs, 0.75rem);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .nb-audit-trail__meta {

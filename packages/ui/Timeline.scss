@@ -75,6 +75,14 @@
   &--pending .nb-timeline__label {
     color: var(--text-tertiary);
   }
+
+  &--error .nb-timeline__label {
+    color: var(--danger-color);
+  }
+
+  &--error:not(:last-child)::before {
+    background: var(--border-color);
+  }
 }
 
 .nb-timeline--log .nb-timeline__item {

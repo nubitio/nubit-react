@@ -17,6 +17,7 @@ import {
   type TimelineItemTone,
 } from '@nubitio/ui';
 import type { AuditEntry, AuditFieldLabelResolver } from './AuditTrail';
+import { consolidateAuditEntries } from './AuditTrail';
 import { resolveDrawerWidth } from '../view/drawerSizes';
 import type { CrudDrawerSize } from '../view/drawerSizes';
 import './AuditTrailPanel.scss';
@@ -187,7 +188,10 @@ export function AuditTrailPanel({
     httpClient
       .get<AuditEntry[]>(url)
       .then((response) => {
-        setFetchState({ status: 'success', entries: response.data });
+        setFetchState({
+          status: 'success',
+          entries: consolidateAuditEntries(response.data),
+        });
       })
       .catch(() => {
         setFetchState({ status: 'error' });
@@ -202,11 +206,13 @@ export function AuditTrailPanel({
     loadEntries();
   }, [loadEntries, visible]);
 
-  const drawerTitle = (
-    <div>
-      <div>{t('auditTrail.title')}</div>
-      {recordSubtitle && <p className="nb-audit-trail__subtitle">{recordSubtitle}</p>}
+  const drawerTitle = recordSubtitle ? (
+    <div className="nb-audit-trail__header">
+      <p className="nb-audit-trail__record">{recordSubtitle}</p>
+      <p className="nb-audit-trail__drawer-label">{t('auditTrail.title')}</p>
     </div>
+  ) : (
+    <div>{t('auditTrail.title')}</div>
   );
 
   const body = (() => {

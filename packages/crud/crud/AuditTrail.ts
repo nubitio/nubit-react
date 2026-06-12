@@ -54,6 +54,87 @@ export function createAuditFieldLabelResolver(
   };
 }
 
+function auditValuesEqual(before: unknown, after: unknown): boolean {
+  return JSON.stringify(before) === JSON.stringify(after);
+}
+
+function mergeAuditEntryGroup(entries: AuditEntry[]): AuditEntry | null {
+  const chronological = [...entries].sort((left, right) => {
+    if (left.id < right.id) return -1;
+    if (left.id > right.id) return 1;
+    return 0;
+  });
+  const mergedChanges: AuditEntry['changes'] = {};
+  const fields = new Set<string>();
+
+  for (const entry of chronological) {
+    for (const field of Object.keys(entry.changes)) {
+      fields.add(field);
+    }
+  }
+
+  for (const field of fields) {
+    const first = chronological.find((entry) => field in entry.changes);
+    const last = [...chronological].reverse().find((entry) => field in entry.changes);
+    if (!first || !last) continue;
+
+    const before = first.changes[field].before;
+    const after = last.changes[field].after;
+    if (!auditValuesEqual(before, after)) {
+      mergedChanges[field] = { before, after };
+    }
+  }
+
+  if (Object.keys(mergedChanges).length === 0) {
+    return null;
+  }
+
+  return {
+    ...chronological[chronological.length - 1],
+    changes: mergedChanges,
+  };
+}
+
+/**
+ * Merges burst audit rows that share the same second, user, and action.
+ * Keeps the earliest "before" and latest "after" per field, and drops
+ * entries whose net diff is empty (e.g. clear-then-restore in one save).
+ */
+export function consolidateAuditEntries(entries: AuditEntry[]): AuditEntry[] {
+  if (entries.length <= 1) {
+    return entries;
+  }
+
+  const consolidated: AuditEntry[] = [];
+  let group: AuditEntry[] = [];
+
+  const flushGroup = () => {
+    if (group.length === 0) return;
+    if (group.length === 1) {
+      consolidated.push(group[0]);
+    } else {
+      const merged = mergeAuditEntryGroup(group);
+      if (merged) consolidated.push(merged);
+    }
+    group = [];
+  };
+
+  const groupKey = (entry: AuditEntry) =>
+    `${entry.timestamp.slice(0, 19)}|${entry.user}|${entry.action}`;
+
+  for (const entry of entries) {
+    if (group.length === 0 || groupKey(group[0]) === groupKey(entry)) {
+      group.push(entry);
+      continue;
+    }
+    flushGroup();
+    group.push(entry);
+  }
+
+  flushGroup();
+  return consolidated;
+}
+
 export function formatAuditValue(value: unknown): string {
   if (value == null || value === '') return '—';
   if (typeof value === 'boolean') return value ? 'Sí' : 'No';

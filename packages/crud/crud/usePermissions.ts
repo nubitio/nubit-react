@@ -53,7 +53,7 @@ export function usePermissions(
   // on every render (e.g. from a default parameter) does not break memoization.
   const opsKey = supportedOperations.slice().sort().join(',');
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   return useMemo(() => {
     const p = resource.permissions;
     const inferred = fromOperations(supportedOperations);

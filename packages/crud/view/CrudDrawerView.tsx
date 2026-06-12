@@ -97,7 +97,7 @@ export const CrudDrawerView = forwardRef<CrudDrawerViewEvents, CrudDrawerViewOpt
     };
 
     const setupObserversRef = useRef(setupObservers);
-    // eslint-disable-next-line react-hooks/refs -- keep event subscriptions using latest options without resubscribing
+
     setupObserversRef.current = setupObservers;
 
     useEffect(() => {

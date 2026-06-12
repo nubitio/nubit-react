@@ -62,7 +62,7 @@ export function logDevHint(resourceUrl: string, fields: Field[], operations: str
 `
       : '';
 
-  // eslint-disable-next-line no-console
+
   console.info(
     `[SmartCRUD] Auto-inferred fields for "${resourceUrl}". To customise, use:\n\n` +
       `defineResource('${resourceUrl}', {\n` +

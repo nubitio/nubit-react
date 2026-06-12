@@ -82,7 +82,7 @@ export const CrudPageView = forwardRef<CrudPageViewEvents, CrudPageViewOptions>(
     };
 
     const setupObserversRef = useRef(setupObservers);
-    setupObserversRef.current = setupObservers; // eslint-disable-line react-hooks/refs
+    setupObserversRef.current = setupObservers;  
 
     useEffect(() => {
       setupObserversRef.current();

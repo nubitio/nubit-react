@@ -465,7 +465,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   );
 
   const toolbar = useMemo(() => {
-    // eslint-disable-next-line react-hooks/refs -- toolbar factories receive refs as opaque handles for event callbacks
+
     const base =
       resolveResourceToolbar(resolvedResource, {
         resource: resolvedResource,

@@ -60,7 +60,7 @@
     content: '';
     left: 11px;
     position: absolute;
-    top: 24px;
+    top: 22px;
     width: 2px;
   }
 
@@ -94,19 +94,29 @@
     padding-bottom: 0;
   }
 
-  // Log entries are self-contained cards; a spine + row dividers read as double separators.
-  &::before {
-    display: none;
+  // Connector spine between event dots — without it the log reads as a
+  // bulleted list, not a timeline. Neutral color regardless of status.
+  &:not(:last-child)::before {
+    background: var(--border-color);
+    left: 7px;
+    top: 18px;
   }
 }
 
+// The marker column matches the height of the heading line so the marker
+// centers on the TITLE row — items with body content below keep the marker
+// anchored to their first line instead of drifting.
 .nb-timeline__marker-col {
-  align-items: flex-start;
+  align-items: center;
   display: flex;
+  height: 20px;
   justify-content: center;
-  padding-top: 2px;
   position: relative;
   z-index: 1;
+}
+
+.nb-timeline--log .nb-timeline__marker-col {
+  height: 18px;
 }
 
 .nb-timeline__marker {
@@ -197,6 +207,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  justify-content: center;
+  min-height: 20px; // matches the marker column → title centers on the marker
 }
 
 .nb-timeline--log .nb-timeline__heading {
@@ -204,6 +216,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  min-height: 18px;
 }
 
 .nb-timeline__label {
@@ -218,4 +231,40 @@
   font-size: var(--font-size-xs);
   font-variant-numeric: tabular-nums;
   line-height: var(--line-height-normal);
+}
+
+// ── Horizontal stepper (wizard/checkout: 1 → 2 → 3) ─────────────────────────
+.nb-timeline--horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+
+  .nb-timeline__item {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+    padding-bottom: 0;
+    text-align: center;
+
+    // Connector runs from this marker to the next one, at marker mid-height.
+    &:not(:last-child)::before {
+      bottom: auto;
+      height: 2px;
+      left: calc(50% + 14px);
+      right: calc(-50% + 14px);
+      top: 9px;
+      width: auto;
+    }
+  }
+
+  .nb-timeline__content {
+    align-items: center;
+  }
+
+  .nb-timeline__heading {
+    align-items: center;
+    min-height: 0;
+  }
 }

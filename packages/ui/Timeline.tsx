@@ -3,12 +3,19 @@ import type { ReactNode } from 'react';
 import './Timeline.scss';
 
 export type TimelineVariant = 'stepper' | 'log';
+export type TimelineOrientation = 'vertical' | 'horizontal';
 export type TimelineItemStatus = 'complete' | 'current' | 'pending' | 'error';
 export type TimelineItemTone = 'default' | 'success' | 'info' | 'danger' | 'warning';
 
 export interface TimelineProps {
   /** `stepper` — workflow stages with checkmarks; `log` — chronological event log. */
   variant?: TimelineVariant;
+  /**
+   * `horizontal` lays the steps in a row (wizard/checkout style: 1 → 2 → 3)
+   * with labels under the markers. Stepper only — the log variant is
+   * inherently vertical and ignores it.
+   */
+  orientation?: TimelineOrientation;
   title?: ReactNode;
   description?: ReactNode;
   children: ReactNode;
@@ -109,12 +116,16 @@ export function TimelineItem({
 
 export function Timeline({
   variant = 'stepper',
+  orientation = 'vertical',
   title,
   description,
   children,
   className,
   'aria-label': ariaLabel,
 }: TimelineProps): React.JSX.Element {
+  // The log variant reads top-to-bottom by nature (newest first).
+  const resolvedOrientation = variant === 'log' ? 'vertical' : orientation;
+
   const panelClasses = [
     'nb-timeline-panel',
     (title != null || description != null) && 'nb-timeline-panel--card',
@@ -135,7 +146,7 @@ export function Timeline({
           </header>
         )}
         <ol
-          className={`nb-timeline nb-timeline--${variant}`}
+          className={`nb-timeline nb-timeline--${variant} nb-timeline--${resolvedOrientation}`}
           role="list"
           aria-label={ariaLabel}
         >

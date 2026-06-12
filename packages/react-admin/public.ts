@@ -251,6 +251,7 @@ export type {
   TimelineProps,
   TimelineItemProps,
   TimelineVariant,
+  TimelineOrientation,
   TimelineItemStatus,
   TimelineItemTone,
   UiStrings,

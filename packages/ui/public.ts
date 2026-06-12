@@ -62,6 +62,7 @@ export type {
   TimelineProps,
   TimelineItemProps,
   TimelineVariant,
+  TimelineOrientation,
   TimelineItemStatus,
   TimelineItemTone,
 } from './Timeline';

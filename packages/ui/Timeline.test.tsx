@@ -36,4 +36,25 @@ describe('Timeline', () => {
     expect(screen.getByText('Updated')).toBeDefined();
     expect(screen.getByText('Field diff')).toBeDefined();
   });
+
+  it('lays the stepper horizontally when asked', () => {
+    render(
+      <Timeline variant="stepper" orientation="horizontal" aria-label="Checkout">
+        <TimelineItem status="complete" title="Cart" />
+        <TimelineItem status="current" title="Payment" />
+      </Timeline>,
+    );
+
+    expect(screen.getByLabelText('Checkout').className).toContain('nb-timeline--horizontal');
+  });
+
+  it('ignores horizontal orientation for the log variant', () => {
+    render(
+      <Timeline variant="log" orientation="horizontal" aria-label="History">
+        <TimelineItem status="complete" title="Created" />
+      </Timeline>,
+    );
+
+    expect(screen.getByLabelText('History').className).toContain('nb-timeline--vertical');
+  });
 });

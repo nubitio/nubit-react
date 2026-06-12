@@ -54,8 +54,17 @@ export function createAuditFieldLabelResolver(
   };
 }
 
+function normalizeAuditScalar(value: unknown): unknown {
+  if (value == null || value === '') {
+    return null;
+  }
+  return value;
+}
+
 function auditValuesEqual(before: unknown, after: unknown): boolean {
-  return JSON.stringify(before) === JSON.stringify(after);
+  return (
+    JSON.stringify(normalizeAuditScalar(before)) === JSON.stringify(normalizeAuditScalar(after))
+  );
 }
 
 function mergeAuditEntryGroup(entries: AuditEntry[]): AuditEntry | null {

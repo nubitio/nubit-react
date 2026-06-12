@@ -46,6 +46,27 @@ describe('consolidateAuditEntries', () => {
     expect(entries).toEqual([]);
   });
 
+  it('drops bursts where null and empty string cancel out', () => {
+    const entries = consolidateAuditEntries([
+      {
+        id: 2,
+        timestamp: '2026-06-12T11:24:06+00:00',
+        user: 'demo_user',
+        action: 'update',
+        changes: { phone: { before: '999000111', after: '' } },
+      },
+      {
+        id: 1,
+        timestamp: '2026-06-12T11:24:06+00:00',
+        user: 'demo_user',
+        action: 'update',
+        changes: { phone: { before: null, after: '999000111' } },
+      },
+    ]);
+
+    expect(entries).toEqual([]);
+  });
+
   it('keeps the earliest before and latest after within the same burst', () => {
     const entries = consolidateAuditEntries([
       {

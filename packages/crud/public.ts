@@ -27,6 +27,7 @@ export {
 export type {
   AuditEntry,
   AuditTrailConfig,
+  AuditFieldLabelResolver,
   AuditTrailPanelProps,
   BulkAction,
   ColumnPreset,

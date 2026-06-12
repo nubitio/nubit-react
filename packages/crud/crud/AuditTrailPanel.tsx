@@ -1,25 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useCoreHttpClient, getCoreLocale, getCoreTimezone, useCoreTranslation } from '@nubitio/core';
-import type { AuditEntry } from './AuditTrail';
+import {
+  getCoreLocale,
+  getCoreTimezone,
+  useCoreHttpClient,
+  useCoreTranslation,
+} from '@nubitio/core';
+import { Badge, Button, Drawer, EmptyState, Skeleton } from '@nubitio/ui';
+import type { AuditEntry, AuditFieldLabelResolver } from './AuditTrail';
+import { resolveDrawerWidth } from '../view/drawerSizes';
+import type { CrudDrawerSize } from '../view/drawerSizes';
+import './AuditTrailPanel.scss';
 
 export interface AuditTrailPanelProps {
   url: string | null;
   renderEntry?: (entry: AuditEntry) => ReactNode;
   visible: boolean;
   onClose: () => void;
+  recordSubtitle?: string;
+  resolveFieldLabel: AuditFieldLabelResolver;
+  drawerSize?: CrudDrawerSize;
 }
 
-const ACTION_COLORS: Record<AuditEntry['action'], string> = {
-  create: '#2e7d32',
-  update: '#1565c0',
-  delete: '#c62828',
+const ACTION_BADGE: Record<AuditEntry['action'], 'success' | 'info' | 'danger'> = {
+  create: 'success',
+  update: 'info',
+  delete: 'danger',
 };
 
-function DefaultEntryRenderer({ entry }: { entry: AuditEntry }): React.JSX.Element {
+function formatAuditValue(value: unknown, yesLabel: string, noLabel: string): string {
+  if (value == null || value === '') return '—';
+  if (typeof value === 'boolean') return value ? yesLabel : noLabel;
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function DefaultEntryRenderer({
+  entry,
+  resolveFieldLabel,
+  yesLabel,
+  noLabel,
+}: {
+  entry: AuditEntry;
+  resolveFieldLabel: AuditFieldLabelResolver;
+  yesLabel: string;
+  noLabel: string;
+}): React.JSX.Element {
   const { t } = useCoreTranslation();
   const date = new Date(entry.timestamp);
-  const formatted = Number.isNaN(date.getTime()) ? entry.timestamp : date.toLocaleString(getCoreLocale(), { timeZone: getCoreTimezone() });
+  const formatted = Number.isNaN(date.getTime())
+    ? entry.timestamp
+    : date.toLocaleString(getCoreLocale(), { timeZone: getCoreTimezone() });
 
   const actionLabels: Record<AuditEntry['action'], string> = {
     create: t('auditTrail.action.create'),
@@ -30,44 +67,42 @@ function DefaultEntryRenderer({ entry }: { entry: AuditEntry }): React.JSX.Eleme
   const changeKeys = Object.keys(entry.changes);
 
   return (
-    <li
-      style={{
-        borderBottom: '1px solid #e0e0e0',
-        padding: '10px 0',
-        listStyle: 'none',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <span style={{ fontSize: 12, color: '#757575' }}>{formatted}</span>
-        <span style={{ fontSize: 12, color: '#424242' }}>{entry.user}</span>
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            padding: '1px 6px',
-            borderRadius: 4,
-            backgroundColor: ACTION_COLORS[entry.action],
-            color: '#fff',
-          }}
-        >
-          {actionLabels[entry.action]}
-        </span>
+    <li className={`nb-audit-trail__entry nb-audit-trail__entry--${entry.action}`}>
+      <span className="nb-audit-trail__marker" aria-hidden="true" />
+      <div>
+        <div className="nb-audit-trail__meta">
+          <time className="nb-audit-trail__timestamp" dateTime={entry.timestamp}>
+            {formatted}
+          </time>
+          <span className="nb-audit-trail__user">{entry.user}</span>
+          <Badge variant={ACTION_BADGE[entry.action]} size="sm" pill>
+            {actionLabels[entry.action]}
+          </Badge>
+        </div>
+        {changeKeys.length > 0 && (
+          <ul className="nb-audit-trail__changes">
+            {changeKeys.map((field) => {
+              const { before, after } = entry.changes[field];
+              return (
+                <li key={field} className="nb-audit-trail__change">
+                  <span className="nb-audit-trail__field">{resolveFieldLabel(field)}</span>
+                  <div className="nb-audit-trail__diff">
+                    <span className="nb-audit-trail__value nb-audit-trail__value--before">
+                      {formatAuditValue(before, yesLabel, noLabel)}
+                    </span>
+                    <span className="nb-audit-trail__arrow" aria-hidden="true">
+                      →
+                    </span>
+                    <span className="nb-audit-trail__value nb-audit-trail__value--after">
+                      {formatAuditValue(after, yesLabel, noLabel)}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
-      {changeKeys.length > 0 && (
-        <ul style={{ margin: '4px 0 0 0', padding: '0 0 0 16px' }}>
-          {changeKeys.map((field) => {
-            const { before, after } = entry.changes[field];
-            return (
-              <li key={field} style={{ fontSize: 12, color: '#616161' }}>
-                <strong>{field}:</strong>{' '}
-                <span style={{ color: '#c62828' }}>{String(before ?? '—')}</span>
-                {' → '}
-                <span style={{ color: '#2e7d32' }}>{String(after ?? '—')}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
     </li>
   );
 }
@@ -78,103 +113,149 @@ type FetchState =
   | { status: 'error' }
   | { status: 'success'; entries: AuditEntry[] };
 
+function AuditTrailSkeleton(): React.JSX.Element {
+  return (
+    <div className="nb-audit-trail__skeleton" aria-busy="true">
+      <Skeleton variant="rect" height={72} />
+      <Skeleton variant="rect" height={72} />
+      <Skeleton variant="rect" height={72} />
+    </div>
+  );
+}
+
 export function AuditTrailPanel({
   url,
   renderEntry,
   visible,
   onClose,
-}: AuditTrailPanelProps): React.JSX.Element | null {
+  recordSubtitle,
+  resolveFieldLabel,
+  drawerSize = 'sm',
+}: AuditTrailPanelProps): React.JSX.Element {
   const { t } = useCoreTranslation();
   const httpClient = useCoreHttpClient();
   const [fetchState, setFetchState] = useState<FetchState>({ status: 'idle' });
+  const yesLabel = t('common.yes');
+  const noLabel = t('common.no');
 
-  useEffect(() => {
-    if (!visible || url === null) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset local async state when panel closes or no record is selected
+  const loadEntries = useCallback(() => {
+    if (url === null) {
       setFetchState({ status: 'idle' });
       return;
     }
 
-    let cancelled = false;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- transition request state before subscribing to the async HTTP response
     setFetchState({ status: 'loading' });
-
     httpClient
       .get<AuditEntry[]>(url)
       .then((response) => {
-        if (!cancelled) setFetchState({ status: 'success', entries: response.data });
+        setFetchState({ status: 'success', entries: response.data });
       })
       .catch(() => {
-        if (!cancelled) setFetchState({ status: 'error' });
+        setFetchState({ status: 'error' });
       });
+  }, [httpClient, url]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [httpClient, url, visible]);
+  useEffect(() => {
+    if (!visible) {
+      setFetchState({ status: 'idle' });
+      return;
+    }
+    loadEntries();
+  }, [loadEntries, visible]);
 
-  if (!visible) return null;
+  const drawerTitle = (
+    <div>
+      <div>{t('auditTrail.title')}</div>
+      {recordSubtitle && <p className="nb-audit-trail__subtitle">{recordSubtitle}</p>}
+    </div>
+  );
+
+  const body = (() => {
+    if (url === null) {
+      return (
+        <EmptyState
+          fill
+          icon="cursor-click"
+          title={t('auditTrail.selectRecord')}
+          description={t('auditTrail.selectRecordHint')}
+          size="sm"
+        />
+      );
+    }
+
+    if (fetchState.status === 'loading') {
+      return <AuditTrailSkeleton />;
+    }
+
+    if (fetchState.status === 'error') {
+      return (
+        <div className="nb-audit-trail__error">
+          <EmptyState
+            fill
+            variant="danger"
+            icon="warning-circle"
+            title={t('auditTrail.error')}
+            size="sm"
+            action={
+              <Button variant="secondary" size="sm" onClick={loadEntries}>
+                {t('auditTrail.retry')}
+              </Button>
+            }
+          />
+        </div>
+      );
+    }
+
+    if (fetchState.status === 'success' && fetchState.entries.length === 0) {
+      return (
+        <EmptyState
+          fill
+          icon="clock-counter-clockwise"
+          title={t('auditTrail.empty')}
+          description={t('auditTrail.emptyHint')}
+          size="sm"
+        />
+      );
+    }
+
+    if (fetchState.status === 'success') {
+      return (
+        <ul className="nb-audit-trail__timeline">
+          {fetchState.entries.map((entry) =>
+            renderEntry ? (
+              <li key={String(entry.id)} className="nb-audit-trail__entry">
+                {renderEntry(entry)}
+              </li>
+            ) : (
+              <DefaultEntryRenderer
+                key={String(entry.id)}
+                entry={entry}
+                resolveFieldLabel={resolveFieldLabel}
+                yesLabel={yesLabel}
+                noLabel={noLabel}
+              />
+            ),
+          )}
+        </ul>
+      );
+    }
+
+    return null;
+  })();
 
   return (
-    <aside
-      className="nb-audit-trail-panel"
-      style={{
-        border: '1px solid #e0e0e0',
-        borderRadius: 4,
-        padding: '12px 16px',
-        backgroundColor: '#fafafa',
-        minWidth: 280,
-      }}
+    <Drawer
+      isOpen={visible}
+      onClose={onClose}
+      title={drawerTitle}
+      width={resolveDrawerWidth({ drawerSize })}
+      side="right"
+      scrim="subtle"
+      closeLabel={t('auditTrail.closeButton')}
+      aria-label={t('auditTrail.title')}
+      className="nb-audit-trail-drawer"
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 12,
-        }}
-      >
-        <strong style={{ fontSize: 14 }}>{t('auditTrail.title')}</strong>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('auditTrail.closeButton')}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 18,
-            lineHeight: 1,
-            padding: '0 4px',
-            color: '#616161',
-          }}
-        >
-          ×
-        </button>
-      </div>
-
-      {url === null ? (
-        <p style={{ fontSize: 13, color: '#757575', margin: 0 }}>{t('auditTrail.selectRecord')}</p>
-      ) : fetchState.status === 'loading' ? (
-        <p style={{ fontSize: 13, color: '#757575', margin: 0 }}>{t('auditTrail.loading')}</p>
-      ) : fetchState.status === 'error' ? (
-        <p style={{ fontSize: 13, color: '#c62828', margin: 0 }}>{t('auditTrail.error')}</p>
-      ) : fetchState.status === 'success' ? (
-        fetchState.entries.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#757575', margin: 0 }}>{t('auditTrail.empty')}</p>
-        ) : (
-          <ul style={{ margin: 0, padding: 0 }}>
-            {fetchState.entries.map((entry) =>
-              renderEntry ? (
-                <React.Fragment key={String(entry.id)}>{renderEntry(entry)}</React.Fragment>
-              ) : (
-                <DefaultEntryRenderer key={String(entry.id)} entry={entry} />
-              ),
-            )}
-          </ul>
-        )
-      ) : null}
-    </aside>
+      <div className="nb-audit-trail">{body}</div>
+    </Drawer>
   );
 }

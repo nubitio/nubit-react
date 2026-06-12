@@ -12,10 +12,15 @@ export interface CoreTranslationKeys {
   'crudPage.schemaErrorRetry': string;
   'auditTrail.title': string;
   'auditTrail.closeButton': string;
+  'auditTrail.toolbarHint': string;
+  'auditTrail.rowAction': string;
   'auditTrail.selectRecord': string;
+  'auditTrail.selectRecordHint': string;
   'auditTrail.loading': string;
   'auditTrail.error': string;
+  'auditTrail.retry': string;
   'auditTrail.empty': string;
+  'auditTrail.emptyHint': string;
   'auditTrail.action.create': string;
   'auditTrail.action.update': string;
   'auditTrail.action.delete': string;

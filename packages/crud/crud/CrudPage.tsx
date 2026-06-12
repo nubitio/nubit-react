@@ -6,10 +6,11 @@ import { CrudFormShell } from '../view/CrudFormShell';
 import { resolveViewMode } from '../view/viewMode';
 import { useCrudPage } from './useCrudPage';
 import { useCoreTranslation, useEvents } from '@nubitio/core';
-import type { ResourceConfig, ResourceRowActions } from './ResourceConfig';
+import type { ResourceConfig, ResourceRowActions, ResourceToolbarAction } from './ResourceConfig';
 import type { BulkAction } from './BulkAction';
 import type { Field } from '../field/Field';
 import { AuditTrailPanel } from './AuditTrailPanel';
+import { createAuditFieldLabelResolver } from './AuditTrail';
 import { DialogStoreProvider } from './DialogStoreProvider';
 import { useCrudDialogStore } from './useCrudDialogStore';
 import type { DialogMode } from './dialogStore';
@@ -408,15 +409,40 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
       if (first != null) {
         const id = (first['id'] ?? first['ID'] ?? null) as string | number | null;
         setSelectedRowId(id);
+      } else {
+        setSelectedRowId(null);
       }
     }
   };
+
+  const selectedRow = selectedRows[0] ?? null;
 
   const auditUrl = useMemo(() => {
     if (!resolvedResource.auditTrail?.enabled || selectedRowId == null) return null;
     const { apiUrl } = resolvedResource.auditTrail;
     return typeof apiUrl === 'function' ? apiUrl(selectedRowId) : `${apiUrl}${selectedRowId}`;
   }, [resolvedResource.auditTrail, selectedRowId]);
+
+  const resolveAuditFieldLabel = useMemo(
+    () => createAuditFieldLabelResolver(resolvedResource.auditTrail, routeAwareGridFields),
+    [resolvedResource.auditTrail, routeAwareGridFields],
+  );
+
+  const auditRecordSubtitle = useMemo(() => {
+    if (!resolvedResource.auditTrail?.recordSubtitle || selectedRow == null) return undefined;
+    return resolvedResource.auditTrail.recordSubtitle(selectedRow);
+  }, [resolvedResource.auditTrail, selectedRow]);
+
+  const openAuditTrail = useCallback((row?: T) => {
+    if (row != null) {
+      const id = (row['id'] ?? row['ID'] ?? null) as string | number | null;
+      if (id != null) {
+        setSelectedRowId(id);
+        setSelectedRows([row]);
+      }
+    }
+    setAuditOpen(true);
+  }, []);
 
   const executeBulkAction = useCallback(
     async (action: BulkAction) => {
@@ -440,16 +466,65 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
 
   const toolbar = useMemo(() => {
     // eslint-disable-next-line react-hooks/refs -- toolbar factories receive refs as opaque handles for event callbacks
-    return resolveResourceToolbar(resolvedResource, {
-      resource: resolvedResource,
-      selectedRow: selectedRows[0],
-      selectedRows,
-      gridRef,
-      formRef,
-      events,
-      emit,
+    const base =
+      resolveResourceToolbar(resolvedResource, {
+        resource: resolvedResource,
+        selectedRow: selectedRows[0],
+        selectedRows,
+        gridRef,
+        formRef,
+        events,
+        emit,
+      }) ?? {};
+
+    if (!hasAuditTrail) return base;
+
+    return {
+      ...base,
+      utility: [
+        ...(base.utility ?? []),
+        {
+          key: 'audit-trail',
+          text: t('crudPage.auditTrailButton'),
+          icon: 'ph-clock-counter-clockwise',
+          hint: t('auditTrail.toolbarHint'),
+          disabled: selectedRowId == null,
+          onClick: () => openAuditTrail(),
+        },
+      ],
+    };
+  }, [
+    emit,
+    events,
+    formRef,
+    gridRef,
+    hasAuditTrail,
+    openAuditTrail,
+    resolvedResource,
+    selectedRowId,
+    selectedRows,
+    t,
+  ]);
+
+  const rowActions = useMemo((): ResourceRowActions<T> | undefined => {
+    const base = resolvedResource.rowActions;
+    if (!hasAuditTrail || resolvedResource.auditTrail?.rowAction === false) {
+      return base;
+    }
+
+    const auditAction = (row: T): ResourceToolbarAction => ({
+      key: 'audit-trail',
+      text: t('auditTrail.rowAction'),
+      icon: 'ph-clock-counter-clockwise',
+      onClick: () => openAuditTrail(row),
     });
-  }, [emit, events, formRef, gridRef, resolvedResource, selectedRows]);
+
+    if (typeof base === 'function') {
+      return (row) => [...base(row), auditAction(row)];
+    }
+
+    return (row) => [...(base ?? []), auditAction(row)];
+  }, [hasAuditTrail, openAuditTrail, resolvedResource.auditTrail?.rowAction, resolvedResource.rowActions, t]);
 
   /** Preset selector rendered as a toolbar slot via `beforeToolbar`. */
   const renderPresetSelector = hasPresets
@@ -469,10 +544,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     <div
       id="wrapper"
       className={
-        [
-          auditOpen && 'wrapper--with-audit',
-          viewMode.mode === 'page' && dialogIsOpen && 'wrapper--with-page',
-        ]
+        [viewMode.mode === 'page' && dialogIsOpen && 'wrapper--with-page']
           .filter(Boolean)
           .join(' ') || undefined
       }
@@ -493,17 +565,6 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
               {action.label}
             </Button>
           ))}
-        </div>
-      )}
-      {hasAuditTrail && (
-        <div className="nb-audit-trail-toolbar" style={{ marginBottom: 8 }}>
-          <button
-            type="button"
-            onClick={() => setAuditOpen((prev) => !prev)}
-            aria-pressed={auditOpen}
-          >
-            {t('crudPage.auditTrailButton')}
-          </button>
         </div>
       )}
       <DataGridView
@@ -530,7 +591,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         mode={resolvedResource.mode}
         stateStoringEnabled={resolvedResource.stateStoring}
         toolbar={toolbar}
-        rowActions={resolvedResource.rowActions as ResourceRowActions | undefined}
+        rowActions={rowActions as ResourceRowActions | undefined}
         onAdd={requestNew}
         onEdit={requestEdit}
         onView={requestView}
@@ -616,6 +677,9 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
           renderEntry={resolvedResource.auditTrail!.renderEntry}
           visible={auditOpen}
           onClose={() => setAuditOpen(false)}
+          recordSubtitle={auditRecordSubtitle}
+          resolveFieldLabel={resolveAuditFieldLabel}
+          drawerSize={resolvedResource.auditTrail?.drawerSize}
         />
       )}
       <ConfirmDialog

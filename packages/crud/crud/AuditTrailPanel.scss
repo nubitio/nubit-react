@@ -1,3 +1,7 @@
+.nb-audit-trail-drawer .nb-drawer__body {
+  padding: var(--space-4) var(--space-5) var(--space-6);
+}
+
 .nb-audit-trail {
   display: flex;
   flex-direction: column;
@@ -49,12 +53,9 @@
 }
 
 .nb-audit-trail__change {
-  background: var(--surface-2);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md, 6px);
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
+  padding: 0;
 }
 
 .nb-audit-trail__field {
@@ -79,13 +80,13 @@
 }
 
 .nb-audit-trail__value--before {
-  color: var(--danger-color);
+  color: var(--status-danger-text, var(--error-color));
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--danger-color) 55%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--error-color) 55%, transparent);
 }
 
 .nb-audit-trail__value--after {
-  color: var(--success-color);
+  color: var(--status-success-text, var(--success-color));
   font-weight: 500;
 }
 

@@ -484,9 +484,14 @@
     background: var(--grid-row-hover-bg, var(--surface-2));
   }
 
-  &:focus-visible td {
-    background: color-mix(in srgb, var(--accent-color) 7%, var(--surface-1));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 34%, transparent);
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: -2px;
+
+    td {
+      background: color-mix(in srgb, var(--accent-color) 7%, var(--surface-1));
+      box-shadow: none;
+    }
   }
 
   &.nb-datagrid__row--selected td {
@@ -1380,7 +1385,8 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   inset: 0;
   justify-content: center;
   position: absolute;
-  z-index: 3;
+  // Above sticky detail/actions columns (z-index up to 5) and header cells (z-index 3).
+  z-index: 10;
 }
 
 .nb-datagrid__loading-card {

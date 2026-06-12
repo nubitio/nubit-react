@@ -88,20 +88,15 @@
 .nb-timeline--log .nb-timeline__item {
   gap: var(--space-2);
   grid-template-columns: 16px 1fr;
-  padding: var(--space-3) 0;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--space-3);
-  }
-
-  &:not(:last-child)::before {
-    left: 7px;
-    top: 18px;
-  }
+  padding: 0 0 var(--space-4);
 
   &:last-child {
     padding-bottom: 0;
+  }
+
+  // Log entries are self-contained cards; a spine + row dividers read as double separators.
+  &::before {
+    display: none;
   }
 }
 

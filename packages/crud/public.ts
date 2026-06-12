@@ -172,6 +172,8 @@ export type {
   ResourceSchemaResolver,
 } from './schema/ResourceSchema';
 export { ResourceStoreProvider } from './data/ResourceStore';
+export { createRestResourceStore } from './data/restResourceStore';
+export type { RestQueryDialect } from './data/restResourceStore';
 export type { FieldOverride } from './crud/resolveSmartCrudFields';
 export { useResourceStoreFactory } from './data/ResourceStore';
 export type {

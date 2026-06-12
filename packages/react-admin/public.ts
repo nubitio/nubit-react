@@ -187,8 +187,8 @@ export type {
 export { initCoreI18n } from '@nubitio/core';
 
 // ── Backend adapters & data stores ────────────────────────────────────────────
-export { RestAdapter, HydraAdapter, ResourceStoreProvider } from '@nubitio/crud';
-export type { BackendAdapter, ResourceStoreProviderProps } from '@nubitio/crud';
+export { RestAdapter, HydraAdapter, ResourceStoreProvider, createRestResourceStore } from '@nubitio/crud';
+export type { BackendAdapter, ResourceStoreProviderProps, RestQueryDialect } from '@nubitio/crud';
 
 // ── UI primitives & localization ──────────────────────────────────────────────
 export {

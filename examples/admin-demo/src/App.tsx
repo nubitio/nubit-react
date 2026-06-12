@@ -5,11 +5,14 @@ import {
   CoreProvider,
   ResourceStoreProvider,
   ThemeProvider,
+  createRestResourceStore,
   type AdminMenuItem,
 } from '@nubitio/react-admin';
-import { restResourceStore } from './restResourceStore';
 import { ShowcasePage } from './pages/ShowcasePage';
 import { UsersPage } from './pages/UsersPage';
+
+// JSONPlaceholder speaks the _page/_limit dialect and ignores unknown params.
+const restResourceStore = createRestResourceStore({ pageParam: '_page', pageSizeParam: '_limit' });
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },

@@ -183,8 +183,15 @@ function DetailSummaryFooter({
               const align = item?.align ?? field.align;
               const alignItems =
                 align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start';
+              const colWidth = item ? resolveDetailColWidth(field, colWidths) : undefined;
               return (
-                <td key={field.name} style={align ? { textAlign: align } : undefined}>
+                <td
+                  key={field.name}
+                  style={{
+                    ...(align ? { textAlign: align } : undefined),
+                    ...(colWidth ? { minWidth: colWidth } : undefined),
+                  }}
+                >
                   {item && (
                     <div className="nb-form__detail-summary-cell" style={{ alignItems }}>
                       {item.label && <span className="nb-form__detail-summary-label">{item.label}</span>}

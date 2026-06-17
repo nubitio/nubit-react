@@ -932,9 +932,12 @@
 
 .nb-form__detail-summary-value {
   color: var(--text-primary);
+  display: block;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+  max-width: none;
   white-space: nowrap;
+  width: max-content;
 }
 
 // ── Controls inside cells — flush, borderless, spreadsheet-like ────────────────

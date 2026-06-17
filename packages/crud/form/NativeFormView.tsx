@@ -119,6 +119,20 @@ function validateField(field: Field, value: unknown, formData: FormDataRecord, t
   return null;
 }
 
+const DETAIL_CURRENCY_COL_WIDTH = 112;
+const DETAIL_NUMBER_COL_WIDTH = 96;
+
+function resolveDetailColWidth(field: Field, colWidths: Record<string, number>): number | undefined {
+  if (colWidths[field.name] !== undefined) return colWidths[field.name];
+  if (field.width !== undefined) {
+    const parsed = typeof field.width === 'number' ? field.width : Number.parseInt(String(field.width), 10);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  if (field.type === FieldType.CURRENCY) return DETAIL_CURRENCY_COL_WIDTH;
+  if (field.type === FieldType.NUMBER) return DETAIL_NUMBER_COL_WIDTH;
+  return undefined;
+}
+
 function DetailColumnGroup({
   allowDeleting,
   fields,
@@ -131,7 +145,7 @@ function DetailColumnGroup({
   return (
     <colgroup>
       {fields.map((field) => {
-        const width = colWidths[field.name] ?? field.width;
+        const width = resolveDetailColWidth(field, colWidths);
         return <col key={field.name} style={width ? { width } : undefined} />;
       })}
       {allowDeleting && <col className="nb-form__col-actions-col" />}
@@ -159,7 +173,7 @@ function DetailSummaryFooter({
   const itemsByColumn = new Map(summary.items.filter((item) => item.column).map((item) => [item.column, item]));
 
   return (
-    <div ref={scrollRef} className="nb-form__detail-summary-wrap" aria-hidden="true">
+    <div ref={scrollRef} className="nb-form__detail-summary-wrap">
       <table className="nb-form__detail-table nb-form__detail-summary-table">
         <DetailColumnGroup allowDeleting={allowDeleting} colWidths={colWidths} fields={fields} />
         <tbody className="nb-form__detail-summary">
@@ -167,11 +181,12 @@ function DetailSummaryFooter({
             {fields.map((field) => {
               const item = itemsByColumn.get(field.name);
               const align = item?.align ?? field.align;
-              const justifyContent = align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start';
+              const alignItems =
+                align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start';
               return (
                 <td key={field.name} style={align ? { textAlign: align } : undefined}>
                   {item && (
-                    <div className="nb-form__detail-summary-cell" style={{ justifyContent }}>
+                    <div className="nb-form__detail-summary-cell" style={{ alignItems }}>
                       {item.label && <span className="nb-form__detail-summary-label">{item.label}</span>}
                       <span className="nb-form__detail-summary-value">{resolveSummaryText(rows, item)}</span>
                     </div>

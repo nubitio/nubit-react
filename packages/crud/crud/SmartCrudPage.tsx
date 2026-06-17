@@ -14,6 +14,7 @@ import { resolveCrudResource } from './resolveCrudResource';
 import { useSmartCrudRoles } from './SmartCrudRolesContext';
 import { useSmartCrudOperation } from './useSmartCrudOperation';
 import { useSmartCrudFields } from './useSmartCrudFields';
+import { applyFormDetailFormFieldOverrides } from './applyFormDetailFormFieldOverrides';
 import type { DataRecord } from '@nubitio/core';
 import type { FormHandle } from '../form/FormHandle';
 import type { GridHandle } from '../datagrid/GridHandle';
@@ -173,6 +174,11 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     stableRoles,
   );
 
+  const formFields = useMemo(
+    () => applyFormDetailFormFieldOverrides(processedFields, resolvedBaseResource.formDetail),
+    [processedFields, resolvedBaseResource.formDetail],
+  );
+
   // Real-time Mercure subscription
   useMercureSubscription(
     resource.apiUrl,
@@ -194,7 +200,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
         ...(!hasManualFields ? { fields: gridFields } : {}),
         apiUrl: normalizedApiUrl,
         fields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : gridFields,
-        formFields: processedFields,
+        formFields,
         // Backend-declared layout from the API doc; explicit config wins.
         formLayout: resolvedBaseResource.formLayout ?? inferredFormLayout,
         _supportedOperations: supportedOperations,
@@ -205,7 +211,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
       hasManualFields,
       inferredFormLayout,
       normalizedApiUrl,
-      processedFields,
+      formFields,
       resolvedBaseResource,
       resource.fields,
       supportedOperations,

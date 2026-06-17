@@ -75,6 +75,14 @@ export function normalizeFormData(
     if (field.type === FieldType.ENTITY) {
       normalizeEntityField(row, field, adapter, prependDataByField);
     }
+    if (
+      field.type !== FieldType.ENTITY &&
+      field.type !== FieldType.FILE &&
+      (Array.isArray(row[field.name]) ||
+        (row[field.name] !== null && typeof row[field.name] === 'object'))
+    ) {
+      delete row[field.name];
+    }
   });
 
   return row;

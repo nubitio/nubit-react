@@ -19,6 +19,9 @@ export {
   configureCoreDate, // deprecated
   getCoreApiBaseUrl,
   getCoreCurrency,
+  getMercureTopicOrigin,
+  buildMercureCollectionTopic,
+  resolveMercureTopicOrigin,
 } from '@nubitio/core';
 export type { CoreProviderProps, CoreConfigProviderProps, CoreConfig } from '@nubitio/core';
 

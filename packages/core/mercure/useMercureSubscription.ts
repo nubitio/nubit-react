@@ -6,6 +6,8 @@
  * - If `hubUrl` is null (Mercure not configured) or `enabled` is false → no-op.
  * - Subscribes to the wildcard topic `<origin>/<apiUrl>/{id}` (URI Template RFC 6570),
  *   which captures any item-level event (create / update / delete) for the collection.
+ * - `<origin>` comes from `CoreConfig.mercureTopicOrigin`, an absolute `apiBaseUrl`,
+ *   or `window.location.origin` (see `buildMercureCollectionTopic`).
  * - Cleanup: unsubscribes on unmount or when dependencies change (no memory leaks).
  *
  * ## Usage
@@ -25,6 +27,8 @@
  */
 
 import { useEffect } from 'react';
+import { useCoreConfig } from '../config/CoreConfig';
+import { buildMercureCollectionTopic } from './mercureTopics';
 import { useMercureHub } from './useMercureHub';
 import MercureManager from './MercureManager';
 
@@ -34,6 +38,7 @@ export function useMercureSubscription(
   enabled = true,
 ): void {
   const hubUrl = useMercureHub();
+  const { mercureTopicOrigin, apiBaseUrl } = useCoreConfig();
 
   useEffect(() => {
     // Graceful degradation: skip if hub not discovered, disabled, or no URL.
@@ -41,10 +46,10 @@ export function useMercureSubscription(
       return;
     }
 
-    // Build the wildcard topic URI Template (RFC 6570):
-    // e.g. apiUrl = 'api/products' → topic = 'https://host/api/products/{id}'
-    const normalizedPath = apiUrl.replace(/^\//, '');
-    const topic = `${window.location.origin}/${normalizedPath}/{id}`;
+    const topic = buildMercureCollectionTopic(apiUrl, mercureTopicOrigin, apiBaseUrl);
+    if (!topic) {
+      return;
+    }
 
     // Wrap onUpdate so MercureManager receives a (data: unknown) => void signature.
     // We ignore the SSE payload — the grid always does a full refresh.
@@ -61,5 +66,5 @@ export function useMercureSubscription(
     // callback (e.g. wrapped in useCallback). Including it would cause re-subscriptions
     // on every render if the caller forgets to memoize.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hubUrl, enabled, apiUrl]);
+  }, [hubUrl, enabled, apiUrl, mercureTopicOrigin, apiBaseUrl]);
 }

@@ -14,6 +14,7 @@ export {
   getCoreTimezone,
   getCoreApiBaseUrl,
   getCoreCurrency,
+  getMercureTopicOrigin,
   useCoreConfig,
 } from './config/CoreConfig';
 export type { CoreConfig, CoreConfigProviderProps } from './config/CoreConfig';
@@ -69,6 +70,8 @@ export type { CoreNotificationType, CoreRuntime, CoreRuntimeProviderProps } from
 export {
   MercureProvider,
   MercureManager,
+  buildMercureCollectionTopic,
+  resolveMercureTopicOrigin,
   useMercureHub,
   useMercureSubscription,
 } from './mercure';

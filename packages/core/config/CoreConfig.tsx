@@ -10,6 +10,12 @@ export interface CoreConfig {
    * formatters that need a currency fall back to plain fixed-point output.
    */
   currency?: string;
+  /**
+   * Origin for Mercure collection topic URIs when it differs from the SPA
+   * (typical Vite dev: API on :8000, admin on :5173). Matches API Platform
+   * `@id` / DEFAULT_URI generation. Defaults to `window.location.origin`.
+   */
+  mercureTopicOrigin?: string;
 }
 
 // Module-level defaults — readable by non-React code (DateUtils, serializeFormData, etc.).
@@ -19,6 +25,7 @@ const _coreConfig: CoreConfig = {
   timezone: 'UTC',
   apiBaseUrl: '/api/',
   currency: undefined,
+  mercureTopicOrigin: undefined,
 };
 
 /**
@@ -31,6 +38,7 @@ export function configureCore(config: Partial<CoreConfig>): void {
   if (config.timezone !== undefined) _coreConfig.timezone = config.timezone;
   if (config.apiBaseUrl !== undefined) _coreConfig.apiBaseUrl = config.apiBaseUrl;
   if ('currency' in config) _coreConfig.currency = config.currency;
+  if ('mercureTopicOrigin' in config) _coreConfig.mercureTopicOrigin = config.mercureTopicOrigin;
 }
 
 /**
@@ -55,6 +63,10 @@ export function getCoreCurrency(): string | undefined {
   return _coreConfig.currency;
 }
 
+export function getMercureTopicOrigin(): string | undefined {
+  return _coreConfig.mercureTopicOrigin;
+}
+
 const CoreConfigContext = React.createContext<CoreConfig>(_coreConfig);
 
 export interface CoreConfigProviderProps {
@@ -63,6 +75,8 @@ export interface CoreConfigProviderProps {
   apiBaseUrl: string;
   /** ISO 4217 app-wide default currency for money formatters (e.g. 'PEN', 'USD'). */
   currency?: string;
+  /** Mercure topic origin override — see {@link CoreConfig.mercureTopicOrigin}. */
+  mercureTopicOrigin?: string;
   children: React.ReactNode;
 }
 
@@ -71,15 +85,16 @@ export const CoreConfigProvider = ({
   timezone,
   apiBaseUrl,
   currency,
+  mercureTopicOrigin,
   children,
 }: CoreConfigProviderProps) => {
   // Keep module-level config in sync so it is available to non-React code
   // (defineResource, entityField, DateUtils, etc.) even at module evaluation time.
-  configureCore({ locale, timezone, apiBaseUrl, currency });
+  configureCore({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin });
 
   const value = React.useMemo(
-    () => ({ locale, timezone, apiBaseUrl, currency }),
-    [locale, timezone, apiBaseUrl, currency],
+    () => ({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin }),
+    [locale, timezone, apiBaseUrl, currency, mercureTopicOrigin],
   );
 
   return (

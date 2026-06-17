@@ -11,6 +11,12 @@ describe('resolveMercureTopicOrigin', () => {
     expect(resolveMercureTopicOrigin('/api/', 'http://localhost:8000')).toBe('http://localhost:8000');
   });
 
+  it('prefers autodiscovered origin over apiBaseUrl and window', () => {
+    expect(resolveMercureTopicOrigin('/api/', undefined, 'http://localhost:8000')).toBe(
+      'http://localhost:8000',
+    );
+  });
+
   it('derives the origin from an absolute apiBaseUrl', () => {
     expect(resolveMercureTopicOrigin('https://api.example.com/v1/')).toBe('https://api.example.com');
   });

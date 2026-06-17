@@ -7,7 +7,8 @@
  * - Mercure is not configured in the backend.
  *
  * This hook does NOT perform any fetch or side effect — it only reads from context.
- * Hub discovery (usually from a `Link` header) must be done by the host application.
+ * Hub discovery happens automatically via `CoreHttpClient` (`Link` header parsing).
+ * Use `<MercureProvider>` without a `hubUrl` prop to expose the discovered URL.
  *
  * ## Usage
  *

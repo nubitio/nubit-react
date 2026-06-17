@@ -9,25 +9,33 @@
  * ## Usage
  *
  * ```tsx
- * // In your app root:
- * <MercureProvider hubUrl={discoveredHubUrl}>
+ * // Autodiscovery (recommended): hub URL comes from API `Link` headers.
+ * <MercureProvider>
+ *   <App />
+ * </MercureProvider>
+ *
+ * // Manual override (e.g. before the first API response):
+ * <MercureProvider hubUrl="/.well-known/mercure">
  *   <App />
  * </MercureProvider>
  * ```
  *
- * The `hubUrl` is typically discovered from the `Link` header of API responses
- * (common pattern with API Platform + Mercure).
+ * The hub URL is autodiscovered from the `Link` header of API responses
+ * (API Platform + Mercure). Pass `hubUrl` only when you need an explicit override.
  */
 
-import React, { createContext, useEffect, type ReactNode } from 'react';
+import React, { createContext, useEffect, useState, type ReactNode } from 'react';
 import mercureManager from './MercureManager';
 
 /** The hub URL, or null if Mercure is not configured / not yet discovered. */
 export const MercureContext = createContext<string | null>(null);
 
 export interface MercureProviderProps {
-  /** Hub URL discovered from the `Link` header, or null if unavailable. */
-  hubUrl: string | null;
+  /**
+   * Hub URL override. When omitted, the provider listens to autodiscovery
+   * from API `Link` headers via `MercureManager`.
+   */
+  hubUrl?: string | null;
   children: ReactNode;
 }
 
@@ -35,10 +43,22 @@ export interface MercureProviderProps {
  * Provides the Mercure hub URL to the React tree and keeps `MercureManager`
  * in sync whenever the URL changes.
  */
-export function MercureProvider({ hubUrl, children }: MercureProviderProps) {
+export function MercureProvider({ hubUrl: hubUrlOverride, children }: MercureProviderProps) {
+  const [discoveredHubUrl, setDiscoveredHubUrl] = useState<string | null>(
+    () => mercureManager.getHubUrl(),
+  );
+
   useEffect(() => {
-    mercureManager.setHubUrl(hubUrl);
-  }, [hubUrl]);
+    if (hubUrlOverride !== undefined) {
+      mercureManager.setHubUrl(hubUrlOverride);
+      return;
+    }
+
+    setDiscoveredHubUrl(mercureManager.getHubUrl());
+    return mercureManager.onHubUrlChange(setDiscoveredHubUrl);
+  }, [hubUrlOverride]);
+
+  const hubUrl = hubUrlOverride !== undefined ? hubUrlOverride : discoveredHubUrl;
 
   return <MercureContext.Provider value={hubUrl}>{children}</MercureContext.Provider>;
 }

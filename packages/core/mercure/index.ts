@@ -6,6 +6,14 @@ export {
   buildMercureCollectionTopic,
   resolveMercureTopicOrigin,
 } from './mercureTopics';
+export {
+  discoverMercureFromResponse,
+  extractMercureHubUrl,
+  extractTopicOriginFromPayload,
+  getDiscoveredMercureTopicOrigin,
+  parseLinkHeader,
+} from './mercureDiscovery';
+export { useDiscoveredMercureTopicOrigin } from './useDiscoveredMercureTopicOrigin';
 /** Singleton instance — import as `MercureManager` per spec barrel contract. */
 export { default as MercureManager } from './MercureManager';
 export type { MercureManager as MercureManagerType } from './MercureManager';

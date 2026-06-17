@@ -1,4 +1,5 @@
 import type { DataRecord } from '../data/DataRecord';
+import { discoverMercureFromResponse } from '../mercure/mercureDiscovery';
 
 export type CoreResponseType = 'json' | 'arraybuffer' | 'blob' | 'text';
 
@@ -206,9 +207,13 @@ export class CoreHttpClient {
     });
 
     if (response.ok) {
+      const data = await readResponseBody<T>(response, config?.responseType);
+      if (config?.responseType === undefined || config.responseType === 'json') {
+        discoverMercureFromResponse(response, data);
+      }
       return {
         response,
-        data: await readResponseBody<T>(response, config?.responseType),
+        data,
         headers: response.headers,
         status: response.status,
       };

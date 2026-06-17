@@ -11,9 +11,8 @@ export interface CoreConfig {
    */
   currency?: string;
   /**
-   * Origin for Mercure collection topic URIs when it differs from the SPA
-   * (typical Vite dev: API on :8000, admin on :5173). Matches API Platform
-   * `@id` / DEFAULT_URI generation. Defaults to `window.location.origin`.
+   * Escape hatch for Mercure collection topic URIs when autodiscovery from
+   * Hydra `@id` cannot infer the API origin (e.g. relative IRIs only).
    */
   mercureTopicOrigin?: string;
 }

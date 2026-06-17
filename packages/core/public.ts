@@ -72,6 +72,12 @@ export {
   MercureManager,
   buildMercureCollectionTopic,
   resolveMercureTopicOrigin,
+  discoverMercureFromResponse,
+  extractMercureHubUrl,
+  extractTopicOriginFromPayload,
+  getDiscoveredMercureTopicOrigin,
+  parseLinkHeader,
+  useDiscoveredMercureTopicOrigin,
   useMercureHub,
   useMercureSubscription,
 } from './mercure';

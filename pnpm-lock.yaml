@@ -144,6 +144,9 @@ importers:
 
   packages/admin:
     dependencies:
+      '@nubitio/core':
+        specifier: workspace:^
+        version: link:../core
       '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui

@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/react-admin",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "type": "module",
   "description": "Batteries-included admin stack: core runtime, CRUD, Hydra adapter, and AdminShell.",
   "license": "MIT",

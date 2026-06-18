@@ -173,6 +173,16 @@
   width: 20px;
 }
 
+.nb-timeline__marker--custom {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+
+  &.nb-timeline__marker--current::after {
+    display: none;
+  }
+}
+
 .nb-timeline__marker--dot {
   background: var(--surface-2);
   border: 2px solid var(--accent-color);

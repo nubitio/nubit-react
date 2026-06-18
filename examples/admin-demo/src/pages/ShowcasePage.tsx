@@ -146,15 +146,15 @@ export function ShowcasePage() {
 
           <section className="showcase__section showcase__section--wide">
             <h2>Timelines</h2>
-            <Timeline
-              variant="stepper"
-              orientation="horizontal"
-              aria-label="Checkout steps"
-            >
-              <TimelineItem status="complete" title="Cart" />
-              <TimelineItem status="complete" title="Shipping" />
-              <TimelineItem status="current" title="Payment" />
-              <TimelineItem status="pending" title="Confirmation" />
+            <Timeline variant="stepper" orientation="horizontal" aria-label="Checkout steps">
+              <TimelineItem status="complete" title="Cart" marker={<i className="ph ph-check" />} />
+              <TimelineItem
+                status="complete"
+                title="Shipping"
+                marker={<i className="ph ph-check" />}
+              />
+              <TimelineItem status="current" title="Payment" marker="3" />
+              <TimelineItem status="pending" title="Confirmation" marker="4" />
             </Timeline>
             <div className="showcase__row" style={{ alignItems: 'flex-start', gap: 24 }}>
               <Timeline

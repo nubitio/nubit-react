@@ -48,6 +48,18 @@ describe('Timeline', () => {
     expect(screen.getByLabelText('Checkout').className).toContain('nb-timeline--horizontal');
   });
 
+  it('renders custom stepper markers', () => {
+    render(
+      <Timeline variant="stepper" orientation="horizontal" aria-label="Setup steps">
+        <TimelineItem status="complete" title="Company" marker="1" />
+        <TimelineItem status="current" title="SUNAT" marker="2" />
+      </Timeline>,
+    );
+
+    expect(screen.getByText('1')).toBeDefined();
+    expect(screen.getByText('2')).toBeDefined();
+  });
+
   it('ignores horizontal orientation for the log variant', () => {
     render(
       <Timeline variant="log" orientation="horizontal" aria-label="History">

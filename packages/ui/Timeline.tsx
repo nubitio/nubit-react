@@ -26,6 +26,8 @@ export interface TimelineProps {
 export interface TimelineItemProps {
   status: TimelineItemStatus;
   title: ReactNode;
+  /** Custom stepper marker content, for example a step number. Ignored by the `log` variant. */
+  marker?: ReactNode;
   timestamp?: ReactNode;
   dateTime?: string;
   /** Marker accent for the `log` variant. */
@@ -43,12 +45,25 @@ function useTimelineVariant(): TimelineVariant {
 function TimelineMarker({
   status,
   variant,
+  marker,
 }: {
   status: TimelineItemStatus;
   variant: TimelineVariant;
+  marker?: ReactNode;
 }): React.JSX.Element {
   if (variant === 'log') {
     return <span className="nb-timeline__marker nb-timeline__marker--dot" aria-hidden="true" />;
+  }
+
+  if (marker != null) {
+    return (
+      <span
+        className={`nb-timeline__marker nb-timeline__marker--${status} nb-timeline__marker--custom`}
+        aria-hidden="true"
+      >
+        {marker}
+      </span>
+    );
   }
 
   if (status === 'complete') {
@@ -77,6 +92,7 @@ function TimelineMarker({
 export function TimelineItem({
   status,
   title,
+  marker,
   timestamp,
   dateTime,
   tone = 'default',
@@ -97,7 +113,7 @@ export function TimelineItem({
   return (
     <li className={classes}>
       <div className="nb-timeline__marker-col">
-        <TimelineMarker status={status} variant={variant} />
+        <TimelineMarker status={status} variant={variant} marker={marker} />
       </div>
       <div className="nb-timeline__content">
         <div className="nb-timeline__heading">
@@ -140,9 +156,7 @@ export function Timeline({
         {(title != null || description != null) && (
           <header className="nb-timeline-panel__header">
             {title != null && <h3 className="nb-timeline-panel__title">{title}</h3>}
-            {description != null && (
-              <p className="nb-timeline-panel__description">{description}</p>
-            )}
+            {description != null && <p className="nb-timeline-panel__description">{description}</p>}
           </header>
         )}
         <ol

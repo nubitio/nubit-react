@@ -23,7 +23,7 @@ const SEED = [
 ];
 
 const memoryStore = () => ({
-  load: async () => ({ data: SEED, totalCount: SEED.length }),
+  load: async () => ({ data: SEED, totalCount: SEED.length, summary: null }),
 });
 
 const sales = defineResource('/sales', {

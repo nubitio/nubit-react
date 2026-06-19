@@ -32,13 +32,12 @@ export function useDashboardData(dataUrl?: string, refreshInterval?: number): Da
         throw new Error(`Dashboard request failed (${response.status})`);
       }
       const data = (await response.json()) as Record<string, unknown>;
-      setState({ data, loading: false, error: null, refetch });
+      setState({ data, loading: false, error: null });
     } catch (error) {
       setState({
         data: {},
         loading: false,
         error: error instanceof Error ? error.message : 'Failed to load dashboard',
-        refetch,
       });
     }
   }, [dataUrl]);

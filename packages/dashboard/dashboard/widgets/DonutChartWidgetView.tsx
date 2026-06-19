@@ -33,10 +33,28 @@ export function DonutChartWidgetView({ widget, data, loading }: Props) {
       ? resolvePath(data, widget.centerValuePath)
       : total;
 
-  let cumulative = 0;
   const radius = 38;
   const stroke = 14;
   const circumference = 2 * Math.PI * radius;
+  const arcs = rows.reduce<
+    Array<{
+      key: string;
+      dash: number;
+      offset: number;
+      color: string;
+    }>
+  >((segments, row, index) => {
+    const value = toNumber(row[widget.valueKey]);
+    const pct = value / total;
+    const offset = segments.reduce((sum, segment) => sum + segment.dash, 0);
+    segments.push({
+      key: `${String(row[widget.labelKey])}-${index}`,
+      dash: pct * circumference,
+      offset,
+      color: colors[index % colors.length],
+    });
+    return segments;
+  }, []);
 
   return (
     <StatCard
@@ -60,28 +78,21 @@ export function DonutChartWidgetView({ widget, data, loading }: Props) {
                 stroke="var(--surface-3)"
                 strokeWidth={stroke}
               />
-              {rows.map((row, index) => {
-                const value = toNumber(row[widget.valueKey]);
-                const pct = value / total;
-                const dash = pct * circumference;
-                const offset = cumulative * circumference;
-                cumulative += pct;
-                return (
-                  <circle
-                    key={`${String(row[widget.labelKey])}-${index}`}
-                    cx="50"
-                    cy="50"
-                    r={radius}
-                    fill="none"
-                    stroke={colors[index % colors.length]}
-                    strokeWidth={stroke}
-                    strokeDasharray={`${dash} ${circumference - dash}`}
-                    strokeDashoffset={-offset}
-                    transform="rotate(-90 50 50)"
-                    strokeLinecap="butt"
-                  />
-                );
-              })}
+              {arcs.map((arc) => (
+                <circle
+                  key={arc.key}
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  fill="none"
+                  stroke={arc.color}
+                  strokeWidth={stroke}
+                  strokeDasharray={`${arc.dash} ${circumference - arc.dash}`}
+                  strokeDashoffset={-arc.offset}
+                  transform="rotate(-90 50 50)"
+                  strokeLinecap="butt"
+                />
+              ))}
             </svg>
             <div className="nb-dashboard-donut__center">
               {widget.centerLabel && (

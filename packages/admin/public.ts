@@ -29,6 +29,14 @@ export type {
 export { LoginPage } from './auth/LoginPage';
 export type { LoginPageProps } from './auth/LoginPage';
 
+export { RegisterPage } from './auth/RegisterPage';
+export type {
+  RegisterField,
+  RegisterFieldType,
+  RegisterPageProps,
+  RegisterSelectOption,
+} from './auth/RegisterPage';
+
 export { useAppRuntime } from './runtime/useAppRuntime';
 export type { NotificationType, ToastItem } from './runtime/useAppRuntime';
 export { useRuntimeConfig } from './runtime/useRuntimeConfig';

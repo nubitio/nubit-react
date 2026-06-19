@@ -47,6 +47,8 @@ export { Toggle } from './Toggle';
 export type { ToggleProps } from './Toggle';
 export { StatCard } from './StatCard';
 export type { StatCardProps } from './StatCard';
+export { KpiMetricRow } from './KpiMetricRow';
+export type { KpiMetricItem, KpiMetricRowProps, KpiMetricTone } from './KpiMetricRow';
 export { ContextMenu } from './ContextMenu';
 export type { ContextMenuProps, ContextMenuItem } from './ContextMenu';
 export { CollapsibleSection } from './CollapsibleSection';

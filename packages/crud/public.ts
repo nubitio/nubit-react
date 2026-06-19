@@ -47,6 +47,7 @@ export type {
   ResourceToolbarActionVariant,
   ResourceToolbarContext,
   ResourceToolbarItems,
+  CrudGridSlotContext,
   SmartCrudFieldContract,
   SmartCrudFieldOperation,
   SmartCrudFieldPatch,

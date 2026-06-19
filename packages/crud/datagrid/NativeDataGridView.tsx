@@ -1114,6 +1114,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               )}
             </div>
           )}
+          {options.aboveGrid ? (
+            <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
+          ) : null}
           {isMobile && quickSearchField && (options.filterRow ?? true) && (
             <div className="nb-datagrid__quick-search">
               <i

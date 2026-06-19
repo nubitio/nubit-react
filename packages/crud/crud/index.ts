@@ -14,6 +14,7 @@ export type {
   ResourceToolbarActionVariant,
   ResourceToolbarContext,
   ResourceToolbarItems,
+  CrudGridSlotContext,
   ResourceGridDetail,
   ResourceFormDetail,
   ResourceEmptyState,

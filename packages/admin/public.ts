@@ -16,6 +16,14 @@ export { SessionProvider, StaticSessionProvider, useSession } from './auth/Sessi
 export { useFeature, useFeatureConfig } from './hooks/useFeature';
 export { FeatureGate } from './features/FeatureGate';
 export type { FeatureGateProps } from './features/FeatureGate';
+export { QuotaUsageBanner, quotaUsageAboveGrid } from './quota/QuotaUsageBanner';
+export type { QuotaUsageBannerProps } from './quota/QuotaUsageBanner';
+export { PlanPanel } from './billing/PlanPanel';
+export type { PlanDefinition, PlanPanelLabels, PlanPanelProps } from './billing/PlanPanel';
+export { parseQuotaError, quotaErrorToastMessage } from './quota/parseQuotaError';
+export type { ParsedQuotaError } from './quota/parseQuotaError';
+export { useQuotaUsage } from './quota/useQuotaUsage';
+export type { UseQuotaUsageOptions } from './quota/useQuotaUsage';
 export type {
   AppProfile,
   SessionFeatureEntitlement,

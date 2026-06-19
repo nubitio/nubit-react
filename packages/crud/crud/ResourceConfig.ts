@@ -1,10 +1,10 @@
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
+import type { GridHandle } from '../datagrid/GridHandle';
 import type { Field, FieldDef } from '../field/Field';
 import type { FieldInput } from '../field/buildFields';
 import type { FilterRule } from '../field/FilterRule';
 import type { DataRecord, FormEventNames } from '@nubitio/core';
 import type { FormHandle } from '../form/FormHandle';
-import type { GridHandle } from '../datagrid/GridHandle';
 import type { FormLayout } from '../form/FormLayout';
 import type { BulkAction } from './BulkAction';
 import type { ColumnPreset } from './ColumnPreset';
@@ -86,6 +86,13 @@ export interface ResourceToolbarContext<T extends DataRecord = DataRecord> {
   formRef: RefObject<FormHandle | null>;
   events: FormEventNames;
   emit: <P>(name: string, payload?: P) => void;
+}
+
+/** Context passed to `aboveGrid` slot renderers on SmartCrudPage / CrudPage. */
+export interface CrudGridSlotContext<T extends DataRecord = DataRecord> {
+  resource: ResourceConfig<T>;
+  gridRef: RefObject<GridHandle | null>;
+  refresh: () => void;
 }
 
 export type ResourceToolbar<T extends DataRecord = DataRecord> =
@@ -213,6 +220,11 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   viewMode?: CrudViewMode | CrudViewModeConfig;
   format?: 'json' | 'multipart';
   toolbar?: ResourceToolbar<T>;
+  /**
+   * Custom UI between the grid toolbar and the table — KPI cards, quota banners,
+   * contextual filters. Static node or render function with grid helpers.
+   */
+  aboveGrid?: ReactNode | ((context: CrudGridSlotContext<T>) => ReactNode);
   rowActions?: ResourceRowActions<T>;
   onSaveSuccess?: (response: T) => void;
   onSaveError?: (error?: unknown) => void;

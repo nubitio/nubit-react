@@ -1,0 +1,45 @@
+.nb-kpi-metric-row {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  width: 100%;
+}
+
+.nb-kpi-metric-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.nb-kpi-metric-card__label {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nb-kpi-metric-card__value {
+  color: var(--text-primary);
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.nb-kpi-metric-card--success .nb-kpi-metric-card__value {
+  color: var(--color-success, #16a34a);
+}
+
+.nb-kpi-metric-card--warning .nb-kpi-metric-card__value {
+  color: var(--color-warning, #d97706);
+}
+
+.nb-kpi-metric-card--danger .nb-kpi-metric-card__value {
+  color: var(--color-error, #dc2626);
+}

@@ -1,0 +1,100 @@
+.nb-plan-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.nb-plan-panel__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.nb-plan-panel__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.nb-plan-panel__subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: var(--space-1) 0 0;
+}
+
+.nb-plan-panel__status {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: var(--space-2) 0 0;
+}
+
+.nb-plan-panel__grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.nb-plan-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.nb-plan-card--highlighted {
+  border-color: color-mix(in srgb, var(--accent-color) 45%, var(--border-subtle));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-color) 20%, transparent);
+}
+
+.nb-plan-card--current {
+  background: color-mix(in srgb, var(--accent-color) 6%, var(--surface-1));
+}
+
+.nb-plan-card__head {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+
+.nb-plan-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.nb-plan-card__price {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 0;
+}
+
+.nb-plan-card__description {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.nb-plan-card__features {
+  color: var(--text-primary);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nb-plan-card__features li::before {
+  color: var(--accent-color);
+  content: '✓ ';
+  font-weight: 700;
+}

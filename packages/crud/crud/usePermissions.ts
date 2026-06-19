@@ -77,5 +77,5 @@ export function usePermissions(
       canBulkDelete: resolve(p?.canBulkDelete, false),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource.id, opsKey]);
+  }, [resource.id, opsKey, resource.permissions]);
 }

@@ -70,6 +70,8 @@ interface CrudPageProps<T extends DataRecord = DataRecord> {
   /** External ref forwarded to the DataGridView — allows the parent to call
    *  showLoading / hideLoading / refresh / getSelectedRow imperatively. */
   gridRef?: React.RefObject<GridHandle | null>;
+  /** Overrides `resource.aboveGrid` — KPI cards, banners, etc. */
+  aboveGrid?: ResourceConfig<T>['aboveGrid'];
   onOperationChange?: (operation: SmartCrudOperation | null) => void;
 }
 
@@ -125,6 +127,7 @@ export const CrudPage = <T extends DataRecord = DataRecord>({
   editDisabled,
   deleteDisabled,
   gridRef,
+  aboveGrid,
   onOperationChange,
 }: CrudPageProps<T>) => (
   <DialogStoreProvider>
@@ -141,6 +144,7 @@ export const CrudPage = <T extends DataRecord = DataRecord>({
       editDisabled={editDisabled}
       deleteDisabled={deleteDisabled}
       gridRef={gridRef}
+      aboveGrid={aboveGrid}
       onOperationChange={onOperationChange}
     />
   </DialogStoreProvider>
@@ -159,6 +163,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   editDisabled,
   deleteDisabled,
   gridRef: externalGridRef,
+  aboveGrid: aboveGridOverride,
   onOperationChange,
 }: CrudPageProps<T>) => {
   const { t } = useCoreTranslation();
@@ -526,6 +531,21 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     return (row) => [...(base ?? []), auditAction(row)];
   }, [hasAuditTrail, openAuditTrail, resolvedResource.auditTrail?.rowAction, resolvedResource.rowActions, t]);
 
+  const aboveGridSlot = aboveGridOverride ?? resolvedResource.aboveGrid;
+  const aboveGridContent = (() => {
+    if (!aboveGridSlot) {
+      return undefined;
+    }
+    if (typeof aboveGridSlot === 'function') {
+      return aboveGridSlot({
+        resource: resolvedResource,
+        gridRef,
+        refresh: () => gridRef.current?.refresh(),
+      });
+    }
+    return aboveGridSlot;
+  })();
+
   /** Preset selector rendered as a toolbar slot via `beforeToolbar`. */
   const renderPresetSelector = hasPresets
     ? () => (
@@ -601,6 +621,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         editMode={resolvedResource.editMode}
         visibleColumns={presetState.visibleColumns}
         beforeToolbar={renderPresetSelector}
+        aboveGrid={aboveGridContent}
         detailUrl={gridDetail?.url}
         detailFields={gridDetail?.fields}
         onFilterChange={onFiltersChange}

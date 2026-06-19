@@ -68,6 +68,8 @@ interface SmartCrudPageProps<T extends DataRecord = DataRecord> {
   /** External ref forwarded to the DataGridView — allows the parent to call
    *  showLoading / hideLoading / refresh / getSelectedRow imperatively. */
   gridRef?: RefObject<GridHandle | null>;
+  /** Custom UI above the grid table — KPI cards, banners. Overrides `resource.aboveGrid`. */
+  aboveGrid?: ResourceConfig<T>['aboveGrid'];
 }
 
 type RoutingFilters = Record<string, string>;
@@ -106,6 +108,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
   editDisabled,
   deleteDisabled,
   gridRef,
+  aboveGrid,
 }: SmartCrudPageProps<T>) {
   const queryClient = useQueryClient();
   const internalGridRef = useRef<GridHandle | null>(null);
@@ -269,6 +272,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
       editDisabled={editDisabled}
       deleteDisabled={deleteDisabled}
       gridRef={effectiveGridRef}
+      aboveGrid={aboveGrid ?? resource.aboveGrid}
       onOperationChange={(operation) => {
         if (operation === 'create') {
           startCreate();

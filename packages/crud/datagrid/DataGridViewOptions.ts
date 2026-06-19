@@ -66,6 +66,8 @@ export interface DataGridViewOptions {
   headerFilter?: boolean;
   manualLoad?: boolean;
   beforeToolbar?: () => ReactNode;
+  /** Custom content between the toolbar and the table (KPI cards, banners, filters). */
+  aboveGrid?: ReactNode;
   errorMessage?: string | null;
   onDismissError?: () => void;
   editMode?: 'popup' | 'row' | 'cell' | 'batch';

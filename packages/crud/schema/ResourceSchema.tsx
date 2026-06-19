@@ -54,6 +54,7 @@ function resolveWithRuntimeErrors(
   resolver: () => Field[],
   supportedOperations: string[] = [],
   formLayout?: FormLayout,
+  workflow?: WorkflowSchema,
 ): ResourceSchemaResolution {
   try {
     return {
@@ -62,6 +63,7 @@ function resolveWithRuntimeErrors(
       error: undefined,
       supportedOperations,
       formLayout,
+      workflow,
     };
   } catch (runtimeError) {
     return {
@@ -70,6 +72,7 @@ function resolveWithRuntimeErrors(
       error: runtimeError instanceof Error ? runtimeError : new Error(String(runtimeError)),
       supportedOperations,
       formLayout,
+      workflow,
     };
   }
 }
@@ -143,6 +146,7 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
         }),
       baseline.supportedOperations,
       baseline.formLayout,
+      baseline.workflow,
     );
   }, [baseline, fieldContract, overrides]);
 }

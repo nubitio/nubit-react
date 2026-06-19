@@ -19,6 +19,7 @@ import type { DataRecord } from '@nubitio/core';
 import type { FormHandle } from '../form/FormHandle';
 import type { GridHandle } from '../datagrid/GridHandle';
 import { useResolvedResourceFields } from '../schema/ResourceSchema';
+import { buildWorkflowRowActions } from '../workflow/buildWorkflowRowActions';
 import './SmartCrudPage.scss';
 
 function CrudSkeleton() {
@@ -117,7 +118,14 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     Array.isArray(resource.fields) &&
     resource.fields.length > 0;
 
-  const { fields, isLoading, error, supportedOperations, formLayout: inferredFormLayout } = useResolvedResourceFields({
+  const {
+    fields,
+    isLoading,
+    error,
+    supportedOperations,
+    formLayout: inferredFormLayout,
+    workflow,
+  } = useResolvedResourceFields({
     apiUrl: resolvedBaseResource.apiUrl,
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
     overrides: hasManualFields ? undefined : fieldOverrides,
@@ -193,30 +201,41 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     ? resolvedBaseResource.apiUrl
     : `/${resolvedBaseResource.apiUrl}`;
 
-  const resolvedResource = useMemo(
-    () =>
-      ({
-        ...resolvedBaseResource,
-        ...(!hasManualFields ? { fields: gridFields } : {}),
-        apiUrl: normalizedApiUrl,
-        fields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : gridFields,
-        formFields,
-        // Backend-declared layout from the API doc; explicit config wins.
-        formLayout: resolvedBaseResource.formLayout ?? inferredFormLayout,
-        _supportedOperations: supportedOperations,
-      }) as ResourceConfig<T>,
-    [
-      fields,
-      gridFields,
-      hasManualFields,
-      inferredFormLayout,
-      normalizedApiUrl,
+  const resolvedResource = useMemo(() => {
+    const rowActions =
+      resolvedBaseResource.rowActions ??
+      (workflow
+        ? (row: T) =>
+            buildWorkflowRowActions(row, workflow, normalizedApiUrl, stableRoles, () => {
+              effectiveGridRef.current?.refresh();
+            })
+        : undefined);
+
+    return {
+      ...resolvedBaseResource,
+      ...(!hasManualFields ? { fields: gridFields } : {}),
+      apiUrl: normalizedApiUrl,
+      fields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : gridFields,
       formFields,
-      resolvedBaseResource,
-      resource.fields,
-      supportedOperations,
-    ],
-  );
+      // Backend-declared layout from the API doc; explicit config wins.
+      formLayout: resolvedBaseResource.formLayout ?? inferredFormLayout,
+      _supportedOperations: supportedOperations,
+      rowActions,
+    } as ResourceConfig<T>;
+  }, [
+    effectiveGridRef,
+    fields,
+    gridFields,
+    hasManualFields,
+    inferredFormLayout,
+    normalizedApiUrl,
+    formFields,
+    resolvedBaseResource,
+    resource.fields,
+    stableRoles,
+    supportedOperations,
+    workflow,
+  ]);
 
   // --- Render ---
 

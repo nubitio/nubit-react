@@ -27,10 +27,16 @@ export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
       onClick: async () => {
         const base = apiUrl.replace(/\/$/, '');
         const id = row.id;
-        await fetch(`${base}/${id}/transition/${transition.name}`, {
+        const response = await fetch(`${base}/${id}/transition/${transition.name}`, {
           method: 'POST',
           credentials: 'include',
         });
+        if (!response.ok) {
+          const detail = await response.text().catch(() => '');
+          throw new Error(
+            detail || `Transition "${transition.name}" failed (${response.status})`,
+          );
+        }
         onDone?.();
       },
     }));

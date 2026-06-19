@@ -1,4 +1,4 @@
-import { getCoreApiBaseUrl } from '../config/CoreConfig';
+import { getCoreApiBaseUrl, getMercureTenantId } from '../config/CoreConfig';
 import { getDiscoveredMercureTopicOrigin } from './mercureDiscovery';
 
 /**
@@ -62,6 +62,11 @@ export function buildMercureCollectionTopic(
   const normalizedPath = apiUrl.replace(/^\//, '').replace(/\/+$/, '');
   if (!normalizedPath) {
     return null;
+  }
+
+  const tenantId = getMercureTenantId();
+  if (tenantId !== undefined && tenantId !== null && `${tenantId}` !== '') {
+    return `${origin}/api/tenants/${tenantId}/${normalizedPath.replace(/^api\//, '')}/{id}`;
   }
 
   return `${origin}/${normalizedPath}/{id}`;

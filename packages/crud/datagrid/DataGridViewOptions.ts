@@ -40,6 +40,8 @@ export interface DataGridViewOptions {
   /** Per-row gate for the Delete action. Absent = allowed. */
   canDeleteRow?: (row: DataRecord) => boolean;
   summaryFields?: DataGridSummaryItem[];
+  /** Server-side aggregates for the current filtered collection. */
+  gridSummary?: Record<string, unknown> | null;
   filter?: FilterRule[];
   sort?: Array<{ selector: string; desc: boolean }>;
   mode?: 'minimal' | 'normal' | 'full';

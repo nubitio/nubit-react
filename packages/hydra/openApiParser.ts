@@ -306,6 +306,7 @@ export function parseHydraDoc(
       fields,
       formLayout: cls['x-crud-layout'],
       workflow: cls['x-workflow'],
+      sequence: cls['x-sequence'],
       searchMappings: extractSearchMappings(cls),
       supportedOperations: Array.from(
         new Set([

@@ -54,6 +54,21 @@ describe('mapHydraSchemaToFields', () => {
     expect(fields.find((f) => f.name === 'lines')?.visibleOnForm).toBe(false);
     expect(fields.find((f) => f.name === 'name')?.visibleOnForm).not.toBe(false);
   });
+
+  it('hides and locks the x-sequence field on forms', () => {
+    const fields = mapHydraSchemaToFields({
+      ...schemaWith([
+        { name: 'number', range: 'xsd:string', writeable: true },
+        { name: 'status', range: 'xsd:string' },
+      ]),
+      sequence: { field: 'number', name: 'order', prefix: 'ORD-', padding: 4, scope: ['restaurant'] },
+    });
+
+    const number = fields.find((f) => f.name === 'number');
+    expect(number?.visibleOnForm).toBe(false);
+    expect(number?.readonly).toBe(true);
+    expect(fields.find((f) => f.name === 'status')?.visibleOnForm).not.toBe(false);
+  });
 });
 
 describe('x-crud format: image / file', () => {

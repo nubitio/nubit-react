@@ -33,6 +33,8 @@ export { useAccentColor, ACCENT_PRESETS } from './theme/useAccentColor';
 export type { AccentPreset } from './theme/useAccentColor';
 export { SettingsPanel } from './SettingsPanel';
 export type { SettingsPanelProps } from './SettingsPanel';
+export { FeatureGate } from './FeatureGate';
+export type { FeatureGateProps } from './FeatureGate';
 export { Badge } from './Badge';
 export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge';
 export { Skeleton } from './Skeleton';

@@ -103,3 +103,25 @@ export function useSession(): SessionContextValue {
   }
   return context;
 }
+
+/** Seeds session state from a known profile (e.g. after a custom /api/me fetch). */
+export function StaticSessionProvider({
+  profile,
+  children,
+}: {
+  profile: SessionProfile;
+  children: React.ReactNode;
+}) {
+  const value = useMemo<SessionContextValue>(
+    () => ({
+      session: { status: 'authenticated', profile },
+      refresh: async () => undefined,
+      logout: async () => undefined,
+      roles: profile.roles,
+      username: profile.username,
+    }),
+    [profile],
+  );
+
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+}

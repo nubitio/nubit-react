@@ -125,6 +125,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     supportedOperations,
     formLayout: inferredFormLayout,
     workflow,
+    summaryFields: inferredSummaryFields,
   } = useResolvedResourceFields({
     apiUrl: resolvedBaseResource.apiUrl,
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
@@ -219,6 +220,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
       formFields,
       // Backend-declared layout from the API doc; explicit config wins.
       formLayout: resolvedBaseResource.formLayout ?? inferredFormLayout,
+      summaryFields: resolvedBaseResource.summaryFields ?? inferredSummaryFields,
       _supportedOperations: supportedOperations,
       rowActions,
     } as ResourceConfig<T>;
@@ -228,6 +230,7 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     gridFields,
     hasManualFields,
     inferredFormLayout,
+    inferredSummaryFields,
     normalizedApiUrl,
     formFields,
     resolvedBaseResource,

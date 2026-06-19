@@ -129,6 +129,22 @@ function applyCrudHints(field: Field, hints: CrudHints | undefined): void {
   if (hints.width !== undefined) field.width = hints.width;
 }
 
+/**
+ * Apply `x-sequence` hints: the server-allocated field is read-only and
+ * excluded from create/edit forms (the listener assigns it on POST).
+ */
+function applySequenceHints(fields: Field[], schema: HydraResourceSchema): void {
+  const sequenceField = schema.sequence?.field;
+  if (!sequenceField) return;
+
+  for (const field of fields) {
+    if (field.name === sequenceField) {
+      field.visibleOnForm = false;
+      field.readonly = true;
+    }
+  }
+}
+
 function resolveEntityValueField(relatedSchema: HydraResourceSchema | undefined): string {
   if (!relatedSchema) return '_iri';
 
@@ -421,6 +437,8 @@ export function mapHydraSchemaToFields(
     // Prepend so it appears first (conventional key position).
     fields.unshift(syntheticId);
   }
+
+  applySequenceHints(fields, schema);
 
   return fields;
 }

@@ -52,4 +52,5 @@ export type {
   ApiDoc,
   WorkflowSchema,
   WorkflowTransitionSchema,
+  SequenceSchema,
 } from './types';

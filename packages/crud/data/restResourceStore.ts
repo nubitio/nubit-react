@@ -111,7 +111,7 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
         const result = await request<
           DataRecord[] | { items?: DataRecord[]; data?: DataRecord[]; total?: number; totalCount?: number }
         >(appendQuery(url, params));
-        if (result === null) return { data: [], totalCount: 0, summary: null };
+        if (result === null) return { data: [], totalCount: 0, summary: null, gridSummary: null };
 
         const body = result.data;
         const data = Array.isArray(body) ? body : (body.items ?? body.data ?? []);
@@ -120,7 +120,20 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
           ? (Number.isFinite(headerTotal) && headerTotal > 0 ? headerTotal : body.length)
           : (body.total ?? body.totalCount ?? data.length);
 
-        return { data, totalCount, summary: null };
+        const gridSummaryHeader = result.headers.get('x-grid-summary');
+        let gridSummary: Record<string, unknown> | null = null;
+        if (gridSummaryHeader) {
+          try {
+            const parsed = JSON.parse(gridSummaryHeader) as unknown;
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              gridSummary = parsed as Record<string, unknown>;
+            }
+          } catch {
+            gridSummary = null;
+          }
+        }
+
+        return { data, totalCount, summary: null, gridSummary };
       },
 
       async byKey(key: unknown): Promise<DataRecord | null> {

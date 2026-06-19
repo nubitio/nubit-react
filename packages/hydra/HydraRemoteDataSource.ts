@@ -132,15 +132,30 @@ function getFlatIriFilter(filter: unknown): unknown[] | null {
   return filter.length === 1 && Array.isArray(filter[0]) ? filter[0] : filter;
 }
 
+function parseGridSummaryHeader(headers: Headers): Record<string, unknown> | null {
+  const raw = headers.get('x-grid-summary');
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function parseCollectionResponse(
   responseData: unknown,
   responseHeaders: Headers,
-): { data: DataRecord[]; totalCount: number } {
+): { data: DataRecord[]; totalCount: number; gridSummary: Record<string, unknown> | null } {
+  const gridSummary = parseGridSummaryHeader(responseHeaders);
   if (Array.isArray(responseData)) {
     const headerCount = Number(responseHeaders.get('x-total-count'));
     return {
       data: responseData as DataRecord[],
       totalCount: Number.isFinite(headerCount) ? headerCount : responseData.length,
+      gridSummary,
     };
   }
 
@@ -153,11 +168,12 @@ function parseCollectionResponse(
       return {
         data: member as DataRecord[],
         totalCount: Number.isFinite(totalCount) ? totalCount : member.length,
+        gridSummary,
       };
     }
   }
 
-  return { data: [], totalCount: 0 };
+  return { data: [], totalCount: 0, gridSummary };
 }
 
 export class HydraRemoteDataSource implements ResourceStore {
@@ -248,6 +264,7 @@ export class HydraRemoteDataSource implements ResourceStore {
       data,
       totalCount,
       summary: null,
+      gridSummary: parsed.gridSummary,
     };
   }
 

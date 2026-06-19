@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { DataRecord, Field, ResourceSchemaResolution } from '@nubitio/crud';
+import { buildSummaryFieldsFromSchema } from './buildSummaryFields';
 import { mapHydraSchemaToFields } from './HydraToFieldMapper';
 import { parseHydraDoc, parseOpenApiDoc } from './openApiParser';
 import { useSchemaContext } from './SchemaContext';
@@ -76,6 +77,8 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
       supportedOperations: resourceSchema.supportedOperations ?? [],
       formLayout: resourceSchema.formLayout,
       workflow: resourceSchema.workflow,
+      sequence: resourceSchema.sequence,
+      summaryFields: buildSummaryFieldsFromSchema(resourceSchema),
     };
   }, [data, isLoading, error, apiUrl]);
 }

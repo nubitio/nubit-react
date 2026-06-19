@@ -34,7 +34,7 @@ import { getCellText, getIdField, renderCell } from './cellRendering';
 import { DetailGridSection } from './DetailGridSection';
 import { GridEmptyStateView } from './GridEmptyStateView';
 import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
-import { resolveSummaryText } from '../summary';
+import { formatSummaryValue, resolveSummaryText } from '../summary';
 import { useIsMobile } from './useIsMobile';
 
 type SortRule = { selector: string; desc: boolean };
@@ -344,6 +344,7 @@ function SummaryFooter({
   hasRowActions,
   rows,
   summaryFields,
+  gridSummary,
   footerRef,
   colWidths,
 }: {
@@ -353,6 +354,7 @@ function SummaryFooter({
   hasRowActions: boolean;
   rows: DataRecord[];
   summaryFields?: DataGridSummaryItem[];
+  gridSummary?: Record<string, unknown> | null;
   footerRef?: React.Ref<HTMLTableSectionElement>;
   colWidths: Record<string, number>;
 }) {
@@ -387,7 +389,9 @@ function SummaryFooter({
                     <span className="nb-datagrid__summary-label">{item.label}</span>
                   )}
                   <span className="nb-datagrid__summary-value">
-                    {resolveSummaryText(rows, item)}
+                    {item.column && gridSummary && item.column in gridSummary
+                      ? formatSummaryValue(gridSummary[item.column], item)
+                      : resolveSummaryText(rows, item)}
                   </span>
                 </div>
               )}
@@ -423,6 +427,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const [rows, setRows] = useState<DataRecord[]>([]);
   const rowsRef = useRef<DataRecord[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [gridSummary, setGridSummary] = useState<Record<string, unknown> | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<unknown[]>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
@@ -635,6 +640,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     rowsRef.current = result.data;
     setRows(result.data);
     setTotalCount(result.totalCount);
+    setGridSummary(result.gridSummary ?? null);
     setIsGridLoading(false);
     onContentReadyRef.current?.();
     return result.data;
@@ -1643,6 +1649,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 hasRowActions={hasRowActions}
                 rows={rows}
                 summaryFields={options.summaryFields}
+                gridSummary={gridSummary}
                 footerRef={tfootRef}
                 colWidths={resolvedColWidths}
               />
@@ -1680,7 +1687,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     <span className="nb-datagrid__summary-label">{item.label}</span>
                   )}
                   <span className="nb-datagrid__summary-value">
-                    {resolveSummaryText(rows, item)}
+                    {item.column && gridSummary && item.column in gridSummary
+                      ? formatSummaryValue(gridSummary[item.column], item)
+                      : resolveSummaryText(rows, item)}
                   </span>
                 </div>
               ))}

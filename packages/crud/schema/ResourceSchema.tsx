@@ -6,6 +6,7 @@ import type { FieldOverride } from '../crud/resolveSmartCrudFields';
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';
 import type { SmartCrudFieldContract } from '../crud/fieldContract';
 import type { WorkflowSchema } from '@nubitio/hydra';
+import type { SummaryItem } from '../summary';
 
 export interface ResourceSchemaRequest {
   apiUrl: string;
@@ -22,6 +23,7 @@ export interface ResourceSchemaResolution {
    */
   formLayout?: FormLayout;
   workflow?: WorkflowSchema;
+  summaryFields?: SummaryItem[];
 }
 
 export interface ResourceSchemaResolver {
@@ -55,6 +57,7 @@ function resolveWithRuntimeErrors(
   supportedOperations: string[] = [],
   formLayout?: FormLayout,
   workflow?: WorkflowSchema,
+  summaryFields?: SummaryItem[],
 ): ResourceSchemaResolution {
   try {
     return {
@@ -64,6 +67,7 @@ function resolveWithRuntimeErrors(
       supportedOperations,
       formLayout,
       workflow,
+      summaryFields,
     };
   } catch (runtimeError) {
     return {
@@ -73,6 +77,7 @@ function resolveWithRuntimeErrors(
       supportedOperations,
       formLayout,
       workflow,
+      summaryFields,
     };
   }
 }
@@ -147,6 +152,7 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
       baseline.supportedOperations,
       baseline.formLayout,
       baseline.workflow,
+      baseline.summaryFields,
     );
   }, [baseline, fieldContract, overrides]);
 }

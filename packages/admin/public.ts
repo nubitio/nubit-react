@@ -12,7 +12,10 @@ export type { AdminSidebarMenuProps, AdminMenuSubItem, AdminSidebarMenuSelectEve
 
 export { useScreenSize, useScreenSizeClass } from './useScreenSize';
 
-export { SessionProvider, useSession } from './auth/SessionContext';
+export { SessionProvider, StaticSessionProvider, useSession } from './auth/SessionContext';
+export { useFeature, useFeatureConfig } from './hooks/useFeature';
+export { FeatureGate } from './features/FeatureGate';
+export type { FeatureGateProps } from './features/FeatureGate';
 export type {
   AppProfile,
   SessionFeatureEntitlement,

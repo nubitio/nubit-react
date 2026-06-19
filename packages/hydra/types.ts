@@ -48,6 +48,10 @@ export interface CrudHints {
    * upload controls that submit the media IRI.
    */
   format?: 'currency' | 'image' | 'file';
+  /** Include this column in the server-side grid summary footer. */
+  summable?: boolean;
+  /** Aggregate function for summable columns. @default 'sum' */
+  summaryType?: 'sum' | 'count' | 'avg' | 'min' | 'max';
 }
 
 export interface HydraSupportedProperty {
@@ -112,6 +116,14 @@ export interface WorkflowSchema {
   transitions: WorkflowTransitionSchema[];
 }
 
+export interface SequenceSchema {
+  field: string;
+  name?: string;
+  prefix?: string;
+  padding?: number;
+  scope?: string[];
+}
+
 export interface HydraClass {
   '@id': string; // e.g. "#Branch"
   '@type': string; // e.g. "Class"
@@ -119,6 +131,8 @@ export interface HydraClass {
   supportedProperty: HydraSupportedProperty[];
   /** State machine metadata from nubitio/workflow-bundle. */
   'x-workflow'?: WorkflowSchema;
+  /** Auto-numbering metadata from nubitio/sequence-bundle. */
+  'x-sequence'?: SequenceSchema;
   /**
    * Class-level UI hints injected by TranslatedDocumentationNormalizer from
    * the ApiResource's extraProperties['x-crud']['formLayout']. Mirrors
@@ -223,6 +237,8 @@ export interface HydraResourceSchema {
   supportedOperations?: string[];
   /** Workflow transitions for auto row actions (nubitio/workflow-bundle). */
   workflow?: WorkflowSchema;
+  /** Server-allocated sequence field (nubitio/sequence-bundle). */
+  sequence?: SequenceSchema;
 }
 
 // ---------------------------------------------------------------------------

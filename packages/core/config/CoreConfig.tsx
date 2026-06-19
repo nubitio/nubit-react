@@ -15,6 +15,8 @@ export interface CoreConfig {
    * Hydra `@id` cannot infer the API origin (e.g. relative IRIs only).
    */
   mercureTopicOrigin?: string;
+  /** Tenant id prefix for Mercure collection topics (SaaS column isolation). */
+  mercureTenantId?: number | string;
 }
 
 // Module-level defaults — readable by non-React code (DateUtils, serializeFormData, etc.).
@@ -25,6 +27,7 @@ const _coreConfig: CoreConfig = {
   apiBaseUrl: '/api/',
   currency: undefined,
   mercureTopicOrigin: undefined,
+  mercureTenantId: undefined,
 };
 
 /**
@@ -38,6 +41,7 @@ export function configureCore(config: Partial<CoreConfig>): void {
   if (config.apiBaseUrl !== undefined) _coreConfig.apiBaseUrl = config.apiBaseUrl;
   if ('currency' in config) _coreConfig.currency = config.currency;
   if ('mercureTopicOrigin' in config) _coreConfig.mercureTopicOrigin = config.mercureTopicOrigin;
+  if ('mercureTenantId' in config) _coreConfig.mercureTenantId = config.mercureTenantId;
 }
 
 /**
@@ -66,6 +70,10 @@ export function getMercureTopicOrigin(): string | undefined {
   return _coreConfig.mercureTopicOrigin;
 }
 
+export function getMercureTenantId(): number | string | undefined {
+  return _coreConfig.mercureTenantId;
+}
+
 const CoreConfigContext = React.createContext<CoreConfig>(_coreConfig);
 
 export interface CoreConfigProviderProps {
@@ -76,6 +84,7 @@ export interface CoreConfigProviderProps {
   currency?: string;
   /** Mercure topic origin override — see {@link CoreConfig.mercureTopicOrigin}. */
   mercureTopicOrigin?: string;
+  mercureTenantId?: number | string;
   children: React.ReactNode;
 }
 
@@ -85,15 +94,16 @@ export const CoreConfigProvider = ({
   apiBaseUrl,
   currency,
   mercureTopicOrigin,
+  mercureTenantId,
   children,
 }: CoreConfigProviderProps) => {
   // Keep module-level config in sync so it is available to non-React code
   // (defineResource, entityField, DateUtils, etc.) even at module evaluation time.
-  configureCore({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin });
+  configureCore({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin, mercureTenantId });
 
   const value = React.useMemo(
-    () => ({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin }),
-    [locale, timezone, apiBaseUrl, currency, mercureTopicOrigin],
+    () => ({ locale, timezone, apiBaseUrl, currency, mercureTopicOrigin, mercureTenantId }),
+    [locale, timezone, apiBaseUrl, currency, mercureTopicOrigin, mercureTenantId],
   );
 
   return (

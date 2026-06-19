@@ -13,13 +13,39 @@ export type { AdminSidebarMenuProps, AdminMenuSubItem, AdminSidebarMenuSelectEve
 export { useScreenSize, useScreenSizeClass } from './useScreenSize';
 
 export { SessionProvider, useSession } from './auth/SessionContext';
-export type { SessionProfile, SessionState, SessionProviderConfig, SessionContextValue } from './auth/SessionContext';
+export type {
+  AppProfile,
+  SessionFeatureEntitlement,
+  SessionProfile,
+  SessionState,
+  SessionProviderConfig,
+  SessionContextValue,
+  SessionTenant,
+} from './auth/SessionContext';
 
 export { LoginPage } from './auth/LoginPage';
 export type { LoginPageProps } from './auth/LoginPage';
 
 export { useAppRuntime } from './runtime/useAppRuntime';
 export type { NotificationType, ToastItem } from './runtime/useAppRuntime';
+export { useRuntimeConfig } from './runtime/useRuntimeConfig';
+export type {
+  RuntimeConfig,
+  RuntimeConfigState,
+  UseRuntimeConfigOptions,
+} from './runtime/useRuntimeConfig';
 
 export { ToastHost } from './runtime/ToastHost';
 export type { ToastHostProps } from './runtime/ToastHost';
+
+export { createNubitApp } from './app/createNubitApp';
+export { filterMenuByRoles, hasAnyRole } from './app/filterMenuByRoles';
+export type {
+  CreateNubitAppConfig,
+  NubitApp,
+  NubitAppMenuContext,
+  NubitAppMenuItem,
+  NubitAppMenuSubItem,
+  NubitAppRoute,
+  NubitAppUserMenuContext,
+} from './app/types';

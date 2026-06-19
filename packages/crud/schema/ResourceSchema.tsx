@@ -5,6 +5,7 @@ import type { FormLayout } from '../form/FormLayout';
 import type { FieldOverride } from '../crud/resolveSmartCrudFields';
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';
 import type { SmartCrudFieldContract } from '../crud/fieldContract';
+import type { WorkflowSchema } from '@nubitio/hydra';
 
 export interface ResourceSchemaRequest {
   apiUrl: string;
@@ -20,6 +21,7 @@ export interface ResourceSchemaResolution {
    * resource publishes one. Explicit `ResourceConfig.formLayout` wins.
    */
   formLayout?: FormLayout;
+  workflow?: WorkflowSchema;
 }
 
 export interface ResourceSchemaResolver {

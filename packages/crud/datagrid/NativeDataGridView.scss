@@ -725,7 +725,9 @@
   }
 }
 
-.nb-datagrid__filter-operator {
+// Use .nb-datagrid__filter-wrap as parent to raise specificity (0-2-0) above
+// .nb-dropdown's position:relative (0-1-0) regardless of CSS bundle order.
+.nb-datagrid__filter-wrap > .nb-datagrid__filter-operator {
   left: 5px;
   position: absolute;
   top: 50%;

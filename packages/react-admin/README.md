@@ -1,6 +1,6 @@
 # @nubitio/react-admin
 
-Batteries-included admin stack for API Platform / Hydra backends. Umbrella package that re-exports [`@nubitio/core`](https://www.npmjs.com/package/@nubitio/core), [`@nubitio/ui`](https://www.npmjs.com/package/@nubitio/ui), [`@nubitio/admin`](https://www.npmjs.com/package/@nubitio/admin), [`@nubitio/crud`](https://www.npmjs.com/package/@nubitio/crud), and [`@nubitio/hydra`](https://www.npmjs.com/package/@nubitio/hydra) from a single install.
+Batteries-included admin stack for API Platform / Hydra backends. Umbrella package that re-exports [`@nubitio/core`](https://www.npmjs.com/package/@nubitio/core), [`@nubitio/ui`](https://www.npmjs.com/package/@nubitio/ui), [`@nubitio/admin`](https://www.npmjs.com/package/@nubitio/admin), [`@nubitio/crud`](https://www.npmjs.com/package/@nubitio/crud), [`@nubitio/hydra`](https://www.npmjs.com/package/@nubitio/hydra), and [`@nubitio/dashboard`](https://www.npmjs.com/package/@nubitio/dashboard) from a single install.
 
 ## Install
 

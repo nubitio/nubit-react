@@ -305,6 +305,7 @@ export function parseHydraDoc(
       apiUrl: urlMap[className] ?? `/api/${pluralize(toDashCase(className))}`,
       fields,
       formLayout: cls['x-crud-layout'],
+      workflow: cls['x-workflow'],
       searchMappings: extractSearchMappings(cls),
       supportedOperations: Array.from(
         new Set([

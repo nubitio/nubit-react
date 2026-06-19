@@ -16,6 +16,7 @@ const sources = [
   join(packagesDir, 'ui', 'dist', 'style.css'),
   join(packagesDir, 'crud', 'dist', 'style.css'),
   join(packagesDir, 'admin', 'dist', 'style.css'),
+  join(packagesDir, 'dashboard', 'dist', 'style.css'),
 ];
 
 const outDir = join(packagesDir, 'react-admin', 'dist');

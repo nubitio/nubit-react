@@ -1,4 +1,5 @@
 export { defineResource } from './defineResource';
+export { embeddedLinesUrl } from './embeddedLinesUrl';
 export { CrudPage } from './CrudPage';
 export { crudRoute } from './crudRoute';
 export { SmartCrudPage } from './SmartCrudPage';

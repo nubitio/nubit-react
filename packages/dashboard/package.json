@@ -1,25 +1,25 @@
 {
-  "name": "@nubitio/ui",
+  "name": "@nubitio/dashboard",
   "version": "0.5.17",
   "type": "module",
-  "description": "Visual primitives and theme system for the Nubit admin stack (dialogs, cards, toolbar, light/dark theme).",
+  "description": "Declarative dashboard engine with stat cards, charts, and data tables for Nubit admin apps.",
   "license": "MIT",
   "keywords": [
     "react",
-    "ui",
-    "components",
-    "theme",
-    "admin"
+    "admin",
+    "dashboard",
+    "analytics",
+    "charts"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nubitio/nubit-react.git",
-    "directory": "packages/ui"
+    "directory": "packages/dashboard"
   },
   "bugs": {
     "url": "https://github.com/nubitio/nubit-react/issues"
   },
-  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/ui#readme",
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/dashboard#readme",
   "source": "./public.ts",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -34,7 +34,6 @@
       "require": "./dist/index.cjs"
     },
     "./style.css": "./dist/style.css",
-    "./themes/*": "./dist/themes/*",
     "./package.json": "./package.json"
   },
   "files": [
@@ -50,10 +49,10 @@
     "access": "public"
   },
   "peerDependencies": {
+    "@nubitio/core": "workspace:^",
+    "@nubitio/ui": "workspace:^",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "dependencies": {
-    "react-dropzone": "^15.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.0.0"
   }
 }

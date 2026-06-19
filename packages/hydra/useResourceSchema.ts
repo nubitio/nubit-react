@@ -75,6 +75,7 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
       error: undefined,
       supportedOperations: resourceSchema.supportedOperations ?? [],
       formLayout: resourceSchema.formLayout,
+      workflow: resourceSchema.workflow,
     };
   }, [data, isLoading, error, apiUrl]);
 }

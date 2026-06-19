@@ -1,8 +1,25 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+export type AppProfile = 'internal' | 'saas' | 'hybrid';
+
+export type SessionTenant = {
+  id?: number;
+  name?: string;
+  domain?: string | null;
+};
+
+export type SessionFeatureEntitlement = {
+  enabled: boolean;
+  config: Record<string, unknown>;
+};
+
 export type SessionProfile = {
   username: string;
   roles: string[];
+  /** Present when the backend runs nubitio/admin-bundle ≥ 0.1 session contract. */
+  appProfile?: AppProfile;
+  tenant?: SessionTenant;
+  features?: Record<string, SessionFeatureEntitlement>;
 };
 
 export type SessionState =

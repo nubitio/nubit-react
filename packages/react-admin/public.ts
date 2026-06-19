@@ -36,6 +36,7 @@ export {
   SmartCrudPage,
   SmartCrudRolesProvider,
   defineResource,
+  embeddedLinesUrl,
   defineFields,
   defineFieldContract,
   validateFieldContract,
@@ -168,6 +169,37 @@ export type {
   ApiDoc,
 } from '@nubitio/hydra';
 
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+export {
+  defineDashboard,
+  DashboardPage,
+  useDashboardData,
+  statWidget,
+  barChartWidget,
+  donutChartWidget,
+  tableWidget,
+  resolvePath,
+  resolveArray,
+  formatDashboardValue,
+} from '@nubitio/dashboard';
+export type {
+  BarChartWidgetConfig,
+  DashboardConfig,
+  DashboardDataResult,
+  DashboardPageProps,
+  DashboardSection,
+  DashboardSectionLayout,
+  DashboardWidget,
+  DonutChartWidgetConfig,
+  StatIconTone,
+  StatWidgetConfig,
+  TableColumnConfig,
+  TableViewAllConfig,
+  TableWidgetConfig,
+  TrendConfig,
+  ValueFormat,
+} from '@nubitio/dashboard';
+
 // ── Admin shell ───────────────────────────────────────────────────────────────
 export {
   AdminShell,
@@ -179,7 +211,11 @@ export {
   useSession,
   LoginPage,
   useAppRuntime,
+  useRuntimeConfig,
   ToastHost,
+  createNubitApp,
+  filterMenuByRoles,
+  hasAnyRole,
 } from '@nubitio/admin';
 export type {
   AdminShellProps,
@@ -189,14 +225,27 @@ export type {
   AdminSidebarMenuProps,
   AdminMenuSubItem,
   AdminSidebarMenuSelectEvent,
+  AppProfile,
+  SessionFeatureEntitlement,
   SessionProfile,
   SessionState,
   SessionProviderConfig,
   SessionContextValue,
+  SessionTenant,
   LoginPageProps,
   NotificationType,
   ToastItem,
   ToastHostProps,
+  RuntimeConfig,
+  RuntimeConfigState,
+  UseRuntimeConfigOptions,
+  CreateNubitAppConfig,
+  NubitApp,
+  NubitAppMenuContext,
+  NubitAppMenuItem,
+  NubitAppMenuSubItem,
+  NubitAppRoute,
+  NubitAppUserMenuContext,
 } from '@nubitio/admin';
 
 // ── i18n bootstrap ────────────────────────────────────────────────────────────

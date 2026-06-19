@@ -20,6 +20,7 @@ export {
   defineFieldContract,
   defineFields,
   defineResource,
+  embeddedLinesUrl,
   validateFieldContract,
   createCrudEvents,
   AuditTrailPanel,
@@ -158,6 +159,7 @@ export type {
   SummaryType,
 } from './summary';
 export { computeSummaryValue, formatSummaryValue, resolveSummaryText } from './summary';
+export { buildWorkflowRowActions } from './workflow/buildWorkflowRowActions';
 
 // ── Backend adapters ──────────────────────────────────────────────────────────
 export type { BackendAdapter } from './adapter/BackendAdapter';

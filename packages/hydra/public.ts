@@ -50,4 +50,6 @@ export type {
   HydraApiDoc,
   OpenApiDoc,
   ApiDoc,
+  WorkflowSchema,
+  WorkflowTransitionSchema,
 } from './types';

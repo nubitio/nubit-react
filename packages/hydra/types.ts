@@ -99,11 +99,26 @@ export interface HydraSupportedOperation {
   method?: string;
 }
 
+export interface WorkflowTransitionSchema {
+  name: string;
+  from: string[];
+  to: string;
+  label?: string;
+  roles?: string[];
+}
+
+export interface WorkflowSchema {
+  field: string;
+  transitions: WorkflowTransitionSchema[];
+}
+
 export interface HydraClass {
   '@id': string; // e.g. "#Branch"
   '@type': string; // e.g. "Class"
   title: string;
   supportedProperty: HydraSupportedProperty[];
+  /** State machine metadata from nubitio/workflow-bundle. */
+  'x-workflow'?: WorkflowSchema;
   /**
    * Class-level UI hints injected by TranslatedDocumentationNormalizer from
    * the ApiResource's extraProperties['x-crud']['formLayout']. Mirrors
@@ -206,6 +221,8 @@ export interface HydraResourceSchema {
    * Empty array means no operation info was found (fall back to platform defaults).
    */
   supportedOperations?: string[];
+  /** Workflow transitions for auto row actions (nubitio/workflow-bundle). */
+  workflow?: WorkflowSchema;
 }
 
 // ---------------------------------------------------------------------------

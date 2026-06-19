@@ -147,9 +147,18 @@ importers:
       '@nubitio/core':
         specifier: workspace:^
         version: link:../core
+      '@nubitio/crud':
+        specifier: workspace:^
+        version: link:../crud
+      '@nubitio/hydra':
+        specifier: workspace:^
+        version: link:../hydra
       '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.101.0(react@19.2.7)
       react:
         specifier: ^19.0.0
         version: 19.2.7
@@ -202,6 +211,24 @@ importers:
         specifier: ^6.0.0
         version: 6.30.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
+  packages/dashboard:
+    dependencies:
+      '@nubitio/core':
+        specifier: workspace:^
+        version: link:../core
+      '@nubitio/ui':
+        specifier: workspace:^
+        version: link:../ui
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
+      react-router-dom:
+        specifier: ^6.0.0
+        version: 6.30.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+
   packages/hydra:
     dependencies:
       '@nubitio/core':
@@ -237,6 +264,9 @@ importers:
       '@nubitio/crud':
         specifier: workspace:^
         version: link:../crud
+      '@nubitio/dashboard':
+        specifier: workspace:^
+        version: link:../dashboard
       '@nubitio/hydra':
         specifier: workspace:^
         version: link:../hydra

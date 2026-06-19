@@ -11,6 +11,7 @@ import {
 import { ShowcasePage } from './pages/ShowcasePage';
 import { UsersPage } from './pages/UsersPage';
 import { FieldTypesPage } from './pages/FieldTypesPage';
+import { DashboardDemoPage } from './pages/DashboardDemoPage';
 
 // JSONPlaceholder speaks the _page/_limit dialect and ignores unknown params.
 const restResourceStore = createRestResourceStore({ pageParam: '_page', pageSizeParam: '_limit' });
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 });
 
 const menu: AdminMenuItem[] = [
+  { text: 'Dashboard', icon: 'ph ph-chart-line-up', path: '/dashboard' },
   { text: 'UI Showcase', icon: 'ph ph-squares-four', path: '/showcase' },
   { text: 'Users (CRUD)', icon: 'ph ph-users', path: '/users' },
   { text: 'Field Types', icon: 'ph ph-list-bullets', path: '/fieldtypes' },
@@ -34,7 +36,8 @@ export function App() {
           <BrowserRouter>
             <AdminShell title="Nubit Demo" menuItems={menu}>
               <Routes>
-                <Route path="/" element={<Navigate to="/showcase" replace />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardDemoPage />} />
                 <Route path="/showcase" element={<ShowcasePage />} />
                 <Route path="/users" element={<UsersPage />} />
                 <Route path="/fieldtypes" element={<FieldTypesPage />} />

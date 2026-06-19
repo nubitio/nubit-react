@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 
-const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra'];
+const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra', '@nubitio/dashboard'];
 
 // Every runtime dependency/peer of any package must stay external — the root
 // package.json only has devDependencies, so tsdown cannot infer these itself.
@@ -75,6 +75,14 @@ export default [
     ...sharedConfig,
     entry: { index: 'packages/hydra/public.ts' },
     outDir: 'packages/hydra/dist',
+  }),
+
+  // ── @nubitio/dashboard ──────────────────────────────────────────────────────
+  // Declarative dashboard engine: stat cards, charts, tables.
+  defineConfig({
+    ...sharedConfig,
+    entry: { index: 'packages/dashboard/public.ts' },
+    outDir: 'packages/dashboard/dist',
   }),
 
   // ── @nubitio/react-admin ────────────────────────────────────────────────────

@@ -15,7 +15,7 @@ if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(version ?? '')) {
 }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const packages = ['core', 'ui', 'admin', 'crud', 'hydra', 'react-admin'];
+const packages = ['core', 'ui', 'admin', 'crud', 'hydra', 'dashboard', 'react-admin'];
 
 for (const name of packages) {
   const file = join(root, 'packages', name, 'package.json');

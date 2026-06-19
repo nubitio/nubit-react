@@ -20,6 +20,7 @@ import type { DataRecord } from '@nubitio/core';
 import { useResourceStoreFactory } from '../data/ResourceStore';
 import { FORM_ERRORS_EVENT, FORM_EVENTS } from './FormEvents';
 import { buildEmptyRow, normalizeFormData, type PrependDataMap } from './FormDataTransform';
+import { loadDetailRows } from './loadDetailRows';
 import { safeRandomId } from './safeRandomId';
 import { buildFormLayoutModel, type FormLayoutGroup, type FormLayoutModel } from './FormLayoutModel';
 import {
@@ -634,9 +635,8 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     if (!detailUrl) return;
 
     emit(FORM_EVENTS.LOADING, true);
-    httpClient
-      .get<FormDataRecord[]>(detailUrl)
-      .then((response) => setNextDetailRows(response.data))
+    loadDetailRows(httpClient, detailUrl, options.adapter)
+      .then((rows) => setNextDetailRows(rows))
       .finally(() => emit(FORM_EVENTS.LOADING, false));
   }, [captureExistingMedia, emit, httpClient, options.adapter, options.detailUrl, options.fields, prependDataRef, resetPrependData, resetUploadSession, setDetailErrors, setEditMode, setErrors, setNextDetailRows, setNextFormData]);
 

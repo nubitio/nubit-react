@@ -19,6 +19,7 @@
       "@nubitio/admin": ["packages/admin/public.ts"],
       "@nubitio/crud": ["packages/crud/public.ts"],
       "@nubitio/hydra": ["packages/hydra/public.ts"],
+      "@nubitio/dashboard": ["packages/dashboard/public.ts"],
       "@nubitio/react-admin": ["packages/react-admin/public.ts"]
     }
   },

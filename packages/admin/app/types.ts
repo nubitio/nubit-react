@@ -14,7 +14,7 @@ export type NubitAppMenuSubItem = AdminMenuSubItem & {
   roles?: string | string[];
 };
 
-export type NubitAppMenuItem = AdminMenuItem & {
+export type NubitAppMenuItem = Omit<AdminMenuItem, 'items'> & {
   /** UX-only — hide unless the session has one of these roles. */
   roles?: string | string[];
   items?: NubitAppMenuSubItem[];

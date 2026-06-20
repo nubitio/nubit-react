@@ -17,6 +17,8 @@ export interface DataGridViewOptions {
   id: string;
   title: string;
   url: string;
+  /** Controlled rows. When provided, the grid renders this data instead of loading from url. */
+  data?: DataRecord[];
   detailUrl?: string;
   fields: Field[];
   detailFields?: Field[] | ((parentRow: DataRecord) => Field[]);
@@ -52,7 +54,17 @@ export interface DataGridViewOptions {
   stateStoringEnabled?: boolean;
   toolbarVisible?: boolean;
   selectionMode?: 'single' | 'multiple';
-  inlineActions?: boolean;
+  /**
+   * Save / revert buttons shown in the toolbar when inline edits are pending.
+   * Set to `false` to hide and handle persistence via `GridHandle.saveChanges()`.
+   * Defaults to `true` for `cell` and `batch` edit modes.
+   */
+  inlineEditToolbar?: boolean | { save?: boolean; revert?: boolean };
+  /**
+   * Per-row save / cancel icons in the actions column while a row is being edited.
+   * Defaults to `true` for `row` mode and `false` for `cell` / `batch`.
+   */
+  inlineRowActions?: boolean;
   onBack?: () => void;
   onAdd?: () => void;
   onEdit?: (row: DataRecord) => void;
@@ -62,6 +74,8 @@ export interface DataGridViewOptions {
   onRowPrepared?: (event: unknown) => void;
   onContentReady?: () => void;
   onFilterChange?: (filters: Record<string, string>) => void;
+  /** Custom batch persistence. Defaults to PATCHing each row to url/id when omitted. */
+  onBatchSave?: (rows: DataRecord[]) => void | Promise<void>;
   filterRow?: boolean;
   headerFilter?: boolean;
   manualLoad?: boolean;

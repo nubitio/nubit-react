@@ -619,6 +619,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         selectionMode={hasMultipleSelection ? 'multiple' : 'single'}
         onSelectionChanged={handleSelectionChanged}
         editMode={resolvedResource.editMode}
+        inlineEditToolbar={resolvedResource.inlineEditToolbar}
+        inlineRowActions={resolvedResource.inlineRowActions}
         visibleColumns={presetState.visibleColumns}
         beforeToolbar={renderPresetSelector}
         aboveGrid={aboveGridContent}

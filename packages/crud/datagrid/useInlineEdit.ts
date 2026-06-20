@@ -26,19 +26,43 @@ export interface InlineEditOptions {
   fields: Field[];
   onSaveSuccess?: () => void;
   onSaveError?: (key: unknown, err: unknown) => void;
+  onBatchSave?: (rows: DataRecord[]) => void | Promise<void>;
+}
+
+export interface ActiveCell {
+  key: unknown;
+  fieldName: string;
 }
 
 export interface UseInlineEditResult {
   draftRows: Map<unknown, DataRecord>;
   savingRows: Set<unknown>;
   rowErrors: Map<unknown, Record<string, string>>;
+  activeCell: ActiveCell | null;
   isEditing: (key: unknown) => boolean;
+  isCellActive: (key: unknown, fieldName: string) => boolean;
+  isCellDirty: (key: unknown, fieldName: string, original: DataRecord) => boolean;
+  hasDraftChanges: (key: unknown, original: DataRecord) => boolean;
   startEdit: (row: DataRecord) => void;
+  startCellEdit: (row: DataRecord, fieldName: string) => void;
+  stopCellEdit: () => void;
   cancelEdit: (key: unknown) => void;
   discardAll: () => void;
   updateDraft: (key: unknown, fieldName: string, value: unknown) => void;
-  saveRow: (key: unknown) => Promise<void>;
-  saveAll: () => Promise<void>;
+  saveRow: (key: unknown) => Promise<boolean>;
+  saveAll: () => Promise<boolean>;
+}
+
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a == null && b == null) return true;
+  if (a == null || b == null) return false;
+  const numA = Number(a);
+  const numB = Number(b);
+  if (!Number.isNaN(numA) && !Number.isNaN(numB)) {
+    return numA === numB;
+  }
+  return String(a) === String(b);
 }
 
 export function useInlineEdit({
@@ -50,20 +74,57 @@ export function useInlineEdit({
   fields,
   onSaveSuccess,
   onSaveError,
+  onBatchSave,
 }: InlineEditOptions): UseInlineEditResult {
   const [draftRows, setDraftRows] = useState<Map<unknown, DataRecord>>(new Map());
   const [savingRows, setSavingRows] = useState<Set<unknown>>(new Set());
   const [rowErrors, setRowErrors] = useState<Map<unknown, Record<string, string>>>(new Map());
+  const [activeCell, setActiveCell] = useState<ActiveCell | null>(null);
 
   // Stable refs so async callbacks always see the latest values without
   // needing to be recreated on every render.
   const draftRowsRef = useRef(draftRows);
   draftRowsRef.current = draftRows; // eslint-disable-line react-hooks/refs
 
-  const optsRef = useRef({ url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError });
-  optsRef.current = { url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError }; // eslint-disable-line react-hooks/refs
+  const optsRef = useRef({
+    url,
+    idField,
+    adapter,
+    httpClient,
+    fields,
+    onSaveSuccess,
+    onSaveError,
+    onBatchSave,
+  });
+  optsRef.current = { url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError, onBatchSave }; // eslint-disable-line react-hooks/refs
 
-  const isEditing = useCallback((key: unknown) => draftRowsRef.current.has(key), []);
+  const isEditing = useCallback((key: unknown) => draftRows.has(key), [draftRows]);
+
+  const isCellActive = useCallback(
+    (key: unknown, fieldName: string) =>
+      activeCell != null && activeCell.key === key && activeCell.fieldName === fieldName,
+    [activeCell],
+  );
+
+  const isCellDirty = useCallback(
+    (key: unknown, fieldName: string, original: DataRecord) => {
+      const draft = draftRows.get(key);
+      if (!draft) return false;
+      return !valuesEqual(draft[fieldName], original[fieldName]);
+    },
+    [draftRows],
+  );
+
+  const hasDraftChanges = useCallback(
+    (key: unknown, original: DataRecord) => {
+      const draft = draftRows.get(key);
+      if (!draft) return false;
+      return optsRef.current.fields.some(
+        (field) => canEditFieldInline(field) && !valuesEqual(draft[field.name], original[field.name]),
+      );
+    },
+    [draftRows],
+  );
 
   const startEdit = useCallback(
     (row: DataRecord) => {
@@ -78,9 +139,33 @@ export function useInlineEdit({
         next.delete(key);
         return next;
       });
+      setActiveCell(null);
     },
     [mode],
   );
+
+  const startCellEdit = useCallback(
+    (row: DataRecord, fieldName: string) => {
+      const key = row[optsRef.current.idField];
+      setDraftRows((prev) => {
+        const existing = prev.get(key);
+        const base: [unknown, DataRecord][] = mode === 'row' ? [] : Array.from(prev.entries());
+        const withoutKey = base.filter(([entryKey]) => entryKey !== key);
+        return new Map([...withoutKey, [key, existing ? { ...existing } : { ...row }]]);
+      });
+      setRowErrors((prev) => {
+        const next = new Map(prev);
+        next.delete(key);
+        return next;
+      });
+      setActiveCell({ key, fieldName });
+    },
+    [mode],
+  );
+
+  const stopCellEdit = useCallback(() => {
+    setActiveCell(null);
+  }, []);
 
   const cancelEdit = useCallback((key: unknown) => {
     setDraftRows((prev) => {
@@ -93,11 +178,13 @@ export function useInlineEdit({
       next.delete(key);
       return next;
     });
+    setActiveCell((current) => (current?.key === key ? null : current));
   }, []);
 
   const discardAll = useCallback(() => {
     setDraftRows(new Map());
     setRowErrors(new Map());
+    setActiveCell(null);
   }, []);
 
   const updateDraft = useCallback((key: unknown, fieldName: string, value: unknown) => {
@@ -176,27 +263,86 @@ export function useInlineEdit({
     }
   }, []);
 
+  const validateDraft = useCallback((key: unknown, draft: DataRecord, fs: Field[]): boolean => {
+    const errors: Record<string, string> = {};
+    fs.forEach((field) => {
+      if (!canEditFieldInline(field)) return;
+      if (field.required && (draft[field.name] == null || draft[field.name] === '')) {
+        errors[field.name] = 'required';
+      }
+    });
+    if (Object.keys(errors).length === 0) return true;
+    setRowErrors((prev) => new Map(prev).set(key, errors));
+    return false;
+  }, []);
+
+  const doSaveBatch = useCallback(async (): Promise<boolean> => {
+    const { fields: fs, onBatchSave: saveBatch, onSaveError: onErr } = optsRef.current;
+    if (!saveBatch) return false;
+
+    const entries = Array.from(draftRowsRef.current.entries());
+    if (entries.length === 0) return false;
+    if (!entries.every(([key, draft]) => validateDraft(key, draft, fs))) return false;
+
+    const keys = entries.map(([key]) => key);
+    setSavingRows((prev) => new Set([...prev, ...keys]));
+
+    try {
+      await saveBatch(entries.map(([, draft]) => ({ ...draft })));
+      setDraftRows(new Map());
+      setRowErrors(new Map());
+      return true;
+    } catch (err: unknown) {
+      keys.forEach((key) => onErr?.(key, err));
+      return false;
+    } finally {
+      setSavingRows((prev) => {
+        const next = new Set(prev);
+        keys.forEach((key) => next.delete(key));
+        return next;
+      });
+    }
+  }, [validateDraft]);
+
   const saveRow = useCallback(
-    async (key: unknown): Promise<void> => {
+    async (key: unknown): Promise<boolean> => {
+      if (optsRef.current.onBatchSave) {
+        const ok = await doSaveBatch();
+        if (ok) optsRef.current.onSaveSuccess?.();
+        return ok;
+      }
       const ok = await doSaveRow(key);
       if (ok) optsRef.current.onSaveSuccess?.();
+      return ok;
     },
-    [doSaveRow],
+    [doSaveBatch, doSaveRow],
   );
 
-  const saveAll = useCallback(async (): Promise<void> => {
+  const saveAll = useCallback(async (): Promise<boolean> => {
+    if (optsRef.current.onBatchSave) {
+      const ok = await doSaveBatch();
+      if (ok) optsRef.current.onSaveSuccess?.();
+      return ok;
+    }
     const keys = Array.from(draftRowsRef.current.keys());
     const results = await Promise.allSettled(keys.map((key) => doSaveRow(key)));
     const anySuccess = results.some((r) => r.status === 'fulfilled' && (r as PromiseFulfilledResult<boolean>).value);
     if (anySuccess) optsRef.current.onSaveSuccess?.();
-  }, [doSaveRow]);
+    return anySuccess;
+  }, [doSaveBatch, doSaveRow]);
 
   return {
     draftRows,
     savingRows,
     rowErrors,
+    activeCell,
     isEditing,
+    isCellActive,
+    isCellDirty,
+    hasDraftChanges,
     startEdit,
+    startCellEdit,
+    stopCellEdit,
     cancelEdit,
     discardAll,
     updateDraft,

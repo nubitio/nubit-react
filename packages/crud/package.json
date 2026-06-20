@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/crud",
-  "version": "0.5.26",
+  "version": "0.5.27",
   "type": "module",
   "description": "Declarative CRUD engine with field DSL, forms, datagrids, RBAC, conditional logic and pluggable adapters (Hydra/REST).",
   "license": "MIT",
@@ -63,8 +63,14 @@
     "react-router-dom": "^6.0.0"
   },
   "peerDependenciesMeta": {
-    "@tiptap/extension-link": { "optional": true },
-    "@tiptap/react": { "optional": true },
-    "@tiptap/starter-kit": { "optional": true }
+    "@tiptap/extension-link": {
+      "optional": true
+    },
+    "@tiptap/react": {
+      "optional": true
+    },
+    "@tiptap/starter-kit": {
+      "optional": true
+    }
   }
 }

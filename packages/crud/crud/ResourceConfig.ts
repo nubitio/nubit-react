@@ -244,6 +244,10 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
    * - `'row'` | `'cell'` | `'batch'` enable inline editing when supported.
    */
   editMode?: 'popup' | 'row' | 'cell' | 'batch';
+  /** Toolbar save/revert for inline edit. `false` hides them (use GridHandle instead). */
+  inlineEditToolbar?: boolean | { save?: boolean; revert?: boolean };
+  /** Per-row save/cancel in the actions column. Defaults by edit mode. */
+  inlineRowActions?: boolean;
   /** Optional layout descriptor for the dialog form: tabs or collapsible sections. */
   formLayout?: FormLayout;
   /** Named column visibility presets. When defined, a preset selector is shown in the toolbar. */

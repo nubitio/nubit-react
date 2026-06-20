@@ -13,4 +13,6 @@ export interface GridHandle {
   getSelectedRows: () => DataRecord[];
   getFilter: () => unknown[];
   filter: (filterRule: FilterRule | null) => void;
+  hasEditData: () => boolean;
+  saveChanges: () => Promise<boolean>;
 }

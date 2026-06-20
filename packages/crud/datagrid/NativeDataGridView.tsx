@@ -33,7 +33,7 @@ import {
 import { getCellText, getIdField, renderCell } from './cellRendering';
 import { DetailGridSection } from './DetailGridSection';
 import { canEditFieldInline, useInlineEdit } from './useInlineEdit';
-import { InlineEditCell } from './InlineEditCell';
+import { INLINE_EDIT_PORTAL_SELECTOR, InlineEditCell } from './InlineEditCell';
 import { GridEmptyStateView } from './GridEmptyStateView';
 import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
 import { formatSummaryValue, resolveSummaryText } from '../summary';
@@ -123,6 +123,28 @@ function normalizeIcon(icon?: string): string | undefined {
 
 function isDateLikeField(field: Field): boolean {
   return field.type === FieldType.DATE || field.type === FieldType.DATETIME;
+}
+
+function isCellEditMode(editMode?: DataGridViewOptions['editMode']): boolean {
+  return editMode === 'cell' || editMode === 'batch';
+}
+
+function resolveInlineEditToolbar(
+  editMode: DataGridViewOptions['editMode'] | undefined,
+  inlineEditToolbar: DataGridViewOptions['inlineEditToolbar'],
+): { save: boolean; revert: boolean } | null {
+  if (inlineEditToolbar === false) return null;
+  const defaultShow = isCellEditMode(editMode);
+  if (inlineEditToolbar == null) {
+    return defaultShow ? { save: true, revert: true } : null;
+  }
+  if (typeof inlineEditToolbar === 'boolean') {
+    return inlineEditToolbar ? { save: true, revert: true } : null;
+  }
+  return {
+    save: inlineEditToolbar.save !== false,
+    revert: inlineEditToolbar.revert !== false,
+  };
 }
 
 function getToolbarKey(action: ResourceToolbarAction, index: number): string {
@@ -634,6 +656,15 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const loadSeqRef = useRef(0);
 
   const loadRows = useCallback(async () => {
+    if (options.data) {
+      rowsRef.current = options.data;
+      setRows(options.data);
+      setTotalCount(options.data.length);
+      setGridSummary(options.gridSummary ?? null);
+      setIsGridLoading(false);
+      onContentReadyRef.current?.();
+      return options.data;
+    }
     if (options.manualLoad) return rowsRef.current;
     setIsGridLoading(true);
     const seq = ++loadSeqRef.current;
@@ -655,7 +686,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     setIsGridLoading(false);
     onContentReadyRef.current?.();
     return result.data;
-  }, [filterOperators, filters, options.manualLoad, options.paging, page, pageSize, sort, source]);
+  }, [filterOperators, filters, options.data, options.gridSummary, options.manualLoad, options.paging, page, pageSize, sort, source]);
 
   useEffect(() => {
     void loadRows();
@@ -685,10 +716,15 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       });
   }, [httpClient, resourceStoreFactory, visibleFields]);
 
-  const canInlineEditMode = options.editMode === 'row' || options.editMode === 'batch';
+  const canInlineEditMode =
+    options.editMode === 'row' || options.editMode === 'cell' || options.editMode === 'batch';
+  const cellEditMode = isCellEditMode(options.editMode);
+  const rowInlineMode = options.editMode === 'row';
+  const inlineEditToolbar = resolveInlineEditToolbar(options.editMode, options.inlineEditToolbar);
+  const showRowInlineActions = options.inlineRowActions ?? rowInlineMode;
 
   const inlineEdit = useInlineEdit({
-    mode: options.editMode === 'batch' ? 'batch' : 'row',
+    mode: cellEditMode ? 'batch' : 'row',
     url: options.url,
     idField,
     adapter: options.adapter,
@@ -696,12 +732,36 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     fields: options.fields,
     onSaveSuccess: () => void loadRows(),
     onSaveError: () => {},
+    onBatchSave: options.onBatchSave,
   });
+
+  const dirtyRowCount = useMemo(
+    () =>
+      rows.filter((row) => {
+        const key = row[idField] ?? row;
+        return inlineEdit.draftRows.has(key) && inlineEdit.hasDraftChanges(key, row);
+      }).length,
+    [rows, idField, inlineEdit.draftRows, inlineEdit.hasDraftChanges],
+  );
+  const hasPendingInlineEdits = dirtyRowCount > 0;
+
+  // Close the active cell editor when clicking outside the grid or its popovers.
+  useEffect(() => {
+    if (!inlineEdit.activeCell) return;
+    const handler = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('.nb-datagrid__edit-cell')) return;
+      if (target.closest(INLINE_EDIT_PORTAL_SELECTOR)) return;
+      inlineEdit.stopCellEdit();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [inlineEdit.activeCell, inlineEdit.stopCellEdit]);
 
   // Snapshot of mutable state read by the imperative handle. Updated after every render
   // so handle methods always see current values without the handle itself being rebuilt.
-  const handleStateRef = useRef({ selectedKeys, filters, filterOperators, loadRows, idField });
-  handleStateRef.current = { selectedKeys, filters, filterOperators, loadRows, idField }; // eslint-disable-line react-hooks/refs
+  const handleStateRef = useRef({ selectedKeys, filters, filterOperators, loadRows, idField, inlineEdit });
+  handleStateRef.current = { selectedKeys, filters, filterOperators, loadRows, idField, inlineEdit }; // eslint-disable-line react-hooks/refs
 
   useImperativeHandle(
     ref,
@@ -763,6 +823,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         setFilterOperators(nextOperators);
         setPage(0);
       },
+      hasEditData: () => handleStateRef.current.inlineEdit.draftRows.size > 0,
+      saveChanges: () => handleStateRef.current.inlineEdit.saveAll(),
     }),
     [options.fields, t],
   );
@@ -788,7 +850,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const rowDeletable = (row: DataRecord): boolean => options.canDeleteRow?.(row) !== false;
 
   const buildRowActions = (row: DataRecord): ResourceToolbarAction[] => [
-    ...(options.allowEdit && rowEditable(row) && canInlineEditMode && !inlineEdit.isEditing(row[idField])
+    ...(options.allowEdit &&
+    rowEditable(row) &&
+    rowInlineMode &&
+    canInlineEditMode &&
+    !inlineEdit.isEditing(row[idField])
       ? [
           {
             text: t('grid.inlineEditRow'),
@@ -835,7 +901,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   ];
 
   const openRow = (row: DataRecord) => {
-    if (options.allowEdit && rowEditable(row) && canInlineEditMode) {
+    if (options.allowEdit && rowEditable(row) && rowInlineMode && canInlineEditMode) {
       inlineEdit.startEdit(row);
       return;
     }
@@ -976,7 +1042,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasCheckbox = options.selectionMode === 'multiple';
   const hasBuiltInRowActions = Boolean(
-    (options.allowEdit && (canInlineEditMode || options.onEdit || options.events?.EDIT)) ||
+    (options.allowEdit &&
+      ((rowInlineMode && showRowInlineActions) || options.onEdit || options.events?.EDIT)) ||
     (options.allowView && options.onView) ||
     (options.allowDelete && (options.onDelete || options.events?.DELETE)),
   );
@@ -1004,25 +1071,40 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   // The actions column (fixed UI chrome) is excluded from stretching — it always
   // stays at ACTIONS_COL_WIDTH regardless of how wide the container gets.
   const resolvedColWidths = useMemo(() => {
-    if (visibleFields.length === 0) return colWidths;
-    const dataTotal = visibleFields.reduce((sum, f) => sum + getColumnWidth(f, colWidths), 0);
+    if (visibleFields.length === 0 || containerWidth <= 0) return colWidths;
+
+    const bases = visibleFields.map((f) => getColumnWidth(f, colWidths));
+    const dataTotal = bases.reduce((sum, width) => sum + width, 0);
     const fixedTotal =
       (hasCheckbox ? CHECKBOX_COL_WIDTH : 0) +
       (hasDetail ? DETAIL_COL_WIDTH : 0) +
       (hasRowActions ? actionsColWidth : 0);
-    const extra = Math.max(0, containerWidth - dataTotal - fixedTotal);
+    const available = Math.max(0, containerWidth - fixedTotal);
+
+    if (dataTotal > available && available > 0) {
+      const scale = available / dataTotal;
+      const result: Record<string, number> = {};
+      visibleFields.forEach((field, index) => {
+        const floor = field.minWidth ?? MIN_COL_WIDTH;
+        result[field.name] = Math.max(floor, Math.floor(bases[index]! * scale));
+      });
+      return result;
+    }
+
+    const extra = Math.max(0, available - dataTotal);
     if (extra === 0 || dataTotal === 0) return colWidths;
+
     let distributed = 0;
     const result: Record<string, number> = {};
     visibleFields.forEach((f, i) => {
-      const base = getColumnWidth(f, colWidths);
+      const base = bases[i]!;
       const share =
-        i < visibleFields.length - 1 ? Math.round(extra * (base / dataTotal)) : extra - distributed; // give remainder to last col to avoid rounding gaps
+        i < visibleFields.length - 1 ? Math.round(extra * (base / dataTotal)) : extra - distributed;
       result[f.name] = base + share;
       distributed += share;
     });
     return result;
-  }, [visibleFields, colWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth]);
+  }, [visibleFields, colWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth, actionsColWidth]);
 
   const tableLayoutStyle = {
     '--nb-datagrid-layout-width': `${layoutWidth}px`,
@@ -1145,6 +1227,22 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   )}
                 </span>
               )}
+              {inlineEditToolbar?.revert && hasPendingInlineEdits && (
+                <IconButton
+                  className="nb-datagrid__toolbar-icon-action nb-datagrid__toolbar-icon-action--revert"
+                  icon="ph ph-arrow-counter-clockwise"
+                  label={t('grid.inlineRevertChanges')}
+                  onClick={() => inlineEdit.discardAll()}
+                />
+              )}
+              {inlineEditToolbar?.save && hasPendingInlineEdits && (
+                <IconButton
+                  className="nb-datagrid__toolbar-icon-action nb-datagrid__toolbar-icon-action--save"
+                  icon="ph ph-floppy-disk"
+                  label={t('grid.inlineSaveChanges')}
+                  onClick={() => void inlineEdit.saveAll()}
+                />
+              )}
               {toolbar.showRefresh !== false && (
                 <IconButton
                   icon="ph ph-arrow-clockwise"
@@ -1154,27 +1252,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               )}
             </div>
           )}
-          {options.editMode === 'batch' && inlineEdit.draftRows.size > 0 && (
-            <div className="nb-datagrid__batch-bar" role="status">
+          {cellEditMode && hasPendingInlineEdits && !inlineEditToolbar && (
+            <div className="nb-datagrid__batch-bar nb-datagrid__batch-bar--compact" role="status">
               <span className="nb-datagrid__batch-bar-label">
-                {t('grid.inlineUnsavedRows', { count: inlineEdit.draftRows.size })}
+                {t('grid.inlineUnsavedRows', { count: dirtyRowCount })}
               </span>
-              <div className="nb-datagrid__batch-bar-actions">
-                <button
-                  type="button"
-                  className="nb-datagrid__batch-bar-btn nb-datagrid__batch-bar-btn--discard"
-                  onClick={() => inlineEdit.discardAll()}
-                >
-                  {t('grid.inlineDiscardAll')}
-                </button>
-                <button
-                  type="button"
-                  className="nb-datagrid__batch-bar-btn nb-datagrid__batch-bar-btn--save"
-                  onClick={() => void inlineEdit.saveAll()}
-                >
-                  {t('grid.inlineSaveAll', { count: inlineEdit.draftRows.size })}
-                </button>
-              </div>
             </div>
           )}
           {options.aboveGrid ? (
@@ -1540,9 +1622,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     const key = row[idField] ?? rowIndex;
                     const selected = selectedKeys.includes(key);
                     const editing = inlineEdit.draftRows.has(key);
+                    const rowHasChanges = editing && inlineEdit.hasDraftChanges(key, row);
                     const saving = inlineEdit.savingRows.has(key);
                     const rowDraft = inlineEdit.draftRows.get(key) ?? row;
                     const rowFieldErrors = inlineEdit.rowErrors.get(key);
+                    const rowInRowEdit = rowInlineMode && editing;
                     const detailFields =
                       typeof options.detailFields === 'function'
                         ? options.detailFields(row)
@@ -1558,15 +1642,19 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                             'nb-datagrid__row',
                             expanded ? 'nb-datagrid__row--expanded' : '',
                             selected ? 'nb-datagrid__row--selected' : '',
-                            editing ? 'nb-datagrid__row--editing' : '',
+                            rowInRowEdit ? 'nb-datagrid__row--editing' : '',
+                            rowHasChanges ? 'nb-datagrid__row--dirty' : '',
                             saving ? 'nb-datagrid__row--saving' : '',
                           ].filter(Boolean).join(' ')}
                           tabIndex={0}
                           aria-selected={selected}
-                          onClick={() => { if (!editing) selectRow(row); }}
+                          onClick={() => {
+                            if (rowInRowEdit) return;
+                            selectRow(row);
+                          }}
                           onDoubleClick={() => {
-                            if (editing) return;
-                            if (options.allowEdit && rowEditable(row) && canInlineEditMode) {
+                            if (rowInRowEdit || inlineEdit.activeCell) return;
+                            if (options.allowEdit && rowEditable(row) && rowInlineMode && canInlineEditMode) {
                               inlineEdit.startEdit(row);
                               return;
                             }
@@ -1580,14 +1668,17 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                             }
                           }}
                           onKeyDown={(event) => {
-                            if (editing && event.key === 'Escape') {
+                            if (inlineEdit.activeCell && event.key === 'Escape') {
+                              inlineEdit.stopCellEdit();
+                            } else if (rowInRowEdit && event.key === 'Escape') {
                               inlineEdit.cancelEdit(key);
-                            } else if (editing && event.key === 'Enter') {
+                            } else if (rowInRowEdit && event.key === 'Enter' && showRowInlineActions) {
                               void inlineEdit.saveRow(key);
                             } else if (
                               !editing &&
                               event.key === 'Enter' &&
                               options.allowEdit &&
+                              rowInlineMode &&
                               canInlineEditMode &&
                               rowEditable(row)
                             ) {
@@ -1668,43 +1759,82 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                           )}
                           {visibleFields.map((field, columnIndex) => {
                             const width = getColumnWidth(field, resolvedColWidths);
-                            if (editing && canEditFieldInline(field)) {
+                            const editable =
+                              options.allowEdit &&
+                              !options.editDisabled &&
+                              rowEditable(row) &&
+                              canEditFieldInline(field);
+                            const cellActive = inlineEdit.isCellActive(key, field.name);
+                            const cellDirty = editing && inlineEdit.isCellDirty(key, field.name, row);
+                            const showCellEditor =
+                              editable &&
+                              ((rowInRowEdit && editing) || (cellEditMode && cellActive));
+                            const displayRow = editing ? rowDraft : row;
+                            const cellClassName = [
+                              showCellEditor ? 'nb-datagrid__edit-cell' : 'nb-datagrid__data-cell',
+                              editable && canInlineEditMode ? 'nb-datagrid__cell--editable' : '',
+                              cellDirty ? 'nb-datagrid__cell--dirty' : '',
+                              cellActive ? 'nb-datagrid__cell--active' : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ');
+
+                            const beginInlineEdit = () => {
+                              if (!editable) return;
+                              selectRow(row);
+                              if (cellEditMode) {
+                                inlineEdit.startCellEdit(row, field.name);
+                              } else if (rowInlineMode && !editing) {
+                                inlineEdit.startEdit(row);
+                              }
+                            };
+
+                            if (showCellEditor) {
                               return (
                                 <td
                                   key={field.name}
                                   style={{ width, textAlign: field.align }}
-                                  className="nb-datagrid__edit-cell"
-                                  onClick={(e) => e.stopPropagation()}
+                                  className={cellClassName}
                                 >
                                   <InlineEditCell
                                     field={field}
                                     rowKey={key}
                                     draft={rowDraft}
-                                    onChange={(name, value) => inlineEdit.updateDraft(key, name, value)}
+                                    onChange={(name, value) =>
+                                      inlineEdit.updateDraft(key, name, value)
+                                    }
                                     errors={rowFieldErrors}
                                     disabled={saving}
                                     allRemoteOptions={filterRemoteOptions}
                                     httpClient={httpClient}
                                     t={t}
+                                    autoFocus
                                   />
                                 </td>
                               );
                             }
+
                             return (
                               <td
                                 key={field.name}
                                 style={{ width, textAlign: field.align }}
+                                className={cellClassName}
                                 title={getCellText(
                                   field,
-                                  row,
+                                  displayRow,
                                   filterRemoteOptions[field.name],
                                   t('common.yes'),
                                   t('common.no'),
                                 )}
+                                onClick={(event) => {
+                                  if (!editable || !canInlineEditMode) return;
+                                  event.stopPropagation();
+                                  beginInlineEdit();
+                                }}
                               >
                                 {renderCell(
                                   field,
-                                  row,
+                                  displayRow,
                                   rowIndex,
                                   columnIndex,
                                   filterRemoteOptions[field.name],
@@ -1719,7 +1849,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               className="nb-datagrid__actions-cell"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              {editing ? (
+                              {rowInRowEdit && showRowInlineActions ? (
                                 <div className="nb-datagrid__inline-actions">
                                   <button
                                     type="button"

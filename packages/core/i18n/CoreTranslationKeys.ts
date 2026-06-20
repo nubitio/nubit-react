@@ -88,6 +88,8 @@ export interface CoreTranslationKeys {
   'grid.inlineSaveAll': string;
   'grid.inlineDiscardAll': string;
   'grid.inlineUnsavedRows': string;
+  'grid.inlineSaveChanges': string;
+  'grid.inlineRevertChanges': string;
   'dialog.buttonCancel': string;
   'dialog.buttonSave': string;
   'dialog.close': string;

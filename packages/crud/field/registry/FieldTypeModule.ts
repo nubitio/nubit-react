@@ -124,6 +124,13 @@ export interface FieldTypeModule {
   serializeDetailValue(field: Field, value: unknown, adapter: BackendAdapter): SerializedFieldValue;
   /** True when the control renders its own label (the form omits the outer one). */
   rendersOwnLabel?: boolean;
+  /**
+   * Custom grid-cell renderer for this type. When present, the grid renders
+   * the returned node instead of the plain `cellText` string. Use for types
+   * that need to display rich markup (e.g. HTML, images, badges).
+   * `field.formatter` still takes precedence over this.
+   */
+  CellRender?(props: { field: Field; value: unknown; row: DataRecord }): React.ReactNode;
   /** The main-form control for this type. `Field.contentRender` still wins. */
   ControlRender(props: FieldControlProps): React.ReactNode;
   /**

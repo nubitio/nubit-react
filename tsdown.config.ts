@@ -12,6 +12,10 @@ const RUNTIME_EXTERNAL = [
   'i18next',
   '@tanstack/react-query',
   'react-dropzone',
+  '@tiptap/react',
+  '@tiptap/starter-kit',
+  '@tiptap/extension-link',
+  '@tiptap/pm',
 ];
 
 // CSS/SCSS is processed by @tsdown/css and extracted into dist/style.css.

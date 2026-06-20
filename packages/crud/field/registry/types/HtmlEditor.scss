@@ -1,0 +1,132 @@
+.nb-html-editor {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+
+  &--error {
+    border-color: var(--color-danger);
+  }
+
+  &--readonly {
+    background: var(--surface-0);
+    border-color: var(--border-subtle);
+  }
+
+  // ── Toolbar ──────────────────────────────────────────────────────────────────
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+
+    &:hover:not(:disabled) {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    &--active {
+      background: var(--accent-subtle, color-mix(in srgb, var(--accent) 15%, transparent));
+      color: var(--accent);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+
+  &__divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border-subtle);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  // ── ProseMirror content area ──────────────────────────────────────────────────
+  &__content {
+    flex: 1;
+
+    .tiptap {
+      padding: 8px 10px;
+      min-height: 100px;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.6;
+
+      p { margin: 0 0 6px; }
+      p:last-child { margin-bottom: 0; }
+
+      h2 { font-size: 1.2em; font-weight: 600; margin: 10px 0 4px; }
+      h3 { font-size: 1.05em; font-weight: 600; margin: 8px 0 4px; }
+
+      strong { font-weight: 600; }
+
+      ul, ol {
+        padding-left: 20px;
+        margin: 4px 0;
+      }
+
+      blockquote {
+        border-left: 3px solid var(--border-color);
+        margin: 6px 0;
+        padding-left: 10px;
+        color: var(--text-secondary);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+
+      &.ProseMirror-focused {
+        // focus ring on the outer container instead
+      }
+    }
+  }
+
+  // Focus ring on the container when the inner editor is focused
+  &:focus-within:not(&--readonly):not(&--error) {
+    border-color: var(--accent, var(--focus-ring-color));
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+  }
+
+  &--error:focus-within {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 30%, transparent);
+  }
+}
+
+// ── Grid cell preview ─────────────────────────────────────────────────────────
+.nb-datagrid__html-cell {
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  p { margin: 0; }
+  strong { font-weight: 600; }
+  a { color: var(--accent); }
+}

@@ -1921,10 +1921,7 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
 
 // ── Inline editing (DevExtreme-style cell / row / batch) ─────────────────────
 
-$inline-edit-dirty-bg: color-mix(in srgb, #4caf50 34%, var(--surface-1, #fff));
-$inline-edit-dirty-ring: color-mix(in srgb, #4caf50 72%, transparent);
-$inline-edit-active-bg: color-mix(in srgb, #4caf50 42%, var(--surface-1, #fff));
-$inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
+$inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
 
 // Row in full-row edit mode
 .nb-datagrid__row--editing {
@@ -1933,7 +1930,7 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
 
 // Row with at least one dirty cell (cell/batch mode)
 .nb-datagrid__row--dirty {
-  .nb-datagrid__cell--dirty {
+  .nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active) {
     background: $inline-edit-dirty-bg;
   }
 }
@@ -1957,44 +1954,45 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
   }
 }
 
-// Modified cell — pending save (DevExtreme green tint).
-// Mix against --surface-1 (cell canvas) and keep a green inset ring so the
-// state stays visible on white/zebra rows without relying on hover.
-.nb-datagrid__table td.nb-datagrid__cell--dirty {
+// Modified cell — pending save (DevExtreme: flat green fill, no ring).
+.nb-datagrid__table td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active) {
   background: $inline-edit-dirty-bg;
-  box-shadow: inset 0 0 0 1px $inline-edit-dirty-ring;
 }
 
-.nb-datagrid--zebra .nb-datagrid__row:nth-child(even) td.nb-datagrid__cell--dirty,
-.nb-datagrid__row:hover td.nb-datagrid__cell--dirty,
-.nb-datagrid__row--selected td.nb-datagrid__cell--dirty {
+.nb-datagrid--zebra .nb-datagrid__row:nth-child(even) td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active),
+.nb-datagrid__row:hover td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active),
+.nb-datagrid__row--selected td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active) {
   background: $inline-edit-dirty-bg;
-  box-shadow: inset 0 0 0 1px $inline-edit-dirty-ring;
 }
 
-// Active editor cell
+// Active editor cell — spreadsheet style: normal cell chrome, accent on the control.
 .nb-datagrid__table td.nb-datagrid__cell--active {
-  background: $inline-edit-active-bg;
-  box-shadow: inset 0 0 0 2px $inline-edit-active-ring;
+  background: var(--surface-1);
+  box-shadow: none;
 }
 
 .nb-datagrid--zebra .nb-datagrid__row:nth-child(even) td.nb-datagrid__cell--active,
 .nb-datagrid__row:hover td.nb-datagrid__cell--active,
 .nb-datagrid__row--selected td.nb-datagrid__cell--active {
-  background: $inline-edit-active-bg;
-  box-shadow: inset 0 0 0 2px $inline-edit-active-ring;
+  background: var(--surface-1);
+  box-shadow: none;
 }
 
-// Cell that contains an inline editor
+// Cell that contains an inline editor (flush, full cell height).
 .nb-datagrid__edit-cell {
-  padding: 2px 4px;
+  height: var(--row-height);
+  padding: 0;
   vertical-align: middle;
 }
 
-// Compact form controls inside inline cells.
+// Spreadsheet-style controls inside inline cells (DevExtreme dx-datagrid-edit-form).
 .nb-inline-cell {
-  width: 100%;
+  align-items: stretch;
+  display: flex;
+  height: 100%;
+  min-height: var(--row-height);
   min-width: 0;
+  width: 100%;
 
   .nb-inline-control,
   .nb-inline-control input,
@@ -2004,33 +2002,28 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
   .nb-form__control input,
   .nb-form__control select,
   .nb-form__control textarea {
-    font-size: 13px;
-    line-height: 1.3;
-    height: 28px;
-    min-height: 28px;
-    padding: 0 8px;
-    border: 1px solid color-mix(in srgb, var(--border-color) 85%, var(--accent));
-    border-radius: var(--radius-sm);
-    box-sizing: border-box;
-    width: 100%;
-    background: var(--surface-0);
-    color: var(--text-primary);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--accent-color, var(--accent));
+    border-radius: 0;
     box-shadow: none;
-    transition: border-color 0.12s, box-shadow 0.12s;
+    box-sizing: border-box;
+    color: var(--accent-color, var(--accent));
+    flex: 1 1 auto;
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    height: 100%;
+    line-height: var(--row-height);
+    min-height: var(--row-height);
+    padding: 0 var(--space-2);
+    transition: border-color 0.12s;
+    width: 100%;
 
     &:focus {
+      border-bottom-color: var(--accent-color, var(--accent));
+      box-shadow: none;
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
     }
-  }
-
-  .nb-datagrid__cell--dirty & .nb-inline-control:focus,
-  .nb-datagrid__cell--active & .nb-inline-control:focus,
-  .nb-datagrid__cell--dirty & .nb-form__control:focus,
-  .nb-datagrid__cell--active & .nb-form__control:focus {
-    border-color: color-mix(in srgb, #4caf50 70%, var(--accent-color, var(--accent)));
-    box-shadow: 0 0 0 2px color-mix(in srgb, #4caf50 28%, transparent);
   }
 
   .nb-inline-control textarea,
@@ -2051,24 +2044,31 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
   }
 
   .nb-dropdown__trigger {
-    height: 28px;
-    min-height: 28px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--accent-color, var(--accent));
+    border-radius: 0;
+    color: var(--accent-color, var(--accent));
     font-size: 13px;
-    padding: 0 8px;
-    border-radius: var(--radius-sm);
+    height: 100%;
+    min-height: var(--row-height);
+    padding: 0 var(--space-2);
   }
 
   // Date picker
   .nb-date-picker {
+    flex: 1 1 auto;
     width: 100%;
   }
 
   .nb-date-picker__trigger {
-    height: 28px;
-    min-height: 28px;
-    border-radius: var(--radius-sm);
-    border: 1px solid color-mix(in srgb, var(--border-color) 85%, var(--accent));
-    background: var(--surface-0);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--accent-color, var(--accent));
+    border-radius: 0;
+    color: var(--accent-color, var(--accent));
+    height: 100%;
+    min-height: var(--row-height);
   }
 
   .nb-date-picker__input {
@@ -2078,14 +2078,16 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
 
   // Entity lookup
   .nb-form__lookup {
+    flex: 1 1 auto;
+    height: 100%;
     width: 100%;
   }
 
   .nb-form__lookup .nb-form__control,
   .nb-form__lookup.has-value .nb-form__control {
-    height: 28px;
-    min-height: 28px;
     font-size: 13px;
+    height: 100%;
+    min-height: var(--row-height);
     padding-right: 52px;
   }
 
@@ -2100,8 +2102,10 @@ $inline-edit-active-ring: color-mix(in srgb, #4caf50 78%, transparent);
     .nb-inline-control input,
     .nb-inline-control select,
     .nb-form__control,
-    .nb-date-picker__trigger {
-      border-color: var(--color-danger);
+    .nb-date-picker__trigger,
+    .nb-dropdown__trigger {
+      border-bottom-color: var(--color-danger);
+      color: var(--color-danger);
     }
   }
 }

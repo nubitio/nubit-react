@@ -82,6 +82,12 @@ export interface CoreTranslationKeys {
   'grid.filterOperator.lessOrEqual': string;
   'grid.filterOperator.between': string;
   'grid.filterOperator.reset': string;
+  'grid.inlineEditRow': string;
+  'grid.inlineSaveRow': string;
+  'grid.inlineCancelRow': string;
+  'grid.inlineSaveAll': string;
+  'grid.inlineDiscardAll': string;
+  'grid.inlineUnsavedRows': string;
   'dialog.buttonCancel': string;
   'dialog.buttonSave': string;
   'dialog.close': string;

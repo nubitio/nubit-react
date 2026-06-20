@@ -1918,3 +1918,172 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
     box-shadow: none;
   }
 }
+
+// ── Inline row editing ────────────────────────────────────────────────────────
+
+// Row in edit mode: subtle tint + no hover cursor change
+.nb-datagrid__row--editing {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-0));
+
+  td {
+    cursor: default;
+  }
+}
+
+// Row being saved: visual dampening
+.nb-datagrid__row--saving {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// Cell that contains an inline editor
+.nb-datagrid__edit-cell {
+  padding: 3px 4px;
+  vertical-align: middle;
+}
+
+// Compact form controls inside inline cells. Override the full-form sizing
+// so controls fit comfortably inside a 36–40 px table row.
+.nb-inline-cell {
+  width: 100%;
+
+  // Generic control reset — inputs, selects, textareas
+  .nb-inline-control,
+  .nb-inline-control input,
+  .nb-inline-control select,
+  .nb-inline-control textarea {
+    font-size: 13px;
+    height: 30px;
+    min-height: 30px;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  // Textarea: allow two lines instead of collapsing to 30 px
+  .nb-inline-control textarea {
+    height: 56px;
+    padding: 4px 6px;
+    resize: none;
+  }
+
+  // Boolean switch / checkbox: center it
+  .nb-form-switch,
+  .nb-form-checkbox {
+    margin: 0;
+  }
+
+  // Entity select / lookup: compact trigger
+  .nb-lookup__trigger {
+    height: 30px;
+    font-size: 13px;
+  }
+
+  // Error outline
+  &.nb-inline-cell--error {
+    .nb-inline-control,
+    .nb-inline-control input,
+    .nb-inline-control select {
+      border-color: var(--color-danger);
+    }
+  }
+}
+
+// Save / Cancel button pair inside the actions cell while a row is editing
+.nb-datagrid__inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.nb-datagrid__inline-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.1s, color 0.1s;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &--save {
+    background: var(--accent);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 85%, #000);
+    }
+  }
+
+  &--cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+
+    &:hover:not(:disabled) {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+  }
+}
+
+// Batch bar — appears between toolbar and table when rows are dirty in batch mode
+.nb-datagrid__batch-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 14px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-0));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  font-size: 13px;
+}
+
+.nb-datagrid__batch-bar-label {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.nb-datagrid__batch-bar-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.nb-datagrid__batch-bar-btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s;
+
+  &--save {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent) 85%, #000);
+    }
+  }
+
+  &--discard {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+  }
+}

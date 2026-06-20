@@ -64,7 +64,11 @@ function setThemeToDOM(href: string): Promise<void> {
       link.setAttribute('data-theme-href', href);
       document.head.appendChild(link);
     }
-    link.onload = () => resolve();
+    // Resolve on error/timeout so the app never hangs waiting for a CSS file.
+    const timer = setTimeout(resolve, 5000);
+    const settle = () => { clearTimeout(timer); resolve(); };
+    link.onload = settle;
+    link.onerror = settle;
   });
 }
 

@@ -89,7 +89,7 @@ export function serializeDetailRows(
   isEditMode: boolean,
   adapter: BackendAdapter = HydraAdapter,
 ): FormDataRecord[] {
-  const details = JSON.parse(JSON.stringify(rows)) as FormDataRecord[];
+  const details = structuredClone(rows) as FormDataRecord[];
 
   detailFields.forEach((field) => {
     const typeModule = getFieldTypeModule(field.type);

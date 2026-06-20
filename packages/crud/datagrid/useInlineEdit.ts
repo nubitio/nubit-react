@@ -58,10 +58,10 @@ export function useInlineEdit({
   // Stable refs so async callbacks always see the latest values without
   // needing to be recreated on every render.
   const draftRowsRef = useRef(draftRows);
-  draftRowsRef.current = draftRows;
+  draftRowsRef.current = draftRows; // eslint-disable-line react-hooks/refs
 
   const optsRef = useRef({ url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError });
-  optsRef.current = { url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError };
+  optsRef.current = { url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError }; // eslint-disable-line react-hooks/refs
 
   const isEditing = useCallback((key: unknown) => draftRowsRef.current.has(key), []);
 

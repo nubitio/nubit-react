@@ -152,7 +152,7 @@ export function HtmlEditor({ id, name, value, disabled, readOnly, hasError, onCh
             active={editor?.isActive('blockquote')}
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
           >
-            "
+            &ldquo;
           </ToolbarButton>
           <ToolbarButton
             title={editor?.isActive('link') ? 'Remove link' : 'Add link'}

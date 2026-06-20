@@ -39,7 +39,7 @@ export function useFloatingPanel(
   const [open, setOpenState] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(options.onClose);
-  onCloseRef.current = options.onClose;
+  onCloseRef.current = options.onClose; // eslint-disable-line react-hooks/refs
 
   const setOpen = useCallback((next: boolean) => {
     setOpenState(next);

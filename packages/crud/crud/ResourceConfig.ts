@@ -8,6 +8,7 @@ import type { FormHandle } from '../form/FormHandle';
 import type { FormLayout } from '../form/FormLayout';
 import type { BulkAction } from './BulkAction';
 import type { ColumnPreset } from './ColumnPreset';
+import type { ColumnGroupDef } from '../datagrid/ColumnGroup';
 import type { AuditTrailConfig } from './AuditTrail';
 import type { SmartCrudFieldContract } from './fieldContract';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
@@ -252,6 +253,8 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   formLayout?: FormLayout;
   /** Named column visibility presets. When defined, a preset selector is shown in the toolbar. */
   columnPresets?: ColumnPreset[];
+  /** Labels and styling for grouped grid column header bands. */
+  columnGroupDefs?: ColumnGroupDef[];
   /** Key of the preset to activate by default (overridden by any localStorage value). */
   defaultPreset?: string;
   /** Custom empty state when the grid has no rows. Falls back to the generic no-records message. */

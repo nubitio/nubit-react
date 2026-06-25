@@ -84,6 +84,12 @@ export interface Field {
   order?: number;
 
   /**
+   * Column header band path for grouped grid headers, outermost segment first.
+   * Omit for ungrouped columns that span all header rows.
+   */
+  columnGroup?: string | readonly string[];
+
+  /**
    * Mobile card layout hint:
    * - 'title'     → rendered as the card title (bold, no label)
    * - 'primary'   → always-visible labelled row

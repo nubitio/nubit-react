@@ -622,6 +622,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         inlineEditToolbar={resolvedResource.inlineEditToolbar}
         inlineRowActions={resolvedResource.inlineRowActions}
         visibleColumns={presetState.visibleColumns}
+        columnGroupDefs={resolvedResource.columnGroupDefs}
         beforeToolbar={renderPresetSelector}
         aboveGrid={aboveGridContent}
         detailUrl={gridDetail?.url}

@@ -374,6 +374,11 @@ export class FieldBuilder<TRecord extends DataRecord = DataRecord> {
     return this;
   }
 
+  columnGroup(key: string | readonly string[]): FieldBuilder {
+    this._field.columnGroup = key;
+    return this;
+  }
+
   build(): Field {
     return { ...this._field };
   }

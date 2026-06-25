@@ -6,3 +6,5 @@ export type {
   DataGridSummaryItem,
   DataGridViewOptions,
 } from './DataGridViewOptions';
+export type { ColumnGroupDef, ColumnHeaderCell, ResolvedColumnHeaders } from './ColumnGroup';
+export { resolveColumnHeaders } from './resolveColumnHeaders';

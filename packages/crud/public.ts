@@ -151,6 +151,8 @@ export type {
   DataGridSummaryItem,
   DataGridViewOptions,
 } from './datagrid/DataGridViewOptions';
+export type { ColumnGroupDef, ColumnHeaderCell, ResolvedColumnHeaders } from './datagrid/ColumnGroup';
+export { resolveColumnHeaders } from './datagrid/resolveColumnHeaders';
 export type {
   DetailSummaryOptions,
   SummaryCalculateContext,

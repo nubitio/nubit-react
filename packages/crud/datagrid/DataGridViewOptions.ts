@@ -6,6 +6,7 @@ import type { GridHandle } from './GridHandle';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { SummaryItem } from '../summary';
 import type { ResourceEmptyState, ResourceRowActions, ResourceToolbarItems } from '../crud/ResourceConfig';
+import type { ColumnGroupDef } from './ColumnGroup';
 
 export interface DataGridSelectionChangedEvent {
   selectedRowsData?: DataRecord[];
@@ -86,6 +87,8 @@ export interface DataGridViewOptions {
   onDismissError?: () => void;
   editMode?: 'popup' | 'row' | 'cell' | 'batch';
   visibleColumns?: string[] | null;
+  /** Optional labels and styling for grouped column header bands. */
+  columnGroupDefs?: ColumnGroupDef[];
   /** Custom empty state when the grid has no rows. */
   emptyState?: ResourceEmptyState;
   /** Backend adapter controlling entity key lookup and display. Defaults to HydraAdapter. */

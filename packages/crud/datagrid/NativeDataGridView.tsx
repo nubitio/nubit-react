@@ -38,6 +38,8 @@ import { GridEmptyStateView } from './GridEmptyStateView';
 import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
 import { formatSummaryValue, resolveSummaryText } from '../summary';
 import { useIsMobile } from './useIsMobile';
+import { resolveColumnHeaders } from './resolveColumnHeaders';
+import type { ColumnHeaderCell } from './ColumnGroup';
 
 type SortRule = { selector: string; desc: boolean };
 
@@ -1106,8 +1108,98 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     return result;
   }, [visibleFields, colWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth, actionsColWidth]);
 
+  const columnHeaders = useMemo(
+    () => resolveColumnHeaders(visibleFields, options.columnGroupDefs),
+    [visibleFields, options.columnGroupDefs],
+  );
+  const hasGroupedHeaders = columnHeaders.groupDepth > 0;
+  const headerRowCount = hasGroupedHeaders ? columnHeaders.groupDepth + 1 : 1;
+
+  const renderFieldHeader = (
+    field: Field,
+    headerOptions?: { rowSpan?: number; stickyTop?: string },
+  ) => {
+    const sortRule = sort.find((rule) => rule.selector === field.name);
+    const width = getColumnWidth(field, resolvedColWidths);
+    const hasActiveFilter = Boolean((filterInputs[field.name] ?? '').trim());
+    const headerClassName = [
+      sortRule ? 'nb-datagrid__header-cell--sorted' : '',
+      hasActiveFilter ? 'nb-datagrid__header-cell--filtered' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    return (
+      <th
+        key={field.name}
+        rowSpan={headerOptions?.rowSpan}
+        className={headerClassName || undefined}
+        title={field.label}
+        style={{
+          width,
+          textAlign: field.align,
+          ...(headerOptions?.stickyTop ? { top: headerOptions.stickyTop } : {}),
+        }}
+        aria-sort={sortRule ? (sortRule.desc ? 'descending' : 'ascending') : undefined}
+      >
+        {field.sortable ? (
+          <button
+            type="button"
+            className="nb-datagrid__sort-button"
+            aria-label={t('grid.sortColumn', { column: field.label })}
+            onClick={() => toggleSort(field)}
+          >
+            <span>{field.label}</span>
+            {sortRule ? (
+              <i
+                className={`ph ${sortRule.desc ? 'ph-caret-down' : 'ph-caret-up'} nb-datagrid__sort-icon`}
+                aria-hidden="true"
+              />
+            ) : (
+              <i className="ph ph-caret-up-down nb-datagrid__sort-hint" aria-hidden="true" />
+            )}
+          </button>
+        ) : (
+          <span className="nb-datagrid__column-label">{field.label}</span>
+        )}
+        <span
+          className="nb-datagrid__col-resize"
+          onMouseDown={handleResizeMouseDown(field.name)}
+          onClick={(event) => event.stopPropagation()}
+          title={t('grid.resizeColumn')}
+        />
+      </th>
+    );
+  };
+
+  const renderGroupHeaderCell = (cell: ColumnHeaderCell, cellIndex: number, bandRowIndex: number) => {
+    if (cell.kind === 'ungrouped') {
+      return renderFieldHeader(cell.field, {
+        rowSpan: cell.rowSpan,
+        stickyTop: '0px',
+      });
+    }
+
+    if (cell.kind !== 'group') return null;
+
+    return (
+      <th
+        key={`${cell.key}-${cellIndex}`}
+        colSpan={cell.colSpan}
+        className={['nb-datagrid__header-group-cell', cell.className].filter(Boolean).join(' ') || undefined}
+        style={{
+          textAlign: cell.align,
+          top: `calc(var(--nb-datagrid-header-height) * ${bandRowIndex})`,
+        }}
+      >
+        <span className="nb-datagrid__column-label">{cell.label}</span>
+      </th>
+    );
+  };
+
   const tableLayoutStyle = {
     '--nb-datagrid-layout-width': `${layoutWidth}px`,
+    '--nb-datagrid-header-row-count': headerRowCount,
   } as React.CSSProperties;
 
   // Mobile card layout: first visible column becomes the card title, the next
@@ -1471,7 +1563,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               </ul>
             ) : (
             <table
-              className="nb-datagrid__table"
+              className={[
+                'nb-datagrid__table',
+                hasGroupedHeaders ? 'nb-datagrid__table--grouped-headers' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               style={tableLayoutStyle}
               aria-label={options.title}
               aria-rowcount={totalCount || rows.length}
@@ -1484,63 +1581,54 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 hasRowActions={hasRowActions}
               />
               <thead ref={theadRef}>
-                <tr>
-                  {options.detailFields && <th className="nb-datagrid__detail-cell" />}
-                  {hasCheckbox && <th className="nb-datagrid__select-cell" />}
-                  {visibleFields.map((field) => {
-                    const sortRule = sort.find((rule) => rule.selector === field.name);
-                    const width = getColumnWidth(field, resolvedColWidths);
-                    const hasActiveFilter = Boolean((filterInputs[field.name] ?? '').trim());
-                    const headerClassName = [
-                      sortRule ? 'nb-datagrid__header-cell--sorted' : '',
-                      hasActiveFilter ? 'nb-datagrid__header-cell--filtered' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ');
-                    return (
-                      <th
-                        key={field.name}
-                        className={headerClassName || undefined}
-                        title={field.label}
-                        style={{ width, textAlign: field.align }}
-                        aria-sort={
-                          sortRule ? (sortRule.desc ? 'descending' : 'ascending') : undefined
-                        }
-                      >
-                        {field.sortable ? (
-                          <button
-                            type="button"
-                            className="nb-datagrid__sort-button"
-                            aria-label={t('grid.sortColumn', { column: field.label })}
-                            onClick={() => toggleSort(field)}
-                          >
-                            <span>{field.label}</span>
-                            {sortRule ? (
-                              <i
-                                className={`ph ${sortRule.desc ? 'ph-caret-down' : 'ph-caret-up'} nb-datagrid__sort-icon`}
-                                aria-hidden="true"
-                              />
-                            ) : (
-                              <i
-                                className="ph ph-caret-up-down nb-datagrid__sort-hint"
-                                aria-hidden="true"
-                              />
-                            )}
-                          </button>
-                        ) : (
-                          <span className="nb-datagrid__column-label">{field.label}</span>
+                {hasGroupedHeaders ? (
+                  <>
+                    {columnHeaders.bandRows.map((bandRow, bandRowIndex) => (
+                      <tr key={`band-${bandRowIndex}`} className="nb-datagrid__header-band-row">
+                        {bandRowIndex === 0 && options.detailFields && (
+                          <th
+                            rowSpan={headerRowCount}
+                            className="nb-datagrid__detail-cell"
+                            style={{ top: 0 }}
+                          />
                         )}
-                        <span
-                          className="nb-datagrid__col-resize"
-                          onMouseDown={handleResizeMouseDown(field.name)}
-                          onClick={(event) => event.stopPropagation()}
-                          title={t('grid.resizeColumn')}
-                        />
-                      </th>
-                    );
-                  })}
-                  {hasRowActions && <th className="nb-datagrid__actions-cell" />}
-                </tr>
+                        {bandRowIndex === 0 && hasCheckbox && (
+                          <th
+                            rowSpan={headerRowCount}
+                            className="nb-datagrid__select-cell"
+                            style={{ top: 0 }}
+                          />
+                        )}
+                        {bandRow.map((cell, cellIndex) =>
+                          renderGroupHeaderCell(cell, cellIndex, bandRowIndex),
+                        )}
+                        {bandRowIndex === 0 && hasRowActions && (
+                          <th
+                            rowSpan={headerRowCount}
+                            className="nb-datagrid__actions-cell"
+                            style={{ top: 0 }}
+                          />
+                        )}
+                      </tr>
+                    ))}
+                    <tr className="nb-datagrid__header-leaf-row">
+                      {columnHeaders.leafRow.map((cell) =>
+                        cell.kind === 'leaf'
+                          ? renderFieldHeader(cell.field, {
+                              stickyTop: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                            })
+                          : null,
+                      )}
+                    </tr>
+                  </>
+                ) : (
+                  <tr>
+                    {options.detailFields && <th className="nb-datagrid__detail-cell" />}
+                    {hasCheckbox && <th className="nb-datagrid__select-cell" />}
+                    {visibleFields.map((field) => renderFieldHeader(field))}
+                    {hasRowActions && <th className="nb-datagrid__actions-cell" />}
+                  </tr>
+                )}
                 {(options.filterRow ?? true) && (
                   <tr className="nb-datagrid__filter-row">
                     {options.detailFields && <td className="nb-datagrid__detail-cell" />}

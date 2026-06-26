@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { textField } from '../field/FieldBuilders';
 import type { Field } from '../field/Field';
 import type { ColumnGroupDef } from './ColumnGroup';
-import { resolveColumnHeaders } from './resolveColumnHeaders';
+import {
+  buildGroupBoundaryClassName,
+  resolveColumnHeaders,
+  resolveFieldGroupBoundaries,
+} from './resolveColumnHeaders';
 
 const field = (
   name: string,
@@ -126,5 +130,55 @@ describe('resolveColumnHeaders', () => {
       { kind: 'group', key: 'exits', label: 'Salidas', colSpan: 1, align: 'center', className: undefined },
     ]);
     expect(result.leafRow).toHaveLength(2);
+  });
+});
+
+describe('resolveFieldGroupBoundaries', () => {
+  it('marks dividers only between contiguous groups', () => {
+    const boundaries = resolveFieldGroupBoundaries([
+      field('occurredAt', 'Fecha', 'document'),
+      field('movementType', 'Tipo', 'document'),
+      field('qtyIn', 'Cant.', 'entries'),
+      field('unitCostIn', 'Costo unit.', 'entries'),
+      field('qtyOut', 'Cant.', 'exits'),
+      field('runningBalance', 'Stock', 'balance'),
+    ]);
+
+    expect(boundaries.occurredAt).toEqual({
+      groupKey: 'document',
+      groupClassName: undefined,
+      isGroupDivider: false,
+    });
+    expect(boundaries.movementType).toEqual({
+      groupKey: 'document',
+      groupClassName: undefined,
+      isGroupDivider: true,
+    });
+    expect(boundaries.qtyIn).toEqual({
+      groupKey: 'entries',
+      groupClassName: undefined,
+      isGroupDivider: false,
+    });
+    expect(boundaries.unitCostIn).toEqual({
+      groupKey: 'entries',
+      groupClassName: undefined,
+      isGroupDivider: true,
+    });
+    expect(boundaries.runningBalance).toEqual({
+      groupKey: 'balance',
+      groupClassName: undefined,
+      isGroupDivider: false,
+    });
+  });
+
+  it('builds boundary class names for grouped columns', () => {
+    const boundaries = resolveFieldGroupBoundaries(
+      [field('qtyIn', 'Cant.', 'entries'), field('qtyOut', 'Cant.', 'exits')],
+      [{ key: 'entries', label: 'ENTRADAS', className: 'nb-datagrid__group--in' }],
+    );
+
+    expect(buildGroupBoundaryClassName(boundaries.qtyIn)).toBe(
+      'nb-datagrid__group--in nb-datagrid__col-group-divider',
+    );
   });
 });

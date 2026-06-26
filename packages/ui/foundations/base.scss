@@ -59,6 +59,13 @@ samp {
   flex-grow: 1;
   flex-direction: column;
   padding: 0 var(--page-padding);
+
+  // When AppToolbar is used inside a scroll container (e.g. DashboardPage), the
+  // overflow:hidden above clips the content so the outer scroller never detects
+  // any overflow and no scrollbar appears. The dashboard variant removes the clip.
+  &.view-wrapper-dashboard {
+    overflow: visible;
+  }
 }
 
 .view-wrapper-scroll {

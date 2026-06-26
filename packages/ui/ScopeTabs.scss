@@ -1,0 +1,55 @@
+@use 'variables' as *;
+
+.nb-scope-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.4rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle, var(--border-color));
+}
+
+.nb-scope-tabs__tab {
+  padding: 0.4rem 0.9rem;
+  font-size: var(--font-size-sm, 0.8125rem);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle, var(--border-color));
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base),
+    box-shadow var(--transition-base);
+
+  &:hover:not(.nb-scope-tabs__tab--active) {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--accent-color) 30%, var(--border-color));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    color: var(--accent-color);
+    border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+    background: var(--accent-subtle, color-mix(in srgb, var(--accent-color) 10%, #fff));
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.nb-scope-tabs--compact {
+  padding: 0.35rem 0.6rem;
+  gap: 0.3rem;
+  background: transparent;
+  border-bottom: none;
+
+  .nb-scope-tabs__tab {
+    padding: 0.28rem 0.65rem;
+    font-size: 0.75rem;
+  }
+}

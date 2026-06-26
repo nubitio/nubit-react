@@ -119,6 +119,14 @@
   opacity: 0.7;
 }
 
+.nb-dropdown__menu-list {
+  list-style: none;
+  margin: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: var(--space-1);
+}
+
 .nb-dropdown__menu {
   background: var(--surface-elevated);
   border: 1px solid var(--border-subtle);

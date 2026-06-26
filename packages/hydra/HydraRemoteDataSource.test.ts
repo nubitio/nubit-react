@@ -52,6 +52,14 @@ describe('HydraRemoteDataSource.prepareLoadOptions', () => {
     expect(result.filter).toEqual([['active', '=', true], ['name', '=', 'test']]);
   });
 
+  it('coerces FilterRule objects into tuple filters for query serialization', () => {
+    const ds = makeSource({
+      defaultFilterRules: [{ field: 'product', operator: '=', value: '/api/products/p1' }],
+    });
+    const result = ds.prepareLoadOptions({ filter: [] });
+    expect(result.filter).toEqual([['product', '=', '/api/products/p1']]);
+  });
+
   it('skips the default id-only sort when no defaultSortRules are set', () => {
     const ds = makeSource();
     const result = ds.prepareLoadOptions({ sort: [{ selector: 'id', desc: false }] });

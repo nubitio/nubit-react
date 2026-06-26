@@ -38,7 +38,11 @@ import { GridEmptyStateView } from './GridEmptyStateView';
 import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
 import { formatSummaryValue, resolveSummaryText } from '../summary';
 import { useIsMobile } from './useIsMobile';
-import { resolveColumnHeaders } from './resolveColumnHeaders';
+import {
+  buildGroupBoundaryClassName,
+  resolveColumnHeaders,
+  resolveFieldGroupBoundaries,
+} from './resolveColumnHeaders';
 import type { ColumnHeaderCell } from './ColumnGroup';
 
 type SortRule = { selector: string; desc: boolean };
@@ -52,6 +56,11 @@ const MIN_COL_WIDTH = 48;
 
 function getColumnWidth(field: Field, colWidths: Record<string, number>): number {
   return colWidths[field.name] ?? field.width ?? field.minWidth ?? DEFAULT_COL_WIDTH;
+}
+
+/** Pin column width so band/leaf header rows stay aligned (each row is display:table). */
+function lockColumnWidth(width: number): React.CSSProperties {
+  return { width, minWidth: width, maxWidth: width };
 }
 
 function computeLayoutWidth({
@@ -833,6 +842,16 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
   const selectedRows = rows.filter((row) => selectedKeys.includes(row[idField]));
 
+  const applySelection = useCallback(
+    (nextKeys: Array<string | number>) => {
+      setSelectedKeys(nextKeys);
+      const nextRows = rows.filter((item) => nextKeys.includes(item[idField]));
+      options.onSelectionChanged?.({ selectedRowsData: nextRows });
+      emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
+    },
+    [emit, idField, options, rows],
+  );
+
   const selectRow = (row: DataRecord) => {
     const key = row[idField];
     const nextKeys =
@@ -842,10 +861,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
           : [...selectedKeys, key]
         : [key];
 
-    setSelectedKeys(nextKeys);
-    const nextRows = rows.filter((item) => nextKeys.includes(item[idField]));
-    options.onSelectionChanged?.({ selectedRowsData: nextRows });
-    emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
+    applySelection(nextKeys);
   };
 
   const rowEditable = (row: DataRecord): boolean => options.canEditRow?.(row) !== false;
@@ -1043,6 +1059,33 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasCheckbox = options.selectionMode === 'multiple';
+  const allPageSelected =
+    hasCheckbox && rows.length > 0 && rows.every((row) => selectedKeys.includes(row[idField]));
+  const somePageSelected =
+    hasCheckbox && selectedKeys.length > 0 && !allPageSelected;
+
+  const toggleSelectAll = () => {
+    if (!hasCheckbox || rows.length === 0) return;
+    if (allPageSelected) {
+      applySelection([]);
+      return;
+    }
+    applySelection(rows.map((row) => row[idField]));
+  };
+
+  const renderSelectAllCheckbox = () => (
+    <input
+      type="checkbox"
+      className="nb-datagrid__select-all"
+      checked={allPageSelected}
+      ref={(element) => {
+        if (element) element.indeterminate = somePageSelected;
+      }}
+      onChange={toggleSelectAll}
+      onClick={(event) => event.stopPropagation()}
+      aria-label={t('grid.selectAll')}
+    />
+  );
   const hasBuiltInRowActions = Boolean(
     (options.allowEdit &&
       ((rowInlineMode && showRowInlineActions) || options.onEdit || options.events?.EDIT)) ||
@@ -1112,6 +1155,10 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     () => resolveColumnHeaders(visibleFields, options.columnGroupDefs),
     [visibleFields, options.columnGroupDefs],
   );
+  const fieldGroupBoundaries = useMemo(
+    () => resolveFieldGroupBoundaries(visibleFields, options.columnGroupDefs),
+    [visibleFields, options.columnGroupDefs],
+  );
   const hasGroupedHeaders = columnHeaders.groupDepth > 0;
   const headerRowCount = hasGroupedHeaders ? columnHeaders.groupDepth + 1 : 1;
 
@@ -1125,6 +1172,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     const headerClassName = [
       sortRule ? 'nb-datagrid__header-cell--sorted' : '',
       hasActiveFilter ? 'nb-datagrid__header-cell--filtered' : '',
+      buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
     ]
       .filter(Boolean)
       .join(' ');
@@ -1136,7 +1184,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         className={headerClassName || undefined}
         title={field.label}
         style={{
-          width,
+          ...lockColumnWidth(width),
           textAlign: field.align,
           ...(headerOptions?.stickyTop ? { top: headerOptions.stickyTop } : {}),
         }}
@@ -1172,27 +1220,62 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     );
   };
 
-  const renderGroupHeaderCell = (cell: ColumnHeaderCell, cellIndex: number, bandRowIndex: number) => {
+  const getGroupHeaderWidth = (cell: ColumnHeaderCell, leafOffset: number): number | undefined => {
+    if (cell.kind !== 'group') return undefined;
+    return visibleFields
+      .slice(leafOffset, leafOffset + cell.colSpan)
+      .reduce((sum, field) => sum + getColumnWidth(field, resolvedColWidths), 0);
+  };
+
+  const renderGroupHeaderCell = (
+    cell: ColumnHeaderCell,
+    cellIndex: number,
+    bandRowIndex: number,
+    bandRow: ColumnHeaderCell[],
+    leafOffset: number,
+  ) => {
     if (cell.kind === 'ungrouped') {
-      return renderFieldHeader(cell.field, {
-        rowSpan: cell.rowSpan,
-        stickyTop: '0px',
-      });
+      const width = getColumnWidth(cell.field, resolvedColWidths);
+      return (
+        <th
+          key={`band-spacer-${cell.field.name}`}
+          className="nb-datagrid__header-band-spacer"
+          style={{
+            ...lockColumnWidth(width),
+            top: `calc(var(--nb-datagrid-header-height) * ${bandRowIndex})`,
+          }}
+          aria-hidden="true"
+        />
+      );
     }
 
     if (cell.kind !== 'group') return null;
+
+    const hasFollowingGroup = bandRow
+      .slice(cellIndex + 1)
+      .some((nextCell) => nextCell.kind === 'group');
+    const groupWidth = getGroupHeaderWidth(cell, leafOffset);
 
     return (
       <th
         key={`${cell.key}-${cellIndex}`}
         colSpan={cell.colSpan}
-        className={['nb-datagrid__header-group-cell', cell.className].filter(Boolean).join(' ') || undefined}
+        className={
+          [
+            'nb-datagrid__header-group-cell',
+            cell.className,
+            hasFollowingGroup ? 'nb-datagrid__col-group-divider' : '',
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         style={{
           textAlign: cell.align,
           top: `calc(var(--nb-datagrid-header-height) * ${bandRowIndex})`,
+          ...(groupWidth ? lockColumnWidth(groupWidth) : {}),
         }}
       >
-        <span className="nb-datagrid__column-label">{cell.label}</span>
+        {cell.label}
       </th>
     );
   };
@@ -1232,6 +1315,19 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     isMobile && isFullMode && options.allowAdd && (options.toolbarVisible ?? true),
   );
   const toolbar = buildToolbar(options, t, onAddClick, !showFab);
+  const selectionActions = useMemo(() => {
+    const bulkSelection =
+      options.bulkActions?.map((action, index) => ({
+        key: action.key,
+        text: action.label,
+        icon: action.icon,
+        group: 'bulk',
+        groupLabel: index === 0 ? t('grid.bulkActionsGroup') : undefined,
+        onClick: () => options.onBulkAction?.(action),
+      })) ?? [];
+
+    return [...bulkSelection, ...(toolbar.selection ?? [])];
+  }, [options.bulkActions, options.onBulkAction, t, toolbar.selection]);
   // Quick search targets the first text-like filterable column. Columns with a
   // formatter are skipped: their displayed text differs from the raw value, so
   // a contains-filter on them would not match what the user sees.
@@ -1279,6 +1375,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         className={`view-wrapper ${options.mode === 'full' || !options.mode ? 'view-wrapper-datagrid-list list-page' : ''}`}
       >
         <div className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}`}>
+          {options.aboveGrid ? (
+            <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
+          ) : null}
           {(options.toolbarVisible ?? true) && options.mode !== 'minimal' && (
             <div className="nb-datagrid__toolbar">
               {options.hasBackButton && (
@@ -1299,7 +1398,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               <SelectionActionsMenu
                 actionsLabel={t('grid.buttonActions')}
                 selectedCount={selectedRows.length}
-                actions={toolbar.selection}
+                actions={selectionActions}
                 permissions={toolbarPermissions}
               />
               {toolbar.utility
@@ -1351,9 +1450,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               </span>
             </div>
           )}
-          {options.aboveGrid ? (
-            <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
-          ) : null}
           {isMobile && quickSearchField && (options.filterRow ?? true) && (
             <div className="nb-datagrid__quick-search">
               <i
@@ -1437,7 +1533,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                                 type="checkbox"
                                 className="nb-datagrid__card-check"
                                 checked={selected}
-                                readOnly
+                                onChange={() => selectRow(row)}
+                                onClick={(event) => event.stopPropagation()}
                                 aria-label={t('grid.selectRow')}
                               />
                             )}
@@ -1597,11 +1694,26 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                             rowSpan={headerRowCount}
                             className="nb-datagrid__select-cell"
                             style={{ top: 0 }}
-                          />
+                          >
+                            {renderSelectAllCheckbox()}
+                          </th>
                         )}
-                        {bandRow.map((cell, cellIndex) =>
-                          renderGroupHeaderCell(cell, cellIndex, bandRowIndex),
-                        )}
+                        {(() => {
+                          let leafOffset = 0;
+                          return bandRow.map((cell, cellIndex) => {
+                            const rendered = renderGroupHeaderCell(
+                              cell,
+                              cellIndex,
+                              bandRowIndex,
+                              bandRow,
+                              leafOffset,
+                            );
+                            if (cell.kind === 'group') {
+                              leafOffset += cell.colSpan;
+                            }
+                            return rendered;
+                          });
+                        })()}
                         {bandRowIndex === 0 && hasRowActions && (
                           <th
                             rowSpan={headerRowCount}
@@ -1612,19 +1724,46 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                       </tr>
                     ))}
                     <tr className="nb-datagrid__header-leaf-row">
-                      {columnHeaders.leafRow.map((cell) =>
-                        cell.kind === 'leaf'
-                          ? renderFieldHeader(cell.field, {
-                              stickyTop: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
-                            })
-                          : null,
+                      {options.detailFields && (
+                        <th
+                          className="nb-datagrid__detail-cell"
+                          style={{
+                            ...lockColumnWidth(DETAIL_COL_WIDTH),
+                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                          }}
+                        />
+                      )}
+                      {hasCheckbox && (
+                        <th
+                          className="nb-datagrid__select-cell"
+                          style={{
+                            ...lockColumnWidth(CHECKBOX_COL_WIDTH),
+                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                          }}
+                        />
+                      )}
+                      {visibleFields.map((field) =>
+                        renderFieldHeader(field, {
+                          stickyTop: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                        }),
+                      )}
+                      {hasRowActions && (
+                        <th
+                          className="nb-datagrid__actions-cell"
+                          style={{
+                            ...lockColumnWidth(actionsColWidth),
+                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                          }}
+                        />
                       )}
                     </tr>
                   </>
                 ) : (
                   <tr>
                     {options.detailFields && <th className="nb-datagrid__detail-cell" />}
-                    {hasCheckbox && <th className="nb-datagrid__select-cell" />}
+                    {hasCheckbox && (
+                      <th className="nb-datagrid__select-cell">{renderSelectAllCheckbox()}</th>
+                    )}
                     {visibleFields.map((field) => renderFieldHeader(field))}
                     {hasRowActions && <th className="nb-datagrid__actions-cell" />}
                   </tr>
@@ -1638,7 +1777,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                       return (
                         <td
                           key={field.name}
-                          style={{ width: filterCellWidth }}
+                          style={lockColumnWidth(filterCellWidth)}
                           className={
                             [
                               field.filterable === false
@@ -1647,6 +1786,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               (filterInputs[field.name] ?? '').trim()
                                 ? 'nb-datagrid__filter-cell--active'
                                 : '',
+                              buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
                             ]
                               .filter(Boolean)
                               .join(' ') || undefined
@@ -1840,7 +1980,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               <input
                                 type="checkbox"
                                 checked={selected}
-                                readOnly
+                                onChange={() => selectRow(row)}
+                                onClick={(event) => event.stopPropagation()}
                                 aria-label={t('grid.selectRow')}
                               />
                             </td>
@@ -1863,6 +2004,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               editable && canInlineEditMode ? 'nb-datagrid__cell--editable' : '',
                               cellDirty ? 'nb-datagrid__cell--dirty' : '',
                               cellActive ? 'nb-datagrid__cell--active' : '',
+                              buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
                             ]
                               .filter(Boolean)
                               .join(' ');
@@ -1881,7 +2023,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               return (
                                 <td
                                   key={field.name}
-                                  style={{ width, textAlign: field.align }}
+                                  style={{ ...lockColumnWidth(width), textAlign: field.align }}
                                   className={cellClassName}
                                 >
                                   <InlineEditCell
@@ -1905,7 +2047,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                             return (
                               <td
                                 key={field.name}
-                                style={{ width, textAlign: field.align }}
+                                style={{ ...lockColumnWidth(width), textAlign: field.align }}
                                 className={cellClassName}
                                 title={getCellText(
                                   field,

@@ -94,7 +94,8 @@
   --grid-header-height:  34px;   // matches --toolbar-height for visual cadence
   --grid-filter-height:  28px;   // matches --control-height
   --grid-cell-padding-x: 10px;
-  --grid-cell-padding-y: 0px;
+  --grid-cell-padding-y: 6px;    // breathing room for single- and multi-line formatters
+  --grid-row-line-height: 1.35;
 
   // ── Overlays ────────────────────────────────────────────────────────────────
   --overlay-bg: rgb(0 0 0 / 42%);
@@ -169,6 +170,8 @@ html[data-density="compact"] {
   --grid-header-height:  28px;
   --grid-filter-height:  24px;
   --grid-cell-padding-x: 8px;
+  --grid-cell-padding-y: 4px;
+  --grid-row-line-height: 1.3;
 }
 
 // ── Comfortable density ────────────────────────────────────────────────────────
@@ -197,4 +200,6 @@ html[data-density="comfortable"] {
   --grid-header-height:  40px;
   --grid-filter-height:  34px;
   --grid-cell-padding-x: 14px;
+  --grid-cell-padding-y: 8px;
+  --grid-row-line-height: 1.4;
 }

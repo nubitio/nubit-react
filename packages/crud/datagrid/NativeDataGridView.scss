@@ -2,7 +2,8 @@
 // Native DataGrid — enterprise-grade table styling.
 //
 // Design reference: Fluent UI DataGrid / DevExtreme grid density.
-// Row height: 34px normal / 28px compact / 40px comfortable (via --row-height).
+// --row-height is the minimum body row height; cells grow when formatters render
+// multi-line content (stacked labels, badges, progress bars, etc.).
 // All colours reference design tokens — no hardcoded hex.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -52,9 +53,13 @@
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: 0;
+  margin-bottom: var(--space-2, 0.5rem);
   min-width: 0;
+}
+
+.view-wrapper-datagrid-list:has(.nb-hub-panel--flush) {
+  padding-top: calc(var(--content-padding) * 0.5);
 }
 
 // ── Toolbar ────────────────────────────────────────────────────────────────────
@@ -83,6 +88,27 @@
 
 .nb-datagrid__toolbar-spacer {
   flex: 1 1 auto;
+}
+
+.nb-datagrid__bulk-actions {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.nb-datagrid__bulk-count {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.nb-datagrid__select-all {
+  cursor: pointer;
+  margin: 0;
 }
 
 .nb-datagrid__actions-menu {
@@ -370,16 +396,24 @@
 .nb-datagrid__table th,
 .nb-datagrid__table td {
   border-bottom: 1px solid var(--border-subtle);
-  overflow: hidden;
   padding: var(--grid-cell-padding-y, 0) var(--grid-cell-padding-x, var(--space-3));
-  text-overflow: ellipsis;
   vertical-align: middle;
+}
+
+.nb-datagrid__table th {
+  height: var(--nb-datagrid-header-height);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .nb-datagrid__table td {
-  height: var(--row-height); // explicit height (not min-height) enforces row density
-  line-height: 1; // prevents line-height from fighting with cell height
+  height: auto;
+  line-height: var(--grid-row-line-height, 1.35);
+  min-height: var(--row-height);
+  overflow: hidden;
+  white-space: normal;
 }
 
 .nb-datagrid__table td .nb-badge {
@@ -433,13 +467,19 @@
 }
 
 .nb-datagrid__header-group-cell {
-  background: var(--grid-header-group-bg, var(--surface-1, var(--surface-0)));
-  border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-primary);
+  background: var(--grid-header-bg, var(--surface-0));
+  color: var(--text-secondary);
   font-size: var(--font-size-xxs);
-  letter-spacing: 0.06em;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
   text-align: center;
+  text-transform: uppercase;
   vertical-align: middle;
+}
+
+.nb-datagrid__header-band-spacer {
+  background: var(--grid-header-bg, var(--surface-0));
+  padding: 0;
 }
 
 .nb-datagrid__table--grouped-headers > thead > tr.nb-datagrid__header-band-row > th {
@@ -451,16 +491,19 @@
   top: calc(var(--nb-datagrid-header-height) * (var(--nb-datagrid-header-row-count, 1) - 1));
 }
 
-.nb-datagrid__group--in {
-  background: color-mix(in srgb, var(--success-color, #16a34a) 8%, var(--surface-0));
-}
+.nb-datagrid__table--grouped-headers {
+  .nb-datagrid__col-group-divider {
+    border-right: 1px solid var(--nb-datagrid-group-divider-color, var(--border-color));
+  }
 
-.nb-datagrid__group--out {
-  background: color-mix(in srgb, var(--danger-color, #dc2626) 8%, var(--surface-0));
-}
+  > thead > tr.nb-datagrid__header-band-row > th.nb-datagrid__header-group-cell {
+    border-bottom: 1px solid var(--border-subtle);
+  }
 
-.nb-datagrid__group--balance {
-  background: color-mix(in srgb, var(--accent-color) 8%, var(--surface-0));
+  > thead > tr.nb-datagrid__header-leaf-row > th.nb-datagrid__col-group-divider,
+  > tbody > tr > td.nb-datagrid__col-group-divider {
+    border-right: 1px solid var(--nb-datagrid-group-divider-color, var(--border-color));
+  }
 }
 
 .nb-datagrid__col-resize {

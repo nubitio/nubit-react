@@ -1,0 +1,58 @@
+@use 'variables' as *;
+
+.nb-segmented-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0.2rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle, var(--border-color));
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-sm);
+}
+
+.nb-segmented-control--sm {
+  padding: 0.15rem;
+
+  .nb-segmented-control__btn {
+    padding: 0.32rem 0.65rem;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+}
+
+.nb-segmented-control__btn {
+  padding: 0.42rem 0.8rem;
+  font-size: var(--font-size-sm, 0.8125rem);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-md, 8px) - 2px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--transition-base),
+    background var(--transition-base),
+    box-shadow var(--transition-base);
+
+  &:hover:not(:disabled):not(.nb-segmented-control__btn--active) {
+    color: var(--text-primary);
+    background: var(--surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &--active {
+    color: var(--accent-color);
+    background: var(--accent-subtle, color-mix(in srgb, var(--accent-color) 10%, #fff));
+    box-shadow: var(--shadow-sm);
+  }
+}

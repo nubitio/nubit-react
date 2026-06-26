@@ -1,6 +1,14 @@
 // @nubitio/admin — Admin panel shell: layout, header, sidebar, footer slots.
 // Import from this facade only; do not reach into implementation paths.
 
+export { FeatureHubLayout } from './FeatureHubLayout';
+export type {
+  FeatureHubBanner,
+  FeatureHubDensity,
+  FeatureHubLayoutProps,
+  FeatureHubTab,
+} from './FeatureHubLayout';
+
 export { AdminShell } from './AdminShell';
 export type { AdminShellProps, AdminMenuItem, AdminHeaderAction } from './AdminShell';
 

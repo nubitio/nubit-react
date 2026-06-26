@@ -1,19 +1,110 @@
+@use 'variables' as *;
+
 .nb-kpi-metric-row {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-3, 0.75rem);
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   width: 100%;
 }
 
+.nb-kpi-metric-row--strip {
+  gap: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--border-subtle, var(--border-color));
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+
+  .nb-kpi-metric-card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-3, 0.75rem);
+    border: none;
+    border-radius: 0;
+    border-right: 1px solid var(--border-subtle, var(--border-color));
+    background: transparent;
+    padding: var(--space-4, 1rem) var(--space-4, 1.1rem);
+
+    &:last-child {
+      border-right: none;
+    }
+
+    @media (max-width: 900px) {
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border-subtle, var(--border-color));
+      }
+    }
+
+    @media (max-width: 480px) {
+      border-right: none;
+      border-bottom: 1px solid var(--border-subtle, var(--border-color));
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .nb-kpi-metric-card--warning {
+    background: color-mix(in srgb, var(--warning-color, #f59e0b) 6%, var(--surface-1));
+  }
+
+  .nb-kpi-metric-card--danger {
+    background: color-mix(in srgb, var(--error-color, #dc2626) 5%, var(--surface-1));
+  }
+}
+
 .nb-kpi-metric-card {
   background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle, var(--border-color));
+  border-radius: var(--radius-lg, 8px);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-1, 0.2rem);
   min-width: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+}
+
+.nb-kpi-metric-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.1rem;
+  color: var(--accent-color);
+  background: var(--accent-subtle, color-mix(in srgb, var(--accent-color) 10%, #fff));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, transparent);
+  border-radius: var(--radius-md, 8px);
+}
+
+.nb-kpi-metric-card--warning .nb-kpi-metric-card__icon {
+  color: var(--status-warning-text, #b45309);
+  background: var(--status-warning-bg, #fef3c7);
+  border-color: var(--status-warning-border, #fcd34d);
+}
+
+.nb-kpi-metric-card--danger .nb-kpi-metric-card__icon {
+  color: var(--status-danger-text, #b91c1c);
+  background: var(--status-danger-bg, #fee2e2);
+  border-color: var(--status-danger-border, #fca5a5);
+}
+
+.nb-kpi-metric-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
 .nb-kpi-metric-card__label {
@@ -32,6 +123,11 @@
   line-height: 1.2;
 }
 
+.nb-kpi-metric-card__hint {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
 .nb-kpi-metric-card--success .nb-kpi-metric-card__value {
   color: var(--color-success, #16a34a);
 }
@@ -42,4 +138,42 @@
 
 .nb-kpi-metric-card--danger .nb-kpi-metric-card__value {
   color: var(--color-error, #dc2626);
+}
+
+// ── Compact density ─────────────────────────────────────────────────────────────
+
+.nb-kpi-metric-row--compact {
+  &.nb-kpi-metric-row--strip .nb-kpi-metric-card {
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.7rem;
+  }
+
+  .nb-kpi-metric-card__icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .nb-kpi-metric-card__label {
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+  }
+
+  .nb-kpi-metric-card__value {
+    font-size: 1.05rem;
+    line-height: 1.1;
+  }
+
+  .nb-kpi-metric-card__hint {
+    display: none;
+  }
+
+  .nb-kpi-metric-card--warning .nb-kpi-metric-card__hint,
+  .nb-kpi-metric-card--danger .nb-kpi-metric-card__hint {
+    display: block;
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
 }

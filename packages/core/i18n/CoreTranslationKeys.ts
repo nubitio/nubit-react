@@ -54,6 +54,8 @@ export interface CoreTranslationKeys {
   'grid.expandDetail': string;
   'grid.collapseDetail': string;
   'grid.selectRow': string;
+  'grid.selectAll': string;
+  'grid.bulkActionsGroup': string;
   'grid.resizeColumn': string;
   'grid.allFilter': string;
   'grid.clearFilter': string;

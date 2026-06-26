@@ -23,6 +23,8 @@ export { FileDropzone } from './FileDropzone';
 export type { FileDropzoneLabels, FileDropzoneProps, FileDropzoneValue } from './FileDropzone';
 export { AppDropdown } from './AppDropdown';
 export type { AppDropdownOption, AppDropdownProps, AppDropdownVariant } from './AppDropdown';
+export { SearchableAppDropdown } from './SearchableAppDropdown';
+export type { SearchableAppDropdownProps } from './SearchableAppDropdown';
 export { ThemeProvider, ThemeContext, useTheme } from './theme/ThemeProvider';
 export type { ThemeProviderProps, ThemeContextValue, Theme, ThemeMode } from './theme/ThemeProvider';
 export { ThemeSwitcher } from './theme/ThemeSwitcher';
@@ -48,7 +50,34 @@ export type { ToggleProps } from './Toggle';
 export { StatCard } from './StatCard';
 export type { StatCardProps } from './StatCard';
 export { KpiMetricRow } from './KpiMetricRow';
-export type { KpiMetricItem, KpiMetricRowProps, KpiMetricTone } from './KpiMetricRow';
+export type {
+  KpiMetricDensity,
+  KpiMetricItem,
+  KpiMetricLayout,
+  KpiMetricRowProps,
+  KpiMetricTone,
+} from './KpiMetricRow';
+export { SegmentedControl } from './SegmentedControl';
+export type { SegmentedControlOption, SegmentedControlProps } from './SegmentedControl';
+export { FilterPanel } from './FilterPanel';
+export type {
+  FilterPanelCategorySection,
+  FilterPanelChipOption,
+  FilterPanelDensity,
+  FilterPanelLayout,
+  FilterPanelProps,
+  FilterPanelStatusSection,
+} from './FilterPanel';
+export { ScopeTabs } from './ScopeTabs';
+export type { ScopeTabOption, ScopeTabsDensity, ScopeTabsProps } from './ScopeTabs';
+export { OperationCardGrid } from './OperationCardGrid';
+export type {
+  OperationCardAccent,
+  OperationCardGridProps,
+  OperationCardItem,
+} from './OperationCardGrid';
+export { HubPanel } from './HubPanel';
+export type { HubPanelProps, HubPanelVariant } from './HubPanel';
 export { ContextMenu } from './ContextMenu';
 export type { ContextMenuProps, ContextMenuItem } from './ContextMenu';
 export { CollapsibleSection } from './CollapsibleSection';

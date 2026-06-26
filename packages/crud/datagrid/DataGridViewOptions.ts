@@ -5,6 +5,7 @@ import type { FilterRule } from '../field/FilterRule';
 import type { GridHandle } from './GridHandle';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { SummaryItem } from '../summary';
+import type { BulkAction } from '../crud/BulkAction';
 import type { ResourceEmptyState, ResourceRowActions, ResourceToolbarItems } from '../crud/ResourceConfig';
 import type { ColumnGroupDef } from './ColumnGroup';
 
@@ -80,6 +81,9 @@ export interface DataGridViewOptions {
   filterRow?: boolean;
   headerFilter?: boolean;
   manualLoad?: boolean;
+  /** Bulk actions rendered inline in the datagrid toolbar when rows are selected. */
+  bulkActions?: BulkAction[];
+  onBulkAction?: (action: BulkAction) => void;
   beforeToolbar?: () => ReactNode;
   /** Custom content between the toolbar and the table (KPI cards, banners, filters). */
   aboveGrid?: ReactNode;

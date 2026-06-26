@@ -41,20 +41,61 @@ function addIriField(url: string, item: DataRecord): DataRecord {
   return { ...item, _iri: iri };
 }
 
+type FilterTuple = [string, string, unknown];
+
+function isFilterTuple(rule: unknown): rule is FilterTuple {
+  return (
+    Array.isArray(rule) &&
+    rule.length === 3 &&
+    typeof rule[0] === 'string' &&
+    typeof rule[1] === 'string'
+  );
+}
+
+function isFilterRuleObject(rule: unknown): rule is { field: string; operator: string; value: unknown } {
+  return (
+    !!rule &&
+    typeof rule === 'object' &&
+    'field' in rule &&
+    'operator' in rule &&
+    'value' in rule
+  );
+}
+
+function coerceFilterTuple(rule: unknown): ResourceFilterDescriptor {
+  if (isFilterTuple(rule)) {
+    return rule;
+  }
+
+  if (isFilterRuleObject(rule)) {
+    return [rule.field, rule.operator, rule.value];
+  }
+
+  if (Array.isArray(rule)) {
+    if (rule.length > 0 && Array.isArray(rule[0])) {
+      return rule as ResourceFilterDescriptor;
+    }
+    return rule as ResourceFilterDescriptor;
+  }
+
+  return [rule];
+}
+
 function normalizeFilterRules(
   filterRules: ResourceFilterDescriptor,
   defaultFilterRules: ResourceFilterDescriptor[],
 ): ResourceFilterDescriptor[] {
   const filters: ResourceFilterDescriptor[] = [];
-  defaultFilterRules.forEach((rule) => filters.push(rule));
+  defaultFilterRules.forEach((rule) => filters.push(coerceFilterTuple(rule)));
 
   if (filterRules.length === 3 && typeof filterRules[0] !== 'object') {
     filters.push([filterRules[0], filterRules[1], filterRules[2]]);
-  } else {
-    filterRules.forEach((rule) => {
-      filters.push(Array.isArray(rule) ? rule : [rule]);
-    });
+    return filters;
   }
+
+  filterRules.forEach((rule) => {
+    filters.push(coerceFilterTuple(rule));
+  });
 
   return filters;
 }

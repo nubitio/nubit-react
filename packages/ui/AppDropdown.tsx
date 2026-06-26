@@ -29,6 +29,9 @@ export interface AppDropdownProps {
   menuMinWidth?: number;
   error?: ReactNode;
   helpText?: ReactNode;
+  menuHeader?: ReactNode;
+  menuFooter?: ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }
 
 function cx(...values: Array<string | false | null | undefined>) {
@@ -94,12 +97,15 @@ export function AppDropdown({
   menuMinWidth,
   error,
   helpText,
+  menuHeader,
+  menuFooter,
+  onOpenChange,
 }: AppDropdownProps) {
   const generatedId = useId();
   const id = idProp ?? generatedId;
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({
     position: 'fixed',
     visibility: 'hidden',
@@ -118,7 +124,7 @@ export function AppDropdown({
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
       if (!containerRef.current?.contains(target) && !menuRef.current?.contains(target)) {
-        setOpen(false);
+        setMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -132,7 +138,7 @@ export function AppDropdown({
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       if (rect.top >= window.innerHeight || rect.bottom <= 0) {
-        setOpen(false);
+        setMenuOpen(false);
         return;
       }
       setMenuStyle(computeMenuStyle());
@@ -146,10 +152,18 @@ export function AppDropdown({
     };
   }, [open, computeMenuStyle]);
 
+  const setMenuOpen = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange],
+  );
+
   const openMenu = useCallback(() => {
     setMenuStyle(computeMenuStyle());
-    setOpen(true);
-  }, [computeMenuStyle]);
+    setMenuOpen(true);
+  }, [computeMenuStyle, setMenuOpen]);
 
   const control = (
     <div
@@ -177,7 +191,7 @@ export function AppDropdown({
         aria-expanded={open}
         aria-labelledby={label ? `${id}-label ${id}-value` : `${id}-value`}
         disabled={disabled}
-        onClick={() => (open ? setOpen(false) : openMenu())}
+        onClick={() => (open ? setMenuOpen(false) : openMenu())}
       >
         <span className="nb-dropdown__value" id={`${id}-value`}>
           {selected?.selectedLabel ?? selected?.label ?? placeholder}
@@ -187,13 +201,17 @@ export function AppDropdown({
       {open &&
         !disabled &&
         createPortal(
-          <ul
+          <div
             ref={menuRef}
             className={cx('nb-dropdown__menu', `nb-dropdown__menu--${variant}`)}
-            role="listbox"
-            aria-labelledby={label ? `${id}-label` : undefined}
             style={menuStyle}
           >
+            {menuHeader}
+            <ul
+              role="listbox"
+              aria-labelledby={label ? `${id}-label` : undefined}
+              className="nb-dropdown__menu-list"
+            >
             {options.map((option) => {
               const isActive = option.value === value;
               return (
@@ -210,7 +228,7 @@ export function AppDropdown({
                     onClick={() => {
                       if (option.disabled) return;
                       onChange(option.value);
-                      setOpen(false);
+                      setMenuOpen(false);
                     }}
                   >
                     <span className="nb-dropdown__option-content">
@@ -225,7 +243,9 @@ export function AppDropdown({
                 </li>
               );
             })}
-          </ul>,
+            </ul>
+            {menuFooter}
+          </div>,
           document.body,
         )}
     </div>

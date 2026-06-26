@@ -29,6 +29,11 @@ export function fieldKeyValue(field: Field, item: DataRecord): unknown {
 }
 
 export function fieldTextValue(field: Field, item: DataRecord): string {
+  if (field.itemFormatter) {
+    const formatted = field.itemFormatter(item);
+    return formatted == null ? '' : String(formatted);
+  }
+
   const value = item[field.textField] ?? item['text'] ?? item['name'] ?? item['businessName'];
   return value == null ? '' : String(value);
 }

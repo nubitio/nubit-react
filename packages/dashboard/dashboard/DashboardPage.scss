@@ -1,5 +1,13 @@
 @use 'variables' as *;
 
+// DashboardPage renders as view-wrapper-scroll.nb-dashboard-page. That outer
+// element gets padding: 0 var(--page-padding) from view-wrapper-scroll in
+// base.scss, but the inner AppToolbar already adds the same padding via
+// .view-wrapper. Zero it here to avoid double horizontal padding.
+.view-wrapper-scroll.nb-dashboard-page {
+  padding-inline: 0;
+}
+
 .nb-dashboard-page {
   position: relative;
 

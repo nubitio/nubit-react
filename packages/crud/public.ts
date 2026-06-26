@@ -102,6 +102,8 @@ export type { CrudDrawerViewEvents, CrudDrawerViewOptions } from './view/CrudDra
 export { PageView } from './view/PageView';
 export type { CrudPageViewEvents, CrudPageViewOptions } from './view/CrudPageView';
 export { FormView, FORM_EVENTS } from './form/FormView';
+export { EntityDropdown } from './form/EntityDropdown';
+export type { EntityDropdownProps } from './form/EntityDropdown';
 export {
   CrudFormShell,
   CrudDialogShell,
@@ -152,7 +154,13 @@ export type {
   DataGridViewOptions,
 } from './datagrid/DataGridViewOptions';
 export type { ColumnGroupDef, ColumnHeaderCell, ResolvedColumnHeaders } from './datagrid/ColumnGroup';
-export { resolveColumnHeaders } from './datagrid/resolveColumnHeaders';
+export {
+  buildGroupBoundaryClassName,
+  resolveColumnHeaders,
+  resolveFieldGroupClassName,
+  resolveFieldGroupBoundaries,
+} from './datagrid/resolveColumnHeaders';
+export type { FieldGroupBoundary } from './datagrid/resolveColumnHeaders';
 export type {
   DetailSummaryOptions,
   SummaryCalculateContext,

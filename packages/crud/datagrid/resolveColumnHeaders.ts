@@ -29,6 +29,62 @@ function resolveGroupClassName(key: string, defs?: ColumnGroupDef[]): string | u
   return defs?.find((def) => def.key === key)?.className;
 }
 
+export function resolveFieldGroupClassName(field: Field, defs?: ColumnGroupDef[]): string | undefined {
+  const path = normalizeColumnGroup(field);
+  if (path.length === 0) return undefined;
+  return resolveGroupClassName(path[path.length - 1]!, defs);
+}
+
+function fieldGroupKey(field: Field): string | null {
+  const path = normalizeColumnGroup(field);
+  return path.length > 0 ? path[path.length - 1]! : null;
+}
+
+export interface FieldGroupBoundary {
+  groupKey: string | null;
+  groupClassName?: string;
+  /** Vertical divider after this column when another group follows. */
+  isGroupDivider: boolean;
+}
+
+export function resolveFieldGroupBoundaries(
+  visibleFields: Field[],
+  groupDefs?: ColumnGroupDef[],
+): Record<string, FieldGroupBoundary> {
+  const result: Record<string, FieldGroupBoundary> = {};
+
+  for (let index = 0; index < visibleFields.length; index += 1) {
+    const field = visibleFields[index]!;
+    const groupKey = fieldGroupKey(field);
+
+    if (!groupKey) {
+      result[field.name] = { groupKey: null, isGroupDivider: false };
+      continue;
+    }
+
+    const nextKey =
+      index < visibleFields.length - 1 ? fieldGroupKey(visibleFields[index + 1]!) : null;
+
+    result[field.name] = {
+      groupKey,
+      groupClassName: resolveGroupClassName(groupKey, groupDefs),
+      isGroupDivider: nextKey !== null && groupKey !== nextKey,
+    };
+  }
+
+  return result;
+}
+
+export function buildGroupBoundaryClassName(boundary?: FieldGroupBoundary): string {
+  if (!boundary?.groupKey) return '';
+  return [
+    boundary.groupClassName,
+    boundary.isGroupDivider ? 'nb-datagrid__col-group-divider' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 function countLeaves(node: HeaderNode): number {
   if (node.type === 'ungrouped' || node.type === 'leaf') return 1;
   return node.children.reduce((sum, child) => sum + countLeaves(child), 0);

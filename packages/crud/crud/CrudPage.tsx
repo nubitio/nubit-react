@@ -569,24 +569,6 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
           .join(' ') || undefined
       }
     >
-      {(resolvedResource.bulkActions?.length ?? 0) > 0 && selectionState.hasSelection && (
-        <div className="nb-bulk-toolbar" role="toolbar" aria-label="Acciones en lote">
-          <span className="nb-bulk-toolbar__count">
-            {t('crudPage.selectedCount', { count: selectionState.selectedCount })}
-          </span>
-          {resolvedResource.bulkActions!.map((action: BulkAction) => (
-            <Button
-              key={action.key}
-              variant="secondary"
-              size="sm"
-              icon={action.icon}
-              onClick={() => handleBulkAction(action)}
-            >
-              {action.label}
-            </Button>
-          ))}
-        </div>
-      )}
       <DataGridView
         ref={gridRef}
         id={resolvedResource.id}
@@ -624,6 +606,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         visibleColumns={presetState.visibleColumns}
         columnGroupDefs={resolvedResource.columnGroupDefs}
         beforeToolbar={renderPresetSelector}
+        bulkActions={resolvedResource.bulkActions}
+        onBulkAction={handleBulkAction}
         aboveGrid={aboveGridContent}
         detailUrl={gridDetail?.url}
         detailFields={gridDetail?.fields}

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 import { rmSync } from 'fs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const packages = ['core', 'ui', 'admin', 'crud', 'hydra', 'dashboard', 'react-admin'];
+const packages = ['core', 'ui', 'admin', 'crud', 'hydra', 'dashboard', 'eject', 'react-admin'];
 
 let failed = false;
 

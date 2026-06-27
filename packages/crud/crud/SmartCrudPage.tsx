@@ -10,7 +10,7 @@ import type { FieldInput } from '../field/buildFields';
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
 import { useCoreTranslation, useMercureSubscription } from '@nubitio/core';
-import { resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
+import { parseHydraDoc, parseOpenApiDoc, resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
 import { Button, Skeleton } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import { useSmartCrudRoles } from './SmartCrudRolesContext';
@@ -134,6 +134,26 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
     fieldContract: resource.fieldContract,
   });
+
+  const awaitingFormDetailInference = useMemo(() => {
+    const detail = resource.formDetail;
+    if (!detail || detail.inferFields === false) return false;
+    if (detail.fields && detail.fields.length > 0) return false;
+    if ((embeddedLines?.length ?? 0) > 0) return true;
+    if (!schemaData) return false;
+
+    const resourceMap =
+      schemaData.format === 'hydra'
+        ? parseHydraDoc(schemaData.doc, schemaData.entrypointHrefs)
+        : parseOpenApiDoc(schemaData.doc);
+    const normalizedApi = resource.apiUrl.split('?')[0].replace(/^\//, '');
+    const parentSchema = Object.values(resourceMap).find((entry) => {
+      const candidate = entry.apiUrl.split('?')[0].replace(/^\//, '');
+      return candidate === normalizedApi;
+    });
+
+    return (parentSchema?.embeddedLines?.length ?? 0) > 0;
+  }, [embeddedLines, resource.apiUrl, resource.formDetail, schemaData]);
 
   const resolvedBaseResource = useMemo(() => {
     const withFormDetail = {
@@ -303,7 +323,13 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
 
   // --- Render ---
 
-  if (!hasManualFields && isLoading) {
+  const inferredFormDetailFieldCount = resolvedBaseResource.formDetail?.fields?.length ?? 0;
+
+  if (
+    (!hasManualFields && isLoading) ||
+    (awaitingFormDetailInference &&
+      (!schemaData || inferredFormDetailFieldCount === 0))
+  ) {
     return <CrudSkeleton />;
   }
 

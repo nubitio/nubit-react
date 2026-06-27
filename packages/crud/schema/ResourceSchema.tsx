@@ -110,6 +110,9 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
   );
   const resolver = schemaResolver ?? fallbackResolver;
   const baseline = resolver.useResourceSchema({ apiUrl, enabled: hydraEnabled });
+  // Manual header fields still need schema metadata for formDetail line inference
+  // (x-embedded-lines) and toolbar permissions.
+  const schemaMeta = resolver.useResourceSchema({ apiUrl, enabled: !hydraEnabled });
 
   return useMemo(() => {
     if (fieldSource === 'manual-contract') {
@@ -119,9 +122,13 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
     if (fieldSource === 'manual-fields') {
       return {
         fields: manualFields!,
-        isLoading: false,
-        error: undefined,
-        supportedOperations: [],
+        isLoading: schemaMeta.isLoading,
+        error: schemaMeta.error,
+        supportedOperations: schemaMeta.supportedOperations ?? [],
+        embeddedLines: schemaMeta.embeddedLines,
+        workflow: schemaMeta.workflow,
+        formLayout: schemaMeta.formLayout,
+        summaryFields: schemaMeta.summaryFields,
       };
     }
 
@@ -145,5 +152,5 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
       baseline.summaryFields,
       baseline.embeddedLines,
     );
-  }, [baseline, fieldContract, fieldSource, manualFields, schemaResolver]);
+  }, [baseline, fieldContract, fieldSource, manualFields, schemaMeta, schemaResolver]);
 }

@@ -9,14 +9,24 @@ function normalizeUrl(url: string): string {
   return base.startsWith('/') ? base.slice(1) : base;
 }
 
-function shouldInferFormDetail(
-  formDetail: ResourceFormDetail | undefined,
-  embeddedLines?: HydraResourceSchema['embeddedLines'],
-): boolean {
-  if (!embeddedLines?.length) return false;
+function shouldInferFormDetail(formDetail: ResourceFormDetail | undefined): boolean {
   if (formDetail?.inferFields === false) return false;
   if (formDetail?.fields && formDetail.fields.length > 0) return false;
   return true;
+}
+
+function resolveParentSchema(
+  apiUrl: string,
+  schemaData: NonNullable<UseHydraMetadataResult['data']>,
+): HydraResourceSchema | undefined {
+  const resourceMap =
+    schemaData.format === 'hydra'
+      ? parseHydraDoc(schemaData.doc, schemaData.entrypointHrefs)
+      : parseOpenApiDoc(schemaData.doc);
+
+  return Object.values(resourceMap).find(
+    (schema) => normalizeUrl(schema.apiUrl) === normalizeUrl(apiUrl),
+  );
 }
 
 /**
@@ -33,7 +43,7 @@ export function resolveInferredFormDetail(
   schemaData: UseHydraMetadataResult['data'],
   embeddedLines?: HydraResourceSchema['embeddedLines'],
 ): ResourceFormDetail | undefined {
-  if (!shouldInferFormDetail(formDetail, embeddedLines) || !schemaData) {
+  if (!shouldInferFormDetail(formDetail) || !schemaData) {
     return formDetail;
   }
 
@@ -42,15 +52,16 @@ export function resolveInferredFormDetail(
       ? parseHydraDoc(schemaData.doc, schemaData.entrypointHrefs)
       : parseOpenApiDoc(schemaData.doc);
 
-  const parentSchema = Object.values(resourceMap).find(
-    (schema) => normalizeUrl(schema.apiUrl) === normalizeUrl(apiUrl),
-  );
+  const parentSchema = resolveParentSchema(apiUrl, schemaData);
+  const effectiveEmbeddedLines = parentSchema?.embeddedLines ?? embeddedLines;
+  if (!effectiveEmbeddedLines?.length) return formDetail;
+
   const binding = resolveEmbeddedBinding(
     {
       className: parentSchema?.className ?? '',
       apiUrl,
       fields: parentSchema?.fields ?? [],
-      embeddedLines: parentSchema?.embeddedLines ?? embeddedLines,
+      embeddedLines: effectiveEmbeddedLines,
     },
     formDetail?.propertyName,
   );

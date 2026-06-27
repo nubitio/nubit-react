@@ -141,7 +141,14 @@ describe('resolveInferredFormDetail', () => {
 
   it('returns formDetail unchanged when embedded lines metadata is absent', () => {
     const formDetail = { propertyName: 'lines' };
+    const docWithoutEmbeddedLines: HydraApiDoc = {
+      ...hydraDoc,
+      supportedClass: hydraDoc.supportedClass.map((cls) =>
+        cls['@id'] === '#SalesDocument' ? { ...cls, 'x-embedded-lines': undefined } : cls,
+      ),
+    };
+    const data = { ...schemaData, doc: docWithoutEmbeddedLines };
 
-    expect(resolveInferredFormDetail('/api/sales_documents', formDetail, schemaData, [])).toBe(formDetail);
+    expect(resolveInferredFormDetail('/api/sales_documents', formDetail, data, [])).toBe(formDetail);
   });
 });

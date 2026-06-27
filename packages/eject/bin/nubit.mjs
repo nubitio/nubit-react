@@ -3,6 +3,7 @@
  * Nubit eject CLI — generates explicit resource/page files from Hydra docs.
  * Run from the monorepo root: node packages/eject/bin/nubit.mjs eject fields /api/products
  */
+import process from 'node:process';
 import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';

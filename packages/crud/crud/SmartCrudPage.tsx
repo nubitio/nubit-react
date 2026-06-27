@@ -3,7 +3,6 @@ import type { FieldOverride } from './resolveSmartCrudFields';
 import { useQueryClient } from '@tanstack/react-query';
 import { CrudPage } from './CrudPage';
 import type { ResourceConfig } from './ResourceConfig';
-import type { Field } from '../field/Field';
 import { buildFields } from '../field/buildFields';
 import type { FieldInput } from '../field/buildFields';
 

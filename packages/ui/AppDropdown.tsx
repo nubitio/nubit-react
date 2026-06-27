@@ -118,6 +118,14 @@ export function AppDropdown({
     [menuMinWidth],
   );
 
+  const setMenuOpen = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange],
+  );
+
   // Outside-click: close on mousedown outside trigger + menu
   useEffect(() => {
     if (!open) return;
@@ -129,7 +137,7 @@ export function AppDropdown({
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  }, [open, setMenuOpen]);
 
   // Reposition on scroll/resize while open
   useLayoutEffect(() => {
@@ -150,15 +158,7 @@ export function AppDropdown({
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, { capture: true });
     };
-  }, [open, computeMenuStyle]);
-
-  const setMenuOpen = useCallback(
-    (next: boolean) => {
-      setOpen(next);
-      onOpenChange?.(next);
-    },
-    [onOpenChange],
-  );
+  }, [open, computeMenuStyle, setMenuOpen]);
 
   const openMenu = useCallback(() => {
     setMenuStyle(computeMenuStyle());

@@ -450,6 +450,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const navigate = useNavigate();
   const [on, emit] = useEvents();
   const idField = useMemo(() => getIdField(options.fields), [options.fields]);
+  const getRowKey = useCallback(
+    (row: DataRecord, fallback?: string | number): string | number => {
+      const value = row[idField];
+      if (typeof value === 'string' || typeof value === 'number') return value;
+      return fallback ?? (value as string | number);
+    },
+    [idField],
+  );
   const visibleFields = useMemo(
     () =>
       options.fields
@@ -466,7 +474,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const rowsRef = useRef<DataRecord[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [gridSummary, setGridSummary] = useState<Record<string, unknown> | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<unknown[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<Array<string | number>>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
   const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -805,7 +813,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       getSelectedRowKeys: () => handleStateRef.current.selectedKeys,
       getSelectedRows: () =>
         rowsRef.current.filter((row) =>
-          handleStateRef.current.selectedKeys.includes(row[handleStateRef.current.idField]),
+          handleStateRef.current.selectedKeys.includes(getRowKey(row)),
         ),
       getFilter: () =>
         buildFilterExpression(
@@ -837,23 +845,23 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       hasEditData: () => handleStateRef.current.inlineEdit.draftRows.size > 0,
       saveChanges: () => handleStateRef.current.inlineEdit.saveAll(),
     }),
-    [options.fields, t],
+    [getRowKey, options.fields, t],
   );
 
-  const selectedRows = rows.filter((row) => selectedKeys.includes(row[idField]));
+  const selectedRows = rows.filter((row) => selectedKeys.includes(getRowKey(row)));
 
   const applySelection = useCallback(
     (nextKeys: Array<string | number>) => {
       setSelectedKeys(nextKeys);
-      const nextRows = rows.filter((item) => nextKeys.includes(item[idField]));
+      const nextRows = rows.filter((item) => nextKeys.includes(getRowKey(item)));
       options.onSelectionChanged?.({ selectedRowsData: nextRows });
       emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
     },
-    [emit, idField, options, rows],
+    [emit, getRowKey, options, rows],
   );
 
   const selectRow = (row: DataRecord) => {
-    const key = row[idField];
+    const key = getRowKey(row);
     const nextKeys =
       options.selectionMode === 'multiple'
         ? selectedKeys.includes(key)
@@ -1060,7 +1068,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasCheckbox = options.selectionMode === 'multiple';
   const allPageSelected =
-    hasCheckbox && rows.length > 0 && rows.every((row) => selectedKeys.includes(row[idField]));
+    hasCheckbox && rows.length > 0 && rows.every((row) => selectedKeys.includes(getRowKey(row)));
   const somePageSelected =
     hasCheckbox && selectedKeys.length > 0 && !allPageSelected;
 
@@ -1070,7 +1078,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       applySelection([]);
       return;
     }
-    applySelection(rows.map((row) => row[idField]));
+    applySelection(rows.map(getRowKey));
   };
 
   const renderSelectAllCheckbox = () => (
@@ -1497,7 +1505,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     ))
                   : rows.map((row, rowIndex) => {
                       const key = row[idField] ?? rowIndex;
-                      const selected = selectedKeys.includes(key);
+                      const selected = selectedKeys.includes(getRowKey(row, rowIndex));
                       const cardActions = buildRowActions(row).filter((a) =>
                         isToolbarActionVisible(a, toolbarPermissions),
                       );
@@ -1848,7 +1856,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 ) : (
                   rows.map((row, rowIndex) => {
                     const key = row[idField] ?? rowIndex;
-                    const selected = selectedKeys.includes(key);
+                    const selected = selectedKeys.includes(getRowKey(row, rowIndex));
                     const editing = inlineEdit.draftRows.has(key);
                     const rowHasChanges = editing && inlineEdit.hasDraftChanges(key, row);
                     const saving = inlineEdit.savingRows.has(key);

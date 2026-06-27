@@ -247,6 +247,15 @@ importers:
         specifier: ^6.0.0
         version: 6.30.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
+  packages/eject:
+    dependencies:
+      '@nubitio/crud':
+        specifier: workspace:*
+        version: link:../crud
+      '@nubitio/hydra':
+        specifier: workspace:*
+        version: link:../hydra
+
   packages/hydra:
     dependencies:
       '@nubitio/core':

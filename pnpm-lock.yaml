@@ -198,6 +198,9 @@ importers:
       '@nubitio/core':
         specifier: workspace:^
         version: link:../core
+      '@nubitio/hydra':
+        specifier: workspace:^
+        version: link:../hydra
       '@nubitio/ui':
         specifier: workspace:^
         version: link:../ui

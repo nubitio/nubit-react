@@ -50,7 +50,7 @@ export default [
   }),
 
   // ── @nubitio/crud ───────────────────────────────────────────────────────────
-  // CRUD engine, field DSL, form/grid views. Depends on @nubitio/core + @nubitio/ui.
+  // CRUD engine, field DSL, form/grid views. Depends on @nubitio/core + @nubitio/hydra + @nubitio/ui.
   defineConfig({
     ...sharedConfig,
     entry: { index: 'packages/crud/public.ts' },

@@ -13,6 +13,7 @@ import {
   datetimeField,
 } from '@nubitio/crud';
 import { pluralize, toDashCase } from './openApiParser';
+import { warnDeprecatedCrudHints } from './crudHintDeprecations';
 
 /**
  * Returns true when the given `range` string declares an XSD integer type.
@@ -119,14 +120,56 @@ export function resolveRangeTag(range: string | undefined, propertyType: string)
  * `visibleOnForm: false` excludes the field from the create/edit form only.
  * `order` maps to the `Field.order` property used by native grid column ordering.
  */
-function applyCrudHints(field: Field, hints: CrudHints | undefined): void {
-  if (!hints) return;
-  if (hints.filterable !== undefined) field.filterable = hints.filterable;
-  if (hints.sortable !== undefined) field.sortable = hints.sortable;
-  if (hints.hidden !== undefined && hints.hidden) field.visible = false;
-  if (hints.visibleOnForm !== undefined) field.visibleOnForm = hints.visibleOnForm;
-  if (hints.order !== undefined) field.order = hints.order;
-  if (hints.width !== undefined) field.width = hints.width;
+function applyCrudHints(field: Field, hints: CrudHints | undefined, fieldName?: string): string[] {
+  const applied: string[] = [];
+  if (!hints) return applied;
+
+  warnDeprecatedCrudHints(hints, fieldName ?? field.name);
+
+  if (hints.filterable !== undefined) {
+    field.filterable = hints.filterable;
+    applied.push(`filterable=${hints.filterable}`);
+  }
+  if (hints.sortable !== undefined) {
+    field.sortable = hints.sortable;
+    applied.push(`sortable=${hints.sortable}`);
+  }
+
+  const hideInGrid = hints.hideInGrid ?? hints.hidden;
+  if (hideInGrid) {
+    field.visible = false;
+    applied.push('hideInGrid');
+  }
+
+  const showInForm = hints.showInForm ?? hints.visibleOnForm;
+  if (showInForm !== undefined) {
+    field.visibleOnForm = showInForm;
+    applied.push(`showInForm=${showInForm}`);
+  }
+
+  if (hints.readonly !== undefined) {
+    field.readonly = hints.readonly;
+    applied.push(`readonly=${hints.readonly}`);
+  }
+
+  if (hints.order !== undefined) {
+    field.order = hints.order;
+    applied.push(`order=${hints.order}`);
+  }
+  if (hints.width !== undefined) {
+    field.width = hints.width;
+    applied.push(`width=${hints.width}`);
+  }
+
+  return applied;
+}
+
+function stampMappingReason(field: Field, rule: string, hintSuffix?: string[]): void {
+  const parts = [rule];
+  if (hintSuffix && hintSuffix.length > 0) {
+    parts.push(`x-crud: ${hintSuffix.join(', ')}`);
+  }
+  field.mappingReason = parts.join(' → ');
 }
 
 /**
@@ -256,6 +299,11 @@ export function mapHydraSchemaToFields(
         hideable: false,
         visibleOnForm: false,
       };
+      stampMappingReason(
+        idField,
+        `rule-1 identity (${isIntegerRange(range) ? 'numberField' : 'textField'})`,
+        applyCrudHints(idField, fieldSchema.crudHints),
+      );
       fields.push(idField);
       continue;
     }
@@ -284,7 +332,11 @@ export function mapHydraSchemaToFields(
           : noneField();
       const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(
+        field,
+        fieldSchema.crudHints?.format === 'currency' ? 'rule-3 display-only+currency' : 'rule-3 display-only',
+        applyCrudHints(field, fieldSchema.crudHints),
+      );
       fields.push(field);
       continue;
     }
@@ -313,7 +365,7 @@ export function mapHydraSchemaToFields(
         .required(required)
         .build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-3.5 enum', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -329,7 +381,11 @@ export function mapHydraSchemaToFields(
       const base = formatHint === 'image' ? imageField(apiBase) : fileField(apiBase);
       const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable: false, sortable: false };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(
+        field,
+        `rule-3.55 ${formatHint}`,
+        applyCrudHints(field, fieldSchema.crudHints),
+      );
       fields.push(field);
       continue;
     }
@@ -343,7 +399,7 @@ export function mapHydraSchemaToFields(
     ) {
       const built = currencyField().name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-3.6 currency', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -352,7 +408,7 @@ export function mapHydraSchemaToFields(
     if (tag === 'boolean') {
       const built = switchField().name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-4 boolean', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -361,7 +417,7 @@ export function mapHydraSchemaToFields(
     if (tag === 'dateTime') {
       const built = datetimeField().name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-5 dateTime', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -370,7 +426,7 @@ export function mapHydraSchemaToFields(
     if (tag === 'integer') {
       const built = numberField().name(name).label(label).required(required).precision(0).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-6 integer', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -380,7 +436,7 @@ export function mapHydraSchemaToFields(
     if (tag === 'decimal') {
       const built = numberField().name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(field, 'rule-7 decimal', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }
@@ -403,7 +459,11 @@ export function mapHydraSchemaToFields(
         .required(required)
         .build();
       const field: Field = { ...built, filterable };
-      applyCrudHints(field, fieldSchema.crudHints);
+      stampMappingReason(
+        field,
+        `rule-8 entity → ${url || 'unknown-url'}`,
+        applyCrudHints(field, fieldSchema.crudHints),
+      );
       fields.push(field);
       continue;
     }
@@ -411,7 +471,7 @@ export function mapHydraSchemaToFields(
     // Rule 9 — xmls:string and unknown → textField (safe fallback)
     const built = textField().name(name).label(label).required(required).build();
     const field: Field = { ...built, filterable };
-    applyCrudHints(field, fieldSchema.crudHints);
+    stampMappingReason(field, `rule-9 text (range=${range ?? 'none'})`, applyCrudHints(field, fieldSchema.crudHints));
     fields.push(field);
   }
 
@@ -434,6 +494,7 @@ export function mapHydraSchemaToFields(
       hideable: false,
       visibleOnForm: false,
     };
+    stampMappingReason(syntheticId, 'rule-1b synthetic identity (no id in schema)');
     // Prepend so it appears first (conventional key position).
     fields.unshift(syntheticId);
   }

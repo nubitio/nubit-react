@@ -29,6 +29,9 @@ export function resolveResourceDetails<T extends DataRecord>(
               buildFields((gridDetail.fields as (row: DataRecord) => FieldInput[])(parentRow))
           : buildFields(gridDetail.fields),
     },
-    formDetail: formDetail && { ...formDetail, fields: buildFields(formDetail.fields) },
+    formDetail: formDetail && {
+      ...formDetail,
+      fields: formDetail.fields ? buildFields(formDetail.fields) : [],
+    },
   };
 }

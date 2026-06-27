@@ -1,14 +1,16 @@
 import React, { useMemo, useEffect, useRef, type RefObject } from 'react';
+import type { FieldOverride } from './resolveSmartCrudFields';
 import { useQueryClient } from '@tanstack/react-query';
 import { CrudPage } from './CrudPage';
 import type { ResourceConfig } from './ResourceConfig';
 import type { Field } from '../field/Field';
 import { buildFields } from '../field/buildFields';
 import type { FieldInput } from '../field/buildFields';
-import type { FieldOverride } from './resolveSmartCrudFields';
+
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
 import { useCoreTranslation, useMercureSubscription } from '@nubitio/core';
+import { resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
 import { Button, Skeleton } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import { useSmartCrudRoles } from './SmartCrudRolesContext';
@@ -20,6 +22,9 @@ import type { FormHandle } from '../form/FormHandle';
 import type { GridHandle } from '../datagrid/GridHandle';
 import { useResolvedResourceFields } from '../schema/ResourceSchema';
 import { buildWorkflowRowActions } from '../workflow/buildWorkflowRowActions';
+import { useDevTools, type FieldResolutionSource } from '../devtools/DevToolsContext';
+import { resolveFormDetailDiagnostics } from '../devtools/formDetailDiagnostics';
+import { warnOnce } from './deprecations';
 import './SmartCrudPage.scss';
 
 function CrudSkeleton() {
@@ -49,14 +54,8 @@ function CrudError({ message, onRetry }: { message: string; onRetry: () => void 
   );
 }
 
-interface SmartCrudPageProps<T extends DataRecord = DataRecord> {
+export interface SchemaCrudPageProps<T extends DataRecord = DataRecord> {
   resource: ResourceConfig<T>;
-  /**
-   * @deprecated Use `resource.fieldContract` (defineFieldContract) instead.
-   * Per-field overrides applied on top of auto-inferred Hydra fields.
-   * Ignored when `resource.fieldContract` is present.
-   */
-  fieldOverrides?: FieldOverride[];
   /** External form ref forwarded to CrudPage — lets the parent call setFieldValue / getFieldValue. */
   formRef?: RefObject<FormHandle | null>;
   /** Called whenever grid row selection changes. Receives the full selected row objects. */
@@ -80,7 +79,7 @@ function formatRuntimeErrorMessage(error: Error): string {
 }
 
 /**
- * SmartCrudPage — wraps CrudPage with Hydra auto-discovery and declarative rules.
+ * SchemaCrudPage — wraps CrudPage with Hydra schema auto-discovery and declarative rules.
  *
  * ## Field resolution
  * - If `resource.fields` is a non-empty array, it is used as-is (pass-through).
@@ -100,21 +99,21 @@ function formatRuntimeErrorMessage(error: Error): string {
  *
  * URL deep-linking is wired via `initialRecordId` / `initialIsNew` props on CrudPage.
  */
-export function SmartCrudPage<T extends DataRecord = DataRecord>({
+export function SchemaCrudPage<T extends DataRecord = DataRecord>({
   resource,
-  fieldOverrides,
   formRef,
   onSelectionChanged,
   editDisabled,
   deleteDisabled,
   gridRef,
   aboveGrid,
-}: SmartCrudPageProps<T>) {
+}: SchemaCrudPageProps<T>) {
   const queryClient = useQueryClient();
+  const { registerResource } = useDevTools();
   const internalGridRef = useRef<GridHandle | null>(null);
   const effectiveGridRef = gridRef ?? internalGridRef;
 
-  const resolvedBaseResource = useMemo(() => resolveCrudResource(resource), [resource]);
+  const { data: schemaData } = useSchemaContext();
 
   const hasManualFields =
     !resource.fieldContract &&
@@ -129,12 +128,25 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     formLayout: inferredFormLayout,
     workflow,
     summaryFields: inferredSummaryFields,
+    embeddedLines,
   } = useResolvedResourceFields({
-    apiUrl: resolvedBaseResource.apiUrl,
+    apiUrl: resource.apiUrl,
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
-    overrides: hasManualFields ? undefined : fieldOverrides,
     fieldContract: resource.fieldContract,
   });
+
+  const resolvedBaseResource = useMemo(() => {
+    const withFormDetail = {
+      ...resource,
+      formDetail: resolveInferredFormDetail(
+        resource.apiUrl,
+        resource.formDetail,
+        schemaData,
+        embeddedLines,
+      ),
+    };
+    return resolveCrudResource(withFormDetail);
+  }, [embeddedLines, resource, schemaData]);
 
   // Dev hint: log a defineResource() snippet once per resource URL when fields
   // were auto-inferred. No-op in production.
@@ -158,6 +170,52 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
     error,
     fields,
     resource.apiUrl,
+    supportedOperations,
+  ]);
+
+  const formDetailDiagnostics = useMemo(
+    () =>
+      resolveFormDetailDiagnostics(
+        resource.formDetail,
+        resolvedBaseResource.formDetail,
+        embeddedLines,
+      ),
+    [embeddedLines, resolvedBaseResource.formDetail, resource.formDetail],
+  );
+
+  useEffect(() => {
+    if (isLoading || error || fields.length === 0) return;
+
+    let source: FieldResolutionSource = 'unknown';
+    if (resource.fieldContract?.source === 'manual') {
+      source = 'fieldContract';
+    } else if (hasManualFields) {
+      source = 'manual';
+    } else {
+      source = 'hydra';
+    }
+
+    const permissionsSource = resource.permissions ? 'explicit' : supportedOperations.length > 0 ? 'inferred' : 'default';
+
+    registerResource({
+      apiUrl: resource.apiUrl,
+      source,
+      fields,
+      supportedOperations,
+      permissionsSource,
+      formDetail: formDetailDiagnostics.active ? formDetailDiagnostics : undefined,
+      updatedAt: Date.now(),
+    });
+  }, [
+    error,
+    fields,
+    formDetailDiagnostics,
+    hasManualFields,
+    isLoading,
+    registerResource,
+    resource.apiUrl,
+    resource.fieldContract?.source,
+    resource.permissions,
     supportedOperations,
   ]);
 
@@ -286,4 +344,58 @@ export function SmartCrudPage<T extends DataRecord = DataRecord>({
       }}
     />
   );
+}
+
+/** @deprecated Use {@link SchemaCrudPageProps} instead. */
+export interface SmartCrudPageProps<T extends DataRecord = DataRecord> extends SchemaCrudPageProps<T> {
+  /**
+   * @deprecated Use `defineFieldContract()` / `defineFields()` on the resource instead.
+   */
+  fieldOverrides?: FieldOverride[];
+}
+
+function fieldOverridesToContract<T extends DataRecord>(
+  overrides: FieldOverride[],
+): NonNullable<ResourceConfig<T>['fieldContract']> {
+  return {
+    source: 'hydra',
+    strategy: 'augment',
+    directives: overrides.map(({ key, ...patch }) => ({
+      kind: 'override' as const,
+      key,
+      patch,
+    })),
+  };
+}
+
+/**
+ * @deprecated Renamed to {@link SchemaCrudPage}. Will be removed in v1.0.
+ */
+export function SmartCrudPage<T extends DataRecord = DataRecord>({
+  fieldOverrides,
+  resource,
+  ...props
+}: SmartCrudPageProps<T>) {
+  warnOnce(
+    'SmartCrudPage',
+    'SmartCrudPage is deprecated — use SchemaCrudPage instead (same props, clearer name).',
+  );
+
+  const resolvedResource = useMemo(() => {
+    if (!fieldOverrides?.length) return resource;
+
+    warnOnce(
+      'fieldOverrides',
+      'fieldOverrides prop is deprecated — use defineFieldContract() on the resource instead.',
+    );
+
+    if (resource.fieldContract) return resource;
+
+    return {
+      ...resource,
+      fieldContract: fieldOverridesToContract<T>(fieldOverrides),
+    };
+  }, [fieldOverrides, resource]);
+
+  return <SchemaCrudPage resource={resolvedResource} {...props} />;
 }

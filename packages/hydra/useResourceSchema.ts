@@ -18,7 +18,9 @@ function normalizeUrl(url: string): string {
 
 export function useResourceSchema<T extends DataRecord = DataRecord>(
   apiUrl: string,
+  options?: { enabled?: boolean },
 ): UseResourceSchemaResult {
+  const enabled = options?.enabled !== false;
   void (undefined as T | undefined);
   const { data, isLoading, error } = useSchemaContext();
 
@@ -27,6 +29,10 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
   // fresh Field objects, which cascades into grid data reloads and lookup
   // refetches downstream (everything that depends on field identity).
   return useMemo(() => {
+    if (!enabled) {
+      return { fields: [], isLoading: false, error: undefined, supportedOperations: [] };
+    }
+
     if (!data) {
       return { fields: [], isLoading, error, supportedOperations: [] };
     }
@@ -79,6 +85,7 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
       workflow: resourceSchema.workflow,
       sequence: resourceSchema.sequence,
       summaryFields: buildSummaryFieldsFromSchema(resourceSchema),
+      embeddedLines: resourceSchema.embeddedLines,
     };
-  }, [data, isLoading, error, apiUrl]);
+  }, [data, enabled, isLoading, error, apiUrl]);
 }

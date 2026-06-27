@@ -1,0 +1,20 @@
+{
+  "name": "@nubitio/eject",
+  "version": "0.6.0",
+  "description": "Eject explicit resource definitions from Hydra API docs",
+  "type": "module",
+  "bin": {
+    "nubit": "./bin/nubit.mjs"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@nubitio/crud": "workspace:*",
+    "@nubitio/hydra": "workspace:*"
+  },
+  "files": [
+    "bin",
+    "src"
+  ]
+}

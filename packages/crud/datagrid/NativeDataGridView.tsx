@@ -16,12 +16,15 @@ import { type ResourceLoadOptions, useResourceStoreFactory } from '../data/Resou
 import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
+import type { ResourceToolbarAction } from '../crud/ResourceConfig';
+import { formatSummaryValue, resolveSummaryText } from '../summary';
+
 import { useEvents, useCoreHttpClient, useCoreTranslation } from '@nubitio/core';
 import { DATA_GRID_EVENTS } from './DataGridEvents';
 import type { DataGridSummaryItem, DataGridViewOptions } from './DataGridViewOptions';
 import type { GridHandle } from './GridHandle';
 import type { FilterRule } from '../field/FilterRule';
-import type { ResourceToolbarAction, ResourceToolbarItems } from '../crud/ResourceConfig';
+
 import { useSmartCrudRoles } from '../crud/SmartCrudRolesContext';
 import {
   buildFilterExpression,
@@ -36,7 +39,7 @@ import { canEditFieldInline, useInlineEdit } from './useInlineEdit';
 import { INLINE_EDIT_PORTAL_SELECTOR, InlineEditCell } from './InlineEditCell';
 import { GridEmptyStateView } from './GridEmptyStateView';
 import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
-import { formatSummaryValue, resolveSummaryText } from '../summary';
+
 import { useIsMobile } from './useIsMobile';
 import {
   buildGroupBoundaryClassName,
@@ -44,403 +47,33 @@ import {
   resolveFieldGroupBoundaries,
 } from './resolveColumnHeaders';
 import type { ColumnHeaderCell } from './ColumnGroup';
+import { GridColumnGroup } from './GridColumnGroup';
+import { SummaryFooter } from './SummaryFooter';
+import {
+  ACTIONS_COL_WIDTH,
+  CHECKBOX_COL_WIDTH,
+  computeLayoutWidth,
+  DEFAULT_COL_WIDTH,
+  DETAIL_COL_WIDTH,
+  getColumnWidth,
+  getPageRange,
+  INLINE_ACTIONS_COL_WIDTH,
+  lockColumnWidth,
+  MIN_COL_WIDTH,
+  PAGE_SIZE_OPTIONS,
+} from './gridLayoutUtils';
+import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gridFieldUtils';
+import {
+  buildToolbar,
+  getResolvedRowActions,
+  getToolbarKey,
+  isToolbarActionVisible,
+  renderRowActionItem,
+  renderToolbarButton,
+  SelectionActionsMenu,
+} from './gridToolbar';
 
 type SortRule = { selector: string; desc: boolean };
-
-const DETAIL_COL_WIDTH = 36;
-const CHECKBOX_COL_WIDTH = 36;
-const ACTIONS_COL_WIDTH = 44;
-const INLINE_ACTIONS_COL_WIDTH = 72;
-const DEFAULT_COL_WIDTH = 120;
-const MIN_COL_WIDTH = 48;
-
-function getColumnWidth(field: Field, colWidths: Record<string, number>): number {
-  return colWidths[field.name] ?? field.width ?? field.minWidth ?? DEFAULT_COL_WIDTH;
-}
-
-/** Pin column width so band/leaf header rows stay aligned (each row is display:table). */
-function lockColumnWidth(width: number): React.CSSProperties {
-  return { width, minWidth: width, maxWidth: width };
-}
-
-function computeLayoutWidth({
-  visibleFields,
-  colWidths,
-  hasCheckbox,
-  hasDetail,
-  hasRowActions,
-  containerWidth,
-  actionsColWidth = ACTIONS_COL_WIDTH,
-}: {
-  visibleFields: Field[];
-  colWidths: Record<string, number>;
-  hasCheckbox: boolean;
-  hasDetail: boolean;
-  hasRowActions: boolean;
-  containerWidth: number;
-  actionsColWidth?: number;
-}): number {
-  let total = 0;
-  if (hasDetail) total += DETAIL_COL_WIDTH;
-  if (hasCheckbox) total += CHECKBOX_COL_WIDTH;
-  visibleFields.forEach((field) => {
-    total += getColumnWidth(field, colWidths);
-  });
-  if (hasRowActions) total += actionsColWidth;
-  return Math.max(containerWidth, total);
-}
-
-function GridColumnGroup({
-  fields,
-  colWidths,
-  hasCheckbox,
-  hasDetail,
-  hasRowActions,
-}: {
-  fields: Field[];
-  colWidths: Record<string, number>;
-  hasCheckbox: boolean;
-  hasDetail: boolean;
-  hasRowActions: boolean;
-}) {
-  return (
-    <colgroup>
-      {hasDetail && <col className="nb-datagrid__detail-col" />}
-      {hasCheckbox && <col className="nb-datagrid__checkbox-col" />}
-      {fields.map((field) => (
-        <col key={field.name} style={{ width: getColumnWidth(field, colWidths) }} />
-      ))}
-      {hasRowActions && <col className="nb-datagrid__actions-col" />}
-    </colgroup>
-  );
-}
-
-function getPageRange(current: number, total: number): (number | null)[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
-  const result: (number | null)[] = [0];
-  if (current > 3) result.push(null);
-  for (let i = Math.max(1, current - 1); i <= Math.min(total - 2, current + 1); i++) result.push(i);
-  if (current < total - 4) result.push(null);
-  result.push(total - 1);
-  return result;
-}
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-function normalizeIcon(icon?: string): string | undefined {
-  if (!icon) return undefined;
-  return icon.includes('ph ') || icon.startsWith('ph-') ? icon : `ph-${icon}`;
-}
-
-function isDateLikeField(field: Field): boolean {
-  return field.type === FieldType.DATE || field.type === FieldType.DATETIME;
-}
-
-function isCellEditMode(editMode?: DataGridViewOptions['editMode']): boolean {
-  return editMode === 'cell' || editMode === 'batch';
-}
-
-function resolveInlineEditToolbar(
-  editMode: DataGridViewOptions['editMode'] | undefined,
-  inlineEditToolbar: DataGridViewOptions['inlineEditToolbar'],
-): { save: boolean; revert: boolean } | null {
-  if (inlineEditToolbar === false) return null;
-  const defaultShow = isCellEditMode(editMode);
-  if (inlineEditToolbar == null) {
-    return defaultShow ? { save: true, revert: true } : null;
-  }
-  if (typeof inlineEditToolbar === 'boolean') {
-    return inlineEditToolbar ? { save: true, revert: true } : null;
-  }
-  return {
-    save: inlineEditToolbar.save !== false,
-    revert: inlineEditToolbar.revert !== false,
-  };
-}
-
-function getToolbarKey(action: ResourceToolbarAction, index: number): string {
-  return action.key ?? action.text ?? String(index);
-}
-
-function renderToolbarButton(action: ResourceToolbarAction, index: number, iconOnly = false) {
-  if (action.visible === false) return null;
-  const icon = normalizeIcon(action.icon);
-  const variant =
-    action.type === 'danger' ? 'danger' : action.type === 'primary' ? 'primary' : 'secondary';
-  if (iconOnly) {
-    return (
-      <IconButton
-        key={getToolbarKey(action, index)}
-        className="nb-datagrid__toolbar-icon-action"
-        icon={icon ? `ph ${icon}` : 'ph ph-circle'}
-        label={action.hint ?? action.text ?? ''}
-        onClick={action.onClick}
-        disabled={action.disabled}
-      />
-    );
-  }
-
-  return (
-    <Button
-      key={getToolbarKey(action, index)}
-      variant={variant}
-      size="sm"
-      icon={icon ? `ph ${icon}` : undefined}
-      onClick={action.onClick}
-      disabled={action.disabled}
-      title={action.hint}
-      aria-label={action.hint ?? action.text}
-    >
-      {action.text && <span>{action.text}</span>}
-    </Button>
-  );
-}
-
-function isToolbarActionVisible(action: ResourceToolbarAction, permissions: string[]): boolean {
-  if (action.visible === false) return false;
-  if (!action.permission) return true;
-  return permissions.includes(action.permission);
-}
-
-function renderSelectionActionItem(
-  action: ResourceToolbarAction,
-  index: number,
-  disabled: boolean,
-  onBeforeClick?: () => void,
-) {
-  const icon = normalizeIcon(action.icon);
-  return (
-    <button
-      key={getToolbarKey(action, index)}
-      type="button"
-      className={`nb-datagrid__actions-item${action.type === 'danger' ? ' nb-datagrid__actions-item--danger' : ''}`}
-      onClick={() => {
-        onBeforeClick?.();
-        action.onClick?.();
-      }}
-      disabled={disabled || action.disabled}
-      role="menuitem"
-    >
-      {icon && <i className={`ph ${icon}`} aria-hidden="true" />}
-      <span>{action.text}</span>
-    </button>
-  );
-}
-
-function getResolvedRowActions(
-  row: DataRecord,
-  rowActions: DataGridViewOptions['rowActions'],
-): ResourceToolbarAction[] {
-  if (!rowActions) return [];
-  return typeof rowActions === 'function' ? rowActions(row) : rowActions;
-}
-
-function renderRowActionItem(
-  action: ResourceToolbarAction,
-  index: number,
-  permissions: string[],
-  onBeforeClick?: () => void,
-) {
-  if (!isToolbarActionVisible(action, permissions)) return null;
-  return renderSelectionActionItem(action, index, false, onBeforeClick);
-}
-
-// Shared event name with NativeFormView so lookup dropdowns and the actions
-// menu close each other (single open dropdown invariant across the whole page).
-const DROPDOWN_OPENED_EVENT = 'lookup:opened';
-
-function SelectionActionsMenu({
-  actionsLabel,
-  selectedCount,
-  actions = [],
-  permissions,
-}: {
-  actionsLabel: string;
-  selectedCount: number;
-  actions?: ResourceToolbarAction[];
-  permissions: string[];
-}) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const idRef = useRef<symbol>(Symbol());
-
-  const visibleActions = actions.filter((action) => isToolbarActionVisible(action, permissions));
-  const disabled = selectedCount === 0;
-
-  // Close on mousedown outside the container.
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  // Mutual exclusion: close when any lookup/dropdown opens.
-  useEffect(() => {
-    const id = idRef.current;
-    const handler = (e: Event) => {
-      if ((e as CustomEvent<{ id: symbol }>).detail.id !== id) setOpen(false);
-    };
-    document.addEventListener(DROPDOWN_OPENED_EVENT, handler);
-    return () => document.removeEventListener(DROPDOWN_OPENED_EVENT, handler);
-  }, []);
-
-  if (visibleActions.length === 0) return null;
-
-  const dangerActions = visibleActions.filter((action) => action.type === 'danger');
-  const regularActions = visibleActions.filter((action) => action.type !== 'danger');
-  const groups = regularActions.reduce<Record<string, ResourceToolbarAction[]>>((acc, action) => {
-    const group = action.group ?? 'default';
-    acc[group] = acc[group] ?? [];
-    acc[group].push(action);
-    return acc;
-  }, {});
-
-  const label = selectedCount > 0 ? `${actionsLabel} (${selectedCount})` : actionsLabel;
-
-  const handleToggle = () => {
-    if (disabled) return;
-    const next = !open;
-    if (next) {
-      document.dispatchEvent(
-        new CustomEvent<{ id: symbol }>(DROPDOWN_OPENED_EVENT, { detail: { id: idRef.current } }),
-      );
-    }
-    setOpen(next);
-  };
-
-  return (
-    <div ref={containerRef} className="nb-datagrid__actions-menu">
-      <Button
-        variant="secondary"
-        aria-disabled={disabled}
-        aria-expanded={open}
-        onClick={handleToggle}
-      >
-        <span>{label}</span>
-        <i className="ph ph-caret-down" aria-hidden="true" />
-      </Button>
-      {open && !disabled && (
-        <div className="nb-datagrid__actions-popover" role="menu">
-          {Object.entries(groups).map(([group, items]) => (
-            <div key={group} className="nb-datagrid__actions-group">
-              {items.length > 1 && items[0]?.groupLabel && (
-                <div className="nb-datagrid__actions-group-label">{items[0].groupLabel}</div>
-              )}
-              {items.map((action, index) =>
-                renderSelectionActionItem(action, index, disabled, () => setOpen(false)),
-              )}
-            </div>
-          ))}
-          {dangerActions.length > 0 && (
-            <div className="nb-datagrid__actions-danger-group">
-              {dangerActions.map((action, index) =>
-                renderSelectionActionItem(action, index, disabled, () => setOpen(false)),
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function buildToolbar(
-  options: DataGridViewOptions,
-  t: ReturnType<typeof useCoreTranslation>['t'],
-  onAddClick: () => void,
-  includeAddAction = true,
-): ResourceToolbarItems {
-  return {
-    primary: [
-      ...(options.allowAdd && includeAddAction
-        ? [
-            {
-              text: t('grid.buttonNew'),
-              icon: 'ph-plus',
-              type: 'primary' as const,
-              onClick: onAddClick,
-              disabled: options.addDisabled,
-            },
-          ]
-        : []),
-      ...(options.toolbar?.primary ?? []),
-    ],
-    selection: options.toolbar?.selection,
-    utility: options.toolbar?.utility,
-    showRefresh: options.toolbar?.showRefresh ?? true,
-  };
-}
-
-
-function SummaryFooter({
-  fields,
-  hasCheckbox,
-  hasDetail,
-  hasRowActions,
-  rows,
-  summaryFields,
-  gridSummary,
-  footerRef,
-  colWidths,
-}: {
-  fields: Field[];
-  hasCheckbox: boolean;
-  hasDetail: boolean;
-  hasRowActions: boolean;
-  rows: DataRecord[];
-  summaryFields?: DataGridSummaryItem[];
-  gridSummary?: Record<string, unknown> | null;
-  footerRef?: React.Ref<HTMLTableSectionElement>;
-  colWidths: Record<string, number>;
-}) {
-  if (!summaryFields?.length) return null;
-
-  const itemsByColumn = new Map(
-    summaryFields.filter((item) => item.column).map((item) => [item.column, item]),
-  );
-  const unboundItems = summaryFields.filter((item) => !item.column);
-  const fallbackFieldName = fields[fields.length - 1]?.name;
-
-  return (
-    <tfoot ref={footerRef} className="nb-datagrid__summary-footer">
-      <tr>
-        {hasDetail && <td className="nb-datagrid__detail-cell" />}
-        {hasCheckbox && <td className="nb-datagrid__select-cell" />}
-        {fields.map((field) => {
-          const item =
-            itemsByColumn.get(field.name) ??
-            (field.name === fallbackFieldName ? unboundItems[0] : undefined);
-          const align = item?.align ?? field.align;
-          const justifyContent =
-            align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start';
-          return (
-            <td
-              key={field.name}
-              style={{ width: getColumnWidth(field, colWidths), textAlign: align }}
-            >
-              {item && (
-                <div className="nb-datagrid__summary-cell" style={{ justifyContent }}>
-                  {item.label && (
-                    <span className="nb-datagrid__summary-label">{item.label}</span>
-                  )}
-                  <span className="nb-datagrid__summary-value">
-                    {item.column && gridSummary && item.column in gridSummary
-                      ? formatSummaryValue(gridSummary[item.column], item)
-                      : resolveSummaryText(rows, item)}
-                  </span>
-                </div>
-              )}
-            </td>
-          );
-        })}
-        {hasRowActions && <td className="nb-datagrid__actions-cell" />}
-      </tr>
-    </tfoot>
-  );
-}
 
 export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((options, ref) => {
   const { t } = useCoreTranslation();

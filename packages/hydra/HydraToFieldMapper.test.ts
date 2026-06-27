@@ -55,6 +55,24 @@ describe('mapHydraSchemaToFields', () => {
     expect(fields.find((f) => f.name === 'name')?.visibleOnForm).not.toBe(false);
   });
 
+  it('applies hideInGrid and showInForm alias hints', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        { name: 'secret', range: 'xsd:string', crudHints: { hideInGrid: true } },
+        { name: 'internal', range: 'xsd:string', crudHints: { showInForm: false } },
+      ]),
+    );
+
+    expect(fields.find((f) => f.name === 'secret')?.visible).toBe(false);
+    expect(fields.find((f) => f.name === 'internal')?.visibleOnForm).toBe(false);
+    expect(fields.find((f) => f.name === 'secret')?.mappingReason).toContain('hideInGrid');
+  });
+
+  it('stamps mappingReason on inferred fields', () => {
+    const fields = mapHydraSchemaToFields(schemaWith([{ name: 'active', range: 'xsd:boolean' }]));
+    expect(fields.find((f) => f.name === 'active')?.mappingReason).toContain('rule-4');
+  });
+
   it('hides and locks the x-sequence field on forms', () => {
     const fields = mapHydraSchemaToFields({
       ...schemaWith([
@@ -140,6 +158,17 @@ describe('x-crud format: currency', () => {
       ]),
     );
     expect(fields.find((f) => f.name === 'fee')?.type).toBe('enum');
+  });
+
+  it('applies the readonly x-crud hint on writeable fields', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        { name: 'lineTotal', range: 'xsd:decimal', crudHints: { format: 'currency', readonly: true } },
+      ]),
+    );
+    const lineTotal = fields.find((f) => f.name === 'lineTotal');
+    expect(lineTotal?.type).toBe('currency');
+    expect(lineTotal?.readonly).toBe(true);
   });
 
   it('maps hinted read-only decimals to readonly currency fields', () => {

@@ -18,7 +18,8 @@
     "validate:packages": "node scripts/validate-packages.mjs",
     "version:set": "node scripts/set-version.mjs",
     "example:build": "pnpm --filter admin-demo build",
-    "example:dev": "pnpm --filter admin-demo dev"
+    "example:dev": "pnpm --filter admin-demo dev",
+    "eject": "node packages/eject/bin/nubit.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",

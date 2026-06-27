@@ -59,6 +59,11 @@ export type CreateNubitAppConfig = {
   queryClient?: QueryClient;
   /** Register Mercure + Hydra schema/store providers. Default true. */
   hydra?: boolean;
+  /**
+   * Show the Nubit DevTools panel (field mapping, provider tree).
+   * Default true on localhost; set false to disable.
+   */
+  devTools?: boolean;
 };
 
 export type NubitApp = {

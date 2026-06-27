@@ -33,8 +33,12 @@ export type { CoreHttpClient, CoreHttpClientConfig } from '@nubitio/core';
 export {
   CrudPage,
   crudRoute,
+  SchemaCrudPage,
   SmartCrudPage,
   SmartCrudRolesProvider,
+  DevToolsProvider,
+  useDevTools,
+  isDevEnvironment,
   defineResource,
   embeddedLinesUrl,
   defineFields,
@@ -44,6 +48,8 @@ export {
   AuditTrailPanel,
 } from '@nubitio/crud';
 export type {
+  SchemaCrudPageProps,
+  SmartCrudPageProps,
   ResourceConfig,
   ResourcePermissions,
   ResourceRowActions,
@@ -76,6 +82,11 @@ export type {
   ResourceStore,
   ResourceStoreFactory,
   FieldOverride,
+  DevToolsContextValue,
+  ResourceDiagnostics,
+  FieldResolutionSource,
+  FormDetailDiagnostics,
+  FormDetailFieldSource,
 } from '@nubitio/crud';
 
 // ── Field DSL ─────────────────────────────────────────────────────────────────
@@ -229,6 +240,7 @@ export {
   createNubitApp,
   filterMenuByRoles,
   hasAnyRole,
+  NubitDevToolsPanel,
 } from '@nubitio/admin';
 export type {
   FeatureHubBanner,

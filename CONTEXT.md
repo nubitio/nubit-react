@@ -29,9 +29,8 @@ about e.g. "currency" has one home. Decided 2026-06-12.
 
 The lookup `FieldType → FieldTypeModule` that the grid, form, serializer and
 validator call through instead of switching on `field.type`. Internal to
-`packages/crud` for now (not exported from `public.ts`); designed so that a
-`registerFieldType()` escape hatch can be added later without breaking
-changes. Per-field customization remains `Field.contentRender`.
+`packages/crud`; extended at runtime via the public `registerFieldType()` API.
+Per-field customization remains `Field.contentRender`.
 
 ## FilterRow
 
@@ -65,7 +64,7 @@ adapter against the same interface.
 
 ## Characterization test
 
-A test pinning current behaviour through the `SmartCrudPage` interface with a
+A test pinning current behaviour through the `SchemaCrudPage` interface with a
 fake ResourceStore adapter — render, filter, edit, submit, assert on the
 wire. These tests survive internal refactors because they exercise the seam,
 not the implementation.

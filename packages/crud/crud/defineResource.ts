@@ -1,4 +1,6 @@
 import type { ResourceConfig } from './ResourceConfig';
+import type { ResourceConfigGroups } from './ResourceConfigGroups';
+import { flattenResourceGroups } from './ResourceConfigGroups';
 import type { DataRecord } from '@nubitio/core';
 
 const stringResourceCache = new Map<string, ResourceConfig>();
@@ -59,4 +61,16 @@ export function defineResource<T extends DataRecord = DataRecord>(
   }
 
   return resource;
+}
+
+/** Grouped config variant — same as defineResource but accepts nested display/access/form/grid. */
+export function defineResourceGrouped<T extends DataRecord = DataRecord>(
+  apiUrl: string,
+  config: ResourceConfigGroups & Partial<Omit<ResourceConfig<T>, 'apiUrl'>> & { id?: string },
+): ResourceConfig<T> {
+  const { display, access, form, grid, routing, ...rest } = config;
+  return defineResource(apiUrl, {
+    ...flattenResourceGroups({ display, access, form, grid, routing }),
+    ...rest,
+  } as Partial<Omit<ResourceConfig<T>, 'apiUrl'>> & { id?: string });
 }

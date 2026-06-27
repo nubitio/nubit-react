@@ -14,6 +14,19 @@ Seven packages, published lockstep under the `@nubitio` npm scope:
 | [`@nubitio/dashboard`](packages/dashboard) | Declarative dashboards: stat cards, bar/donut charts, tables |
 | [`@nubitio/react-admin`](packages/react-admin) | Batteries-included umbrella — install this one |
 
+## Architecture
+
+See [`docs/architecture/`](docs/architecture/README.md) for the full pipeline, field-resolution rules, complexity tiers, and debug breakpoints.
+
+In development, `createNubitApp({ devTools: true })` shows a **Nubit DevTools** panel with per-field mapping reasons. The browser console prints `[SmartCRUD]` hints when fields are auto-inferred.
+
+### Eject explicit definitions
+
+```bash
+pnpm eject eject fields /api/products --docs http://localhost:8000/api/docs.jsonld --out src/products.fields.ts
+pnpm eject eject page ProductsPage /api/products --out src/pages/ProductsPage.tsx
+```
+
 ## Quick start
 
 ```bash

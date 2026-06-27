@@ -66,6 +66,7 @@ export { ToastHost } from './runtime/ToastHost';
 export type { ToastHostProps } from './runtime/ToastHost';
 
 export { createNubitApp } from './app/createNubitApp';
+export { NubitDevToolsPanel } from './devtools/NubitDevToolsPanel';
 export { filterMenuByRoles, hasAnyRole } from './app/filterMenuByRoles';
 export type {
   CreateNubitAppConfig,

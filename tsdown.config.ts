@@ -89,6 +89,13 @@ export default [
     outDir: 'packages/dashboard/dist',
   }),
 
+  // ── @nubitio/eject ──────────────────────────────────────────────────────────
+  defineConfig({
+    ...sharedConfig,
+    entry: { index: 'packages/eject/src/index.ts' },
+    outDir: 'packages/eject/dist',
+  }),
+
   // ── @nubitio/react-admin ────────────────────────────────────────────────────
   // Umbrella re-export: all sibling packages are external, near-zero bytes.
   defineConfig({

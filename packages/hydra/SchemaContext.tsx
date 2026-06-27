@@ -2,13 +2,13 @@
  * SchemaContext — shared parsed schema, no per-page re-fetch.
  *
  * Provides a single shared `useHydraMetadata()` call at the provider level
- * so that multiple `SmartCrudPage` instances mounted simultaneously share
+ * so that multiple `SchemaCrudPage` instances mounted simultaneously share
  * one `/api/docs.jsonld` request instead of each issuing their own.
  *
  * ## Usage
  *
  * ```tsx
- * // In your app root (optional — SmartCrudPage still works without it):
+ * // In your app root (optional — SchemaCrudPage still works without it):
  * <SchemaProvider>
  *   <App />
  * </SchemaProvider>
@@ -35,7 +35,7 @@ interface SchemaProviderProps {
 
 /**
  * Wrap your app (or a subtree) with `SchemaProvider` to share a single
- * `/api/docs.jsonld` fetch across all `SmartCrudPage` instances.
+ * `/api/docs.jsonld` fetch across all `SchemaCrudPage` instances.
  */
 export function SchemaProvider({ children }: SchemaProviderProps) {
   const metadata = useHydraMetadata();
@@ -54,7 +54,7 @@ export interface UseSchemaContextResult {
  * Returns the shared schema context if inside a `<SchemaProvider>`,
  * otherwise falls back to calling `useHydraMetadata()` directly.
  *
- * This makes `SmartCrudPage` work standalone without requiring a provider.
+ * This makes `SchemaCrudPage` work standalone without requiring a provider.
  */
 export function useSchemaContext(): UseSchemaContextResult {
   const ctx = useContext(SchemaContext);

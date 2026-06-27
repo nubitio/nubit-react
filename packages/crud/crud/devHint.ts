@@ -16,11 +16,13 @@
 
 import type { Field } from '../field/Field';
 
+const loggedUrls = new Set<string>();
+
 /**
  * Returns true when running on a local development hostname.
  * Works regardless of Vite build mode (`import.meta.env.DEV`).
  */
-function isDevEnvironment(): boolean {
+export function isDevEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
   const host = window.location.hostname;
   return (
@@ -40,6 +42,11 @@ function fieldToHintLine(field: Field): string {
   return `    { key: '${field.name}', label: '${field.label}', type: '${field.type}'${readOnlyPart} },`;
 }
 
+function fieldMappingLine(field: Field): string {
+  const reason = field.mappingReason ?? 'manual/unknown';
+  return `  ${field.name.padEnd(20)} ${field.type.padEnd(10)} ← ${reason}`;
+}
+
 /**
  * Log a dev hint for auto-inferred fields the first time a resource URL is
  * mounted with auto-discovery active.
@@ -50,11 +57,12 @@ function fieldToHintLine(field: Field): string {
  */
 export function logDevHint(resourceUrl: string, fields: Field[], operations: string[] = []): void {
   if (!isDevEnvironment()) return;
+  if (loggedUrls.has(resourceUrl)) return;
+  loggedUrls.add(resourceUrl);
 
-  // Exclude hidden identity fields from the hint — developers should not need
-  // to manually define the system-generated id field in their resource config.
   const hintableFields = fields.filter((f) => !f.isIdentity);
   const fieldLines = hintableFields.map(fieldToHintLine).join('\n');
+  const mappingLines = hintableFields.map(fieldMappingLine).join('\n');
 
   const operationsLine =
     operations.length > 0
@@ -62,9 +70,10 @@ export function logDevHint(resourceUrl: string, fields: Field[], operations: str
 `
       : '';
 
-
   console.info(
-    `[SmartCRUD] Auto-inferred fields for "${resourceUrl}". To customise, use:\n\n` +
+    `[SmartCRUD] Auto-inferred fields for "${resourceUrl}".\n\n` +
+      `Mapping (rule → x-crud):\n${mappingLines}\n\n` +
+      `To customise, use:\n\n` +
       `defineResource('${resourceUrl}', {\n` +
       operationsLine +
       `  fields: [\n` +

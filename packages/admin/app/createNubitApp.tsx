@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CoreConfigProvider, CoreProvider, MercureProvider } from '@nubitio/core';
-import { SmartCrudRolesProvider } from '@nubitio/crud';
+import { DevToolsProvider, isDevEnvironment, SmartCrudRolesProvider } from '@nubitio/crud';
+import { NubitDevToolsPanel } from '../devtools/NubitDevToolsPanel';
 import {
   HydraResourceSchemaProvider,
   HydraResourceStoreProvider,
@@ -100,37 +101,42 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
     </AdminShell>
   );
 
+  const devToolsEnabled = config.devTools ?? isDevEnvironment();
+
   const authenticated = (
-    <CoreProvider
-      http={{ baseUrl: apiBaseUrl, refreshPath: 'auth/refresh', loginPath: 'auth/login' }}
-      runtime={runtime}
-    >
-      <CoreConfigProvider
-        apiBaseUrl={apiBaseUrl}
-        locale={config.locale ?? 'en'}
-        timezone={config.timezone ?? 'UTC'}
-        currency={config.currency ?? 'USD'}
+    <DevToolsProvider enabled={devToolsEnabled}>
+      <CoreProvider
+        http={{ baseUrl: apiBaseUrl, refreshPath: 'auth/refresh', loginPath: 'auth/login' }}
+        runtime={runtime}
       >
-        <SmartCrudRolesProvider roles={session.roles}>
-          <BrowserRouter>
-            <Wrapper>
-              {config.hydra === false ? (
-                shell
-              ) : (
-                <MercureProvider>
-                  <SchemaProvider>
-                    <HydraResourceSchemaProvider>
-                      <HydraResourceStoreProvider>{shell}</HydraResourceStoreProvider>
-                    </HydraResourceSchemaProvider>
-                  </SchemaProvider>
-                </MercureProvider>
-              )}
-            </Wrapper>
-          </BrowserRouter>
-          <ToastHost toasts={toasts} onDismiss={dismiss} />
-        </SmartCrudRolesProvider>
-      </CoreConfigProvider>
-    </CoreProvider>
+        <CoreConfigProvider
+          apiBaseUrl={apiBaseUrl}
+          locale={config.locale ?? 'en'}
+          timezone={config.timezone ?? 'UTC'}
+          currency={config.currency ?? 'USD'}
+        >
+          <SmartCrudRolesProvider roles={session.roles}>
+            <BrowserRouter>
+              <Wrapper>
+                {config.hydra === false ? (
+                  shell
+                ) : (
+                  <MercureProvider>
+                    <SchemaProvider>
+                      <HydraResourceSchemaProvider>
+                        <HydraResourceStoreProvider>{shell}</HydraResourceStoreProvider>
+                      </HydraResourceSchemaProvider>
+                    </SchemaProvider>
+                  </MercureProvider>
+                )}
+              </Wrapper>
+            </BrowserRouter>
+            <ToastHost toasts={toasts} onDismiss={dismiss} />
+            {devToolsEnabled && <NubitDevToolsPanel />}
+          </SmartCrudRolesProvider>
+        </CoreConfigProvider>
+      </CoreProvider>
+    </DevToolsProvider>
   );
 
   if (session.session.status === 'authenticated') {

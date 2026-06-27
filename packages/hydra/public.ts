@@ -27,6 +27,9 @@ export {
   mapHydraSchemaToFields,
   resolveRangeTag,
 } from './HydraToFieldMapper';
+export { buildEmbeddedFormDetail, resolveEmbeddedBinding } from './buildEmbeddedFormDetail';
+export { resolveInferredFormDetail } from './resolveInferredFormDetail';
+export type { EmbeddedLinesSchema } from './types';
 
 export {
   useHydraMetadata,

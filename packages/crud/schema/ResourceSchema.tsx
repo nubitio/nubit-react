@@ -1,15 +1,18 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { DataRecord } from '@nubitio/core';
+import type { EmbeddedLinesSchema, WorkflowSchema } from '@nubitio/hydra';
 import type { Field } from '../field/Field';
 import type { FormLayout } from '../form/FormLayout';
-import type { FieldOverride } from '../crud/resolveSmartCrudFields';
+
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';
 import type { SmartCrudFieldContract } from '../crud/fieldContract';
-import type { WorkflowSchema } from '@nubitio/hydra';
 import type { SummaryItem } from '../summary';
+import { useFallbackResourceSchema } from './useFallbackResourceSchema';
 
 export interface ResourceSchemaRequest {
   apiUrl: string;
+  /** When false, skip Hydra resolution (manual/contract fields). Default true. */
+  enabled?: boolean;
 }
 
 export interface ResourceSchemaResolution {
@@ -17,13 +20,10 @@ export interface ResourceSchemaResolution {
   isLoading: boolean;
   error: Error | undefined;
   supportedOperations: string[];
-  /**
-   * Backend-declared form layout (sections/tabs) from the API doc, when the
-   * resource publishes one. Explicit `ResourceConfig.formLayout` wins.
-   */
   formLayout?: FormLayout;
   workflow?: WorkflowSchema;
   summaryFields?: SummaryItem[];
+  embeddedLines?: EmbeddedLinesSchema[];
 }
 
 export interface ResourceSchemaResolver {
@@ -33,7 +33,6 @@ export interface ResourceSchemaResolver {
 export interface ResolveResourceFieldsOptions<T extends DataRecord = DataRecord> {
   apiUrl: string;
   manualFields?: Field[];
-  overrides?: FieldOverride[];
   fieldContract?: SmartCrudFieldContract<T>;
 }
 
@@ -58,6 +57,7 @@ function resolveWithRuntimeErrors(
   formLayout?: FormLayout,
   workflow?: WorkflowSchema,
   summaryFields?: SummaryItem[],
+  embeddedLines?: EmbeddedLinesSchema[],
 ): ResourceSchemaResolution {
   try {
     return {
@@ -68,6 +68,7 @@ function resolveWithRuntimeErrors(
       formLayout,
       workflow,
       summaryFields,
+      embeddedLines,
     };
   } catch (runtimeError) {
     return {
@@ -78,66 +79,56 @@ function resolveWithRuntimeErrors(
       formLayout,
       workflow,
       summaryFields,
+      embeddedLines,
     };
   }
+}
+
+type FieldSource = 'manual-contract' | 'manual-fields' | 'hydra';
+
+function resolveFieldSource<T extends DataRecord>(
+  manualFields?: Field[],
+  fieldContract?: SmartCrudFieldContract<T>,
+): FieldSource {
+  if (fieldContract?.source === 'manual') return 'manual-contract';
+  if (manualFields && manualFields.length > 0) return 'manual-fields';
+  return 'hydra';
 }
 
 export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
   apiUrl,
   manualFields,
-  overrides,
   fieldContract,
 }: ResolveResourceFieldsOptions<T>): ResourceSchemaResolution {
   const schemaResolver = useContext(ResourceSchemaResolverContext);
+  const fieldSource = resolveFieldSource(manualFields, fieldContract);
+  const hydraEnabled = fieldSource === 'hydra';
 
-  // NOTE on conditional hooks: which branch executes is fixed for the lifetime
-  // of a mounted component (a resource never changes its field source), so the
-  // hook order stays consistent — the same invariant the conditional
-  // `schemaResolver.useResourceSchema` call below already relies on.
-  // Each branch memoises its resolution: returning a fresh `fields` array per
-  // render cascades into grid data reloads and lookup refetches downstream
-  // (everything keys on field identity).
+  const fallbackResolver: ResourceSchemaResolver = useMemo(
+    () => ({ useResourceSchema: useFallbackResourceSchema }),
+    [],
+  );
+  const resolver = schemaResolver ?? fallbackResolver;
+  const baseline = resolver.useResourceSchema({ apiUrl, enabled: hydraEnabled });
 
-  if (fieldContract?.source === 'manual') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useMemo(
-      () => resolveWithRuntimeErrors(() => resolveSmartCrudFields({ contract: fieldContract })),
-      [fieldContract],
-    );
-  }
+  return useMemo(() => {
+    if (fieldSource === 'manual-contract') {
+      return resolveWithRuntimeErrors(() => resolveSmartCrudFields({ contract: fieldContract }));
+    }
 
-  if (manualFields && manualFields.length > 0) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useMemo(
-      () => ({
-        fields: manualFields,
+    if (fieldSource === 'manual-fields') {
+      return {
+        fields: manualFields!,
         isLoading: false,
         error: undefined,
         supportedOperations: [],
-      }),
-      [manualFields],
-    );
-  }
+      };
+    }
 
-  if (!schemaResolver) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useMemo(
-      () => ({
-        fields: [],
-        isLoading: false,
-        error: new Error(
-          `No ResourceSchema resolver configured for ${apiUrl}. Wrap your app with ResourceSchemaProvider or a backend-specific provider such as HydraResourceSchemaProvider.`,
-        ),
-        supportedOperations: [],
-      }),
-      [apiUrl],
-    );
-  }
+    if (!schemaResolver) {
+      return baseline;
+    }
 
-  const baseline = schemaResolver.useResourceSchema({ apiUrl });
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  return useMemo(() => {
     if (baseline.isLoading || baseline.error) {
       return baseline;
     }
@@ -147,12 +138,12 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
         resolveSmartCrudFields({
           baselineFields: baseline.fields,
           contract: fieldContract,
-          legacyOverrides: fieldContract ? undefined : overrides,
         }),
       baseline.supportedOperations,
       baseline.formLayout,
       baseline.workflow,
       baseline.summaryFields,
+      baseline.embeddedLines,
     );
-  }, [baseline, fieldContract, overrides]);
+  }, [baseline, fieldContract, fieldSource, manualFields, schemaResolver]);
 }

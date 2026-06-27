@@ -68,7 +68,7 @@ async function fetchEntrypointHrefs(
 
 /**
  * Stable query key used by useHydraMetadata.
- * Export this so that consumers (e.g. SmartCrudPage retry button) can
+ * Export this so that consumers (e.g. SchemaCrudPage retry button) can
  * invalidate exactly the right query without coupling to an internal string.
  */
 export const API_DOC_QUERY_KEY = ['api-doc-discovery'] as const;

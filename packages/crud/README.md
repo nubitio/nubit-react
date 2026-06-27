@@ -31,7 +31,7 @@ import '@nubitio/crud/style.css';  // grid + form styles
 ## Quick start
 
 ```tsx
-import { SmartCrudPage, defineResource, textField, numberField } from '@nubitio/crud';
+import { SchemaCrudPage, defineResource, textField, numberField } from '@nubitio/crud';
 import { HydraAdapter } from '@nubitio/crud';
 
 const products = defineResource('/api/products', {
@@ -44,7 +44,7 @@ const products = defineResource('/api/products', {
 });
 
 export function ProductsPage() {
-  return <SmartCrudPage resource={products} />;
+  return <SchemaCrudPage resource={products} />;
 }
 ```
 
@@ -53,7 +53,7 @@ export function ProductsPage() {
 ### Engine
 | Export | Description |
 |--------|-------------|
-| `SmartCrudPage` | Main component — resolves schema, applies rules, renders grid + form |
+| `SchemaCrudPage` | Main component — resolves schema, applies rules, renders grid + form |
 | `CrudPage` | Lower-level page if you manage fields manually |
 | `defineResource` | Create a typed `ResourceConfig` for a REST/Hydra resource |
 
@@ -75,4 +75,4 @@ Each returns a chainable `FieldBuilder` with `.label()`, `.required()`, `.visibl
 | `ResourceSchemaProvider` | Supply a custom field schema for a resource |
 | `ResourceStoreProvider` | Supply a custom data store factory |
 | `SmartCrudRolesProvider` | Inject RBAC role claims for field-level permissions |
-| `defineFieldContract` | Type-safe field contract for `SmartCrudPage` |
+| `defineFieldContract` | Type-safe field contract for `SchemaCrudPage` |

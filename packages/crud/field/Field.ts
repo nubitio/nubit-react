@@ -84,6 +84,12 @@ export interface Field {
   order?: number;
 
   /**
+   * Dev/diagnostics only: how this field was inferred from Hydra (rule id + detail).
+   * Set by `mapHydraSchemaToFields`; consumed by `logDevHint` and Nubit DevTools.
+   */
+  mappingReason?: string;
+
+  /**
    * Column header band path for grouped grid headers, outermost segment first.
    * Omit for ungrouped columns that span all header rows.
    */

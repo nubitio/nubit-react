@@ -40,7 +40,7 @@ import {
   CoreProvider,
   AdminShell,
   SchemaProvider,
-  SmartCrudPage,
+  SchemaCrudPage,
   defineResource,
 } from '@nubitio/react-admin';
 import '@nubitio/react-admin/style.css';
@@ -52,7 +52,7 @@ export function App() {
     <CoreProvider apiBaseUrl="https://api.example.com" locale="es" timezone="America/Lima">
       <SchemaProvider>
         <AdminShell title="My Admin" menuItems={menu}>
-          <SmartCrudPage resource={products} />
+          <SchemaCrudPage resource={products} />
         </AdminShell>
       </SchemaProvider>
     </CoreProvider>
@@ -60,7 +60,7 @@ export function App() {
 }
 ```
 
-`SmartCrudPage` discovers the resource schema from your API Platform docs and renders a full CRUD page — datagrid with filters/sorting/pagination, create/edit forms (dialog, drawer, or page), validation, and RBAC — with zero hand-written field definitions. Use `CrudPage` with explicit field definitions when you want full manual control.
+`SchemaCrudPage` discovers the resource schema from your API Platform docs and renders a full CRUD page — datagrid with filters/sorting/pagination, create/edit forms (dialog, drawer, or page), validation, and RBAC — with zero hand-written field definitions. Use `CrudPage` with explicit field definitions when you want full manual control.
 
 ## The stack
 

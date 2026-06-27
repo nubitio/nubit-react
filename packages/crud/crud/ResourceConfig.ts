@@ -116,8 +116,16 @@ export interface ResourceFormDetail {
   url?: string;
   /** Footer summary for the detail grid (e.g. sum of line totals). */
   summary?: DetailSummaryOptions;
+  /**
+   * When `false`, disables automatic line-field inference from `x-embedded-lines`.
+   * Inference runs by default when the parent resource publishes embedded-line metadata.
+   * Manual `fields` always override inferred ones.
+   *
+   * @deprecated Explicit `inferFields: true` is no longer required — inference is automatic.
+   */
+  inferFields?: boolean;
   /** Built Fields or builder instances — `.build()` is called for you. */
-  fields: FieldInput[];
+  fields?: FieldInput[];
   propertyName?: string;
   allowAdding?: boolean;
   allowDeleting?: boolean;
@@ -173,7 +181,7 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   adapter?: BackendAdapter;
   /**
    * Manual field definitions for this resource.
-   * Omit (or pass an empty array) to let SmartCrudPage auto-infer fields from
+   * Omit (or pass an empty array) to let SchemaCrudPage auto-infer fields from
    * the Hydra/OpenAPI schema. Prefer `fieldContract` for augmenting inferred fields.
    */
   fields?: FieldInput[] | FieldDef<T>[];
@@ -184,9 +192,8 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
    */
   formFields?: FieldInput[];
   /**
-   * Canonical production field contract for SmartCrud.
-   * SmartCrud runtime treats this as authoritative over legacy
-   * `fields` + `fieldOverrides` combinations whenever it is present.
+   * Canonical production field contract for schema-driven CRUD.
+   * SchemaCrudPage treats this as authoritative over manual `fields` whenever it is present.
    */
   fieldContract?: SmartCrudFieldContract<T>;
   /**

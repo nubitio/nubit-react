@@ -1,5 +1,6 @@
 import { FieldType } from '../FieldType';
 import type { FieldTypeModule } from './FieldTypeModule';
+import { validateFieldTypeModule } from './validateFieldTypeModule';
 import { checkboxTypeModule } from './types/checkbox';
 import { currencyTypeModule } from './types/currency';
 import { dateTypeModule } from './types/date';
@@ -21,10 +22,8 @@ import { textareaTypeModule } from './types/textarea';
 /**
  * The Field-Type registry (see CONTEXT.md): FieldType → FieldTypeModule.
  *
- * Internal to @nubitio/crud for now — not exported from public.ts. Per-field
- * customization goes through `Field.contentRender`/`Field.formatter`; a
- * `registerFieldType()` escape hatch can be added later without breaking
- * changes.
+ * Built-in types are closed; third parties register custom types via
+ * {@link registerFieldType}. Per-field customization remains `Field.contentRender`.
  */
 const FIELD_TYPE_MODULES: Record<FieldType, FieldTypeModule> = {
   [FieldType.NONE]: noneTypeModule,
@@ -46,6 +45,35 @@ const FIELD_TYPE_MODULES: Record<FieldType, FieldTypeModule> = {
   [FieldType.HTML]: htmlTypeModule,
 };
 
-export function getFieldTypeModule(type: FieldType): FieldTypeModule {
-  return FIELD_TYPE_MODULES[type] ?? textTypeModule;
+const CUSTOM_FIELD_TYPE_MODULES = new Map<string, FieldTypeModule>();
+
+const BUILTIN_TYPE_VALUES = new Set<string>(Object.values(FieldType));
+
+/**
+ * Register a custom Field-Type module. Custom type ids must not collide with
+ * built-in {@link FieldType} values.
+ */
+export function registerFieldType(type: string, module: FieldTypeModule): void {
+  validateFieldTypeModule(type, module);
+
+  if (BUILTIN_TYPE_VALUES.has(type)) {
+    throw new Error(
+      `registerFieldType("${type}"): cannot override a built-in FieldType. Use Field.contentRender instead.`,
+    );
+  }
+
+  CUSTOM_FIELD_TYPE_MODULES.set(type, module);
+}
+
+/** Returns all registered custom type ids (for diagnostics). */
+export function listRegisteredFieldTypes(): string[] {
+  return [...CUSTOM_FIELD_TYPE_MODULES.keys()].sort();
+}
+
+export function getFieldTypeModule(type: FieldType | string): FieldTypeModule {
+  if (type in FIELD_TYPE_MODULES) {
+    return FIELD_TYPE_MODULES[type as FieldType];
+  }
+
+  return CUSTOM_FIELD_TYPE_MODULES.get(type) ?? textTypeModule;
 }

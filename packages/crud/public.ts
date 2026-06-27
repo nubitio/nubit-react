@@ -5,7 +5,7 @@
  *
  * Quick start:
  *   const resource = defineResource('/api/products', { title: 'Products' });
- *   export const ProductPage = () => <SmartCrudPage resource={resource} />;
+ *   export const ProductPage = () => <SchemaCrudPage resource={resource} />;
  *
  * defineResource(apiUrl, overrides?) is the only call form — the legacy object overload is gone.
  */
@@ -14,18 +14,23 @@
 export {
   CrudPage,
   crudRoute,
+  SchemaCrudPage,
   SmartCrudPage,
   SmartCrudRolesProvider,
   useSmartCrudRoles,
   defineFieldContract,
   defineFields,
   defineResource,
+  defineResourceGrouped,
+  flattenResourceGroups,
   embeddedLinesUrl,
   validateFieldContract,
   createCrudEvents,
   AuditTrailPanel,
 } from './crud';
 export type {
+  SchemaCrudPageProps,
+  SmartCrudPageProps,
   AuditEntry,
   AuditTrailConfig,
   AuditFieldLabelResolver,
@@ -56,6 +61,11 @@ export type {
   SmartCrudManualField,
   SmartCrudManualFieldContract,
   SmartCrudOperation,
+  ResourceConfigGroups,
+  ResourceDisplayGroup,
+  ResourceAccessGroup,
+  ResourceFormGroup,
+  ResourceGridGroup,
 } from './crud';
 
 // ── Field DSL ─────────────────────────────────────────────────────────────────
@@ -82,6 +92,7 @@ export { buildFields } from './field/buildFields';
 export type { FieldInput } from './field/buildFields';
 export { FieldBuilder } from './field/FieldBuilder';
 export { FieldType } from './field/FieldType';
+export { registerFieldType, listRegisteredFieldTypes } from './field/registry/registry';
 export type { Field, FieldDef, LoadOption } from './field/Field';
 export type {
   FormatterFn,
@@ -188,6 +199,14 @@ export { ResourceStoreProvider } from './data/ResourceStore';
 export { createRestResourceStore } from './data/restResourceStore';
 export type { RestQueryDialect } from './data/restResourceStore';
 export type { FieldOverride } from './crud/resolveSmartCrudFields';
+export { DevToolsProvider, useDevTools, isDevEnvironment } from './crud';
+export type {
+  DevToolsContextValue,
+  ResourceDiagnostics,
+  FieldResolutionSource,
+  FormDetailDiagnostics,
+  FormDetailFieldSource,
+} from './crud';
 export { useResourceStoreFactory } from './data/ResourceStore';
 export type {
   ResourceFilterDescriptor,

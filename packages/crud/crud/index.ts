@@ -1,8 +1,17 @@
-export { defineResource } from './defineResource';
+export { defineResource, defineResourceGrouped } from './defineResource';
+export { flattenResourceGroups } from './ResourceConfigGroups';
+export type {
+  ResourceAccessGroup,
+  ResourceConfigGroups,
+  ResourceDisplayGroup,
+  ResourceFormGroup,
+  ResourceGridGroup,
+} from './ResourceConfigGroups';
 export { embeddedLinesUrl } from './embeddedLinesUrl';
 export { CrudPage } from './CrudPage';
 export { crudRoute } from './crudRoute';
-export { SmartCrudPage } from './SmartCrudPage';
+export { SchemaCrudPage, SmartCrudPage } from './SmartCrudPage';
+export type { SchemaCrudPageProps, SmartCrudPageProps } from './SmartCrudPage';
 export { SmartCrudRolesProvider, useSmartCrudRoles } from './SmartCrudRolesContext';
 export type {
   ResourceConfig,
@@ -43,3 +52,7 @@ export { createAuditFieldLabelResolver } from './AuditTrail';
 export { AuditTrailPanel } from './AuditTrailPanel';
 export type { AuditTrailPanelProps } from './AuditTrailPanel';
 export { createCrudEvents } from '@nubitio/core';
+export { DevToolsProvider, useDevTools } from '../devtools/DevToolsContext';
+export type { DevToolsContextValue, ResourceDiagnostics, FieldResolutionSource } from '../devtools/DevToolsContext';
+export type { FormDetailDiagnostics, FormDetailFieldSource } from '../devtools/formDetailDiagnostics';
+export { isDevEnvironment } from './devHint';

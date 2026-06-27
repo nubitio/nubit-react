@@ -34,10 +34,22 @@ export interface CrudHints {
   filterable?: boolean;
   /** Override whether the field can be sorted in the grid. */
   sortable?: boolean;
-  /** When true, the column is hidden from the grid by default (the form still shows the field). */
+  /**
+   * When true, the column is hidden from the grid (the form still shows the field).
+   * @deprecated Prefer `hideInGrid`.
+   */
   hidden?: boolean;
-  /** When false, the field is excluded from the create/edit form (the grid still shows the column). */
+  /** When true, hide the column from the grid. Preferred over `hidden`. */
+  hideInGrid?: boolean;
+  /**
+   * When false, exclude from the create/edit form (the grid still shows the column).
+   * @deprecated Prefer `showInForm`.
+   */
   visibleOnForm?: boolean;
+  /** When false, exclude from the form. Preferred over `visibleOnForm`. */
+  showInForm?: boolean;
+  /** When true, render as read-only in the create/edit form. */
+  readonly?: boolean;
   /** Column display order. */
   order?: number;
   /** Column width in pixels or as a CSS string. */
@@ -124,6 +136,16 @@ export interface SequenceSchema {
   scope?: string[];
 }
 
+/** Master-detail line metadata from nubitio/admin-bundle EmbeddedLinesDocumentationNormalizer. */
+export interface EmbeddedLinesSchema {
+  propertyName: string;
+  lineClass: string;
+  lineEntityClass?: string;
+  routePath: string;
+  parentQueryParam: string;
+  reloadUrl: string;
+}
+
 export interface HydraClass {
   '@id': string; // e.g. "#Branch"
   '@type': string; // e.g. "Class"
@@ -139,6 +161,8 @@ export interface HydraClass {
    * @nubitio/crud's FormLayout shape.
    */
   'x-crud-layout'?: FormLayout;
+  /** Embedded line collections declared on parent document resources. */
+  'x-embedded-lines'?: EmbeddedLinesSchema[];
   /**
    * Hydra search template describing server-side filterable query params.
    * Present on collection operations in API Platform JSON-LD responses.
@@ -239,6 +263,8 @@ export interface HydraResourceSchema {
   workflow?: WorkflowSchema;
   /** Server-allocated sequence field (nubitio/sequence-bundle). */
   sequence?: SequenceSchema;
+  /** Embedded line collections (nubitio/admin-bundle). */
+  embeddedLines?: EmbeddedLinesSchema[];
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { ResourceFormDetail } from '@nubitio/crud';
 import { resolveInferredFormDetail } from './resolveInferredFormDetail';
 import type { HydraApiDoc } from './types';
 import type { UseHydraMetadataResult } from './useHydraMetadata';
@@ -110,7 +111,7 @@ describe('resolveInferredFormDetail', () => {
     const manual = {
       propertyName: 'lines',
       fields: [{ name: 'custom', type: 'text' as const, label: 'Custom' }],
-    };
+    } as ResourceFormDetail;
 
     const result = resolveInferredFormDetail('/api/sales_documents', manual, schemaData, embeddedLines);
 

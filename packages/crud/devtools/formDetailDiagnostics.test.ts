@@ -28,7 +28,7 @@ describe('resolveFormDetailDiagnostics', () => {
 
   it('reports manual when configured fields override inference', () => {
     const result = resolveFormDetailDiagnostics(
-      { fields: [{ name: 'custom', type: 'text', label: 'Custom' }] },
+      { fields: [{ name: 'custom', type: 'text', label: 'Custom' } as never] },
       { fields: [lineField] },
       [binding],
     );

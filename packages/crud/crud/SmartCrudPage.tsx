@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef, type RefObject } from 'react';
+import type { SmartCrudHydraFieldContract } from './fieldContract';
 import type { FieldOverride } from './resolveSmartCrudFields';
 import { useQueryClient } from '@tanstack/react-query';
 import { CrudPage } from './CrudPage';
@@ -355,7 +356,7 @@ export interface SmartCrudPageProps<T extends DataRecord = DataRecord> extends S
 
 function fieldOverridesToContract<T extends DataRecord>(
   overrides: FieldOverride[],
-): NonNullable<ResourceConfig<T>['fieldContract']> {
+): SmartCrudHydraFieldContract<T> {
   return {
     source: 'hydra',
     strategy: 'augment',
@@ -364,7 +365,7 @@ function fieldOverridesToContract<T extends DataRecord>(
       key,
       patch,
     })),
-  };
+  } as unknown as SmartCrudHydraFieldContract<T>;
 }
 
 /**

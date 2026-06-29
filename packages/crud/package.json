@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/crud",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "type": "module",
   "description": "Declarative CRUD engine with field DSL, forms, datagrids, RBAC, conditional logic and pluggable adapters (Hydra/REST).",
   "license": "MIT",
@@ -58,8 +58,8 @@
     "@tiptap/react": "^3.0.0",
     "@tiptap/starter-kit": "^3.0.0",
     "i18next": "^23.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^6.0.0"
   },

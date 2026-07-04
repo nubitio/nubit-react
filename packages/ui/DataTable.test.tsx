@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { DataTable } from './DataTable';
@@ -33,6 +33,9 @@ describe('DataTable', () => {
 
     expect(screen.getByText('Alpha')).toBeTruthy();
     await user.click(screen.getAllByRole('button', { name: 'Acciones' })[0]!);
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Edit' })).toBeTruthy();
+    });
     await user.click(screen.getByRole('menuitem', { name: 'Edit' }));
     expect(onEdit).toHaveBeenCalledTimes(1);
   });

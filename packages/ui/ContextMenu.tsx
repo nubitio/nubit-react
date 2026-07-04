@@ -135,7 +135,12 @@ export const ContextMenu = ({
     const update = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      if (rect.top >= window.innerHeight || rect.bottom <= 0) {
+      // happy-dom/jsdom often report 0×0 until layout runs — don't treat that as off-screen.
+      const hasLayout = rect.width > 0 || rect.height > 0;
+      if (
+        hasLayout &&
+        (rect.top >= window.innerHeight || rect.bottom <= 0)
+      ) {
         setOpen(false);
         return;
       }

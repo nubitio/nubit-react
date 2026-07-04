@@ -11,10 +11,6 @@
   display: inline-flex;
 
   &__dropdown {
-    position: absolute;
-    top: calc(100% + var(--space-1));
-    right: 0;
-    z-index: var(--z-dropdown);
     min-width: 190px;
     background: var(--surface-elevated);
     border: 1px solid var(--border-subtle);
@@ -23,9 +19,13 @@
     list-style: none;
     margin: 0;
     padding: var(--space-1);
-
-    // enter animation
     animation: nb-context-menu-enter 100ms ease both;
+
+    // Portalled menus use inline fixed positioning (see ContextMenu.tsx).
+    &--portaled {
+      position: fixed;
+      z-index: var(--z-shell-dropdown, 1600);
+    }
   }
 
   &__item {

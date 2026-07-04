@@ -133,3 +133,12 @@ export type { CodeProps } from './Code';
 export { Text } from './Text';
 export type { TextProps, TextTone } from './Text';
 export type { SpaceScale, ColSpan, FlexAlign, FlexJustify } from './layoutUtils';
+
+export { DataTable } from './DataTable';
+export type { DataTableProps, DataTableColumn, DataTableColumnAlign } from './DataTable';
+export { Pagination } from './Pagination';
+export type { PaginationProps } from './Pagination';
+export { RowActions } from './RowActions';
+export type { RowActionsProps } from './RowActions';
+export { useConfirm } from './useConfirm';
+export type { ConfirmRequest } from './useConfirm';

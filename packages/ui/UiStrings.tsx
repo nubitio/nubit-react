@@ -49,6 +49,14 @@ export interface UiStrings {
   previousYears: string;
   /** DatePicker years view: next 12-year range. */
   nextYears: string;
+  /** RowActions / table overflow menu trigger. */
+  rowActions: string;
+  /** Generic view action. */
+  view: string;
+  /** Pagination nav aria-label. */
+  pages: string;
+  previousPage: string;
+  nextPage: string;
 }
 
 export const EN_UI_STRINGS: UiStrings = {
@@ -73,6 +81,11 @@ export const EN_UI_STRINGS: UiStrings = {
   back: 'Back',
   previousYears: 'Previous years',
   nextYears: 'Next years',
+  rowActions: 'Actions',
+  view: 'View',
+  pages: 'Pages',
+  previousPage: 'Previous page',
+  nextPage: 'Next page',
 };
 
 export const ES_UI_STRINGS: UiStrings = {
@@ -97,6 +110,11 @@ export const ES_UI_STRINGS: UiStrings = {
   back: 'Volver',
   previousYears: 'Años anteriores',
   nextYears: 'Años siguientes',
+  rowActions: 'Acciones',
+  view: 'Ver',
+  pages: 'Páginas',
+  previousPage: 'Página anterior',
+  nextPage: 'Página siguiente',
 };
 
 const UiStringsContext = createContext<UiStrings>(EN_UI_STRINGS);

@@ -20,7 +20,8 @@
       "@nubitio/crud": ["packages/crud/public.ts"],
       "@nubitio/hydra": ["packages/hydra/public.ts"],
       "@nubitio/dashboard": ["packages/dashboard/public.ts"],
-      "@nubitio/react-admin": ["packages/react-admin/public.ts"]
+      "@nubitio/react-admin": ["packages/react-admin/public.ts"],
+      "@nubitio/devextreme": ["packages/devextreme/public.ts"]
     }
   },
   "include": ["packages/**/*.ts", "packages/**/*.tsx", "global.d.ts", "vitest.config.ts", "tsdown.config.ts"],

@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 
-const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra', '@nubitio/dashboard'];
+const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra', '@nubitio/dashboard', '@nubitio/devextreme'];
 
 // Every runtime dependency/peer of any package must stay external — the root
 // package.json only has devDependencies, so tsdown cannot infer these itself.
@@ -16,6 +16,8 @@ const RUNTIME_EXTERNAL = [
   '@tiptap/starter-kit',
   '@tiptap/extension-link',
   '@tiptap/pm',
+  'devextreme',
+  'devextreme-react',
 ];
 
 // CSS/SCSS is processed by @tsdown/css and extracted into dist/style.css.
@@ -94,6 +96,14 @@ export default [
     ...sharedConfig,
     entry: { index: 'packages/eject/src/index.ts' },
     outDir: 'packages/eject/dist',
+  }),
+
+  // ── @nubitio/devextreme ───────────────────────────────────────────────────
+  // DevExtreme-backed CRUD views. DevExtreme packages are external peers.
+  defineConfig({
+    ...sharedConfig,
+    entry: { index: 'packages/devextreme/public.ts' },
+    outDir: 'packages/devextreme/dist',
   }),
 
   // ── @nubitio/react-admin ────────────────────────────────────────────────────

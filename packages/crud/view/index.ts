@@ -15,3 +15,10 @@ export {
   parseDrawerWidthPx,
 } from './drawerSizes';
 export type { CrudFormShellProps } from './CrudFormShellProps';
+export { CrudViewProvider, useCrudViews } from './CrudViewContext';
+export type {
+  CrudDataGridView,
+  CrudFormView,
+  CrudViewComponents,
+  CrudViewProviderProps,
+} from './CrudViewContext';

@@ -22,6 +22,7 @@ export default defineConfig({
       '@nubitio/admin': pkg('admin'),
       '@nubitio/crud': pkg('crud'),
       '@nubitio/hydra': pkg('hydra'),
+      '@nubitio/devextreme': pkg('devextreme'),
     },
   },
 });

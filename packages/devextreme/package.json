@@ -1,25 +1,26 @@
 {
-  "name": "@nubitio/admin",
-  "version": "0.6.8",
+  "name": "@nubitio/devextreme",
+  "version": "0.6.5",
   "type": "module",
-  "description": "Admin shell layout components: responsive sidebar, header, and screen size utilities for Nubit apps.",
+  "description": "DevExtreme-backed CRUD views for @nubitio/crud — optional drop-in for licensed DevExtreme customers.",
   "license": "MIT",
   "keywords": [
     "react",
-    "admin",
-    "layout",
-    "sidebar",
-    "shell"
+    "devextreme",
+    "crud",
+    "datagrid",
+    "form",
+    "admin"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nubitio/nubit-react.git",
-    "directory": "packages/admin"
+    "directory": "packages/devextreme"
   },
   "bugs": {
     "url": "https://github.com/nubitio/nubit-react/issues"
   },
-  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/admin#readme",
+  "homepage": "https://github.com/nubitio/nubit-react/tree/main/packages/devextreme#readme",
   "source": "./public.ts",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -51,11 +52,10 @@
   "peerDependencies": {
     "@nubitio/core": "workspace:^",
     "@nubitio/crud": "workspace:^",
-    "@nubitio/hydra": "workspace:^",
     "@nubitio/ui": "workspace:^",
-    "@tanstack/react-query": "^5.0.0",
+    "devextreme": ">=24.0.0",
+    "devextreme-react": ">=24.0.0",
     "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0",
-    "react-router-dom": "^6.0.0"
+    "react-dom": "^18.2.0 || ^19.0.0"
   }
 }

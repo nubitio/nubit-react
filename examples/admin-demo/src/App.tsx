@@ -10,6 +10,7 @@ import {
 } from '@nubitio/react-admin';
 import { ShowcasePage } from './pages/ShowcasePage';
 import { UsersPage } from './pages/UsersPage';
+import { UsersDevExtremePage } from './pages/UsersDevExtremePage';
 import { FieldTypesPage } from './pages/FieldTypesPage';
 import { DashboardDemoPage } from './pages/DashboardDemoPage';
 
@@ -24,6 +25,7 @@ const menu: AdminMenuItem[] = [
   { text: 'Dashboard', icon: 'ph ph-chart-line-up', path: '/dashboard' },
   { text: 'UI Showcase', icon: 'ph ph-squares-four', path: '/showcase' },
   { text: 'Users (CRUD)', icon: 'ph ph-users', path: '/users' },
+  { text: 'Users (DevExtreme)', icon: 'ph ph-table', path: '/users-dx' },
   { text: 'Field Types', icon: 'ph ph-list-bullets', path: '/fieldtypes' },
 ];
 
@@ -40,6 +42,7 @@ export function App() {
                 <Route path="/dashboard" element={<DashboardDemoPage />} />
                 <Route path="/showcase" element={<ShowcasePage />} />
                 <Route path="/users" element={<UsersPage />} />
+                <Route path="/users-dx" element={<UsersDevExtremePage />} />
                 <Route path="/fieldtypes" element={<FieldTypesPage />} />
               </Routes>
             </AdminShell>

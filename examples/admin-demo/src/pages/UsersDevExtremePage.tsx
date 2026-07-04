@@ -1,9 +1,9 @@
+import { DevExtremeCrudProvider } from '@nubitio/devextreme';
 import { CrudPage, RestAdapter, defineResource, textField } from '@nubitio/react-admin';
 
 /**
- * CRUD page against the public JSONPlaceholder API.
- * Reads work for real; create/update/delete are accepted by the fake API
- * but not persisted — enough to exercise the full form/grid flow.
+ * Same JSONPlaceholder users resource as UsersPage, but with DevExtreme grid/form.
+ * Expand a row to load that user's posts in the master-detail panel.
  */
 const users = defineResource('https://jsonplaceholder.typicode.com/users', {
   title: 'Users',
@@ -25,6 +25,10 @@ const users = defineResource('https://jsonplaceholder.typicode.com/users', {
   },
 });
 
-export function UsersPage() {
-  return <CrudPage resource={users} />;
+export function UsersDevExtremePage() {
+  return (
+    <DevExtremeCrudProvider>
+      <CrudPage resource={users} />
+    </DevExtremeCrudProvider>
+  );
 }

@@ -1,0 +1,202 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DevExtreme CRUD views — layout shell + Nubit token alignment.
+//
+// Mirrors NativeDataGridView flex chain so the grid fills the admin content area.
+// Color tweaks bridge dx.light/dx.dark with --surface-* / --text-* tokens.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Reuse the native #wrapper / view-wrapper flex chain when only DX is mounted.
+#wrapper > .view.datagrid-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.view-wrapper.view-wrapper-datagrid-list:has(.nb-dx-datagrid) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: var(--content-padding);
+  padding-top: var(--content-padding);
+}
+
+.nb-dx-datagrid {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-dx-datagrid__above-grid {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  margin-bottom: var(--space-2);
+  min-width: 0;
+}
+
+.nb-dx-datagrid__toolbar {
+  align-items: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  margin-bottom: var(--toolbar-margin-bottom);
+  min-height: var(--toolbar-height);
+  padding: 4px 10px;
+}
+
+.nb-dx-datagrid__toolbar .grid-header {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.nb-dx-datagrid__grid {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+
+  .dx-datagrid {
+    background: transparent;
+    color: var(--text-primary);
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+// Toolbar inside the grid — match native card surface
+.nb-dx-datagrid__grid .dx-toolbar {
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px 8px;
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-headers {
+  background: var(--grid-header-bg, var(--surface-0));
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-rowsview .dx-row {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-rowsview .dx-row:not(.dx-header-row):hover > td {
+  background: var(--surface-2);
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-rowsview .dx-selection.dx-row:not(.dx-row-focused) > td {
+  background: var(--surface-selected);
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-pager {
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-3);
+}
+
+.nb-dx-datagrid__grid .dx-datagrid-filter-row {
+  background: var(--grid-header-bg, var(--surface-0));
+
+  .dx-editor-cell .dx-texteditor-input {
+    background: var(--control-bg);
+    color: var(--text-primary);
+  }
+}
+
+// Master-detail panel
+.nb-dx-detail-grid {
+  background: var(--surface-0);
+  border-radius: var(--radius-md);
+  margin: var(--space-2) var(--space-3);
+  padding: var(--space-2);
+}
+
+.nb-dx-row-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.nb-dx-row-actions__btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+
+  &:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+  }
+}
+
+.nb-dx-row-actions__btn--delete:hover {
+  color: var(--error-color);
+}
+
+.nb-dx-detail-grid__loading,
+.nb-dx-detail-grid__empty {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-3);
+}
+
+// Form shell
+.nb-dx-form {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.nb-dx-form .dx-field-item-label-text {
+  color: var(--text-secondary);
+}
+
+.nb-dx-form .dx-texteditor-input {
+  color: var(--text-primary);
+}
+
+// Token bridge — keeps DX controls readable when Nubit theme toggles
+[data-theme='light'] .nb-dx-datagrid,
+[data-theme='dark'] .nb-dx-datagrid {
+  --dx-texteditor-color-text: var(--text-primary);
+  --dx-texteditor-color-label: var(--text-secondary);
+}
+
+[data-theme='dark'] .nb-dx-datagrid__grid {
+  .dx-datagrid,
+  .dx-toolbar,
+  .dx-datagrid-headers,
+  .dx-datagrid-pager {
+    color: var(--text-primary);
+  }
+
+  .dx-datagrid-rowsview .dx-row > td {
+    background: var(--surface-1);
+    border-color: var(--border-subtle);
+  }
+}

@@ -9,3 +9,5 @@ dist/
 coverage/
 .vite/
 examples/*/public/themes/
+examples/*/public/devextreme-themes/
+examples/*/test-results/

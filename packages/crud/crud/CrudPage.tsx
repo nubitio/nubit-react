@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { DataGridView } from '../datagrid/DataGridView';
-import { FormView, FORM_EVENTS } from '../form/FormView';
+import { FORM_EVENTS } from '../form/FormView';
 import { CrudFormShell } from '../view/CrudFormShell';
+import { useCrudViews } from '../view/CrudViewContext';
 import { resolveViewMode } from '../view/viewMode';
 import { useCrudPage } from './useCrudPage';
 import { useCoreTranslation, useEvents } from '@nubitio/core';
@@ -178,6 +178,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     selectionState,
     presetState,
   } = useCrudPage(resolvedInputResource, externalFormRef);
+  const { DataGridView, FormView } = useCrudViews();
   const datagridFields = useMemo(
     () => fields.filter((field) => field.isIdentity || field.visible !== false),
     [fields],

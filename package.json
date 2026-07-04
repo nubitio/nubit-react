@@ -19,6 +19,7 @@
     "version:set": "node scripts/set-version.mjs",
     "example:build": "pnpm --filter admin-demo build",
     "example:dev": "pnpm --filter admin-demo dev",
+    "example:e2e": "pnpm --filter admin-demo test:e2e",
     "eject": "node packages/eject/bin/nubit.mjs"
   },
   "devDependencies": {

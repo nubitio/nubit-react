@@ -8,6 +8,7 @@ import '@fontsource/inter/latin-600.css';
 import '@fontsource/inter/latin-700.css';
 import '@fontsource/syne/latin-700.css';
 import '@nubitio/react-admin/style.css';
+import '@nubitio/devextreme/style.css';
 import { App } from './App';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

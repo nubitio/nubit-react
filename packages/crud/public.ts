@@ -92,7 +92,8 @@ export { buildFields } from './field/buildFields';
 export type { FieldInput } from './field/buildFields';
 export { FieldBuilder } from './field/FieldBuilder';
 export { FieldType } from './field/FieldType';
-export { registerFieldType, listRegisteredFieldTypes } from './field/registry/registry';
+export { registerFieldType, listRegisteredFieldTypes, getFieldTypeModule } from './field/registry/registry';
+export { BETWEEN_VALUE_SEPARATOR } from './field/registry/shared';
 export type { Field, FieldDef, LoadOption } from './field/Field';
 export type {
   FormatterFn,
@@ -113,6 +114,10 @@ export type { CrudDrawerViewEvents, CrudDrawerViewOptions } from './view/CrudDra
 export { PageView } from './view/PageView';
 export type { CrudPageViewEvents, CrudPageViewOptions } from './view/CrudPageView';
 export { FormView, FORM_EVENTS } from './form/FormView';
+export { FORM_ERRORS_EVENT } from './form/FormEvents';
+export { buildEmptyRow, normalizeFormData } from './form/FormDataTransform';
+export { loadDetailRows } from './form/loadDetailRows';
+export { mapApiViolations } from './form/FormApiViolations';
 export { EntityDropdown } from './form/EntityDropdown';
 export type { EntityDropdownProps } from './form/EntityDropdown';
 export {
@@ -120,9 +125,17 @@ export {
   CrudDialogShell,
   CrudDrawerShell,
   CrudPageShell,
+  CrudViewProvider,
+  useCrudViews,
   resolveViewMode,
 } from './view';
-export type { CrudFormShellProps } from './view';
+export type {
+  CrudDataGridView,
+  CrudFormView,
+  CrudFormShellProps,
+  CrudViewComponents,
+  CrudViewProviderProps,
+} from './view';
 export type { ResolvedViewMode, CrudDrawerSize } from './view';
 export {
   DRAWER_WIDTHS,
@@ -142,6 +155,16 @@ export type { ColumnPresetState } from './crud/useColumnPreset';
 // ── Handles & options ─────────────────────────────────────────────────────────
 export type { FormHandle } from './form/FormHandle';
 export type { FormViewOptions } from './form/FormViewOptions';
+export { useFormState } from './form/useFormState';
+export type { FieldState, UseFormStateOptions } from './form/useFormState';
+export { useFormSubmit } from './form/useFormSubmit';
+export type { UseFormSubmitAccessors, UseFormSubmitOptions } from './form/useFormSubmit';
+export { useFormValidation } from './form/useFormValidation';
+export { getIdField } from './datagrid/cellRendering';
+export { canEditFieldInline } from './datagrid/useInlineEdit';
+export { resolveInlineEditToolbar } from './datagrid/gridFieldUtils';
+export { serializeFormFields } from './form/serializeFormData';
+export { FileUploadField } from './form/FileUploadField';
 export {
   buildFieldColSpanContext,
   isLongTextField,
@@ -208,6 +231,7 @@ export type {
   FormDetailFieldSource,
 } from './crud';
 export { useResourceStoreFactory } from './data/ResourceStore';
+export type { FormDataRecord } from './form/FormDataSnapshot';
 export type {
   ResourceFilterDescriptor,
   ResourceFilterRule,

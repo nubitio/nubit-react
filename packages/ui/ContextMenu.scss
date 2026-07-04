@@ -45,7 +45,8 @@
     transition: background var(--transition-fast);
 
     &:hover {
-      background: var(--control-bg-hover);
+      background: color-mix(in srgb, var(--accent-color) 14%, var(--surface-elevated));
+      color: var(--text-primary);
     }
 
     &:focus-visible {

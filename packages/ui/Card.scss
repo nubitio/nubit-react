@@ -64,3 +64,32 @@
     }
   }
 }
+
+// ── Panel variant — full-width surfaces inside admin pages / grids ─────────────
+
+.nb-card--panel {
+  height: auto;
+  width: 100%;
+
+  .nb-card__content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-4) var(--space-5);
+
+    .header {
+      margin-bottom: var(--space-4);
+      text-align: left;
+
+      .title {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+      }
+
+      .description {
+        margin-top: var(--space-1);
+      }
+    }
+  }
+}

@@ -1,19 +1,35 @@
 import React from 'react';
+import { joinClasses } from './layoutUtils';
 import './Card.scss';
+
+export type CardVariant = 'auth' | 'panel';
 
 export interface CardProps {
   title?: string;
   description?: string;
+  /** auth: centered narrow card (login). panel: full-width admin surface. */
+  variant?: CardVariant;
+  className?: string;
 }
 
-export const Card = ({ title, description, children }: React.PropsWithChildren<CardProps>) => {
+export const Card = ({
+  title,
+  description,
+  variant = 'auth',
+  className,
+  children,
+}: React.PropsWithChildren<CardProps>) => {
+  const showHeader = Boolean(title || description);
+
   return (
-    <div className="nb-card">
+    <div className={joinClasses('nb-card', variant === 'panel' && 'nb-card--panel', className)}>
       <div className="nb-card__content content">
-        <div className="header">
-          <div className="title">{title}</div>
-          <div className="description">{description}</div>
-        </div>
+        {showHeader && (
+          <div className="header">
+            {title && <div className="title">{title}</div>}
+            {description && <div className="description">{description}</div>}
+          </div>
+        )}
         {children}
       </div>
     </div>

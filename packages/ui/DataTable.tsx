@@ -18,12 +18,16 @@ export interface DataTableColumn<T> {
   accessor?: (row: T) => ReactNode;
 }
 
+export type DataTableVariant = 'default' | 'flush';
+
 export interface DataTableProps<T> {
   columns: Array<DataTableColumn<T>>;
   rows: T[];
   getRowKey: (row: T) => string | number;
   emptyMessage?: ReactNode;
   fill?: boolean;
+  /** flush drops outer chrome — use inside panel Cards. */
+  variant?: DataTableVariant;
   className?: string;
   wrapClassName?: string;
   testId?: string;
@@ -59,6 +63,7 @@ export function DataTable<T>({
   getRowKey,
   emptyMessage,
   fill,
+  variant = 'default',
   className,
   wrapClassName,
   testId,
@@ -78,6 +83,7 @@ export function DataTable<T>({
       <div
         className={joinClasses(
           'nb-data-table-wrap',
+          variant === 'flush' && 'nb-data-table-wrap--flush',
           fill && 'nb-data-table-wrap--fill',
           wrapClassName,
         )}

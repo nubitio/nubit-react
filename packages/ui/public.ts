@@ -16,7 +16,7 @@ export type { AppToolbarProps } from './AppToolbar';
 export { Button, IconButton } from './Button';
 export type { ButtonProps, ButtonSize, ButtonVariant, IconButtonProps } from './Button';
 export { Card } from './Card';
-export type { CardProps } from './Card';
+export type { CardProps, CardVariant } from './Card';
 export { FormField, SelectField, TextAreaField, TextField } from './FormControls';
 export type { FormFieldProps, SelectFieldProps, TextAreaFieldProps, TextFieldProps } from './FormControls';
 export { FileDropzone } from './FileDropzone';
@@ -135,7 +135,12 @@ export type { TextProps, TextTone } from './Text';
 export type { SpaceScale, ColSpan, FlexAlign, FlexJustify } from './layoutUtils';
 
 export { DataTable } from './DataTable';
-export type { DataTableProps, DataTableColumn, DataTableColumnAlign } from './DataTable';
+export type {
+  DataTableProps,
+  DataTableColumn,
+  DataTableColumnAlign,
+  DataTableVariant,
+} from './DataTable';
 export { Pagination } from './Pagination';
 export type { PaginationProps } from './Pagination';
 export { RowActions } from './RowActions';

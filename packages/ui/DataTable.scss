@@ -7,6 +7,16 @@
   background: var(--surface-1);
 }
 
+.nb-data-table-wrap--flush {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.nb-data-table-wrap--flush + .nb-pagination {
+  margin-top: var(--space-3, 0.75rem);
+}
+
 .nb-data-table-wrap--fill {
   flex: 1;
   min-height: 0;

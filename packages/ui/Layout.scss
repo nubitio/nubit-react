@@ -9,7 +9,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--page-padding, 1.5rem) var(--content-padding, 1rem);
+  padding: var(--content-padding, 1rem) var(--page-padding, 1.5rem) var(--content-padding, 1rem);
   box-sizing: border-box;
 }
 
@@ -41,6 +41,8 @@
   justify-content: space-between;
   gap: var(--space-4, 1rem);
   flex-wrap: wrap;
+  padding-bottom: var(--space-4, 1rem);
+  border-bottom: 1px solid var(--border-subtle, var(--border-color));
 }
 
 .nb-page-header__title {

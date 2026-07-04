@@ -80,6 +80,20 @@
   gap: var(--space-2, 0.5rem);
   justify-content: flex-end;
   flex-wrap: wrap;
+  min-width: 2.75rem;
+  white-space: nowrap;
+
+  .nb-icon-button {
+    background: var(--control-bg, var(--surface-1));
+    border: 1px solid var(--border-subtle, var(--border-color));
+    color: var(--text-primary);
+
+    &:hover {
+      background: var(--control-bg-hover, var(--surface-2));
+      border-color: var(--border-color);
+      color: var(--accent-color);
+    }
+  }
 }
 
 .nb-data-table code {

@@ -13,6 +13,12 @@
   background: transparent;
 }
 
+// Let flush tables use the full card width (title keeps card padding).
+.nb-card--panel .nb-data-table-wrap--flush {
+  margin-inline: calc(-1 * var(--space-5, 1.25rem));
+  width: calc(100% + 2 * var(--space-5, 1.25rem));
+}
+
 .nb-data-table-wrap--flush + .nb-pagination {
   margin-top: var(--space-3, 0.75rem);
 }
@@ -75,13 +81,36 @@
   white-space: nowrap;
 }
 
+.nb-data-table--has-actions {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.nb-data-table__actions-head,
+.nb-data-table__actions {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  width: 3.5rem;
+  min-width: 3.5rem;
+  max-width: 3.5rem;
+  padding-inline: var(--space-2, 0.5rem);
+  background: var(--surface-1);
+  box-shadow: -8px 0 12px -10px color-mix(in srgb, var(--surface-0, #000) 65%, transparent);
+}
+
+.nb-data-table__actions-head {
+  z-index: 2;
+  background: var(--surface-2, var(--surface-1));
+}
+
 .nb-data-table__actions {
   display: flex;
   gap: var(--space-2, 0.5rem);
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  min-width: 2.75rem;
+  justify-content: center;
+  flex-wrap: nowrap;
   white-space: nowrap;
+  vertical-align: middle;
 
   .nb-icon-button {
     background: var(--control-bg, var(--surface-1));
@@ -94,6 +123,10 @@
       color: var(--accent-color);
     }
   }
+}
+
+.nb-data-table tbody tr:hover .nb-data-table__actions {
+  background: var(--grid-row-hover-bg, var(--surface-2));
 }
 
 .nb-data-table code {

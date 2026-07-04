@@ -89,7 +89,13 @@ export function DataTable<T>({
         )}
         data-testid={testId}
       >
-        <table className={joinClasses('nb-data-table', className)}>
+        <table
+          className={joinClasses(
+            'nb-data-table',
+            hasActions && 'nb-data-table--has-actions',
+            className,
+          )}
+        >
           <thead>
             <tr>
               {columns.map((column) => (
@@ -97,7 +103,13 @@ export function DataTable<T>({
                   {column.header}
                 </th>
               ))}
-              {hasActions && <th scope="col" />}
+              {hasActions && (
+                <th
+                  scope="col"
+                  className="nb-data-table__actions-head"
+                  {...(rowActionsLabel ? { 'aria-label': rowActionsLabel } : {})}
+                />
+              )}
             </tr>
           </thead>
           <tbody>

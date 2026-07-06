@@ -2,7 +2,7 @@ export { CrudFormShell } from './CrudFormShell';
 export { CrudDialogShell } from './CrudDialogShell';
 export { CrudDrawerShell } from './CrudDrawerShell';
 export { CrudPageShell } from './CrudPageShell';
-export { PageView } from './PageView';
+export { CrudPageView as PageView } from './CrudPageView';
 export type { CrudPageViewEvents, CrudPageViewOptions } from './CrudPageView';
 export { resolveViewMode } from './viewMode';
 export type { ResolvedViewMode, CrudDrawerSize } from './viewMode';

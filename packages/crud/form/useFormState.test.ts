@@ -21,7 +21,7 @@ describe('useFormState', () => {
     act(() => result.current.setFieldValue('name', 'Ada'));
 
     expect(result.current.formData.name).toBe('Ada');
-    expect(result.current.formDataRef.current.name).toBe('Ada');
+    expect(result.current.accessors.getFieldValue('name')).toBe('Ada');
     expect(result.current.errors.name).toBe('');
   });
 
@@ -43,7 +43,7 @@ describe('useFormState', () => {
     act(() => result.current.setNextFormData({ name: 'Ada', city: 'London' }));
 
     expect(result.current.formData).toEqual({ name: 'Ada', city: 'London' });
-    expect(result.current.formDataRef.current).toEqual({ name: 'Ada', city: 'London' });
+    expect(result.current.accessors.getFormData()).toEqual({ name: 'Ada', city: 'London' });
   });
 
   it('clearDetailCellError removes single errors and drops empty rows', () => {
@@ -65,7 +65,29 @@ describe('useFormState', () => {
     act(() => result.current.upsertUploadedFile({ name: 'doc', iri: '/media/1' }));
     act(() => result.current.upsertUploadedFile({ name: 'doc', iri: '/media/2' }));
 
-    expect(result.current.uploadedFiles.current).toEqual([{ name: 'doc', iri: '/media/2' }]);
+    expect(result.current.accessors.getUploadedFiles()).toEqual([{ name: 'doc', iri: '/media/2' }]);
+    expect(result.current.accessors.getUploadedFile('doc')).toEqual({ name: 'doc', iri: '/media/2' });
+  });
+
+  it('edit mode and existing media round-trip through intents and accessors', () => {
+    const { result } = renderHook(() => useFormState({ fields }));
+
+    expect(result.current.accessors.isEditMode()).toBe(false);
+    act(() => result.current.setEditMode(true));
+    expect(result.current.accessors.isEditMode()).toBe(true);
+
+    act(() => result.current.setExistingMedia({ doc: { '@id': '/media/9' } }));
+    expect(result.current.accessors.getExistingMedia('doc')).toEqual({ '@id': '/media/9' });
+    act(() => result.current.clearExistingMedia('doc'));
+    expect(result.current.accessors.getExistingMedia('doc')).toBeNull();
+  });
+
+  it('accessors keep a stable identity across renders', () => {
+    const { result, rerender } = renderHook(() => useFormState({ fields }));
+    const first = result.current.accessors;
+    act(() => result.current.setFieldValue('name', 'Ada'));
+    rerender();
+    expect(result.current.accessors).toBe(first);
   });
 
   it('setNextDetailRows keeps the detail ref in sync', () => {
@@ -74,6 +96,6 @@ describe('useFormState', () => {
     act(() => result.current.setNextDetailRows([{ qty: 1 }]));
 
     expect(result.current.detailRows).toEqual([{ qty: 1 }]);
-    expect(result.current.detailRowsRef.current).toEqual([{ qty: 1 }]);
+    expect(result.current.accessors.getDetailRows()).toEqual([{ qty: 1 }]);
   });
 });

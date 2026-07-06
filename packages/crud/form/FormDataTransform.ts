@@ -1,6 +1,6 @@
-import { getCoreTimezone } from '@nubitio/core';
 import { Field } from '../field/Field';
-import { FieldType } from '../field/FieldType';
+import { getFieldTypeModule } from '../field/registry/registry';
+import type { NormalizeFieldContext } from '../field/registry/FieldTypeModule';
 import type { FormDataRecord } from './FormDataSnapshot';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import { HydraAdapter } from '../adapter/HydraAdapter';
@@ -43,10 +43,10 @@ export function buildEmptyRow(fields: Field[]): FormDataRecord {
 /**
  * Normalizes raw API data into the shape expected by the active form editors.
  *
- * - FILE fields are stripped (uploaded separately)
- * - PASSWORD fields are blanked
- * - DATE fields remain YYYY-MM-DD strings
- * - ENTITY fields are normalized to their scalar key for select-style editors
+ * Per-type behaviour lives in each Field-Type module's `normalizeFormValue`
+ * (FILE strips, PASSWORD blanks, DATE truncates to YYYY-MM-DD, ENTITY resolves
+ * to its scalar key). Types without a normalizer get the generic rule: object
+ * and array values are stripped, scalars pass through untouched.
  */
 export function normalizeFormData(
   data: FormDataRecord,
@@ -55,72 +55,35 @@ export function normalizeFormData(
   prependDataByField?: PrependDataMap,
 ): FormDataRecord {
   const row = { ...data };
-  fields.forEach((field) => {
-    if (field.type === FieldType.FILE) {
-      delete row[field.name];
-    }
-    if (field.type === FieldType.PASSWORD) {
-      row[field.name] = '';
-    }
-    if (field.type === FieldType.DATE) {
-      const rawValue = row[field.name];
-      if (typeof rawValue === 'string') {
-        row[field.name] = rawValue.slice(0, 10);
-      } else if (rawValue instanceof Date) {
-        row[field.name] = rawValue.toLocaleDateString('en-CA', { timeZone: getCoreTimezone() });
-      } else {
-        row[field.name] = null;
+  const ctx: NormalizeFieldContext = {
+    adapter,
+    prependEntityOption: (field, item) => {
+      if (prependDataByField) {
+        upsertPrependData(prependDataByField, field, item);
       }
+    },
+    getPrependData: (field) => prependDataByField?.get(field.name),
+  };
+
+  fields.forEach((field) => {
+    const normalize = getFieldTypeModule(field.type).normalizeFormValue;
+    if (normalize) {
+      const outcome = normalize(field, row[field.name], ctx);
+      if (outcome.kind === 'set') {
+        row[field.name] = outcome.value;
+      } else if (outcome.kind === 'omit') {
+        delete row[field.name];
+      }
+      return;
     }
-    if (field.type === FieldType.ENTITY) {
-      normalizeEntityField(row, field, adapter, prependDataByField);
-    }
+
     if (
-      field.type !== FieldType.ENTITY &&
-      field.type !== FieldType.FILE &&
-      (Array.isArray(row[field.name]) ||
-        (row[field.name] !== null && typeof row[field.name] === 'object'))
+      Array.isArray(row[field.name]) ||
+      (row[field.name] !== null && typeof row[field.name] === 'object')
     ) {
       delete row[field.name];
     }
   });
 
   return row;
-}
-
-function normalizeEntityField(
-  row: FormDataRecord,
-  field: Field,
-  adapter: BackendAdapter,
-  prependDataByField?: PrependDataMap,
-): void {
-  const rawValue = row[field.name];
-
-  if (typeof rawValue === 'object' && rawValue !== null) {
-    const entityValue = { ...(rawValue as FormDataRecord) };
-
-    // Allow the adapter to synthesize a canonical key when the object lacks one.
-    // For Hydra: synthesizes an `_iri` when `@id` is absent.
-    // For REST: no-op (returns undefined).
-    if (field.valueField === '_iri') {
-      const synthesized = adapter.synthesizeEntityKey(field, entityValue);
-      if (synthesized && typeof entityValue['_iri'] !== 'string' && typeof entityValue['@id'] !== 'string') {
-        entityValue['_iri'] = synthesized;
-      }
-    }
-
-    // Always add the full object to the dropdown options so the selected item
-    // can be displayed even when it is not in the loaded page of results.
-    if (prependDataByField) {
-      upsertPrependData(prependDataByField, field, entityValue);
-    }
-  }
-
-  const normalized = adapter.normalizeEntityValue(rawValue, field);
-  row[field.name] = normalized ?? null;
-
-  if (row[field.name] === null || row[field.name] === undefined) {
-    const fromMap = prependDataByField?.get(field.name);
-    row[field.name] = fromMap?.[0] ?? field.loadOptions[0]?.prependData?.[0] ?? null;
-  }
 }

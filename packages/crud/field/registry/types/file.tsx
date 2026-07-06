@@ -11,6 +11,10 @@ import {
 } from '../shared';
 
 export const fileTypeModule: FieldTypeModule = {
+  controlKind: 'file',
+  formWidth: () => 'full',
+  // Raw file values never round-trip from the API; uploads are tracked separately.
+  normalizeFormValue: () => OMIT,
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

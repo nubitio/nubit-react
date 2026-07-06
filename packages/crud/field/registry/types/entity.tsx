@@ -1,5 +1,6 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
+import type { FormDataRecord } from '../../../form/FormDataSnapshot';
 import { NativeEntitySelect } from '../../../form/LookupControls';
 import { renderDefaultInputControl } from '../controlHelpers';
 import {
@@ -12,6 +13,32 @@ import {
 } from '../shared';
 
 export const entityTypeModule: FieldTypeModule = {
+  controlKind: 'select',
+  // Multi-valued entities render the full-row plain input; single refs fit half.
+  formWidth: (field) => (field.multiple ? 'auto' : 'compact'),
+  // Editor value is the scalar entity key. Object values first register as a
+  // dropdown option (so the selection displays even off the loaded page) and,
+  // for Hydra, may need their `_iri` synthesized when `@id` is absent.
+  normalizeFormValue: (field, rawValue, ctx) => {
+    if (typeof rawValue === 'object' && rawValue !== null) {
+      const entityValue = { ...(rawValue as FormDataRecord) };
+      if (field.valueField === '_iri') {
+        const synthesized = ctx.adapter.synthesizeEntityKey(field, entityValue);
+        if (
+          synthesized &&
+          typeof entityValue['_iri'] !== 'string' &&
+          typeof entityValue['@id'] !== 'string'
+        ) {
+          entityValue['_iri'] = synthesized;
+        }
+      }
+      ctx.prependEntityOption(field, entityValue);
+    }
+
+    const normalized = ctx.adapter.normalizeEntityValue(rawValue, field);
+    if (normalized !== null && normalized !== undefined) return set(normalized);
+    return set(ctx.getPrependData(field)?.[0] ?? field.loadOptions[0]?.prependData?.[0] ?? null);
+  },
   defaultFilterOperator: '=',
   filterOperators: EQUALITY_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

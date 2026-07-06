@@ -8,6 +8,8 @@ import {
 } from '../shared';
 
 export const radioTypeModule: FieldTypeModule = {
+  controlKind: 'radio',
+  formWidth: () => 'compact',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

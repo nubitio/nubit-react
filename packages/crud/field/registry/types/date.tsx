@@ -15,6 +15,17 @@ import {
 } from '../shared';
 
 export const dateTypeModule: FieldTypeModule = {
+  controlKind: 'date',
+  formWidth: () => 'compact',
+  // Editor value is always a YYYY-MM-DD business date: API strings are
+  // truncated, Date objects rendered in the core timezone, anything else nulled.
+  normalizeFormValue: (_field, value) => {
+    if (typeof value === 'string') return set(value.slice(0, 10));
+    if (value instanceof Date) {
+      return set(value.toLocaleDateString('en-CA', { timeZone: getCoreTimezone() }));
+    }
+    return set(null);
+  },
   defaultFilterOperator: '=',
   filterOperators: DATE_OPERATORS,
   // 'between' expands to a >=/<= pair of plain business dates (no time bounds —

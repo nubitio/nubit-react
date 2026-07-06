@@ -9,6 +9,8 @@ import {
 } from '../shared';
 
 export const textareaTypeModule: FieldTypeModule = {
+  controlKind: 'textarea',
+  formWidth: () => 'full',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

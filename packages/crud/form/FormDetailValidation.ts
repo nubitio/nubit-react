@@ -1,5 +1,5 @@
 import type { Field } from '../field/Field';
-import { FieldType } from '../field/FieldType';
+import { getFieldTypeModule } from '../field/registry/registry';
 import type { FormDataRecord } from './FormDataSnapshot';
 
 export function validateDetailRows(detailRows: FormDataRecord[], detailFields: Field[]): boolean {
@@ -13,26 +13,7 @@ export function validateDetailRows(detailRows: FormDataRecord[], detailFields: F
         return false;
       }
 
-      if (field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY) {
-        const numericValue = Number(value ?? 0);
-
-        if (field.required && Number.isNaN(numericValue)) {
-          return false;
-        }
-
-        const rangeValidators = field.validators.filter((validator) => validator.type === 'range');
-        for (const validator of rangeValidators) {
-          const { min, max } = validator.options;
-          if (min !== undefined && numericValue < min) {
-            return false;
-          }
-          if (max !== undefined && numericValue > max) {
-            return false;
-          }
-        }
-      }
-
-      return true;
+      return getFieldTypeModule(field.type).validateDetailValue?.(field, value) ?? true;
     }),
   );
 }

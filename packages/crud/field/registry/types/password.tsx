@@ -4,10 +4,15 @@ import {
   defaultBuildFilterTerms,
   getPrimitiveDisplay,
   KEEP,
+  set,
   TEXT_OPERATORS,
 } from '../shared';
 
 export const passwordTypeModule: FieldTypeModule = {
+  controlKind: 'password',
+  formWidth: (field) => (field.maxLength != null && field.maxLength <= 40 ? 'compact' : 'auto'),
+  // Stored hashes never reach the editor; the control always starts blank.
+  normalizeFormValue: () => set(''),
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

@@ -109,20 +109,15 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
   const [detailDirty, setDetailDirty] = useState(false);
 
   const {
-    isEdit,
-    uploadedFiles,
-    existingMediaByField,
+    accessors,
     formData,
-    formDataRef,
     detailRows,
-    detailRowsRef,
     fieldState,
     setFieldState,
     errors,
     setErrors,
     detailErrors,
     setDetailErrors,
-    prependDataRef,
     setNextFormData,
     setNextDetailRows,
     setFieldValue,
@@ -152,26 +147,26 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
         return;
       }
 
-      let value = formDataRef.current[field.name];
+      let value = accessors.getFieldValue(field.name);
       if (field.type === FieldType.FILE) {
-        const uploaded = uploadedFiles.current.find((file) => file.name === field.name);
-        const hasExisting = !!existingMediaByField.current[field.name];
+        const uploaded = accessors.getUploadedFile(field.name);
+        const hasExisting = accessors.getExistingMedia(field.name) !== null;
         value =
           uploaded?.iri != null || (hasExisting && uploaded === undefined) ? 'present' : null;
       }
 
-      const error = validateField(field, value, formDataRef.current, t);
+      const error = validateField(field, value, accessors.getFormData(), t);
       if (error) nextErrors[field.name] = error;
     });
     setErrors(nextErrors);
     setDetailErrors({});
     return Object.keys(nextErrors).length === 0;
-  }, [existingMediaByField, fieldState, formDataRef, options.fields, setDetailErrors, setErrors, t, uploadedFiles]);
+  }, [accessors, fieldState, options.fields, setDetailErrors, setErrors, t]);
 
   const validate = useFormValidation({
     accessors: {
-      getDetailRowCount: () => detailRowsRef.current.length,
-      getDetailRows: () => detailRowsRef.current,
+      getDetailRowCount: () => accessors.getDetailRows().length,
+      getDetailRows: accessors.getDetailRows,
       hasPendingDetailEdits: () => detailDirty,
       validateForm,
     },
@@ -180,17 +175,6 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
     requiredDetail: options.requiredDetail,
     validationErrorText: t('form.validationError'),
   });
-
-  const submitAccessors = useMemo(
-    () => ({
-      getDetailRows: () => detailRowsRef.current,
-      getFieldValue: (field: string) => formDataRef.current[field],
-      getFormData: () => formDataRef.current,
-      getUploadedFiles: () => uploadedFiles.current,
-      isEditMode: () => isEdit.current,
-    }),
-    [detailRowsRef, formDataRef, isEdit, uploadedFiles],
-  );
 
   const { handleSave, handleDelete } = useFormSubmit(
     {
@@ -210,7 +194,7 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
       onDeleteError: options.onDeleteError,
       onLoadingChange: options.onLoadingChange,
     },
-    submitAccessors,
+    accessors,
     emit,
     validate,
   );
@@ -245,15 +229,15 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
       setDetailDirty(false);
       resetPrependData();
       const row = payload
-        ? normalizeFormData(payload, options.fields, options.adapter, prependDataRef.current)
+        ? normalizeFormData(payload, options.fields, options.adapter, accessors.getPrependDataMap())
         : buildEmptyRow(options.fields);
       setNextFormData(row);
       setEditMode(false);
     },
     [
+      accessors,
       options.adapter,
       options.fields,
-      prependDataRef,
       resetPrependData,
       resetUploadSession,
       setDetailErrors,
@@ -269,7 +253,7 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
     (payload: { row: FormDataRecord }) => {
       resetPrependData();
       captureExistingMedia(payload.row);
-      const row = normalizeFormData(payload.row, options.fields, options.adapter, prependDataRef.current);
+      const row = normalizeFormData(payload.row, options.fields, options.adapter, accessors.getPrependDataMap());
       resetUploadSession();
       setErrors({});
       setDetailErrors({});
@@ -291,13 +275,13 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
         .finally(() => emit(FORM_EVENTS.LOADING, false));
     },
     [
+      accessors,
       captureExistingMedia,
       emit,
       httpClient,
       options.adapter,
       options.detailUrl,
       options.fields,
-      prependDataRef,
       resetPrependData,
       resetUploadSession,
       setDetailErrors,
@@ -364,16 +348,16 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
   useImperativeHandle(
     ref,
     () => ({
-      getFormData: () => formDataRef.current,
-      getFieldValue: (name) => formDataRef.current[name],
+      getFormData: accessors.getFormData,
+      getFieldValue: accessors.getFieldValue,
       setFieldValue,
-      getDetailData: () => detailRowsRef.current,
+      getDetailData: accessors.getDetailRows,
       setDetailData: (data) => setNextDetailRows(data),
       saveDetailData: () => undefined,
       reloadDetailData: () => undefined,
       setValues: (data) => {
         resetPrependData();
-        setNextFormData(normalizeFormData(data, options.fields, undefined, prependDataRef.current));
+        setNextFormData(normalizeFormData(data, options.fields, undefined, accessors.getPrependDataMap()));
       },
       save: () => handleSaveRef.current(),
       deleteRow: (row) => handleDeleteRef.current({ row }),
@@ -394,10 +378,8 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
       setIsEdit: (value) => setEditMode(value),
     }),
     [
-      detailRowsRef,
-      formDataRef,
+      accessors,
       options.fields,
-      prependDataRef,
       resetPrependData,
       setEditMode,
       setErrors,
@@ -464,7 +446,7 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
           <label className="nb-dx-form__file-label">{field.label}</label>
           <FileUploadField
             field={field}
-            existingMedia={existingMediaByField.current[field.name] ?? null}
+            existingMedia={accessors.getExistingMedia(field.name)}
             disabled={fieldState[field.name]?.disabled ?? field.disabled ?? options.editable === false}
             readOnly={fieldState[field.name]?.readonly ?? field.readonly ?? options.editable === false}
             invalid={!!errors[field.name]}

@@ -9,6 +9,7 @@ import {
 } from '../shared';
 
 export const noneTypeModule: FieldTypeModule = {
+  controlKind: 'none',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

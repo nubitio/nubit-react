@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Field } from '../field/Field';
 import type { FormDataRecord } from './FormDataSnapshot';
 import type { DetailFieldErrors } from './FormApiViolations';
@@ -18,10 +18,30 @@ export interface UseFormStateOptions {
 }
 
 /**
+ * Imperative read access to the freshest form state. The functions are
+ * identity-stable and never trigger renders — safe in event handlers,
+ * effects and submit paths. The backing refs stay private to useFormState.
+ */
+export interface FormStateAccessors {
+  getFormData(): FormDataRecord;
+  getFieldValue(name: string): unknown;
+  getDetailRows(): FormDataRecord[];
+  getUploadedFiles(): UploadedFile[];
+  getUploadedFile(name: string): UploadedFile | undefined;
+  isEditMode(): boolean;
+  /** The captured media object for a FILE field, or null when none exists. */
+  getExistingMedia(name: string): FormDataRecord | null;
+  getPrependData(name: string): FormDataRecord[] | undefined;
+  /** The live prepend-option store, for pipelines that register options while normalizing (see normalizeFormData). */
+  getPrependDataMap(): PrependDataMap;
+}
+
+/**
  * Owns the form's value and error state: main-form data, detail rows,
  * per-field UI state, validation errors, upload tracking and edit mode.
- * Refs mirror the latest values so imperative callers (FormHandle, submit
- * accessors) read fresh data without re-rendering.
+ * Imperative callers (FormHandle, submit accessors) read fresh data through
+ * `accessors`; mutations go through the intent methods. The backing refs
+ * never leave this module.
  *
  * Option loading, layout and rendering stay in the form view — this hook is
  * the state seam, independently testable without the 900-line closure.
@@ -117,22 +137,34 @@ export function useFormState({ fields, onFieldDataChanged }: UseFormStateOptions
     detailRowsRef.current = detailRows;
   }, [detailRows]);
 
+  // Stable identity: every accessor closes over refs, so callers can list
+  // `accessors` in dependency arrays without re-running effects.
+  const accessors = useMemo<FormStateAccessors>(
+    () => ({
+      getFormData: () => formDataRef.current,
+      getFieldValue: (name) => formDataRef.current[name],
+      getDetailRows: () => detailRowsRef.current,
+      getUploadedFiles: () => uploadedFiles.current,
+      getUploadedFile: (name) => uploadedFiles.current.find((file) => file.name === name),
+      isEditMode: () => isEdit.current,
+      getExistingMedia: (name) => existingMediaByField.current[name] ?? null,
+      getPrependData: (name) => prependDataRef.current.get(name),
+      getPrependDataMap: () => prependDataRef.current,
+    }),
+    [],
+  );
+
   return {
-    isEdit,
-    uploadedFiles,
-    existingMediaByField,
+    accessors,
     upsertUploadedFile,
     formData,
-    formDataRef,
     detailRows,
-    detailRowsRef,
     fieldState,
     setFieldState,
     errors,
     setErrors,
     detailErrors,
     setDetailErrors,
-    prependDataRef,
     setNextFormData,
     setNextDetailRows,
     setFieldValue,

@@ -26,6 +26,43 @@ export type SerializedFieldValue =
   | { kind: 'omit' }
   | { kind: 'keep' };
 
+/**
+ * Semantic control category of a type's form editor. View backends that do
+ * not render `ControlRender` directly (e.g. DevExtreme) map this to their own
+ * widget set instead of switching on `field.type`.
+ */
+export type FieldControlKind =
+  | 'text'
+  | 'password'
+  | 'textarea'
+  | 'number'
+  | 'date'
+  | 'datetime'
+  | 'select'
+  | 'radio'
+  | 'switch'
+  | 'checkbox'
+  | 'file'
+  | 'tags'
+  | 'html'
+  | 'none';
+
+/**
+ * Width class the form col-span heuristics assign to a type's control:
+ * `full` always spans the row, `compact` fits a half column, `auto` leaves
+ * the decision to the layout context.
+ */
+export type FieldFormWidth = 'full' | 'compact' | 'auto';
+
+export interface NormalizeFieldContext {
+  /** Backend adapter controlling entity-value normalization. */
+  adapter: BackendAdapter;
+  /** Registers an entity option so the selected item displays even when absent from the loaded page. */
+  prependEntityOption(field: Field, item: FormDataRecord): void;
+  /** Options previously registered for the field (including via prependEntityOption). */
+  getPrependData(field: Field): FormDataRecord[] | undefined;
+}
+
 export interface SerializeFieldContext {
   /** Backend adapter controlling entity-reference serialization. */
   adapter: BackendAdapter;
@@ -110,6 +147,18 @@ export interface FieldControlProps {
  * Field-Type registry instead of switching on `field.type`.
  */
 export interface FieldTypeModule {
+  /** Semantic control category for adapter view backends; treated as 'text' when omitted. */
+  controlKind?: FieldControlKind;
+  /** Width class for the form col-span heuristics; treated as 'auto' when omitted. */
+  formWidth?(field: Field): FieldFormWidth;
+  /**
+   * Normalizes one raw API value into the shape the form editors expect
+   * (see `normalizeFormData`). When omitted, object/array values are
+   * stripped from the row and scalars pass through untouched.
+   */
+  normalizeFormValue?(field: Field, value: unknown, ctx: NormalizeFieldContext): SerializedFieldValue;
+  /** Per-type detail-row validation beyond the generic required-empty check; valid when omitted. */
+  validateDetailValue?(field: Field, value: unknown): boolean;
   /** Operator preselected in the grid filter row (a Field's own `selectedFilterOperation` wins). */
   defaultFilterOperator: string;
   /** Operators offered for this type in the grid filter row. */

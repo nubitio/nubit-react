@@ -21,6 +21,7 @@ import {
   weekDayLabels,
 } from './DatePicker';
 import { useUiStrings } from './UiStrings';
+import { useFloatingPanel } from './useFloatingPanel';
 import './DateRangePicker.scss';
 
 export interface DateRangePickerProps {
@@ -150,12 +151,10 @@ export function DateRangePicker({
   const hasRange = Boolean(startIso && endIso);
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<SelectionPhase>('idle');
   const [pendingStart, setPendingStart] = useState<string | null>(null);
   const [hoverIso, setHoverIso] = useState<string | null>(null);
   const [month, setMonth] = useState(() => startOfMonth(parseIsoDate(startValue) ?? new Date()));
-  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
 
   // ── Text input state ──────────────────────────────────────────────────────
   const [startText, setStartText] = useState('');
@@ -163,9 +162,7 @@ export function DateRangePicker({
   const [editingField, setEditingField] = useState<'start' | 'end' | null>(null);
 
   // ── Refs ──────────────────────────────────────────────────────────────────
-  const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const startInputRef = useRef<HTMLInputElement | null>(null);
   const endInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -179,61 +176,37 @@ export function DateRangePicker({
     if (anchor) setMonth(startOfMonth(anchor));
   }, [startValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Panel positioning ─────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) return;
-
-    const update = () => {
+  // ── Floating panel: open state, positioning, outside-click and Escape ────
+  const {
+    open,
+    setOpen,
+    containerRef: rootRef,
+    panelRef,
+    panelStyle,
+  } = useFloatingPanel<HTMLDivElement, HTMLDivElement>({
+    onClose: () => {
+      setPhase('idle');
+      setPendingStart(null);
+      setHoverIso(null);
+    },
+    onEscape: (e) => {
+      e.preventDefault();
+      startInputRef.current?.focus();
+    },
+    computeStyle: () => {
       const rect = triggerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      if (!rect) return null;
       const panelWidth = panelRef.current?.offsetWidth ?? 296;
       const left = Math.min(Math.max(8, rect.left), window.innerWidth - panelWidth - 8);
       const top = Math.min(rect.bottom + 6, window.innerHeight - 380);
-      setPanelStyle({ left, top: Math.max(8, top) });
-    };
-
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
-    };
-  }, [open]);
+      return { left, top: Math.max(8, top) };
+    },
+  });
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const closePanel = useCallback(() => {
     setOpen(false);
-    setPhase('idle');
-    setPendingStart(null);
-    setHoverIso(null);
-  }, []);
-
-  // ── Outside click / Escape ────────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return;
-      closePanel();
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closePanel();
-        startInputRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, closePanel]);
+  }, [setOpen]);
 
   const commitRange = useCallback((start: string, end: string) => {
     // Normalize: ensure start <= end
@@ -356,7 +329,7 @@ export function DateRangePicker({
   const handleCalendarPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
     if (readOnly || disabled) return;
-    setOpen((v) => !v);
+    setOpen(!open);
   };
 
   const handleClear = (e: React.PointerEvent) => {

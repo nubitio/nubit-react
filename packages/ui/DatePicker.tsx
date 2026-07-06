@@ -1,6 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUiStrings } from './UiStrings';
+import { useFloatingPanel } from './useFloatingPanel';
 import './DatePicker.scss';
 
 export interface DatePickerProps {
@@ -211,11 +212,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   const displayValue = formatDisplayDate(value, resolvedLocale);
 
   // ── UI state ────────────────────────────────────────────────────────────────
-  const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('days');
   const [month, setMonth] = useState(() => startOfMonth(selectedDate ?? new Date()));
   const [yearRangeStart, setYearRangeStart] = useState(() => getYearRangeStart(new Date().getFullYear()));
-  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
   const [focusedIso, setFocusedIso] = useState<string | null>(null);
 
   // ── Text input state ─────────────────────────────────────────────────────
@@ -223,10 +222,34 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   const [isEditing, setIsEditing] = useState(false);
 
   // ── Refs ─────────────────────────────────────────────────────────────────
-  const rootRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  // ── Floating panel: open state, positioning, outside-click and Escape ────
+  const {
+    open,
+    setOpen,
+    containerRef: rootRef,
+    panelRef,
+    panelStyle,
+  } = useFloatingPanel<HTMLDivElement, HTMLDivElement>({
+    onClose: () => {
+      setFocusedIso(null);
+      setViewMode('days');
+    },
+    onEscape: (e) => {
+      e.preventDefault();
+      inputRef.current?.focus();
+    },
+    computeStyle: () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return null;
+      const panelWidth = panelRef.current?.offsetWidth ?? 296;
+      const left = Math.min(Math.max(8, rect.left), window.innerWidth - panelWidth - 8);
+      const top = Math.min(rect.bottom + 6, window.innerHeight - 380);
+      return { left, top: Math.max(8, top) };
+    },
+  });
 
   const days = useMemo(() => buildCalendarDays(month, min, max, resolvedLocale), [max, min, month, resolvedLocale]);
   const weekdayLabels = useMemo(() => weekDayLabels(resolvedLocale), [resolvedLocale]);
@@ -237,58 +260,6 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   useEffect(() => {
     if (selectedDate) setMonth(startOfMonth(selectedDate));
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Panel positioning ────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) {
-      setFocusedIso(null);
-      setViewMode('days');
-      return;
-    }
-
-    const updatePosition = () => {
-      const rect = triggerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const panelWidth = panelRef.current?.offsetWidth ?? 296;
-      const left = Math.min(Math.max(8, rect.left), window.innerWidth - panelWidth - 8);
-      const top = Math.min(rect.bottom + 6, window.innerHeight - 380);
-      setPanelStyle({ left, top: Math.max(8, top) });
-    };
-
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
-  }, [open]);
-
-  // ── Outside click / Escape ───────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) return;
-
-    const handlePointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setOpen(false);
-        inputRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open]);
 
   // ── Initial focus when calendar opens ───────────────────────────────────
   useEffect(() => {
@@ -307,7 +278,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     setIsEditing(false);
     setInputText('');
     window.setTimeout(() => inputRef.current?.focus());
-  }, [onChange]);
+  }, [onChange, setOpen]);
 
   const handleToday = useCallback(() => {
     const today = toIsoDate(new Date());
@@ -368,7 +339,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   const handleCalendarPointerDown = (e: React.PointerEvent) => {
     e.preventDefault(); // keep focus on the input
     if (readOnly || disabled) return;
-    setOpen((v) => !v);
+    setOpen(!open);
   };
 
   // ── Calendar keyboard navigation ─────────────────────────────────────────
@@ -397,7 +368,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     window.setTimeout(() => {
       panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${nextIso}"]`)?.focus();
     }, 0);
-  }, [days, month, commitValue]);
+  }, [days, month, commitValue, panelRef]);
 
   // ── View: months ─────────────────────────────────────────────────────────
   const handleMonthSelect = (monthIndex: number) => {

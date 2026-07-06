@@ -269,7 +269,7 @@ function NativeDetailGrid({
     const onMouseMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return;
       const next = Math.max(36, resizingRef.current.startWidth + (ev.clientX - resizingRef.current.startX));
-      setColWidths((prev) => ({ ...prev, [resizingRef.current!.name]: next })); // eslint-disable-line react-hooks/refs
+      setColWidths((prev) => ({ ...prev, [resizingRef.current!.name]: next }));
     };
     const onMouseUp = () => {
       resizingRef.current = null;
@@ -392,7 +392,7 @@ function NativeDetailGrid({
               )}
               {/* eslint-disable react-hooks/refs -- rowKeysRef is updated synchronously by addRow/removeRow before onRowsChange fires, so it is always in sync with rows here */}
               {rows.map((row, rowIndex) => {
-                const rowKey = rowKeysRef.current[rowIndex]; // eslint-disable-line react-hooks/refs
+                const rowKey = rowKeysRef.current[rowIndex];
                 return (
                 <tr key={rowKey}>
                   {visibleFields.map((field) => (
@@ -434,21 +434,16 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
   const instanceId = useId();
   const scopedFormErrorsEvent = `${FORM_ERRORS_EVENT}:${instanceId}`;
   const {
-    isEdit,
-    uploadedFiles,
-    existingMediaByField,
+    accessors,
     upsertUploadedFile,
     formData,
-    formDataRef,
     detailRows,
-    detailRowsRef,
     fieldState,
     setFieldState,
     errors,
     setErrors,
     detailErrors,
     setDetailErrors,
-    prependDataRef,
     setNextFormData,
     setNextDetailRows,
     setFieldValue,
@@ -486,8 +481,8 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
   ]);
 
   const notifyDetailRowsMutated = useCallback(() => {
-    emit(FORM_EVENTS.ROW_UPDATED, detailRowsRef.current);
-  }, [detailRowsRef, emit]);
+    emit(FORM_EVENTS.ROW_UPDATED, accessors.getDetailRows());
+  }, [accessors, emit]);
 
   useEffect(() => {
     optionFields.forEach((field) => {
@@ -496,12 +491,12 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
         setRemoteOptions((current) => ({ ...current, [field.name]: field.data ?? [] }));
         return;
       }
-      const source = createRemoteSource(field, httpClient, resourceStoreFactory, prependDataRef.current.get(field.name));
+      const source = createRemoteSource(field, httpClient, resourceStoreFactory, accessors.getPrependData(field.name));
       source
         .load({ take: 50 })
         .then((result) => {
           setRemoteOptions((current) => ({ ...current, [field.name]: result.data }));
-          if (field.autoSelectIfSingle && result.data.length === 1 && isEmptyValue(formDataRef.current[field.name])) {
+          if (field.autoSelectIfSingle && result.data.length === 1 && isEmptyValue(accessors.getFieldValue(field.name))) {
             setFieldValue(field.name, fieldKeyValue(field, result.data[0]));
           }
         })
@@ -509,15 +504,15 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
           setRemoteOptions((current) => ({ ...current, [field.name]: field.data ?? [] }));
         });
     });
-  }, [formDataRef, httpClient, optionFields, prependDataRef, resourceStoreFactory, setFieldValue]);
+  }, [accessors, httpClient, optionFields, resourceStoreFactory, setFieldValue]);
 
   useEffect(() => {
     fields.forEach((field) => {
       const optionsForField = remoteOptions[field.name];
-      if (!field.autoSelectIfSingle || optionsForField?.length !== 1 || !isEmptyValue(formDataRef.current[field.name])) return;
+      if (!field.autoSelectIfSingle || optionsForField?.length !== 1 || !isEmptyValue(accessors.getFieldValue(field.name))) return;
       setFieldValue(field.name, fieldKeyValue(field, optionsForField[0]));
     });
-  }, [fields, formData, formDataRef, remoteOptions, setFieldValue]);
+  }, [accessors, fields, formData, remoteOptions, setFieldValue]);
 
   const validateForm = useCallback(() => {
     const nextErrors: Record<string, string> = {};
@@ -525,27 +520,27 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       const state = fieldState[field.name];
       if (field.isIdentity || state?.validationEnabled === false || state?.hidden === true || field.hidden || field.visibleOnForm === false) return;
 
-      let value = formDataRef.current[field.name];
+      let value = accessors.getFieldValue(field.name);
       if (field.type === FieldType.FILE) {
-        const uploaded = uploadedFiles.current.find((file) => file.name === field.name);
-        const hasExisting = !!existingMediaByField.current[field.name];
+        const uploaded = accessors.getUploadedFile(field.name);
+        const hasExisting = accessors.getExistingMedia(field.name) !== null;
         value = uploaded?.iri != null || (hasExisting && uploaded === undefined)
           ? 'present'
           : null;
       }
 
-      const error = validateField(field, value, formDataRef.current, t);
+      const error = validateField(field, value, accessors.getFormData(), t);
       if (error) nextErrors[field.name] = error;
     });
     setErrors(nextErrors);
     setDetailErrors({});
     return Object.keys(nextErrors).length === 0;
-  }, [existingMediaByField, fieldState, formDataRef, options.fields, setDetailErrors, setErrors, t, uploadedFiles]);
+  }, [accessors, fieldState, options.fields, setDetailErrors, setErrors, t]);
 
   const validate = useFormValidation({
     accessors: {
-      getDetailRowCount: () => detailRowsRef.current.length,
-      getDetailRows: () => detailRowsRef.current,
+      getDetailRowCount: () => accessors.getDetailRows().length,
+      getDetailRows: accessors.getDetailRows,
       hasPendingDetailEdits: () => false,
       validateForm,
     },
@@ -554,14 +549,6 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     requiredDetail: options.requiredDetail,
     validationErrorText: t('form.validationError'),
   });
-
-  const submitAccessors = useMemo(() => ({
-    getDetailRows: () => detailRowsRef.current,
-    getFieldValue: (field: string) => formDataRef.current[field],
-    getFormData: () => formDataRef.current,
-    getUploadedFiles: () => uploadedFiles.current,
-    isEditMode: () => isEdit.current,
-  }), [detailRowsRef, formDataRef, isEdit, uploadedFiles]);
 
   const { handleSave, handleDelete } = useFormSubmit({
     url: options.url,
@@ -579,7 +566,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     onDeleteSuccess: options.onDeleteSuccess,
     onDeleteError: options.onDeleteError,
     onLoadingChange: options.onLoadingChange,
-  }, submitAccessors, emit, validate);
+  }, accessors, emit, validate);
 
   const handleSaveRef = useRef(handleSave);
   handleSaveRef.current = handleSave;
@@ -605,7 +592,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     setDetailErrors({});
     setNextDetailRows([]);
     resetPrependData();
-    const row = payload ? normalizeFormData(payload, options.fields, options.adapter, prependDataRef.current) : buildEmptyRow(options.fields);
+    const row = payload ? normalizeFormData(payload, options.fields, options.adapter, accessors.getPrependDataMap()) : buildEmptyRow(options.fields);
     setNextFormData(row);
     options.fields.forEach((field) => {
       const value = row[field.name];
@@ -617,12 +604,12 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       setNextDetailRows(payload[detailPropertyName] as FormDataRecord[]);
     }
     setEditMode(false);
-  }, [detailPropertyName, options.adapter, options.fields, prependDataRef, resetPrependData, resetUploadSession, setEditMode, setErrors, setExistingMedia, setDetailErrors, setNextDetailRows, setNextFormData]);
+  }, [accessors, detailPropertyName, options.adapter, options.fields, resetPrependData, resetUploadSession, setEditMode, setErrors, setExistingMedia, setDetailErrors, setNextDetailRows, setNextFormData]);
 
   const applyEditPayload = useCallback((payload: { row: FormDataRecord }) => {
     resetPrependData();
     captureExistingMedia(payload.row);
-    const row = normalizeFormData(payload.row, options.fields, options.adapter, prependDataRef.current);
+    const row = normalizeFormData(payload.row, options.fields, options.adapter, accessors.getPrependDataMap());
     resetUploadSession();
     setErrors({});
     setDetailErrors({});
@@ -638,7 +625,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     loadDetailRows(httpClient, detailUrl, options.adapter)
       .then((rows) => setNextDetailRows(rows))
       .finally(() => emit(FORM_EVENTS.LOADING, false));
-  }, [captureExistingMedia, emit, httpClient, options.adapter, options.detailUrl, options.fields, prependDataRef, resetPrependData, resetUploadSession, setDetailErrors, setEditMode, setErrors, setNextDetailRows, setNextFormData]);
+  }, [accessors, captureExistingMedia, emit, httpClient, options.adapter, options.detailUrl, options.fields, resetPrependData, resetUploadSession, setDetailErrors, setEditMode, setErrors, setNextDetailRows, setNextFormData]);
 
   useEffect(() => {
     if (!options.operation) {
@@ -686,7 +673,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
   useEffect(() => {
     if (computedFieldNames.length === 0 || !options.computedValues) return;
     let changed = false;
-    const nextData = { ...formDataRef.current };
+    const nextData = { ...accessors.getFormData() };
     computedFieldNames.forEach((name) => {
       if (Object.prototype.hasOwnProperty.call(options.computedValues, name) && nextData[name] !== options.computedValues?.[name]) {
         nextData[name] = options.computedValues?.[name];
@@ -694,19 +681,19 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       }
     });
     if (changed) setNextFormData(nextData);
-  }, [computedFieldNames, formDataRef, options.computedValues, setNextFormData]);
+  }, [accessors, computedFieldNames, options.computedValues, setNextFormData]);
 
   useImperativeHandle(ref, () => ({
-    getFormData: () => formDataRef.current,
-    getFieldValue: (name) => formDataRef.current[name],
+    getFormData: accessors.getFormData,
+    getFieldValue: accessors.getFieldValue,
     setFieldValue,
-    getDetailData: () => detailRowsRef.current,
+    getDetailData: accessors.getDetailRows,
     setDetailData: setNextDetailRows,
     saveDetailData: () => undefined,
     reloadDetailData: () => undefined,
     setValues: (data) => {
       resetPrependData();
-      setNextFormData(normalizeFormData(data, options.fields, undefined, prependDataRef.current));
+      setNextFormData(normalizeFormData(data, options.fields, undefined, accessors.getPrependDataMap()));
     },
     save: () => handleSaveRef.current(),
     deleteRow: (row) => handleDeleteRef.current({ row }),
@@ -719,15 +706,15 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     hideField: (field) => setFieldState((current) => ({ ...current, [field]: { ...current[field], hidden: true } })),
     validate,
     setIsEdit: (value) => setEditMode(value),
-  }), [detailRowsRef, formDataRef, options.fields, prependDataRef, resetPrependData, setEditMode, setErrors, setFieldState, setFieldValue, setNextDetailRows, setNextFormData, validate]);
+  }), [accessors, options.fields, resetPrependData, setEditMode, setErrors, setFieldState, setFieldValue, setNextDetailRows, setNextFormData, validate]);
 
   const controlContext: FormControlContext = {
     httpClient,
     t,
     remoteOptions,
-    getPrependData: (name) => prependDataRef.current.get(name),
-    getFieldValue: (name) => formDataRef.current[name],
-    getExistingMedia: (name) => existingMediaByField.current[name] ?? null,
+    getPrependData: accessors.getPrependData,
+    getFieldValue: accessors.getFieldValue,
+    getExistingMedia: accessors.getExistingMedia,
     clearExistingMedia,
     upsertUploadedFile,
   };
@@ -876,7 +863,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       httpClient={httpClient}
       onClearCellError={clearDetailCellError}
       onRowsMutated={notifyDetailRowsMutated}
-      prependData={prependDataRef.current}
+      prependData={accessors.getPrependDataMap()}
       remoteOptions={remoteOptions}
       rows={detailRows}
       summary={options.detailSummary}

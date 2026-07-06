@@ -28,6 +28,8 @@ export {
   resolveRangeTag,
 } from './HydraToFieldMapper';
 export { buildEmbeddedFormDetail, resolveEmbeddedBinding } from './buildEmbeddedFormDetail';
+export { HydraSchemaResolver, getSchemaResolver } from './HydraSchemaResolver';
+export type { ResolvedResourceSchema } from './HydraSchemaResolver';
 export { resolveInferredFormDetail } from './resolveInferredFormDetail';
 export type { EmbeddedLinesSchema } from './types';
 

@@ -93,6 +93,7 @@ export type { FieldInput } from './field/buildFields';
 export { FieldBuilder } from './field/FieldBuilder';
 export { FieldType } from './field/FieldType';
 export { registerFieldType, listRegisteredFieldTypes, getFieldTypeModule } from './field/registry/registry';
+export type { FieldControlKind, FieldFormWidth, FieldTypeModule } from './field/registry/FieldTypeModule';
 export { BETWEEN_VALUE_SEPARATOR } from './field/registry/shared';
 export type { Field, FieldDef, LoadOption } from './field/Field';
 export type {
@@ -107,13 +108,16 @@ export type { FilterRule } from './field/FilterRule';
 export type { ValidationRule } from './field/ValidationRule';
 
 // ── Views ─────────────────────────────────────────────────────────────────────
-export { DataGridView, DATA_GRID_EVENTS } from './datagrid/DataGridView';
-export { DialogView } from './dialog/DialogView';
-export { DrawerView } from './view/DrawerView';
+export { NativeDataGridView as DataGridView } from './datagrid/NativeDataGridView';
+export { DATA_GRID_EVENTS } from './datagrid/DataGridEvents';
+export { CrudDialogView as DialogView } from './dialog/CrudDialogView';
+export type { CrudDialogViewEvents, CrudDialogViewOptions } from './dialog/CrudDialogView';
+export { CrudDrawerView as DrawerView } from './view/CrudDrawerView';
 export type { CrudDrawerViewEvents, CrudDrawerViewOptions } from './view/CrudDrawerView';
-export { PageView } from './view/PageView';
+export { CrudPageView as PageView } from './view/CrudPageView';
 export type { CrudPageViewEvents, CrudPageViewOptions } from './view/CrudPageView';
-export { FormView, FORM_EVENTS } from './form/FormView';
+export { NativeFormView as FormView } from './form/NativeFormView';
+export { FORM_EVENTS } from './form/FormEvents';
 export { FORM_ERRORS_EVENT } from './form/FormEvents';
 export { buildEmptyRow, normalizeFormData } from './form/FormDataTransform';
 export { loadDetailRows } from './form/loadDetailRows';
@@ -156,7 +160,7 @@ export type { ColumnPresetState } from './crud/useColumnPreset';
 export type { FormHandle } from './form/FormHandle';
 export type { FormViewOptions } from './form/FormViewOptions';
 export { useFormState } from './form/useFormState';
-export type { FieldState, UseFormStateOptions } from './form/useFormState';
+export type { FieldState, FormStateAccessors, UseFormStateOptions } from './form/useFormState';
 export { useFormSubmit } from './form/useFormSubmit';
 export type { UseFormSubmitAccessors, UseFormSubmitOptions } from './form/useFormSubmit';
 export { useFormValidation } from './form/useFormValidation';

@@ -10,6 +10,8 @@ import {
 } from '../shared';
 
 export const enumTypeModule: FieldTypeModule = {
+  controlKind: 'select',
+  formWidth: () => 'compact',
   defaultFilterOperator: '=',
   filterOperators: EQUALITY_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

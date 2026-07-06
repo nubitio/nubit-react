@@ -25,6 +25,14 @@ validation, plain-text cell formatting (`cellText`), grid cell rendering
 React rendering live in the same file — one file per type — so everything
 about e.g. "currency" has one home. Decided 2026-06-12.
 
+Since 2026-07-05 the module also owns the form-facing taxonomy:
+`controlKind` (semantic control category adapter backends like DevExtreme map
+to their own widgets), `formWidth` (col-span width class), `normalizeFormValue`
+(API value → editor shape; FILE strips, PASSWORD blanks, DATE truncates,
+ENTITY resolves its scalar key) and `validateDetailValue` (per-type
+detail-row checks). The form, layout, DevExtreme mappers and
+`normalizeFormData` read the registry instead of switching on `field.type`.
+
 ## Field-Type registry
 
 The lookup `FieldType → FieldTypeModule` that the grid, form, serializer and
@@ -51,10 +59,33 @@ cell editors are the Field-Type modules' `DetailCellRender`.
 
 `useFormState` (`packages/crud/form/useFormState.ts`) owns the form's value
 and error state: main-form data, detail rows, per-field UI state, validation
-errors, upload tracking and edit mode. Ref mutations go through intent
-methods (`setEditMode`, `resetUploadSession`, `setExistingMedia`,
-`clearExistingMedia`, `resetPrependData`) — never assign `.current` from the
-view. Option loading, layout and rendering stay in `NativeFormView`.
+errors, upload tracking and edit mode. The backing refs never leave the hook:
+writes go through intent methods (`setEditMode`, `resetUploadSession`,
+`setExistingMedia`, `clearExistingMedia`, `resetPrependData`) and imperative
+reads through the identity-stable `accessors` (`FormStateAccessors`:
+`getFormData`, `getFieldValue`, `getDetailRows`, `getUploadedFiles`,
+`isEditMode`, `getExistingMedia`, `getPrependData`, …), which also serve as
+the submit/validation accessor objects. Option loading, layout and rendering
+stay in `NativeFormView`. Narrowed 2026-07-05.
+
+## Floating panel
+
+`useFloatingPanel` (`packages/ui/useFloatingPanel.ts`) is the one home for
+floating-panel behaviour: open state, outside-click + Escape dismissal,
+anchored fixed-positioning recomputed on scroll/resize (with the happy-dom
+0×0-rect guard), and viewport-exit close. Five adapters make it a real seam:
+Popover, AppDropdown, ContextMenu, DatePicker and DateRangePicker. Shared
+flip/clamp geometry lives in `computeAnchoredStyle`. Consolidated 2026-07-05.
+
+## HydraSchemaResolver
+
+The schema-resolution seam of the hydra package
+(`packages/hydra/HydraSchemaResolver.ts`): one API doc in, Fields and
+inferred form detail out. `getSchemaResolver(doc)` parses each discovery
+result exactly once and callers (`useResourceSchema`,
+`resolveInferredFormDetail`, `SmartCrudPage`) ask it for resources, Fields or
+embedded-line inference instead of sequencing `parse* → map → infer`
+themselves. Created 2026-07-05.
 
 ## ResourceStore
 

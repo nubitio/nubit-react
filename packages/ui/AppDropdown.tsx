@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import { useId } from 'react';
+import type { ReactNode } from 'react';
+import { computeAnchoredStyle, useFloatingPanel } from './useFloatingPanel';
 import './AppDropdown.scss';
 
 export interface AppDropdownOption {
@@ -45,43 +46,6 @@ function normalizeIcon(icon?: string): string | undefined {
   return `ph ph-${icon}`;
 }
 
-function getMenuStyle(
-  containerRef: React.RefObject<HTMLElement | null>,
-  menuMinWidth = 72,
-): CSSProperties {
-  if (!containerRef.current) return { position: 'fixed', visibility: 'hidden', margin: 0 };
-  const trigger = containerRef.current.querySelector<HTMLElement>('.nb-dropdown__trigger');
-  const rect = (trigger ?? containerRef.current).getBoundingClientRect();
-  const menuWidth = Math.max(rect.width, menuMinWidth);
-  const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8));
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-
-  if (spaceBelow < 250 && spaceAbove > spaceBelow) {
-    return {
-      position: 'fixed',
-      left: `${left}px`,
-      width: `${menuWidth}px`,
-      bottom: `${window.innerHeight - rect.top + 4}px`,
-      top: 'auto',
-      margin: 0,
-      zIndex: 9999,
-      visibility: 'visible',
-    };
-  }
-
-  return {
-    position: 'fixed',
-    left: `${left}px`,
-    width: `${menuWidth}px`,
-    top: `${rect.bottom + 4}px`,
-    bottom: 'auto',
-    margin: 0,
-    zIndex: 9999,
-    visibility: 'visible',
-  };
-}
-
 export function AppDropdown({
   id: idProp,
   label,
@@ -103,67 +67,26 @@ export function AppDropdown({
 }: AppDropdownProps) {
   const generatedId = useId();
   const id = idProp ?? generatedId;
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuStyle, setMenuStyle] = useState<CSSProperties>({
-    position: 'fixed',
-    visibility: 'hidden',
-    margin: 0,
+  const {
+    open,
+    setOpen: setMenuOpen,
+    openPanel: openMenu,
+    containerRef,
+    panelRef: menuRef,
+    panelStyle: menuStyle,
+  } = useFloatingPanel<HTMLDivElement, HTMLDivElement>({
+    onOpenChange,
+    dismissEvent: 'mousedown',
+    closeOnViewportExit: true,
+    computeStyle: (container) => {
+      const trigger = container?.querySelector<HTMLElement>('.nb-dropdown__trigger') ?? container;
+      return computeAnchoredStyle(trigger, {
+        matchAnchorWidth: true,
+        minWidth: menuMinWidth ?? 72,
+      });
+    },
   });
   const selected = options.find((option) => option.value === value);
-
-  const computeMenuStyle = useCallback(
-    () => getMenuStyle(containerRef, menuMinWidth),
-    [menuMinWidth],
-  );
-
-  const setMenuOpen = useCallback(
-    (next: boolean) => {
-      setOpen(next);
-      onOpenChange?.(next);
-    },
-    [onOpenChange],
-  );
-
-  // Outside-click: close on mousedown outside trigger + menu
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (!containerRef.current?.contains(target) && !menuRef.current?.contains(target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open, setMenuOpen]);
-
-  // Reposition on scroll/resize while open
-  useLayoutEffect(() => {
-    if (!open) return;
-    const update = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      if (rect.top >= window.innerHeight || rect.bottom <= 0) {
-        setMenuOpen(false);
-        return;
-      }
-      setMenuStyle(computeMenuStyle());
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, { capture: true, passive: true });
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, { capture: true });
-    };
-  }, [open, computeMenuStyle, setMenuOpen]);
-
-  const openMenu = useCallback(() => {
-    setMenuStyle(computeMenuStyle());
-    setMenuOpen(true);
-  }, [computeMenuStyle, setMenuOpen]);
 
   const control = (
     <div

@@ -151,6 +151,31 @@ export function serializeNumericValue(field: Field, value: unknown): SerializedF
   return set(field.sendAsString ? Number(value).toFixed(field.precision || 2) : Number(value));
 }
 
+/**
+ * NUMBER/CURRENCY detail-row validation: a required cell must coerce to a
+ * number, and range validators bound the coerced value.
+ */
+export function validateNumericDetailValue(field: Field, value: unknown): boolean {
+  const numericValue = Number(value ?? 0);
+
+  if (field.required && Number.isNaN(numericValue)) {
+    return false;
+  }
+
+  const rangeValidators = field.validators.filter((validator) => validator.type === 'range');
+  for (const validator of rangeValidators) {
+    const { min, max } = validator.options;
+    if (min !== undefined && numericValue < min) {
+      return false;
+    }
+    if (max !== undefined && numericValue > max) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /** ENTITY/TAGS main-form wire format: adapter-resolved refs, arrays for `multiple`. */
 export function serializeEntityFormValue(
   field: Field,

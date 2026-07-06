@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { getCoreLocale } from '@nubitio/core';
 import { FieldType } from '../FieldType';
 import { getFieldTypeModule } from './registry';
-import type { SerializeFieldContext } from './FieldTypeModule';
+import type { NormalizeFieldContext, SerializeFieldContext } from './FieldTypeModule';
 import { HydraAdapter } from '../../adapter/HydraAdapter';
 import { textField, currencyField, numberField, dateField, entityField, enumField } from '../FieldBuilders';
 import type { Field } from '../Field';
@@ -185,6 +185,137 @@ describe('form value serialization', () => {
     const file = { name: 'a.pdf' };
     const multipart: SerializeFieldContext = { ...ctx, format: 'multipart', getFieldValue: () => [file] };
     expect(mod.serializeFormValue(f, undefined, multipart)).toEqual({ kind: 'set', value: file });
+  });
+});
+
+describe('control kind', () => {
+  it('declares the semantic control category adapter backends map to widgets', () => {
+    const expected: Record<string, string> = {
+      [FieldType.TEXT]: 'text',
+      [FieldType.PASSWORD]: 'password',
+      [FieldType.TEXTAREA]: 'textarea',
+      [FieldType.NUMBER]: 'number',
+      [FieldType.CURRENCY]: 'number',
+      [FieldType.DATE]: 'date',
+      [FieldType.DATETIME]: 'datetime',
+      [FieldType.SELECT]: 'select',
+      [FieldType.ENUM]: 'select',
+      [FieldType.ENTITY]: 'select',
+      [FieldType.RADIO]: 'radio',
+      [FieldType.SWITCH]: 'switch',
+      [FieldType.CHECKBOX]: 'checkbox',
+      [FieldType.FILE]: 'file',
+      [FieldType.TAGS]: 'tags',
+      [FieldType.HTML]: 'html',
+      [FieldType.NONE]: 'none',
+    };
+    for (const [type, kind] of Object.entries(expected)) {
+      expect(getFieldTypeModule(type).controlKind).toBe(kind);
+    }
+  });
+});
+
+describe('form width', () => {
+  const width = (type: FieldType, over: Partial<Field> = {}) => {
+    const f = { ...textField().name('f').label('F').build(), type, ...over };
+    return getFieldTypeModule(type).formWidth?.(f) ?? 'auto';
+  };
+
+  it('multiline and upload controls always span the full row', () => {
+    for (const type of [FieldType.TEXTAREA, FieldType.HTML, FieldType.FILE, FieldType.TAGS]) {
+      expect(width(type)).toBe('full');
+    }
+  });
+
+  it('option, date, numeric and toggle controls fit a half column', () => {
+    for (const type of [FieldType.DATE, FieldType.DATETIME, FieldType.NUMBER, FieldType.CURRENCY, FieldType.SELECT, FieldType.ENUM, FieldType.SWITCH, FieldType.CHECKBOX, FieldType.RADIO]) {
+      expect(width(type)).toBe('compact');
+    }
+  });
+
+  it('ENTITY is compact only for single refs', () => {
+    expect(getFieldTypeModule(FieldType.ENTITY).formWidth?.(entity())).toBe('compact');
+    expect(getFieldTypeModule(FieldType.ENTITY).formWidth?.(entity({ multiple: true }))).toBe('auto');
+  });
+
+  it('TEXT width follows the declared max length', () => {
+    expect(width(FieldType.TEXT, { maxLength: 100 })).toBe('full');
+    expect(width(FieldType.TEXT, { maxLength: 30 })).toBe('compact');
+    expect(width(FieldType.TEXT)).toBe('auto');
+  });
+
+  it('PASSWORD is compact only when short', () => {
+    expect(width(FieldType.PASSWORD, { maxLength: 20 })).toBe('compact');
+    expect(width(FieldType.PASSWORD)).toBe('auto');
+  });
+});
+
+describe('form value normalization', () => {
+  const normCtx = (prepends: Map<string, Record<string, unknown>[]> = new Map()): NormalizeFieldContext => ({
+    adapter: HydraAdapter,
+    prependEntityOption: (field, item) => {
+      const existing = prepends.get(field.name) ?? [];
+      prepends.set(field.name, [...existing, item]);
+    },
+    getPrependData: (field) => prepends.get(field.name),
+  });
+
+  it('FILE values are always omitted from the editor row', () => {
+    const f = textField().name('doc').label('Doc').build();
+    expect(getFieldTypeModule(FieldType.FILE).normalizeFormValue?.(f, '/api/media/1', normCtx())).toEqual({ kind: 'omit' });
+  });
+
+  it('PASSWORD values are always blanked', () => {
+    const f = textField().name('pw').label('PW').build();
+    expect(getFieldTypeModule(FieldType.PASSWORD).normalizeFormValue?.(f, '$hash', normCtx())).toEqual({ kind: 'set', value: '' });
+  });
+
+  it('DATE truncates strings, formats Date objects, and nulls the rest', () => {
+    const f = dateField().name('soldOn').label('Sold').build();
+    const mod = getFieldTypeModule(FieldType.DATE);
+    expect(mod.normalizeFormValue?.(f, '2026-05-02T10:00:00', normCtx())).toEqual({ kind: 'set', value: '2026-05-02' });
+    expect(mod.normalizeFormValue?.(f, 42, normCtx())).toEqual({ kind: 'set', value: null });
+    const out = mod.normalizeFormValue?.(f, new Date('2026-05-02T12:00:00Z'), normCtx());
+    expect(out?.kind).toBe('set');
+    expect(String((out as { value: unknown }).value)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('ENTITY resolves objects to their key and registers them as options', () => {
+    const prepends = new Map<string, Record<string, unknown>[]>();
+    const f = entity();
+    const out = getFieldTypeModule(FieldType.ENTITY).normalizeFormValue?.(
+      f,
+      { '@id': '/api/categories/7', id: 7, name: 'Books' },
+      normCtx(prepends),
+    );
+    expect(out).toEqual({ kind: 'set', value: '7' });
+    expect(prepends.get('category')).toEqual([{ '@id': '/api/categories/7', id: 7, name: 'Books' }]);
+  });
+
+  it('ENTITY falls back to the first known option when the value is unresolvable', () => {
+    const prepends = new Map<string, Record<string, unknown>[]>([['category', [{ id: 3, name: 'Games' }]]]);
+    const out = getFieldTypeModule(FieldType.ENTITY).normalizeFormValue?.(entity(), null, normCtx(prepends));
+    expect(out).toEqual({ kind: 'set', value: { id: 3, name: 'Games' } });
+  });
+});
+
+describe('detail value validation', () => {
+  it('NUMBER and CURRENCY reject NaN in required cells and enforce range validators', () => {
+    for (const type of [FieldType.NUMBER, FieldType.CURRENCY]) {
+      const mod = getFieldTypeModule(type);
+      const f = { ...numberField().name('qty').label('Qty').build(), type, required: true };
+      expect(mod.validateDetailValue?.(f, 'abc')).toBe(false);
+      expect(mod.validateDetailValue?.(f, '4')).toBe(true);
+
+      const ranged = { ...f, validators: [{ type: 'range', options: { min: 1, max: 10 } }] } as Field;
+      expect(mod.validateDetailValue?.(ranged, 0)).toBe(false);
+      expect(mod.validateDetailValue?.(ranged, 11)).toBe(false);
+      expect(mod.validateDetailValue?.(ranged, 5)).toBe(true);
+    }
+  });
+
+  it('other types leave detail cells to the generic required check', () => {
+    expect(getFieldTypeModule(FieldType.TEXT).validateDetailValue).toBeUndefined();
   });
 });
 

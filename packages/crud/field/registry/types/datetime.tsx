@@ -14,6 +14,8 @@ import {
 } from '../shared';
 
 export const datetimeTypeModule: FieldTypeModule = {
+  controlKind: 'datetime',
+  formWidth: () => 'compact',
   defaultFilterOperator: '=',
   filterOperators: DATE_OPERATORS,
   // Filtering a DATETIME column by a date means "that whole day", so '='

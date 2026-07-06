@@ -1,5 +1,5 @@
-import type { Field } from '@nubitio/crud';
-import { FieldType } from '@nubitio/crud';
+import type { Field, FieldControlKind } from '@nubitio/crud';
+import { getFieldTypeModule } from '@nubitio/crud';
 
 export interface DxColumnDef {
   dataField: string;
@@ -12,29 +12,28 @@ export interface DxColumnDef {
   format?: string;
 }
 
+const DX_DATA_TYPE_BY_KIND: Partial<Record<FieldControlKind, DxColumnDef['dataType']>> = {
+  number: 'number',
+  date: 'date',
+  datetime: 'datetime',
+  checkbox: 'boolean',
+  switch: 'boolean',
+};
+
 function resolveDataType(field: Field): DxColumnDef['dataType'] {
-  switch (field.type) {
-    case FieldType.NUMBER:
-    case FieldType.CURRENCY:
-      return 'number';
-    case FieldType.DATE:
-      return 'date';
-    case FieldType.DATETIME:
-      return 'datetime';
-    case FieldType.CHECKBOX:
-    case FieldType.SWITCH:
-      return 'boolean';
-    default:
-      return field.valueType === 'number'
-        ? 'number'
-        : field.valueType === 'date'
-          ? 'date'
-          : field.valueType === 'datetime'
-            ? 'datetime'
-            : field.valueType === 'boolean'
-              ? 'boolean'
-              : 'string';
-  }
+  const kind = getFieldTypeModule(field.type).controlKind ?? 'text';
+  const fromKind = DX_DATA_TYPE_BY_KIND[kind];
+  if (fromKind) return fromKind;
+
+  return field.valueType === 'number'
+    ? 'number'
+    : field.valueType === 'date'
+      ? 'date'
+      : field.valueType === 'datetime'
+        ? 'datetime'
+        : field.valueType === 'boolean'
+          ? 'boolean'
+          : 'string';
 }
 
 export function mapFieldsToDxColumns(

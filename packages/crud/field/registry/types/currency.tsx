@@ -8,9 +8,13 @@ import {
   KEEP,
   NUMERIC_OPERATORS,
   serializeNumericValue,
+  validateNumericDetailValue,
 } from '../shared';
 
 export const currencyTypeModule: FieldTypeModule = {
+  controlKind: 'number',
+  formWidth: () => 'compact',
+  validateDetailValue: validateNumericDetailValue,
   defaultFilterOperator: '=',
   filterOperators: NUMERIC_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

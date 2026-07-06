@@ -1,8 +1,8 @@
-import { FieldType } from '../field/FieldType';
 import type { Field } from '../field/Field';
+import { getFieldTypeModule } from '../field/registry/registry';
+import type { FieldFormWidth } from '../field/registry/FieldTypeModule';
 import {
   DRAWER_WIDTHS,
-  parseDrawerWidthPx,
   resolveDrawerLayoutBucket,
   type CrudDrawerSize,
 } from '../view/drawerSizes';
@@ -59,18 +59,6 @@ const SHORT_HINTS: ReadonlySet<FormLayoutHint> = new Set([
   'medium',
 ]);
 
-const COMPACT_FIELD_TYPES: ReadonlySet<FieldType> = new Set([
-  FieldType.DATE,
-  FieldType.DATETIME,
-  FieldType.NUMBER,
-  FieldType.CURRENCY,
-  FieldType.SELECT,
-  FieldType.ENUM,
-  FieldType.SWITCH,
-  FieldType.CHECKBOX,
-  FieldType.RADIO,
-]);
-
 /** Layout bucket derived from the effective drawer width. */
 export function resolveDrawerSize(drawerWidth?: number | string): CrudDrawerSize {
   return resolveDrawerLayoutBucket(drawerWidth);
@@ -81,38 +69,27 @@ export function isMobileViewport(context: FieldColSpanContext): boolean {
   return width != null && width <= MOBILE_BREAKPOINT;
 }
 
-function isFullWidthFieldType(field: Field): boolean {
-  return (
-    field.type === FieldType.TEXTAREA
-    || field.type === FieldType.HTML
-    || field.type === FieldType.FILE
-    || field.type === FieldType.TAGS
-    || field.contentRender != null
-  );
+/** The Field-Type module's width class for the field ('auto' when the module declares none). */
+function moduleFormWidth(field: Field): FieldFormWidth {
+  return getFieldTypeModule(field.type).formWidth?.(field) ?? 'auto';
 }
 
 /**
- * Structural full-width signal — type, layout hint, or declared max length only.
- * No field-name or label heuristics (library stays domain-agnostic).
+ * Structural full-width signal — the Field-Type module's width class, a layout
+ * hint, or a custom `contentRender` only. No field-name or label heuristics
+ * (library stays domain-agnostic).
  */
 export function isLongTextField(field: Field): boolean {
-  if (isFullWidthFieldType(field)) {
+  if (moduleFormWidth(field) === 'full' || field.contentRender != null) {
     return true;
   }
 
-  if (field.layoutHint && FULL_WIDTH_HINTS.has(field.layoutHint)) {
-    return true;
-  }
-
-  if (field.type === FieldType.TEXT && field.maxLength != null && field.maxLength > 80) {
-    return true;
-  }
-
-  return false;
+  return field.layoutHint != null && FULL_WIDTH_HINTS.has(field.layoutHint);
 }
 
 /**
- * Structural compact-field signal — field type and explicit layout hints only.
+ * Structural compact-field signal — the Field-Type module's width class and
+ * explicit layout hints only.
  */
 export function isShortField(field: Field): boolean {
   if (isLongTextField(field)) {
@@ -123,19 +100,7 @@ export function isShortField(field: Field): boolean {
     return true;
   }
 
-  if (COMPACT_FIELD_TYPES.has(field.type)) {
-    return true;
-  }
-
-  if (field.type === FieldType.ENTITY) {
-    return !field.multiple;
-  }
-
-  if (field.type === FieldType.TEXT || field.type === FieldType.PASSWORD) {
-    return field.maxLength != null && field.maxLength <= 40;
-  }
-
-  return false;
+  return moduleFormWidth(field) === 'compact';
 }
 
 function canUseHalfColumn(context: FieldColSpanContext): boolean {

@@ -10,7 +10,7 @@ import type { FieldInput } from '../field/buildFields';
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
 import { useCoreTranslation, useMercureSubscription } from '@nubitio/core';
-import { parseHydraDoc, parseOpenApiDoc, resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
+import { getSchemaResolver, resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
 import { Button, Skeleton } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import { useSmartCrudRoles } from './SmartCrudRolesContext';
@@ -142,17 +142,7 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
     if ((embeddedLines?.length ?? 0) > 0) return true;
     if (!schemaData) return false;
 
-    const resourceMap =
-      schemaData.format === 'hydra'
-        ? parseHydraDoc(schemaData.doc, schemaData.entrypointHrefs)
-        : parseOpenApiDoc(schemaData.doc);
-    const normalizedApi = resource.apiUrl.split('?')[0].replace(/^\//, '');
-    const parentSchema = Object.values(resourceMap).find((entry) => {
-      const candidate = entry.apiUrl.split('?')[0].replace(/^\//, '');
-      return candidate === normalizedApi;
-    });
-
-    return (parentSchema?.embeddedLines?.length ?? 0) > 0;
+    return getSchemaResolver(schemaData).hasEmbeddedLines(resource.apiUrl);
   }, [embeddedLines, resource.apiUrl, resource.formDetail, schemaData]);
 
   const resolvedBaseResource = useMemo(() => {

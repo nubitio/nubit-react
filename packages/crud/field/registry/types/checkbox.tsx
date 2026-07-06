@@ -8,6 +8,8 @@ import {
 } from '../shared';
 
 export const checkboxTypeModule: FieldTypeModule = {
+  controlKind: 'checkbox',
+  formWidth: () => 'compact',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

@@ -10,6 +10,8 @@ import {
 } from '../shared';
 
 export const tagsTypeModule: FieldTypeModule = {
+  controlKind: 'tags',
+  formWidth: () => 'full',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

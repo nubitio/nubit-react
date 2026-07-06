@@ -17,6 +17,8 @@ function stripTags(html: unknown): string {
 }
 
 export const htmlTypeModule: FieldTypeModule = {
+  controlKind: 'html',
+  formWidth: () => 'full',
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

@@ -1,5 +1,5 @@
-import type { Field } from '@nubitio/crud';
-import { FieldType } from '@nubitio/crud';
+import type { Field, FieldControlKind } from '@nubitio/crud';
+import { getFieldTypeModule } from '@nubitio/crud';
 
 export interface DxFormItemDef {
   dataField: string;
@@ -12,43 +12,42 @@ export interface DxFormItemDef {
   helpText?: string;
 }
 
+const DX_EDITOR_BY_KIND: Record<FieldControlKind, string> = {
+  text: 'dxTextBox',
+  password: 'dxTextBox',
+  textarea: 'dxTextArea',
+  number: 'dxNumberBox',
+  date: 'dxDateBox',
+  datetime: 'dxDateBox',
+  select: 'dxSelectBox',
+  radio: 'dxSelectBox',
+  switch: 'dxSwitch',
+  checkbox: 'dxCheckBox',
+  file: 'dxTextBox',
+  tags: 'dxSelectBox',
+  html: 'dxTextBox',
+  none: 'dxTextBox',
+};
+
+const OPTION_LIST_KINDS: ReadonlySet<FieldControlKind> = new Set(['select', 'radio', 'tags']);
+
+function controlKind(field: Field): FieldControlKind {
+  return getFieldTypeModule(field.type).controlKind ?? 'text';
+}
+
 function resolveEditorType(field: Field): string {
-  switch (field.type) {
-    case FieldType.TEXT:
-    case FieldType.PASSWORD:
-      return 'dxTextBox';
-    case FieldType.TEXTAREA:
-      return 'dxTextArea';
-    case FieldType.NUMBER:
-    case FieldType.CURRENCY:
-      return 'dxNumberBox';
-    case FieldType.DATE:
-      return 'dxDateBox';
-    case FieldType.DATETIME:
-      return 'dxDateBox';
-    case FieldType.CHECKBOX:
-      return 'dxCheckBox';
-    case FieldType.SWITCH:
-      return 'dxSwitch';
-    case FieldType.SELECT:
-    case FieldType.ENUM:
-    case FieldType.ENTITY:
-    case FieldType.RADIO:
-    case FieldType.TAGS:
-      return 'dxSelectBox';
-    default:
-      return 'dxTextBox';
-  }
+  return DX_EDITOR_BY_KIND[controlKind(field)];
 }
 
 function resolveEditorOptions(field: Field): Record<string, unknown> {
+  const kind = controlKind(field);
   const options: Record<string, unknown> = {};
 
-  if (field.type === FieldType.PASSWORD) {
+  if (kind === 'password') {
     options.mode = 'password';
   }
 
-  if (field.type === FieldType.TEXTAREA) {
+  if (kind === 'textarea') {
     options.height = field.height ?? 96;
   }
 
@@ -56,13 +55,7 @@ function resolveEditorOptions(field: Field): Record<string, unknown> {
     options.maxLength = field.maxLength;
   }
 
-  if (
-    field.type === FieldType.SELECT ||
-    field.type === FieldType.ENUM ||
-    field.type === FieldType.ENTITY ||
-    field.type === FieldType.RADIO ||
-    field.type === FieldType.TAGS
-  ) {
+  if (OPTION_LIST_KINDS.has(kind)) {
     options.dataSource = field.data ?? [];
     options.displayExpr = field.textField || 'label';
     options.valueExpr = field.valueField || 'value';
@@ -73,7 +66,7 @@ function resolveEditorOptions(field: Field): Record<string, unknown> {
     options.format = field.format;
   }
 
-  if (field.precision > 0 && (field.type === FieldType.NUMBER || field.type === FieldType.CURRENCY)) {
+  if (field.precision > 0 && kind === 'number') {
     options.format = field.format || `#,##0.${'0'.repeat(field.precision)}`;
   }
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FORM_EVENTS } from '../form/FormView';
+import { FORM_EVENTS } from '../form/FormEvents';
 import { CrudFormShell } from '../view/CrudFormShell';
 import { useCrudViews } from '../view/CrudViewContext';
 import { resolveViewMode } from '../view/viewMode';

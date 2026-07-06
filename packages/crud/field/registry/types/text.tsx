@@ -9,6 +9,12 @@ import {
 } from '../shared';
 
 export const textTypeModule: FieldTypeModule = {
+  controlKind: 'text',
+  formWidth: (field) => {
+    if (field.maxLength != null && field.maxLength > 80) return 'full';
+    if (field.maxLength != null && field.maxLength <= 40) return 'compact';
+    return 'auto';
+  },
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

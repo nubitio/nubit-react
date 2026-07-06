@@ -9,6 +9,8 @@ import {
 } from '../shared';
 
 export const switchTypeModule: FieldTypeModule = {
+  controlKind: 'switch',
+  formWidth: () => 'compact',
   defaultFilterOperator: '=',
   filterOperators: EQUALITY_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,

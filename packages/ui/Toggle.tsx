@@ -48,11 +48,12 @@ export const Toggle = ({
     </span>
   );
 
-  if (!label) return input;
-
+  // The checkbox input is visually hidden with pointer-events: none — clicks
+  // must land on a <label htmlFor> to reach it natively. Always wrap in a
+  // label (even without visible text) so the track itself is clickable.
   return (
-    <label htmlFor={id} className="nb-toggle-row">
-      <span>{label}</span>
+    <label htmlFor={id} className={label ? 'nb-toggle-row' : undefined}>
+      {label && <span>{label}</span>}
       {input}
     </label>
   );

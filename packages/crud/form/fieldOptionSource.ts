@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { getCoreTimezone, type CoreHttpClient, type DataRecord } from '@nubitio/core';
 import { Field } from '../field/Field';
 import { type ResourceStore, type ResourceStoreFactory } from '../data/ResourceStore';
@@ -29,13 +30,18 @@ export function fieldKeyValue(field: Field, item: DataRecord): unknown {
 }
 
 export function fieldTextValue(field: Field, item: DataRecord): string {
-  if (field.itemFormatter) {
-    const formatted = field.itemFormatter(item);
-    return formatted == null ? '' : String(formatted);
-  }
-
   const value = item[field.textField] ?? item['text'] ?? item['name'] ?? item['businessName'];
   return value == null ? '' : String(value);
+}
+
+/**
+ * Rich display node for a dropdown option row. Unlike fieldTextValue (which
+ * must stay a plain string since it also feeds the input's query/selected
+ * text), this renders itemFormatter's ReactNode output when present.
+ */
+export function fieldOptionNode(field: Field, item: DataRecord): ReactNode {
+  if (field.itemFormatter) return field.itemFormatter(item);
+  return fieldTextValue(field, item);
 }
 
 export function fieldFilters(field: Field): unknown[][] | undefined {

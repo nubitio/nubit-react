@@ -11,6 +11,7 @@ import type { FormDataRecord } from './FormDataSnapshot';
 import {
   createRemoteSource,
   fieldKeyValue,
+  fieldOptionNode,
   fieldSearchExpr,
   fieldTextValue,
 } from './fieldOptionSource';
@@ -406,7 +407,7 @@ export function NativeEntitySelect({
         const isActive = items[activeOptionIndex] === item;
         return (
           <button key={String(itemValue)} id={`${controlId}-option-${String(itemValue)}`} type="button" role="option" aria-selected={String(itemValue ?? '') === normalizedValue} className={`nb-form__lookup-option${isActive ? ' is-active' : ''}`} onMouseDown={(e) => e.preventDefault()} onClick={() => selectItem(item)}>
-            {fieldTextValue(field, item)}
+            {fieldOptionNode(field, item)}
           </button>
         );
       })}

@@ -33,107 +33,72 @@
 }
 
 // ── Tabs nav ──────────────────────────────────────────────────────────────────
+// Flat underline bar — no outer box/pill. Reads as part of the header, not a
+// separate card floating on the page.
 
 .nb-feature-hub__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
+  gap: 0;
   // Only vertical separation from title/subtitle — header padding already
   // handles horizontal alignment, so no side margins here.
-  margin-top: var(--space-5);
-  padding: var(--space-1);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle, var(--border-color));
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  margin-top: var(--space-4);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle, var(--border-color));
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .nb-feature-hub__tab {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  position: relative;
   // Height follows --control-height so tabs stay in the vertical rhythm.
-  min-height: var(--control-height);
-  padding: 0 var(--space-3);
+  min-height: calc(var(--control-height) + var(--space-2));
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: -1px;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium, 500);
   color: var(--text-secondary);
   text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: 0;
+  background: transparent;
   transition:
     color var(--transition-base),
-    background var(--transition-base),
-    border-color var(--transition-base);
+    background var(--transition-base);
 
   .ph {
     font-size: var(--control-icon-size);
     opacity: 0.75;
   }
 
-  &:hover {
+  &:hover:not(.nb-feature-hub__tab--active) {
     color: var(--text-primary);
-    background: var(--surface-2);
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
   }
 
   &--active {
     color: var(--accent-color);
-    background: var(--accent-subtle);
-    border-color: color-mix(in srgb, var(--accent-color) 22%, transparent);
-    box-shadow: var(--shadow-sm);
+    font-weight: var(--font-weight-semibold);
+    background: transparent;
 
     .ph {
       opacity: 1;
     }
-  }
-}
 
-// Underline variant — flat tab bar, no outer box. Better on dark surfaces.
-.nb-feature-hub__tabs--underline {
-  margin-top: var(--space-4);
-  padding: 0;
-  gap: 0;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border-subtle, var(--border-color));
-  border-radius: 0;
-  box-shadow: none;
-
-  .nb-feature-hub__tab {
-    position: relative;
-    min-height: calc(var(--control-height) + var(--space-2));
-    padding: var(--space-2) var(--space-3);
-    margin-bottom: -1px;
-    font-weight: var(--font-weight-medium, 500);
-    border: none;
-    border-radius: 0;
-    background: transparent;
-
-    &:hover:not(.nb-feature-hub__tab--active) {
-      color: var(--text-primary);
-      background: color-mix(in srgb, var(--accent-color) 8%, transparent);
-    }
-
-    &--active {
-      color: var(--accent-color);
-      background: transparent;
-      border: none;
-      box-shadow: none;
-
-      &::after {
-        content: '';
-        position: absolute;
-        right: var(--space-3);
-        bottom: 0;
-        left: var(--space-3);
-        height: 2px;
-        border-radius: 2px 2px 0 0;
-        background: var(--accent-color);
-      }
-
-      .ph {
-        opacity: 1;
-      }
+    &::after {
+      content: '';
+      position: absolute;
+      right: var(--space-3);
+      bottom: 0;
+      left: var(--space-3);
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+      background: var(--accent-color);
     }
   }
 }
@@ -186,23 +151,26 @@
 .nb-feature-hub--compact {
   .nb-feature-hub__header {
     // Vertical padding tighter; horizontal matches --page-padding so the
-    // title/card edges align with whatever's below.
-    padding: var(--space-2) var(--page-padding) 0;
+    // title/tab edges align with whatever's below.
+    padding: var(--space-3) var(--page-padding) 0;
   }
 
+  // Title + tabs share one row. No card chrome — a single hairline under the
+  // whole row separates header from content.
   .nb-feature-hub__tabs-card {
     align-items: center;
-    background: var(--surface-1);
-    border: 1px solid var(--border-subtle, var(--border-color));
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-subtle, var(--border-color));
+    border-radius: 0;
+    box-shadow: none;
     display: flex;
     flex: 1 1 auto;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-5);
     justify-content: space-between;
     min-width: 0;
-    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+    padding: 0 0 var(--space-2);
     width: 100%;
   }
 
@@ -216,26 +184,24 @@
     flex: 1 1 auto;
     justify-content: flex-end;
     margin: 0;
-    padding: var(--space-1);
-    border: none;
-    border-radius: var(--radius-lg);
-    background: transparent;
-    box-shadow: none;
-    min-width: min(100%,  520px);
-
-    &.nb-feature-hub__tabs--underline {
-      padding: 0;
-      border-bottom: 1px solid var(--border-subtle, var(--border-color));
-    }
+    border-bottom: none;
+    min-width: min(100%, 520px);
   }
 
   .nb-feature-hub__tab {
     // Font shrinks one step in compact; min-height comes from --control-height
     // which is already smaller (24px) in compact density.
     font-size: var(--font-size-xs);
+    min-height: calc(var(--control-height) + var(--space-1));
+    padding: var(--space-1) var(--space-2);
 
     .ph {
       font-size: var(--font-size-sm);
+    }
+
+    &--active::after {
+      right: var(--space-2);
+      left: var(--space-2);
     }
   }
 

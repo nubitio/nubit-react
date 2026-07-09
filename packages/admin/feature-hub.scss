@@ -210,4 +210,10 @@
     padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-xs);
   }
+
+  // Compact hubs pack the header tight, so give content less breathing
+  // room on top than the default density does.
+  .nb-feature-hub__content {
+    padding-top: var(--space-3);
+  }
 }

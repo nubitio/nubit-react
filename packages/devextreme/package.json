@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/devextreme",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "type": "module",
   "description": "DevExtreme-backed CRUD views for @nubitio/crud — optional drop-in for licensed DevExtreme customers.",
   "license": "MIT",

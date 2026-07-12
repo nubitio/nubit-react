@@ -1,16 +1,8 @@
 import { StatCard } from '@nubitio/ui';
+import { DEFAULT_CHART_COLORS } from '../chartPalette';
 import { formatDashboardValue } from '../formatValue';
 import { resolveArray, resolvePath } from '../resolvePath';
 import type { DonutChartWidgetConfig } from '../types';
-
-const DEFAULT_COLORS = [
-  'var(--accent-color)',
-  'var(--success-color)',
-  'var(--warning-color)',
-  'var(--info-color)',
-  '#6b4fc8',
-  '#c2410c',
-];
 
 type Props = {
   widget: DonutChartWidgetConfig;
@@ -25,7 +17,7 @@ function toNumber(value: unknown): number {
 
 export function DonutChartWidgetView({ widget, data, loading }: Props) {
   const rows = resolveArray(data, widget.dataPath);
-  const colors = widget.colors ?? DEFAULT_COLORS;
+  const colors = widget.colors ?? DEFAULT_CHART_COLORS;
   const total = rows.reduce((sum, row) => sum + toNumber(row[widget.valueKey]), 0);
 
   const centerValue =

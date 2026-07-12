@@ -1,6 +1,9 @@
 import type {
+  AreaChartWidgetConfig,
   BarChartWidgetConfig,
   DonutChartWidgetConfig,
+  LineChartWidgetConfig,
+  ProgressWidgetConfig,
   StatWidgetConfig,
   TableWidgetConfig,
 } from './types';
@@ -25,4 +28,16 @@ export function donutChartWidget(config: Omit<DonutChartWidgetConfig, 'type'>): 
 
 export function tableWidget(config: Omit<TableWidgetConfig, 'type'>): TableWidgetConfig {
   return { type: 'table', menuVisible: false, ...config };
+}
+
+export function lineChartWidget(config: Omit<LineChartWidgetConfig, 'type'>): LineChartWidgetConfig {
+  return { type: 'line-chart', menuVisible: false, showGrid: true, height: 240, ...config };
+}
+
+export function areaChartWidget(config: Omit<AreaChartWidgetConfig, 'type'>): AreaChartWidgetConfig {
+  return { type: 'area-chart', menuVisible: false, showGrid: true, height: 240, ...config };
+}
+
+export function progressWidget(config: Omit<ProgressWidgetConfig, 'type'>): ProgressWidgetConfig {
+  return { type: 'progress', menuVisible: false, max: 100, format: 'number', ...config };
 }

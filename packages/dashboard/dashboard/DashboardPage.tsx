@@ -1,8 +1,13 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { AppToolbar } from '@nubitio/ui';
-import type { DashboardConfig, DashboardSection } from './types';
+import { DashboardLayoutControls } from './DashboardLayoutControls';
+import { DashboardPeriodFilter } from './DashboardPeriodFilter';
+import { DashboardWidgetSlot } from './DashboardWidgetSlot';
+import { DEFAULT_PERIOD_PARAM_NAMES } from './defaults';
+import type { DashboardConfig, DashboardPeriodValue, DashboardSection } from './types';
 import { useDashboardData } from './useDashboardData';
-import { WidgetRenderer } from './widgets/WidgetRenderer';
+import { useDashboardLayout, type DashboardLayoutState } from './useDashboardLayout';
+import { useDashboardPeriod } from './useDashboardPeriod';
 import './DashboardPage.scss';
 
 export interface DashboardPageProps {
@@ -11,13 +16,6 @@ export interface DashboardPageProps {
 
 function sectionClassName(section: DashboardSection): string {
   const layout = section.layout ?? 'grid';
-  if (layout === 'grid') {
-    const columns =
-      typeof section.columns === 'number'
-        ? `repeat(${section.columns}, minmax(0, 1fr))`
-        : section.columns;
-    return columns ? 'nb-dashboard-section nb-dashboard-section--grid' : 'nb-dashboard-section nb-dashboard-section--grid';
-  }
   return `nb-dashboard-section nb-dashboard-section--${layout}`;
 }
 
@@ -28,48 +26,94 @@ function sectionStyle(section: DashboardSection): CSSProperties | undefined {
       ? `repeat(${section.columns}, minmax(0, 1fr))`
       : section.columns;
   if (!columns) return undefined;
-  return { gridTemplateColumns: String(columns) };
+  // Set via custom property (not `gridTemplateColumns` directly) so the
+  // responsive breakpoints in DashboardPage.scss can still override it —
+  // an inline style on the property itself would always win the cascade.
+  return { '--nb-dashboard-columns': String(columns) } as CSSProperties;
 }
 
 function DashboardSectionView({
   section,
+  sectionId,
   data,
   loading,
+  layout,
+  period,
+  periodParamNames,
 }: {
   section: DashboardSection;
+  sectionId: string;
   data: Record<string, unknown>;
   loading?: boolean;
+  layout?: DashboardLayoutState;
+  period?: DashboardPeriodValue;
+  periodParamNames: { start: string; end: string };
 }) {
+  const widgets = layout ? layout.getSectionWidgets(section, sectionId) : section.widgets;
+
   return (
     <section
       className={sectionClassName(section)}
       style={sectionStyle(section)}
       data-section={section.id}
     >
-      {section.widgets.map((widget) => (
-        <WidgetRenderer key={widget.id} widget={widget} data={data} loading={loading} />
+      {widgets.map((widget) => (
+        <DashboardWidgetSlot
+          key={widget.id}
+          widget={widget}
+          data={data}
+          loading={loading}
+          editMode={!!layout?.editMode}
+          onHide={() => layout?.hideWidget(sectionId, widget.id)}
+          onMoveUp={() => layout?.moveWidget(sectionId, widget.id, -1)}
+          onMoveDown={() => layout?.moveWidget(sectionId, widget.id, 1)}
+          period={period}
+          periodParamNames={periodParamNames}
+        />
       ))}
     </section>
   );
 }
 
 export function DashboardPage({ config }: DashboardPageProps) {
-  const fetched = useDashboardData(config.dataUrl, config.refreshInterval);
-  const custom = config.useData?.();
+  const period = useDashboardPeriod(config.period);
+  const layout = useDashboardLayout(config.id, config.sections, !!config.customizable);
+  const fetched = useDashboardData(
+    config.dataUrl,
+    config.refreshInterval,
+    period?.value,
+    config.period?.paramNames,
+  );
+  const custom = config.useData?.(period?.value);
   const { data, loading, error, refetch } = custom ?? fetched;
+  const periodParamNames = config.period?.paramNames ?? DEFAULT_PERIOD_PARAM_NAMES;
+
+  const toolbarExtras: ReactNode = (
+    <>
+      {period && <DashboardPeriodFilter period={period} />}
+      {layout && <DashboardLayoutControls layout={layout} />}
+    </>
+  );
 
   return (
     <div className="view-wrapper-scroll nb-dashboard-page">
-      <AppToolbar title={config.title} onRefresh={refetch}>
+      <AppToolbar title={config.title} onRefresh={refetch} additionalToolbarContent={toolbarExtras}>
         {error && <div className="nb-dashboard-page__error">{error}</div>}
-        {config.sections.map((section, index) => (
-          <DashboardSectionView
-            key={section.id ?? `section-${index}`}
-            section={section}
-            data={data}
-            loading={loading}
-          />
-        ))}
+        {config.sections.map((section, index) => {
+          const sectionId = section.id ?? `section-${index}`;
+          return (
+            <DashboardSectionView
+              key={sectionId}
+              section={section}
+              sectionId={sectionId}
+              data={data}
+              loading={loading}
+              layout={layout}
+              period={period?.value}
+              periodParamNames={periodParamNames}
+            />
+          );
+        })}
       </AppToolbar>
       {loading && (
         <div className="nb-dashboard-page__loading" aria-hidden="true">

@@ -18,6 +18,7 @@ const RUNTIME_EXTERNAL = [
   '@tiptap/pm',
   'devextreme',
   'devextreme-react',
+  'recharts',
 ];
 
 // CSS/SCSS is processed by @tsdown/css and extracted into dist/style.css.

@@ -1,58 +1,34 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getCoreApiBaseUrl } from '@nubitio/core';
-import type { DashboardDataResult } from './types';
+import { useQuery } from '@tanstack/react-query';
+import { useCoreHttpClient } from '@nubitio/core';
+import { DEFAULT_PERIOD_PARAM_NAMES } from './defaults';
+import type { DashboardDataResult, DashboardPeriodValue } from './types';
 
-function resolveDataUrl(dataUrl: string): string {
-  if (/^https?:\/\//i.test(dataUrl)) return dataUrl;
-  const base = getCoreApiBaseUrl().replace(/\/+$/, '');
-  const path = dataUrl.startsWith('/') ? dataUrl : `/${dataUrl}`;
-  return `${base}${path}`;
-}
+export function useDashboardData(
+  dataUrl?: string,
+  refreshInterval?: number,
+  period?: DashboardPeriodValue,
+  periodParamNames: { start: string; end: string } = DEFAULT_PERIOD_PARAM_NAMES,
+): DashboardDataResult {
+  const http = useCoreHttpClient();
+  const params = period ? { [periodParamNames.start]: period.start, [periodParamNames.end]: period.end } : undefined;
 
-const EMPTY: DashboardDataResult = {
-  data: {},
-  loading: false,
-  error: null,
-};
+  const query = useQuery({
+    queryKey: ['nb-dashboard', dataUrl, params],
+    queryFn: async () => {
+      const response = await http.get<Record<string, unknown>>(dataUrl!, { params });
+      return response.data;
+    },
+    enabled: !!dataUrl,
+    refetchInterval: refreshInterval,
+    retry: false,
+  });
 
-export function useDashboardData(dataUrl?: string, refreshInterval?: number): DashboardDataResult {
-  const [state, setState] = useState<DashboardDataResult>({ ...EMPTY, loading: !!dataUrl });
-
-  const refetch = useCallback(async () => {
-    if (!dataUrl) {
-      setState(EMPTY);
-      return;
-    }
-
-    setState((prev) => ({ ...prev, loading: true, error: null }));
-
-    try {
-      const response = await fetch(resolveDataUrl(dataUrl), { credentials: 'include' });
-      if (!response.ok) {
-        throw new Error(`Dashboard request failed (${response.status})`);
-      }
-      const data = (await response.json()) as Record<string, unknown>;
-      setState({ data, loading: false, error: null });
-    } catch (error) {
-      setState({
-        data: {},
-        loading: false,
-        error: error instanceof Error ? error.message : 'Failed to load dashboard',
-      });
-    }
-  }, [dataUrl]);
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch]);
-
-  useEffect(() => {
-    if (!refreshInterval || !dataUrl) return undefined;
-    const timer = window.setInterval(() => {
-      void refetch();
-    }, refreshInterval);
-    return () => window.clearInterval(timer);
-  }, [dataUrl, refreshInterval, refetch]);
-
-  return { ...state, refetch };
+  return {
+    data: query.data ?? {},
+    loading: query.isLoading,
+    error: query.error ? (query.error instanceof Error ? query.error.message : 'Failed to load dashboard') : null,
+    refetch: () => {
+      void query.refetch();
+    },
+  };
 }

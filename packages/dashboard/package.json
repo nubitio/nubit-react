@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/dashboard",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "description": "Declarative dashboard engine with stat cards, charts, and data tables for Nubit admin apps.",
   "license": "MIT",
@@ -40,7 +40,9 @@
     "dist"
   ],
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "./dashboard/widgets/registerBuiltinWidgets.ts",
+    "./dashboard/widgets/WidgetRenderer.tsx"
   ],
   "engines": {
     "node": ">=18.0.0"

@@ -402,7 +402,8 @@ export function NativeEntitySelect({
     >
       {loading && items.length === 0 && <div className="nb-form__lookup-status">{t('form.lookupSearching')}</div>}
       {!loading && items.length === 0 && <div className="nb-form__lookup-status">{t('form.lookupNoResults')}</div>}
-      {!loading && items.map((item) => {
+      {/* Keep stale items visible while a refetch is in flight; unmounting them collapses the open panel (visible blink on every debounced search). */}
+      {items.map((item) => {
         const itemValue = fieldKeyValue(field, item);
         const isActive = items[activeOptionIndex] === item;
         return (

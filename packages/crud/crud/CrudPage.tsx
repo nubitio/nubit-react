@@ -23,7 +23,8 @@ import type { GridHandle } from '../datagrid/GridHandle';
 import { resolveResourceDetails } from './resolveResourceDetails';
 import { resolveResourceToolbar } from './resolveResourceToolbar';
 import type { SmartCrudOperation } from './fieldOperationSemantics';
-import { ColumnPresetSelector } from './ColumnPresetSelector';
+import { ColumnChooserButton } from './ColumnChooserButton';
+import { useColumnChooser } from './useColumnChooser';
 
 type GridSelectionChange = {
   selectedRowsData?: unknown[];
@@ -176,13 +177,17 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     formRef,
     permissions,
     selectionState,
-    presetState,
   } = useCrudPage(resolvedInputResource, externalFormRef);
   const { DataGridView, FormView } = useCrudViews();
   const datagridFields = useMemo(
     () => fields.filter((field) => field.isIdentity || field.visible !== false),
     [fields],
   );
+  const columnChooserFields = useMemo(
+    () => datagridFields.filter((field) => !field.isIdentity),
+    [datagridFields],
+  );
+  const columnChooserState = useColumnChooser(resolvedResource as ResourceConfig, columnChooserFields);
   // Per-row gates are taken from the raw resource permissions: they are
   // predicates, not booleans, so they bypass the boolean resolution above.
   const rawPermissions =
@@ -230,7 +235,6 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   const location = useLocation();
 
   const hasMultipleSelection = (resolvedResource.bulkActions?.length ?? 0) > 0;
-  const hasPresets = (resolvedResource.columnPresets?.length ?? 0) > 0;
   const hasAuditTrail = resolvedResource.auditTrail?.enabled === true;
   const { gridDetail, formDetail } = resolveResourceDetails(resolvedResource);
 
@@ -547,19 +551,18 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     return aboveGridSlot;
   })();
 
-  /** Preset selector rendered as a toolbar slot via `beforeToolbar`. */
-  const renderPresetSelector = hasPresets
-    ? () => (
-        <ColumnPresetSelector
-          resourceId={resolvedResource.id}
-          presets={resolvedResource.columnPresets!}
-          activePreset={presetState.activePreset}
-          onPresetChange={presetState.setPreset}
-          columnsLabel={t('crudPage.columnsLabel')}
-          allColumnsLabel={t('crudPage.allColumns')}
-        />
-      )
-    : undefined;
+  /** Column chooser rendered as a toolbar slot via `beforeToolbar`. */
+  const renderColumnChooser =
+    columnChooserState.fields.length > 0
+      ? () => (
+          <ColumnChooserButton
+            state={columnChooserState}
+            triggerLabel={t('crudPage.columnChooserLabel')}
+            selectAllLabel={t('crudPage.columnChooserSelectAll')}
+            resetLabel={t('crudPage.columnChooserReset')}
+          />
+        )
+      : undefined;
 
   return (
     <div
@@ -604,9 +607,9 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         editMode={resolvedResource.editMode}
         inlineEditToolbar={resolvedResource.inlineEditToolbar}
         inlineRowActions={resolvedResource.inlineRowActions}
-        visibleColumns={presetState.visibleColumns}
+        visibleColumns={columnChooserState.visibleColumns}
         columnGroupDefs={resolvedResource.columnGroupDefs}
-        beforeToolbar={renderPresetSelector}
+        beforeToolbar={renderColumnChooser}
         bulkActions={resolvedResource.bulkActions}
         onBulkAction={handleBulkAction}
         aboveGrid={aboveGridContent}

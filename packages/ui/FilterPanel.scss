@@ -44,6 +44,10 @@
 
 .nb-filter-panel__search {
   flex: 1;
+  // Without a min-width this collapses to a near-invisible sliver once the
+  // toolbar row is tight (title + search + chips all fighting for space) —
+  // it wraps to its own line instead once it can't fit at a usable width.
+  min-width: 140px;
   max-width: 220px;
 }
 
@@ -52,6 +56,11 @@
   margin: 0 -0.25rem;
   padding: 0.15rem 0.25rem 0.25rem;
   scrollbar-width: thin;
+  // The thin scrollbar alone is easy to miss (especially on touch devices,
+  // which hide it entirely until actively scrolling) — fade the trailing
+  // edge so a cut-off chip reads as "more to scroll", not a layout glitch.
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 20px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 20px), transparent 100%);
 
   &::-webkit-scrollbar {
     height: 4px;

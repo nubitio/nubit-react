@@ -152,9 +152,10 @@ export {
 export type { CrudViewMode, CrudViewModeConfig } from './crud/ResourceConfig';
 export { ToolbarSelect } from './crud/ToolbarSelect';
 export type { ToolbarSelectOption, ToolbarSelectProps } from './crud/ToolbarSelect';
-export { ColumnPresetSelector } from './crud/ColumnPresetSelector';
-export { useColumnPreset } from './crud/useColumnPreset';
-export type { ColumnPresetState } from './crud/useColumnPreset';
+export { ColumnChooserButton } from './crud/ColumnChooserButton';
+export type { ColumnChooserButtonProps } from './crud/ColumnChooserButton';
+export { useColumnChooser } from './crud/useColumnChooser';
+export type { ColumnChooserState } from './crud/useColumnChooser';
 
 // ── Handles & options ─────────────────────────────────────────────────────────
 export type { FormHandle } from './form/FormHandle';

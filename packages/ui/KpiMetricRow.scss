@@ -27,7 +27,12 @@
     border: none;
     border-radius: 0;
     border-right: 1px solid var(--border-subtle, var(--border-color));
-    background: transparent;
+    // A faint tint on every card (not just warning/danger) keeps the row
+    // reading as one consistent set of stats. Without this, default-tone
+    // cards go fully transparent and look unstyled next to the tinted
+    // warning/danger ones — most jarring once they stack full-width on
+    // mobile instead of sitting side by side.
+    background: color-mix(in srgb, var(--surface-1) 60%, transparent);
     padding: var(--space-4, 1rem) var(--space-4, 1.1rem);
 
     &:last-child {
@@ -147,6 +152,32 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.45rem 0.7rem;
+  }
+
+  // Compact cards are short and content-light (icon + label + value on one
+  // row), so they don't need the full-width single column the spacious
+  // variant collapses to below 480px — that turns 4 stats into 4 full
+  // screen-width rows before any real content is visible. Keep 2 columns
+  // all the way down; halves the vertical footprint on phones.
+  &.nb-kpi-metric-row--strip {
+    @media (max-width: 480px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &.nb-kpi-metric-row--strip .nb-kpi-metric-card {
+    @media (max-width: 480px) {
+      border-right: 1px solid var(--border-subtle, var(--border-color));
+      border-bottom: none;
+
+      &:nth-child(2n) {
+        border-right: none;
+      }
+
+      &:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border-subtle, var(--border-color));
+      }
+    }
   }
 
   .nb-kpi-metric-card__icon {

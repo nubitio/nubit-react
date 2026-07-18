@@ -38,7 +38,7 @@
 
 .nb-feature-hub__tabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0;
   // Only vertical separation from title/subtitle — header padding already
   // handles horizontal alignment, so no side margins here.
@@ -49,6 +49,20 @@
   border-bottom: 1px solid var(--border-subtle, var(--border-color));
   border-radius: 0;
   box-shadow: none;
+
+  // Tabs never wrap — on narrow viewports a wrapped row leaves the last tab
+  // stranded alone on its own line. Scroll horizontally instead; the fade
+  // mask signals there's more (native scrollbar is hidden).
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .nb-feature-hub__tab {
@@ -56,6 +70,8 @@
   align-items: center;
   gap: var(--space-2);
   position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
   // Height follows --control-height so tabs stay in the vertical rhythm.
   min-height: calc(var(--control-height) + var(--space-2));
   padding: var(--space-2) var(--space-3);
@@ -182,7 +198,10 @@
 
   .nb-feature-hub__tabs {
     flex: 1 1 auto;
-    justify-content: flex-end;
+    // flex-end reads fine once tabs fit on one line, but with the scroll
+    // behavior above it fights the browser's initial scroll position on
+    // overflow — start-aligned is the standard mobile tab-bar pattern anyway.
+    justify-content: flex-start;
     margin: 0;
     border-bottom: none;
     min-width: min(100%, 520px);

@@ -1,13 +1,11 @@
 import { useRef, useMemo } from 'react';
 import { usePermissions } from './usePermissions';
 import { useSelectionState } from './useSelectionState';
-import { useColumnPreset } from './useColumnPreset';
 import type { Field } from '../field/Field';
 import type { FormHandle } from '../form/FormHandle';
 import type { ResourceConfig } from './ResourceConfig';
 import type { ResolvedPermissions } from './usePermissions';
 import type { SelectionState } from './useSelectionState';
-import type { ColumnPresetState } from './useColumnPreset';
 import { resolveCrudResource, type ResolvedCrudResource } from './resolveCrudResource';
 import { buildFields } from '../field/buildFields';
 import type { FieldInput } from '../field/buildFields';
@@ -26,7 +24,6 @@ export function useCrudPage<T extends DataRecord = DataRecord>(
   selectionState: SelectionState & {
     onSelectionChanged: (rows: DataRecord[]) => void;
   };
-  presetState: ColumnPresetState;
 } {
   const resolvedResource = useMemo(() => resolveCrudResource(resource), [resource]);
   const events = resolvedResource.events;
@@ -57,7 +54,6 @@ export function useCrudPage<T extends DataRecord = DataRecord>(
   }, [fields]);
 
   const selectionState = useSelectionState(identityFieldName);
-  const presetState = useColumnPreset(resolvedResource as ResourceConfig);
 
   return {
     events,
@@ -67,6 +63,5 @@ export function useCrudPage<T extends DataRecord = DataRecord>(
     formRef,
     permissions,
     selectionState,
-    presetState,
   };
 }

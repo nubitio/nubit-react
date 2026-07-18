@@ -3,6 +3,9 @@ export interface CoreTranslationKeys {
   'crudPage.auditTrailButton': string;
   'crudPage.allColumns': string;
   'crudPage.columnsLabel': string;
+  'crudPage.columnChooserLabel': string;
+  'crudPage.columnChooserSelectAll': string;
+  'crudPage.columnChooserReset': string;
   'crudPage.dialogTitleAdd': string;
   'crudPage.dialogTitleEdit': string;
   'crudPage.dialogTitleView': string;

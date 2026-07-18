@@ -52,6 +52,7 @@ import { SummaryFooter } from './SummaryFooter';
 import {
   ACTIONS_COL_WIDTH,
   CHECKBOX_COL_WIDTH,
+  computeAutoColumnWidths,
   computeLayoutWidth,
   DEFAULT_COL_WIDTH,
   DETAIL_COL_WIDTH,
@@ -142,6 +143,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const syncHorizontalScrollRef = useRef<() => void>(() => {});
   const [containerWidth, setContainerWidth] = useState(0);
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
+  const [autoColWidths, setAutoColWidths] = useState<Record<string, number>>({});
   const resizingRef = useRef<{ name: string; startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
@@ -205,7 +207,22 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       applyScrollLeft(hScroll.scrollLeft);
     };
 
+    // tbody itself is overflow-x: hidden (see .nb-datagrid__table > tbody) so
+    // it never grows its own horizontal scrollbar — .nb-datagrid__hscroll
+    // below is the single visible one. That means trackpad/shift+wheel
+    // horizontal gestures made while hovering the rows no longer move
+    // anything on their own; forward them here so that UX isn't lost.
+    const onWheel = (e: WheelEvent) => {
+      const horizontalDelta = e.deltaX !== 0 ? e.deltaX : e.shiftKey ? e.deltaY : 0;
+      if (horizontalDelta === 0) return;
+      const maxScroll = Math.max(0, tbody.scrollWidth - tbody.clientWidth);
+      if (maxScroll === 0) return;
+      e.preventDefault();
+      applyScrollLeft(Math.min(maxScroll, Math.max(0, tbody.scrollLeft + horizontalDelta)));
+    };
+
     tbody.addEventListener('scroll', onBodyScroll, { passive: true });
+    tbody.addEventListener('wheel', onWheel, { passive: false });
     hScroll?.addEventListener('scroll', onFooterScroll, { passive: true });
 
     const layoutObserver = new ResizeObserver(() => clampAndSync());
@@ -215,10 +232,65 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
     return () => {
       tbody.removeEventListener('scroll', onBodyScroll);
+      tbody.removeEventListener('wheel', onWheel);
       hScroll?.removeEventListener('scroll', onFooterScroll);
       layoutObserver.disconnect();
     };
   }, [rows.length, visibleFields.length, colWidths, containerWidth, options.summaryFields?.length]);
+
+  // Content-driven auto width (DevExtreme-style columnAutoWidth): measure
+  // after the current page has rendered, using the real header/body font so
+  // it matches whatever theme/density is active, then size columns that
+  // don't have an explicit width to fit their content instead of sitting at
+  // the flat 120px default. Recomputes per page since the "widest cell"
+  // naturally changes as rows change.
+  //
+  // setState always goes through setIfChanged: computeAutoColumnWidths (and
+  // the {} empty case) return a brand-new object every call, and this effect
+  // depends on values (visibleFields, filterRemoteOptions, t) that aren't
+  // guaranteed referentially stable from their own callers. Setting an
+  // unconditionally-new object on every run turns that into a real infinite
+  // render loop — setIfChanged makes the update a no-op once the values
+  // stop actually differing, regardless of how often the effect itself reruns.
+  useLayoutEffect(() => {
+    const setIfChanged = (next: Record<string, number>) => {
+      setAutoColWidths((prev) => {
+        const prevKeys = Object.keys(prev);
+        const nextKeys = Object.keys(next);
+        if (
+          prevKeys.length === nextKeys.length &&
+          nextKeys.every((key) => prev[key] === next[key])
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    if (rows.length === 0 || visibleFields.length === 0) {
+      setIfChanged({});
+      return;
+    }
+    const sampleHeaderCell = theadRef.current?.querySelector('th');
+    const sampleBodyCell = tbodyRef.current?.querySelector('td');
+    if (!sampleHeaderCell || !sampleBodyCell) return;
+
+    const headerStyle = getComputedStyle(sampleHeaderCell);
+    const bodyStyle = getComputedStyle(sampleBodyCell);
+    const headerFont = `${headerStyle.fontWeight} ${headerStyle.fontSize} ${headerStyle.fontFamily}`;
+    const bodyFont = `${bodyStyle.fontWeight} ${bodyStyle.fontSize} ${bodyStyle.fontFamily}`;
+
+    setIfChanged(
+      computeAutoColumnWidths({
+        fields: visibleFields,
+        rows,
+        bodyFont,
+        headerFont,
+        getCellText: (field, row) =>
+          getCellText(field, row, filterRemoteOptions[field.name], t('common.yes'), t('common.no')),
+      }),
+    );
+  }, [rows, visibleFields, filterRemoteOptions, t]);
 
   useEffect(() => {
     if (!openRowMenu) return;
@@ -746,6 +818,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const layoutWidth = computeLayoutWidth({
     visibleFields,
     colWidths,
+    autoWidths: autoColWidths,
     hasCheckbox,
     hasDetail,
     hasRowActions,
@@ -756,32 +829,52 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   // Distribute container space proportionally among data columns only.
   // The actions column (fixed UI chrome) is excluded from stretching — it always
   // stays at ACTIONS_COL_WIDTH regardless of how wide the container gets.
+  //
+  // Deliberately one-directional: columns stretch to fill extra space when
+  // content is narrower than the container, but never shrink below their
+  // natural (manual/explicit/auto-measured) width when content is wider.
+  // Shrinking used to cram every column into the viewport, which fought
+  // widths that were set (explicitly, via drag-resize, or via content
+  // auto-width) specifically to fit their content — the frequent result was
+  // wrapped, uneven-height rows. Letting the row overflow instead is what
+  // drives the horizontal scrollbar below the grid (DevExtreme-style, see
+  // .nb-datagrid__hscroll) — that scrollbar already existed but rarely
+  // triggered because shrinking almost always won the fight to stay within
+  // the container first.
+  //
+  // Always resolves every visible field to a concrete number (manual >
+  // explicit > auto-measured > minWidth > default, per getColumnWidth) —
+  // never falls back to returning the raw (usually near-empty) colWidths
+  // state, which would silently drop the auto-measured width right when it
+  // matters most (the overflow/scroll case).
   const resolvedColWidths = useMemo(() => {
-    if (visibleFields.length === 0 || containerWidth <= 0) return colWidths;
+    const bases = visibleFields.map((f) => getColumnWidth(f, colWidths, autoColWidths));
 
-    const bases = visibleFields.map((f) => getColumnWidth(f, colWidths));
+    if (visibleFields.length === 0 || containerWidth <= 0) {
+      const result: Record<string, number> = {};
+      visibleFields.forEach((f, i) => {
+        result[f.name] = bases[i]!;
+      });
+      return result;
+    }
+
     const dataTotal = bases.reduce((sum, width) => sum + width, 0);
     const fixedTotal =
       (hasCheckbox ? CHECKBOX_COL_WIDTH : 0) +
       (hasDetail ? DETAIL_COL_WIDTH : 0) +
       (hasRowActions ? actionsColWidth : 0);
     const available = Math.max(0, containerWidth - fixedTotal);
+    const extra = Math.max(0, available - dataTotal);
 
-    if (dataTotal > available && available > 0) {
-      const scale = available / dataTotal;
-      const result: Record<string, number> = {};
-      visibleFields.forEach((field, index) => {
-        const floor = field.minWidth ?? MIN_COL_WIDTH;
-        result[field.name] = Math.max(floor, Math.floor(bases[index]! * scale));
+    const result: Record<string, number> = {};
+    if (extra === 0 || dataTotal === 0) {
+      visibleFields.forEach((f, i) => {
+        result[f.name] = bases[i]!;
       });
       return result;
     }
 
-    const extra = Math.max(0, available - dataTotal);
-    if (extra === 0 || dataTotal === 0) return colWidths;
-
     let distributed = 0;
-    const result: Record<string, number> = {};
     visibleFields.forEach((f, i) => {
       const base = bases[i]!;
       const share =
@@ -790,7 +883,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       distributed += share;
     });
     return result;
-  }, [visibleFields, colWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth, actionsColWidth]);
+  }, [visibleFields, colWidths, autoColWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth, actionsColWidth]);
 
   const columnHeaders = useMemo(
     () => resolveColumnHeaders(visibleFields, options.columnGroupDefs),

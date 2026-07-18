@@ -1,0 +1,90 @@
+// ── Column chooser ──────────────────────────────────────────────────────────
+// DevExtreme-style: an icon-button trigger in the grid toolbar opens a
+// checklist letting the user show/hide individual columns, replacing the
+// old segmented preset-button row.
+
+.nb-column-chooser__trigger--active {
+  color: var(--accent-color);
+  position: relative;
+
+  // Small dot signaling the visible-column set has been customized away
+  // from the resource's default — otherwise there's no visual difference
+  // between "everything visible" and "user hid some columns a while ago".
+  &::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    border: 1.5px solid var(--surface-1);
+  }
+}
+
+.nb-column-chooser__panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 260px;
+}
+
+.nb-column-chooser__actions {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle, var(--border-color));
+}
+
+.nb-column-chooser__action {
+  flex: 1 1 auto;
+  border: none;
+  background: transparent;
+  color: var(--accent-color);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold, 600);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--accent-subtle, color-mix(in srgb, var(--accent-color) 10%, transparent));
+  }
+}
+
+.nb-column-chooser__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.nb-column-chooser__item {
+  padding: var(--space-1) var(--space-3);
+
+  .nb-toggle-row {
+    display: flex;
+    align-items: center;
+    // Toggle already renders <span>label</span> before the switch in the
+    // DOM, so a plain row + space-between naturally puts the label on the
+    // left and the switch on the right — the standard checklist layout.
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+
+    // Toggle's own DOM is <span>{label}</span><span class="nb-toggle">...
+    // — both are direct-child spans, so an unscoped `span { flex: 1 1 auto }`
+    // here was also matching the switch's own wrapper span, not just the
+    // label, and making the switch itself stretch by a variable amount
+    // (whatever space the label text happened to leave behind) instead of
+    // staying a fixed size. Target the label only.
+    > span:not(.nb-toggle) {
+      flex: 1 1 auto;
+    }
+  }
+}

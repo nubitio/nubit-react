@@ -201,100 +201,6 @@
   margin-left: var(--space-1);
 }
 
-// ── Column preset selector (Fluent segmented control) ───────────────────────────
-// Toolbar-height control that matches secondary buttons and DevExtreme view modes.
-
-.nb-datagrid__preset-control {
-  align-items: center;
-  display: inline-flex;
-  flex: 0 1 auto;
-  gap: var(--space-2);
-  margin-left: var(--space-2);
-  min-width: 0;
-}
-
-.nb-datagrid__preset-label {
-  align-items: center;
-  color: var(--text-secondary);
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  gap: var(--space-1);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-
-  i {
-    color: var(--text-tertiary);
-    font-size: 14px;
-  }
-}
-
-.nb-datagrid__preset-segments {
-  background: var(--surface-0);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  display: inline-flex;
-  flex: 0 1 auto;
-  gap: 1px;
-  max-width: 100%;
-  min-height: var(--control-height);
-  min-width: 0;
-  overflow-x: auto;
-  padding: 2px;
-  scrollbar-width: thin;
-}
-
-.nb-datagrid__preset-segment {
-  background: transparent;
-  border: 0;
-  border-radius: calc(var(--radius-md) - 2px);
-  color: var(--text-secondary);
-  cursor: pointer;
-  flex: 0 0 auto;
-  font: inherit;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
-  min-height: calc(var(--control-height) - 4px);
-  padding: 0 var(--space-2);
-  transition:
-    background var(--transition-base),
-    box-shadow var(--transition-base),
-    color var(--transition-base);
-
-  &:hover:not(.nb-datagrid__preset-segment--active) {
-    background: var(--control-bg-hover);
-    color: var(--text-primary);
-  }
-
-  &:focus-visible {
-    box-shadow: 0 0 0 2px var(--focus-ring-color);
-    outline: none;
-    z-index: 1;
-  }
-
-  &--active {
-    background: var(--surface-1);
-    box-shadow: var(--shadow-sm);
-    color: var(--text-primary);
-    font-weight: var(--font-weight-semibold);
-  }
-}
-
-@media (max-width: 720px) {
-  .nb-datagrid__preset-control {
-    align-items: stretch;
-    flex-direction: column;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .nb-datagrid__preset-segments {
-    width: 100%;
-  }
-}
-
 // ── Table wrapper ──────────────────────────────────────────────────────────────
 // Rounded container that clips the table's first/last rows to the border radius.
 
@@ -342,17 +248,20 @@
   width: var(--nb-datagrid-layout-width, 100%);
 }
 
-// tbody scrolls vertically; horizontal scroll syncs with the footer bar.
+// tbody scrolls vertically with its own native scrollbar; horizontal
+// position is driven entirely by JS (see applyScrollLeft) staying in sync
+// with thead/tfoot/.nb-datagrid__hscroll. overflow-x: hidden rather than
+// auto — scrollLeft still works fine set programmatically — so tbody never
+// grows a horizontal scrollbar of its own. .nb-datagrid__hscroll below is
+// the single visible horizontal scrollbar. (An auto/webkit-only-hide combo
+// here previously let Firefox show its native one alongside it — two
+// scrollbars at once.)
 .nb-datagrid__table > tbody {
   display: block;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
-
-  // Keep horizontal scrolling functional but hide the in-body horizontal bar.
-  &::-webkit-scrollbar:horizontal {
-    height: 0;
-  }
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .nb-datagrid__detail-col {
@@ -377,9 +286,32 @@
 // Shared horizontal scrollbar below the grid body (DevExtreme-style).
 .nb-datagrid__hscroll {
   flex: 0 0 auto;
+  // Explicit height so the scrollbar track itself is visible (DevExtreme-
+  // style, persistent) rather than relying on the browser's native
+  // scrollbar, which on most systems overlays paper-thin content and only
+  // appears during active interaction — easy to miss entirely.
+  height: 10px;
   margin-top: 2px;
   overflow-x: auto;
   overflow-y: hidden;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--surface-1);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+
+    &:hover {
+      background: var(--text-secondary);
+    }
+  }
 }
 
 .nb-datagrid__hscroll-inner {
@@ -413,7 +345,16 @@
   line-height: var(--grid-row-line-height, 1.35);
   min-height: var(--row-height);
   overflow: hidden;
-  white-space: normal;
+  // Plain text content truncates to one line with an ellipsis (every cell
+  // already carries a `title` attribute with the full value, so hover still
+  // reveals it) — matches DevExtreme/ag-Grid/MUI defaults and keeps row
+  // heights uniform regardless of column width vs. content length.
+  // This does NOT force single-line formatter output: nested block content
+  // (stacked label/sublabel, badges, progress bars) lays out on its own —
+  // white-space only governs the td's own direct text flow, not its
+  // children's block/flex layout — so composite cells still grow normally.
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .nb-datagrid__table td .nb-badge {
@@ -1964,21 +1905,6 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
 
   &:active {
     transform: scale(0.96);
-  }
-}
-
-// Column presets relocate into the filter sheet on mobile — make the
-// segmented control stack full-width there.
-.nb-datagrid__sheet-presets {
-  .nb-datagrid__preset-control {
-    align-items: stretch;
-    flex-direction: column;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .nb-datagrid__preset-segments {
-    width: 100%;
   }
 }
 

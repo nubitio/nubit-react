@@ -1,4 +1,4 @@
-import type { DataRecord } from '@nubitio/core';
+import type { CoreHttpClient, DataRecord } from '@nubitio/core';
 import type { WorkflowSchema } from '@nubitio/hydra';
 import type { ResourceToolbarAction } from '../crud/ResourceConfig';
 
@@ -8,6 +8,7 @@ export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
   apiUrl: string,
   roles: string[],
   onDone?: () => void,
+  httpClient?: CoreHttpClient,
 ): ResourceToolbarAction[] {
   if (!workflow) {
     return [];
@@ -27,7 +28,22 @@ export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
       onClick: async () => {
         const base = apiUrl.replace(/\/$/, '');
         const id = row.id;
-        const response = await fetch(`${base}/${id}/transition/${transition.name}`, {
+        const transitionUrl = `${base}/${id}/transition/${transition.name}`;
+
+        // Prefer the app's configured CoreHttpClient: it retries once through
+        // the app's session-refresh flow on a 401 (an access token can expire
+        // between page load and a row action click, especially on long-lived
+        // grids) and surfaces the API's JSON error detail directly. Without
+        // it, a stale-but-refreshable session fails the transition outright
+        // instead of transparently refreshing and retrying — the plain fetch
+        // fallback below has no notion of "refresh and retry".
+        if (httpClient) {
+          await httpClient.post(transitionUrl, undefined);
+          onDone?.();
+          return;
+        }
+
+        const response = await fetch(transitionUrl, {
           method: 'POST',
           credentials: 'include',
         });

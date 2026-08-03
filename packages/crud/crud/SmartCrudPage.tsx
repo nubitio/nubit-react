@@ -9,7 +9,7 @@ import type { FieldInput } from '../field/buildFields';
 
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
-import { useCoreTranslation, useMercureSubscription } from '@nubitio/core';
+import { useCoreHttpClient, useCoreTranslation, useMercureSubscription } from '@nubitio/core';
 import { getSchemaResolver, resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
 import { Button, Skeleton } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
@@ -246,6 +246,10 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
   const roles = useSmartCrudRoles();
   const stableRoles = useMemo(() => roles ?? [], [roles]);
 
+  // Same client the grid/form data source uses — gives workflow transitions
+  // session auto-refresh instead of a bare fetch (see buildWorkflowRowActions).
+  const httpClient = useCoreHttpClient();
+
   // Declarative rules pipeline
   const { gridFields, processedFields, computedValues } = useSmartCrudFields(
     fields,
@@ -278,9 +282,16 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
       resolvedBaseResource.rowActions ??
       (workflow
         ? (row: T) =>
-            buildWorkflowRowActions(row, workflow, normalizedApiUrl, stableRoles, () => {
-              effectiveGridRef.current?.refresh();
-            })
+            buildWorkflowRowActions(
+              row,
+              workflow,
+              normalizedApiUrl,
+              stableRoles,
+              () => {
+                effectiveGridRef.current?.refresh();
+              },
+              httpClient,
+            )
         : undefined);
 
     return {
@@ -300,6 +311,7 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
     fields,
     gridFields,
     hasManualFields,
+    httpClient,
     inferredFormLayout,
     inferredSummaryFields,
     normalizedApiUrl,

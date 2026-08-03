@@ -215,7 +215,26 @@ function resolveEntityTextField(
 ): string {
   if (!relatedSchema) return 'name';
 
-  const preferredNames = ['name', 'businessName', 'description', 'fullNumber', 'title', 'series'];
+  // Spanish-first field names are just as common as the English ones in
+  // apps built on this stack (ES_UI_STRINGS, lng: 'es' is a first-class
+  // config, not an afterthought) — without them, an entity whose only
+  // string fields are e.g. `codigo`/`nombre` falls through to "first string
+  // field other than valueField", which picks whichever property happens
+  // to be declared first (often a code/id-like field) instead of the
+  // human-readable name.
+  const preferredNames = [
+    'name',
+    'nombre',
+    'businessName',
+    'razonSocial',
+    'description',
+    'descripcion',
+    'fullNumber',
+    'title',
+    'titulo',
+    'series',
+    'label',
+  ];
 
   for (const fieldName of preferredNames) {
     const match = relatedSchema.fields.find(

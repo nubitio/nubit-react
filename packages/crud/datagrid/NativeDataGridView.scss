@@ -377,7 +377,13 @@
   letter-spacing: 0.02em;
   position: sticky;
   text-align: left;
-  text-transform: uppercase;
+  // Sortable columns render their label inside a <button>, and browsers'
+  // UA stylesheets reset text-transform to `none` on form controls — so
+  // this uppercase never actually reached sortable headers, only the plain
+  // <span> used by non-sortable/non-filterable columns (see
+  // NativeDataGridView.tsx: .nb-datagrid__sort-button vs
+  // .nb-datagrid__column-label). Every column now renders in the case the
+  // label/translation string was authored in, consistently.
   top: 0;
   z-index: 3;
 }

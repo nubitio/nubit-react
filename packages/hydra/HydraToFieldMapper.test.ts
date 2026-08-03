@@ -243,4 +243,41 @@ describe('x-crud entity relation display field', () => {
     );
     expect(fields.find((f) => f.name === 'centroCosto')?.textField).toBe('codigo');
   });
+
+  it('formats a read-only entity relation (writeable: false) using the related displayField', () => {
+    // Mirrors OrdenCompra::$cotizacion: never writeable (system-generated),
+    // serializes as a nested object ({id, numero}), and previously rendered
+    // blank because Rule 3 (display-only) didn't know it was an entity ref.
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        { name: 'cotizacion', range: '#Cotizacion', propertyType: 'Link', writeable: false },
+      ]),
+      undefined,
+      (className) =>
+        className === 'Cotizacion'
+          ? ({
+              className: 'Cotizacion',
+              apiUrl: '/api/cotizacions',
+              fields: [
+                {
+                  name: 'numero',
+                  propertyType: 'rdf:Property',
+                  required: true,
+                  readable: true,
+                  writeable: false,
+                  range: 'xsd:string',
+                  crudHints: { displayField: true },
+                },
+              ],
+            } satisfies HydraResourceSchema)
+          : undefined,
+    );
+
+    const field = fields.find((f) => f.name === 'cotizacion');
+    expect(field?.type).toBe('none');
+    expect(field?.formatter?.({ value: { id: 1, numero: 'COT-000001' } } as never)).toBe(
+      'COT-000001',
+    );
+    expect(field?.formatter?.({ value: null } as never)).toBe('');
+  });
 });

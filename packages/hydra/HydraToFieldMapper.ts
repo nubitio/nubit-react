@@ -356,10 +356,52 @@ export function mapHydraSchemaToFields(
       hydraTitle && hydraTitle.trim() !== '' && hydraTitle !== name ? hydraTitle : toLabel(name);
     const filterable = filterableProperties.size === 0 ? true : filterableProperties.has(name);
 
+    const tag = resolveRangeTag(range, propertyType);
+
     // Rule 3 — display-only (writeable: false) → noneField. A `format:
     // 'currency'` hint still wins so computed money columns (totals) render
     // formatted instead of as raw text; the field stays readonly.
+    //
+    // A read-only *entity reference* (e.g. OrdenCompra::$cotizacion — never
+    // writeable since OrdenCompra has no POST/PATCH touching it) still
+    // serializes as the full nested object ({id, numero, ...}), not a
+    // scalar — rendering that object directly reads as blank/"[object
+    // Object]". Resolve its display field the same way Rule 8 does for
+    // writable relations (x-crud.textField on this property, else
+    // x-crud.displayField on the related entity, else the name-heuristic)
+    // and format the cell with it, so read-only relations are just as
+    // readable as editable ones without per-field frontend configuration.
     if (!writeable) {
+      const isEntityRef = tag === 'entity' || propertyType === 'Link';
+      if (isEntityRef) {
+        const resourceClass = range ? range.replace('#', '') : '';
+        const relatedSchema = resourceClass ? schemaLookup?.(resourceClass) : undefined;
+        const relatedTextField = resolveEntityTextField(
+          relatedSchema,
+          resolveEntityValueField(relatedSchema),
+          fieldSchema.crudHints?.textField,
+        );
+        const built = noneField()
+          .name(name)
+          .label(label)
+          .required(required)
+          .formatter((cell) => {
+            const value = cell.value as Record<string, unknown> | null | undefined;
+            if (value == null) return '';
+            if (typeof value !== 'object') return String(value);
+            return String(value[relatedTextField] ?? '');
+          })
+          .build();
+        const field: Field = { ...built, filterable };
+        stampMappingReason(
+          field,
+          'rule-3 display-only entity-ref',
+          applyCrudHints(field, fieldSchema.crudHints),
+        );
+        fields.push(field);
+        continue;
+      }
+
       const base =
         fieldSchema.crudHints?.format === 'currency'
           ? currencyField().readonly(true)
@@ -374,8 +416,6 @@ export function mapHydraSchemaToFields(
       fields.push(field);
       continue;
     }
-
-    const tag = resolveRangeTag(range, propertyType);
 
     // Rule 3.5 — enum'd scalar → select control with the allowed values.
     // The backend forwards `openapiContext: ['enum' => [...]]` into the docs;

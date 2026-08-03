@@ -64,6 +64,33 @@ export interface CrudHints {
   summable?: boolean;
   /** Aggregate function for summable columns. @default 'sum' */
   summaryType?: 'sum' | 'count' | 'avg' | 'min' | 'max';
+  /**
+   * Set on an entity-relation property (e.g. `Cotizacion::$proveedor`).
+   * Names the property of the *related* resource to display in pickers,
+   * columns and form labels for this relation specifically — takes priority
+   * over `displayField` and the built-in name-heuristic. Use this when the
+   * same related entity should show a different field depending on which
+   * relation is pointing at it; for the common case (one natural label per
+   * entity), prefer `displayField` on the related entity itself so every
+   * relation to it picks it up automatically.
+   *
+   *   #[ApiProperty(openapiContext: ['x-crud' => ['textField' => 'razonSocial']])]
+   *   private ?Actor $proveedor = null;
+   */
+  textField?: string;
+  /**
+   * Set on a property of the entity being *referenced* (e.g.
+   * `CentroCosto::$nombre`), not on the relation that points to it. Declares
+   * "this is the natural human-readable label for this entity" once, so
+   * every relation to it — anywhere in the app, present or future — resolves
+   * to the right field without per-relation configuration. Falls back to the
+   * built-in name-heuristic (`name`, `nombre`, `businessName`, `description`,
+   * `descripcion`, …) when no field on the related entity sets this.
+   *
+   *   #[ApiProperty(openapiContext: ['x-crud' => ['displayField' => true]])]
+   *   private string $nombre = '';
+   */
+  displayField?: boolean;
 }
 
 export interface HydraSupportedProperty {

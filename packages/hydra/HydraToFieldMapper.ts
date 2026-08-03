@@ -212,9 +212,24 @@ function isStringLikeField(field: HydraFieldSchema): boolean {
 function resolveEntityTextField(
   relatedSchema: HydraResourceSchema | undefined,
   valueField: string,
+  relationTextFieldHint?: string,
 ): string {
-  if (!relatedSchema) return 'name';
+  if (!relatedSchema) return relationTextFieldHint ?? 'name';
 
+  // 1. Explicit override on the relation itself (x-crud.textField on e.g.
+  //    Cotizacion::$proveedor) — highest priority, no heuristic involved.
+  if (relationTextFieldHint) {
+    const hinted = relatedSchema.fields.find((field) => field.name === relationTextFieldHint);
+    if (hinted) return hinted.name;
+  }
+
+  // 2. Self-described label on the related entity (x-crud.displayField on
+  //    e.g. CentroCosto::$nombre) — declared once, honored by every relation
+  //    pointing at that entity, no per-relation configuration needed.
+  const declared = relatedSchema.fields.find((field) => field.crudHints?.displayField === true);
+  if (declared) return declared.name;
+
+  // 3. Built-in name-heuristic fallback for entities that declare neither.
   // Spanish-first field names are just as common as the English ones in
   // apps built on this stack (ES_UI_STRINGS, lng: 'es' is a first-class
   // config, not an afterthought) — without them, an entity whose only
@@ -471,7 +486,7 @@ export function mapHydraSchemaToFields(
         ? (urlLookup?.(resourceClass) ?? `/api/${pluralize(toDashCase(resourceClass))}`)
         : '';
       const valueField = resolveEntityValueField(relatedSchema);
-      const textField = resolveEntityTextField(relatedSchema, valueField);
+      const textField = resolveEntityTextField(relatedSchema, valueField, fieldSchema.crudHints?.textField);
       const built = entityField(url, valueField, textField)
         .name(name)
         .label(label)

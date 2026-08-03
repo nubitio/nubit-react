@@ -182,3 +182,65 @@ describe('x-crud format: currency', () => {
     expect(total?.readonly).toBe(true);
   });
 });
+
+describe('x-crud entity relation display field', () => {
+  const centroCosto: HydraResourceSchema = {
+    className: 'CentroCosto',
+    apiUrl: '/api/centro_costos',
+    fields: [
+      { name: 'codigo', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
+      {
+        name: 'nombre',
+        propertyType: 'rdf:Property',
+        required: true,
+        readable: true,
+        writeable: true,
+        range: 'xsd:string',
+        crudHints: { displayField: true },
+      },
+    ],
+  };
+
+  it('falls back to the built-in heuristic when the related entity declares no displayField', () => {
+    const actor: HydraResourceSchema = {
+      className: 'Actor',
+      apiUrl: '/api/actors',
+      fields: [
+        { name: 'codigo', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
+        { name: 'nombre', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
+      ],
+    };
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'proveedor', range: '#Actor', propertyType: 'Link' }]),
+      undefined,
+      (className) => (className === 'Actor' ? actor : undefined),
+    );
+    expect(fields.find((f) => f.name === 'proveedor')?.textField).toBe('nombre');
+  });
+
+  it('uses the related entity displayField hint over "first string field"', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'centroCosto', range: '#CentroCosto', propertyType: 'Link' }]),
+      undefined,
+      (className) => (className === 'CentroCosto' ? centroCosto : undefined),
+    );
+    // Without the hint this would resolve to "codigo" (declared first).
+    expect(fields.find((f) => f.name === 'centroCosto')?.textField).toBe('nombre');
+  });
+
+  it('lets an explicit relation textField hint override the related displayField', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        {
+          name: 'centroCosto',
+          range: '#CentroCosto',
+          propertyType: 'Link',
+          crudHints: { textField: 'codigo' },
+        },
+      ]),
+      undefined,
+      (className) => (className === 'CentroCosto' ? centroCosto : undefined),
+    );
+    expect(fields.find((f) => f.name === 'centroCosto')?.textField).toBe('codigo');
+  });
+});

@@ -254,11 +254,15 @@ export interface HydraFieldSchema {
   enumOptions?: Array<string | number>;
   /**
    * True when the property is a to-many relation (Doctrine ManyToMany /
-   * OneToMany) rather than a single reference. Derived from the Hydra
-   * collection-range wrapper shape — see {@link normalizeRange} — which
-   * signals cardinality but is otherwise discarded once the target class
-   * name has been extracted. Rule 8 in {@link mapHydraSchemaToFields} uses
-   * this to render a multi-select control instead of a single picker.
+   * OneToMany) rather than a single reference. Two independent Hydra signals
+   * feed this, checked with OR since different API Platform configurations
+   * emit different ones: the collection-range array wrapper (see
+   * {@link isCollectionRange}), or `propertyType === 'Link'` — confirmed
+   * empirically to be exactly the to-many properties in at least one real
+   * deployment, where `range` alone is an unchanged plain string identical to
+   * a to-one relation's and carries no cardinality information at all. Rule 8
+   * in {@link mapHydraSchemaToFields} uses this to render a multi-select
+   * control instead of a single picker.
    */
   isCollection?: boolean;
 }

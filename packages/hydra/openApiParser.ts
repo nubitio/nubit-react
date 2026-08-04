@@ -108,9 +108,11 @@ function deriveApiUrl(entrypointPropertyId: string): string {
 /**
  * True when `raw` is the Hydra collection-range wrapper — an array whose
  * entries carry the target class under `owl:equivalentClass.owl:allValuesFrom`.
- * This is exactly the shape API Platform emits for `ManyToMany`/`OneToMany`
- * properties (see {@link normalizeRange}); a to-one relation's `range` is
- * always a plain string or a single IRI object, never an array.
+ * Some API Platform configurations emit this shape for `ManyToMany`/`OneToMany`
+ * properties instead of the plain string `range` + `@type: "Link"` combination
+ * (see the `isCollection` field on `HydraFieldSchema` for the other signal) —
+ * this function only recognises the array-wrapper variant. A to-one relation's
+ * `range` is always a plain string or a single IRI object, never an array.
  */
 export function isCollectionRange(raw: unknown): boolean {
   return Array.isArray(raw);
@@ -294,14 +296,21 @@ export function parseHydraDoc(
       // Skip fields that are not readable (write-only internal fields)
       if (!readable) continue;
 
+      const propertyType = sp.property?.['@type'] ?? 'rdf:Property';
       fields.push({
         name: technicalName(sp),
         range: normalizeRange(sp.property?.range),
-        propertyType: sp.property?.['@type'] ?? 'rdf:Property',
+        propertyType,
         required: sp.required ?? false,
         readable,
         writeable,
-        isCollection: isCollectionRange(sp.property?.range),
+        // Two independent signals, either sufficient: the owl:Restriction range-array
+        // wrapper (isCollectionRange — the shape some API Platform configurations emit),
+        // or `@type: "Link"` (what this project's API Platform version actually emits —
+        // confirmed empirically: every *ToMany association is Link, every *ToOne is
+        // rdf:Property with the same string range). Neither is documented as *the*
+        // contract, so check both rather than gamble on which one a given backend uses.
+        isCollection: isCollectionRange(sp.property?.range) || propertyType === 'Link',
         // Read the translated label from the OUTER SupportedProperty wrapper
         // (sp.title / sp['hydra:title']), NOT from sp.property which only
         // carries the raw technical property name in its `label` field.

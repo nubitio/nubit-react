@@ -29,6 +29,38 @@ function readViolation(value: unknown): ApiViolation | null {
   return { propertyPath, message };
 }
 
+/**
+ * Extracts a human-readable message from an API Platform error response body.
+ *
+ * Two distinct error shapes reach the client:
+ *  1. Symfony validation failures — a `violations: [{ propertyPath, message }]`
+ *     array, handled entirely by {@link mapApiViolations}.
+ *  2. Everything else API Platform can throw as a JSON-LD `Error`/`hydra:Error`
+ *     resource — domain exceptions (`ComplianceChecker::assertVigente`), type
+ *     mismatches (wrong payload shape for a collection relation), FK
+ *     constraint violations surfaced as 409 Conflict, etc. These carry no
+ *     `violations` array, only a `detail` (preferred, API Platform's
+ *     human-readable message) or `title`/`hydra:description` fallback.
+ *
+ * Without this, shape (2) errors have no textual representation anywhere in
+ * the response and are silently dropped by callers that only look for
+ * `violations` (see `useFormSubmit.handleSave` / `handleDelete`).
+ *
+ * Returns `undefined` when `data` isn't an object or carries none of the
+ * known message fields, so callers can fall back to a generic translation.
+ */
+export function extractApiErrorMessage(data: unknown): string | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const record = data as Record<string, unknown>;
+  const detail = record['detail'];
+  if (typeof detail === 'string' && detail.trim() !== '') return detail;
+  const title = record['title'];
+  if (typeof title === 'string' && title.trim() !== '') return title;
+  const description = record['hydra:description'] ?? record['description'];
+  if (typeof description === 'string' && description.trim() !== '') return description;
+  return undefined;
+}
+
 export function mapApiViolations(
   violations: unknown,
   detailPropertyName = 'items',

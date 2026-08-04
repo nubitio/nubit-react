@@ -4,7 +4,18 @@ import type { UseFormSubmitOptions } from './FormSubmitOptions';
 import { useCoreRuntime, useCoreTranslation } from '@nubitio/core';
 import type { FormDataRecord } from './FormDataSnapshot';
 import { FORM_ERRORS_EVENT } from './FormEvents';
+import { extractApiErrorMessage } from './FormApiViolations';
 import { HydraAdapter } from '../adapter/HydraAdapter';
+
+/** Narrows an unknown rejection to the `{ status, data }` shape our http clients reject with. */
+function readApiError(err: unknown): { status?: number; data?: unknown } | null {
+  if (typeof err !== 'object' || err === null) return null;
+  const record = err as Record<string, unknown>;
+  return {
+    status: typeof record['status'] === 'number' ? record['status'] : undefined,
+    data: 'data' in record ? record['data'] : undefined,
+  };
+}
 
 export type { UseFormSubmitAccessors } from './FormSubmitAccessors';
 export type { UseFormSubmitOptions } from './FormSubmitOptions';
@@ -24,7 +35,7 @@ export const useFormSubmit = (
   validateFn: () => boolean,
 ) => {
   const { t } = useCoreTranslation();
-  const { confirm } = useCoreRuntime();
+  const { confirm, notify } = useCoreRuntime();
 
   const adapter = options.adapter ?? HydraAdapter;
   const getIdField = () => options.fields.find((f) => f.isIdentity)?.name ?? '';
@@ -99,17 +110,23 @@ export const useFormSubmit = (
         options.onSaveSuccess?.(response);
       })
       .catch((err: unknown) => {
-        if (
-          typeof err === 'object' &&
-          err !== null &&
-          'status' in err &&
-          err.status === 422 &&
-          'data' in err &&
-          typeof err.data === 'object' &&
-          err.data !== null &&
-          'violations' in err.data
-        ) {
-          emit(options.formErrorsEvent ?? FORM_ERRORS_EVENT, err.data.violations);
+        const apiError = readApiError(err);
+        const violations =
+          apiError?.data && typeof apiError.data === 'object'
+            ? (apiError.data as Record<string, unknown>)['violations']
+            : undefined;
+
+        if (Array.isArray(violations)) {
+          // Symfony validation failure — per-field messages the form already knows how to render.
+          emit(options.formErrorsEvent ?? FORM_ERRORS_EVENT, violations);
+        } else {
+          // Any other API Platform error shape (domain exceptions, type mismatches, …) carries no
+          // `violations` array and would otherwise vanish silently. Route its message through the
+          // same pipeline as an "unassigned" violation so the existing toast picks it up.
+          const message = extractApiErrorMessage(apiError?.data);
+          if (message) {
+            emit(options.formErrorsEvent ?? FORM_ERRORS_EVENT, [{ message }]);
+          }
         }
         options.onSaveError?.(err);
       })
@@ -135,6 +152,16 @@ export const useFormSubmit = (
         options.onDeleteSuccess?.(response);
       })
       .catch((err: unknown) => {
+        // A resource that doesn't wire its own onDeleteError previously failed
+        // completely silently — the confirm dialog closed as if the delete had
+        // succeeded (e.g. a DELETE rejected with 409 Conflict by a foreign-key
+        // constraint). Surface the API's message by default; a resource that
+        // supplies its own handler is assumed to render its own feedback.
+        if (!options.onDeleteError) {
+          const apiError = readApiError(err);
+          const message = extractApiErrorMessage(apiError?.data);
+          notify(message ?? t('form.deleteError'), 'error');
+        }
         options.onDeleteError?.(err);
       })
       .finally(finalize);

@@ -33,6 +33,7 @@ export interface CoreTranslationKeys {
   'form.detailAdd': string;
   'form.detailRemove': string;
   'form.validationError': string;
+  'form.deleteError': string;
   'form.loading': string;
   'form.groupOther': string;
   'grid.noRecords': string;

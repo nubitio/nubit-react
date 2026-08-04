@@ -649,7 +649,11 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     const subs = [
       on<unknown>(scopedFormErrorsEvent, (formErrors) => {
         const mapped = mapApiViolations(formErrors, detailPropertyName, t('validation.defaultError'));
-        notify(t('form.validationError'), 'error');
+        // Violations without a propertyPath (a general/root-level error — e.g. a domain
+        // exception synthesized by useFormSubmit as a single unassigned message) carry the
+        // only description of what went wrong; show it verbatim instead of the generic
+        // "some field is invalid" copy, which would otherwise be actively misleading.
+        notify(mapped.unassigned.length > 0 ? mapped.unassigned.join(' ') : t('form.validationError'), 'error');
         setErrors((current) => {
           return { ...current, ...mapped.fieldErrors };
         });

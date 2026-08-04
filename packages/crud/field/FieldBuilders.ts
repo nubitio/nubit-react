@@ -61,6 +61,43 @@ export function entityField<TRecord extends DataRecord = DataRecord>(
 }
 
 /**
+ * Builder for TAGS (multi-select remote) fields.
+ *
+ * Same three required args as {@link entityField} — url, valueField,
+ * textField — because a TAGS field IS an entity relation, just a to-many one:
+ * it loads options from the same kind of remote resource and serializes the
+ * same way (`serializeEntityFormValue`), the only difference is the control
+ * renders a multi-select and the value is an array. Defaults `multiple(true)`
+ * since that's what the ENTITY field type's `multiple` flag is defined
+ * against (see `entityTypeModule` — an ENTITY field with `multiple: true`
+ * falls back to a plain input; TAGS is the control that actually implements
+ * multi-select).
+ *
+ * Usage:
+ *   tagsField('/api/existencias', '_iri', 'peso')
+ *     .name('existencias')
+ *     .label('Existencias seleccionadas')
+ *     .build()
+ */
+export class TagsFieldBuilder<TRecord extends DataRecord = DataRecord> extends BaseFieldBuilder<TRecord> {
+  constructor(url: string, valueField: string, textField: string) {
+    super(FieldType.TAGS);
+    this._field.url = url;
+    this._field.valueField = valueField;
+    this._field.textField = textField;
+    this._field.multiple = true;
+  }
+}
+
+export function tagsField<TRecord extends DataRecord = DataRecord>(
+  url: string,
+  valueField: string,
+  textField: string,
+): TagsFieldBuilder<TRecord> {
+  return new TagsFieldBuilder<TRecord>(url, valueField, textField);
+}
+
+/**
  * Builder for CURRENCY fields.
  *
  * Defaults applied automatically:

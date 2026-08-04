@@ -105,6 +105,17 @@ function deriveApiUrl(entrypointPropertyId: string): string {
  *   - a Hydra collection range array where the resource class lives under
  *     `owl:equivalentClass.owl:allValuesFrom.@id`
  */
+/**
+ * True when `raw` is the Hydra collection-range wrapper — an array whose
+ * entries carry the target class under `owl:equivalentClass.owl:allValuesFrom`.
+ * This is exactly the shape API Platform emits for `ManyToMany`/`OneToMany`
+ * properties (see {@link normalizeRange}); a to-one relation's `range` is
+ * always a plain string or a single IRI object, never an array.
+ */
+export function isCollectionRange(raw: unknown): boolean {
+  return Array.isArray(raw);
+}
+
 export function normalizeRange(raw: unknown): string | undefined {
   if (typeof raw === 'string') return raw;
   if (Array.isArray(raw)) {
@@ -290,6 +301,7 @@ export function parseHydraDoc(
         required: sp.required ?? false,
         readable,
         writeable,
+        isCollection: isCollectionRange(sp.property?.range),
         // Read the translated label from the OUTER SupportedProperty wrapper
         // (sp.title / sp['hydra:title']), NOT from sp.property which only
         // carries the raw technical property name in its `label` field.

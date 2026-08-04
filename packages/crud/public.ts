@@ -74,6 +74,7 @@ export {
   dateField,
   datetimeField,
   entityField,
+  tagsField,
   enumField,
   checkboxField,
   identityField,

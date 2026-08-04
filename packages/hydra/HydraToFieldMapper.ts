@@ -6,6 +6,7 @@ import {
   numberField,
   switchField,
   entityField,
+  tagsField,
   enumField,
   fileField,
   imageField,
@@ -527,15 +528,18 @@ export function mapHydraSchemaToFields(
         : '';
       const valueField = resolveEntityValueField(relatedSchema);
       const textField = resolveEntityTextField(relatedSchema, valueField, fieldSchema.crudHints?.textField);
-      const built = entityField(url, valueField, textField)
-        .name(name)
-        .label(label)
-        .required(required)
-        .build();
+      // A to-many relation (ManyToMany/OneToMany) needs a multi-select control, not the
+      // single-picker ENTITY renders — TAGS is the multi-valued counterpart, backed by the
+      // exact same remote resource (see the TagsFieldBuilder doc comment for why the naming
+      // differs from the relation's own Doctrine cardinality).
+      const builder = fieldSchema.isCollection
+        ? tagsField(url, valueField, textField)
+        : entityField(url, valueField, textField);
+      const built = builder.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       stampMappingReason(
         field,
-        `rule-8 entity → ${url || 'unknown-url'}`,
+        `rule-8 ${fieldSchema.isCollection ? 'tags (collection)' : 'entity'} → ${url || 'unknown-url'}`,
         applyCrudHints(field, fieldSchema.crudHints),
       );
       fields.push(field);

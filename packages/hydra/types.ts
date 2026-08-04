@@ -252,6 +252,15 @@ export interface HydraFieldSchema {
   crudHints?: CrudHints;
   /** Allowed values (renders as a select). From `enum` on the supported property. */
   enumOptions?: Array<string | number>;
+  /**
+   * True when the property is a to-many relation (Doctrine ManyToMany /
+   * OneToMany) rather than a single reference. Derived from the Hydra
+   * collection-range wrapper shape — see {@link normalizeRange} — which
+   * signals cardinality but is otherwise discarded once the target class
+   * name has been extracted. Rule 8 in {@link mapHydraSchemaToFields} uses
+   * this to render a multi-select control instead of a single picker.
+   */
+  isCollection?: boolean;
 }
 
 /**

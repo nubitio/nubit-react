@@ -2,7 +2,11 @@
   position: fixed;
   bottom: 12px;
   right: 12px;
-  z-index: 9999;
+  // Must stay below Tier 3 (--z-dialog and up, see tokens.scss) so this
+  // dev-only toggle never physically covers a dialog/drawer's own controls
+  // (e.g. a Save button in the bottom-right corner of a form panel) — it
+  // used to sit at 9999, above literally everything.
+  z-index: var(--z-devtools, 1800);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
 }

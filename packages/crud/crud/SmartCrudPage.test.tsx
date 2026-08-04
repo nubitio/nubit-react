@@ -64,6 +64,25 @@ const resource = defineResource(API_URL, {
   ],
 });
 
+// Regression fixture for the "Nuevo does nothing in editMode: 'batch'" bug:
+// CrudPage used to hide its <CrudFormShell> (the add/edit dialog) for every
+// inline edit mode, but only 'row' mode has a real inline replacement for it
+// (NativeDataGridView's openRow() short-circuits to inlineEdit.startEdit()
+// only when editMode === 'row'). 'cell' and 'batch' modes have no inline
+// "add new record" path, so hiding the dialog for them left "Nuevo" — and
+// clicking a row to edit — silently doing nothing.
+const batchResource = defineResource(API_URL, {
+  title: 'Products',
+  mercure: false,
+  adapter: RestAdapter,
+  routing: { routeParam: 'id' },
+  editMode: 'batch',
+  fields: [
+    identityField().build(),
+    textField().name('name').label('Name').build(),
+  ],
+});
+
 // ── Test doubles ───────────────────────────────────────────────────────────────
 const okResponse = <T,>(data: T) => ({
   data,
@@ -103,7 +122,13 @@ const runtime: CoreRuntime = {
   confirm: () => true, // auto-accept delete confirmation
 };
 
-function renderPage(entry: string, formRef: React.RefObject<FormHandle | null>, http: HttpMock, loadSpy: ReturnType<typeof vi.fn>) {
+function renderPage(
+  entry: string,
+  formRef: React.RefObject<FormHandle | null>,
+  http: HttpMock,
+  loadSpy: ReturnType<typeof vi.fn>,
+  resourceUnderTest: typeof resource = resource,
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -112,8 +137,8 @@ function renderPage(entry: string, formRef: React.RefObject<FormHandle | null>, 
           <ResourceStoreProvider factory={() => makeStore(loadSpy)}>
             <MemoryRouter initialEntries={[entry]}>
               <Routes>
-                <Route path="/:id" element={<SmartCrudPage resource={resource} formRef={formRef} />} />
-                <Route path="/" element={<SmartCrudPage resource={resource} formRef={formRef} />} />
+                <Route path="/:id" element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />} />
+                <Route path="/" element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />} />
               </Routes>
             </MemoryRouter>
           </ResourceStoreProvider>
@@ -187,5 +212,41 @@ describe('CRUD engine ↔ RestAdapter wiring', () => {
 
     await waitFor(() => expect(http.delete).toHaveBeenCalledTimes(1));
     expect(http.delete).toHaveBeenCalledWith(`${API_URL}/9`);
+  });
+});
+
+describe("editMode: 'batch' still renders the add/edit dialog", () => {
+  it('create → POST still fires with editMode "batch" (form actually mounts)', async () => {
+    const formRef = createRef<FormHandle>();
+    renderPage('/new', formRef, http, loadSpy, batchResource);
+
+    // Before the fix, CrudPage never rendered <CrudFormShell> for any inline
+    // edit mode, so <FormView ref={formRef}> never mounted and this ref
+    // stayed null forever — "Nuevo" silently did nothing.
+    await waitFor(() => expect(formRef.current).not.toBeNull());
+
+    act(() => {
+      formRef.current!.setValues({ name: 'Keyboard' });
+      formRef.current!.save();
+    });
+
+    await waitFor(() => expect(http.post).toHaveBeenCalledTimes(1));
+    expect(http.post).toHaveBeenCalledWith(API_URL, expect.objectContaining({ name: 'Keyboard' }));
+  });
+
+  it('edit → PATCH still fires with editMode "batch" (row-click dialog still mounts)', async () => {
+    const formRef = createRef<FormHandle>();
+    renderPage('/7', formRef, http, loadSpy, batchResource);
+
+    await waitFor(() => expect(formRef.current).not.toBeNull());
+
+    act(() => {
+      formRef.current!.setValues({ id: 7, name: 'Edited' });
+      formRef.current!.setIsEdit(true);
+      formRef.current!.save();
+    });
+
+    await waitFor(() => expect(http.patch).toHaveBeenCalledTimes(1));
+    expect(http.patch).toHaveBeenCalledWith(`${API_URL}/7`, expect.objectContaining({ name: 'Edited' }));
   });
 });

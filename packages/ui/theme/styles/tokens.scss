@@ -124,6 +124,7 @@
   --z-shell-header:   1501;
   --z-shell-popover:  1700;
   --z-shell-dropdown: 1600;
+  --z-devtools:       1800; // dev-only debug overlay — above shell chrome, below Tier 3 so it never covers a dialog's own controls (e.g. a form's Save button)
 
   // Tier 3 — full-screen overlays (dialogs, nested CRUD, loading screens)
   // Max is 3000 — never exceed this value.

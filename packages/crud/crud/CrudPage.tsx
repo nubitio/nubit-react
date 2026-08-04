@@ -222,10 +222,14 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     [initialFilters, resolvedResource.filter, routeAwareGridFields],
   );
 
-  const isInlineEditMode =
-    resolvedResource.editMode === 'row' ||
-    resolvedResource.editMode === 'cell' ||
-    resolvedResource.editMode === 'batch';
+  // Only 'row' edit mode has a real inline replacement for the dialog
+  // (NativeDataGridView's openRow() calls inlineEdit.startEdit() and returns
+  // early, without ever reaching onEdit). 'cell' and 'batch' modes have no
+  // inline "add new record" path at all, and openRow() falls through to
+  // onEdit(row) for them exactly like non-inline grids — so hiding the
+  // dialog for those two modes left both "Nuevo" and clicking a row to edit
+  // silently doing nothing (the dialog they both need was never rendered).
+  const hasInlineReplacementForDialog = resolvedResource.editMode === 'row';
 
   const viewMode = useMemo(
     () => resolveViewMode(resolvedResource.viewMode),
@@ -619,7 +623,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         adapter={resolvedResource.adapter}
         emptyState={resolvedResource.emptyState}
       />
-      {!isInlineEditMode && (
+      {!hasInlineReplacementForDialog && (
         <CrudFormShell
           viewMode={viewMode}
           events={events}

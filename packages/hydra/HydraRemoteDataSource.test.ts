@@ -152,4 +152,113 @@ describe('HydraRemoteDataSource.load', () => {
     expect(result.data).toEqual([{ id: 1, name: 'Laptop' }]);
     expect(result.totalCount).toBe(3);
   });
+
+  // prependData/appendData keep the currently-selected option visible in an
+  // entity dropdown even when the default query would otherwise exclude it
+  // (e.g. it's already assigned elsewhere and the list only shows
+  // "available" items). When the query's own filters aren't active yet —
+  // opening the dropdown with a blank search — that same record often comes
+  // back from the API too, so without deduping it renders twice with an
+  // identical key.
+  it('drops a prepended item already present in the fetched page', async () => {
+    const httpClient = {
+      get: async () => ({
+        data: [{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }],
+        headers: new Headers(),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.load({ prependData: [{ id: 1, name: 'OC-000001' }] });
+
+    expect(result.data).toEqual([{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }]);
+  });
+
+  it('keeps a prepended item that is not in the fetched page', async () => {
+    const httpClient = {
+      get: async () => ({
+        data: [{ id: 2, name: 'OC-000002' }],
+        headers: new Headers(),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.load({ prependData: [{ id: 1, name: 'OC-000001' }] });
+
+    expect(result.data).toEqual([{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }]);
+  });
+
+  it('drops an appended item already present in the fetched page', async () => {
+    const httpClient = {
+      get: async () => ({
+        data: [{ id: 1, name: 'OC-000001' }],
+        headers: new Headers(),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.load({ appendData: [{ id: 1, name: 'OC-000001' }] });
+
+    expect(result.data).toEqual([{ id: 1, name: 'OC-000001' }]);
+  });
+
+  it('matches prependData/appendData by @id when idField is absent (iriMode)', async () => {
+    const httpClient = {
+      get: async () => ({
+        data: [{ '@id': '/api/orden_compras/1', name: 'OC-000001' }],
+        headers: new Headers(),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.load({
+      prependData: [{ '@id': '/api/orden_compras/1', name: 'OC-000001' }],
+    });
+
+    expect(result.data).toEqual([{ '@id': '/api/orden_compras/1', name: 'OC-000001' }]);
+  });
+
+  // Real-world shape (plain REST JSON, no JSON-LD): idField is `_iri`
+  // (iriMode) but raw items off the wire have neither `_iri` nor `@id` —
+  // only `id`. The prepended item is the currently-selected entity dropdown
+  // value, already normalized through a prior byKey()/addIriField() pass,
+  // so it *does* carry `_iri` already. Keying off idField/@id first would
+  // compare `undefined` (raw item) against `/api/orden_compras/1`
+  // (prepended item) and never match — this is the exact bug this dedup
+  // exists to fix, on an entity dropdown with an active selection.
+  it('dedupes a pre-normalized prependData item against a raw fetched item sharing only `id`', async () => {
+    const httpClient = {
+      get: async () => ({
+        data: [
+          { id: 1, numero: 'OC-000001' },
+          { id: 2, numero: 'OC-000002' },
+        ],
+        headers: new Headers(),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient, idField: '_iri', iriMode: true });
+
+    const result = await ds.load({
+      prependData: [{ id: 1, numero: 'OC-000001', _iri: '/api/orden_compras/1' }],
+    });
+
+    expect(result.data).toHaveLength(2);
+    expect(result.data.filter((item) => item['id'] === 1)).toHaveLength(1);
+  });
+
+  it('does not forward prependData/appendData as request query params', async () => {
+    let capturedParams: Record<string, unknown> | undefined;
+    const httpClient = {
+      get: async (_url: string, config?: { params?: Record<string, unknown> }) => {
+        capturedParams = config?.params;
+        return { data: [{ id: 1, name: 'OC-000001' }], headers: new Headers() };
+      },
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    await ds.load({ prependData: [{ id: 2, name: 'OC-000002' }], appendData: [{ id: 3, name: 'OC-000003' }] });
+
+    expect(capturedParams).not.toHaveProperty('prependData');
+    expect(capturedParams).not.toHaveProperty('appendData');
+  });
 });

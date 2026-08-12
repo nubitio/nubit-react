@@ -147,6 +147,22 @@ function stripAdapterOnlyParams(loadOptions: ResourceLoadOptions): ResourceLoadO
   return nextOptions;
 }
 
+/**
+ * prependData/appendData are client-side merge instructions consumed in
+ * `fetchAll` after the response comes back — they were never meant to leave
+ * the browser. `preparedOptions` (which still carries them, for `fetchAll`
+ * to read) doubles as the HTTP request's query params, so left in place
+ * they'd serialize into the URL as a wall of prependData[0][...] params:
+ * harmless to the server, which ignores unrecognized filters, but noisy and
+ * wasteful.
+ */
+function stripMergeOnlyParams(loadOptions: ResourceLoadOptions): ResourceLoadOptions {
+  const nextOptions: ResourceLoadOptions = { ...loadOptions };
+  delete nextOptions.prependData;
+  delete nextOptions.appendData;
+  return nextOptions;
+}
+
 function convertPaginationParams(loadOptions: ResourceLoadOptions): ResourceLoadOptions {
   const nextOptions: ResourceLoadOptions = { ...loadOptions };
 
@@ -289,15 +305,41 @@ export class HydraRemoteDataSource implements ResourceStore {
   }
 
   private async fetchAll(loadOptions: RemoteLoadOptions): Promise<GridData<DataRecord>> {
-    const response = await this.httpClient.get<unknown>(this.config.url, { params: loadOptions });
+    const response = await this.httpClient.get<unknown>(this.config.url, {
+      params: stripMergeOnlyParams(loadOptions),
+    });
     const parsed = parseCollectionResponse(response.data, response.headers);
     let data = parsed.data;
 
+    // appendData/prependData exist so the currently-selected option stays
+    // visible even when the default query would otherwise exclude it (e.g.
+    // it's already assigned elsewhere and the resource's own list filters
+    // "available" items). That item is frequently *also* returned by the
+    // query itself (no filter active yet, page still shows it, …) — without
+    // deduping, the same record renders twice with the same identity, which
+    // React (correctly) flags as a duplicate key in the option list.
+    //
+    // prependData/appendData items are pre-normalized (they went through a
+    // prior `byKey`/`addIriField` pass, e.g. for the currently-selected
+    // entity) while `data` fresh off the wire hasn't yet — for a plain REST
+    // API (no JSON-LD `@id`) that means the prepended item already carries a
+    // synthesized `_iri` the matching raw item doesn't have yet, so keying
+    // off idField/@id first misses the match entirely. The natural id-like
+    // fields (id/code/uuid/slug) survive normalization unchanged on both
+    // sides, so check those first and only fall back to @id/idField for
+    // IRI-only entities that never had one.
+    const itemKey = (item: DataRecord): unknown =>
+      item['id'] ?? item['code'] ?? item['uuid'] ?? item['slug'] ?? item['@id'] ?? item[this.config.idField];
+    const dedupeAgainst = (extra: DataRecord[], existing: DataRecord[]): DataRecord[] => {
+      const existingKeys = new Set(existing.map(itemKey));
+      return extra.filter((item) => !existingKeys.has(itemKey(item)));
+    };
+
     if (loadOptions.appendData) {
-      data = [...data, ...loadOptions.appendData];
+      data = [...data, ...dedupeAgainst(loadOptions.appendData, data)];
     }
     if (loadOptions.prependData) {
-      data = [...loadOptions.prependData, ...data];
+      data = [...dedupeAgainst(loadOptions.prependData, data), ...data];
     }
 
     const totalCount = parsed.totalCount === parsed.data.length ? data.length : parsed.totalCount;

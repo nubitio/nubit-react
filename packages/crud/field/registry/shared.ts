@@ -70,12 +70,27 @@ export function getEntityDisplayValue(
   return getPrimitiveDisplay(value);
 }
 
-export function getEnumDisplayValue(field: Field, value: unknown): string {
+export function getEnumDisplayValue(
+  field: Field,
+  value: unknown,
+  yesLabel?: string,
+  noLabel?: string,
+): string {
   const match = Array.isArray(field.data)
     ? field.data.find((item) => item['value'] === value || item[field.valueField] === value)
     : undefined;
 
-  return getPrimitiveDisplay(match?.['text'] ?? match?.[field.textField] ?? value);
+  const display = match?.['text'] ?? match?.[field.textField] ?? value;
+  // SWITCH fields (see switch.tsx) route through here with no `field.data`,
+  // so `display` falls through to the raw boolean `value` — without
+  // threading yesLabel/noLabel this call used to fall back to
+  // getPrimitiveDisplay's hardcoded English defaults ('Yes'/'No'),
+  // ignoring the caller's locale even when every other boolean-valued cell
+  // (dates, entity refs, plain display-only fields) rendered correctly
+  // translated via that same context.
+  return yesLabel !== undefined && noLabel !== undefined
+    ? getPrimitiveDisplay(display, yesLabel, noLabel)
+    : getPrimitiveDisplay(display);
 }
 
 // ─── Filter operator sets ─────────────────────────────────────────────────────

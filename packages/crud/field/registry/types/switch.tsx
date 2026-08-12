@@ -15,7 +15,11 @@ export const switchTypeModule: FieldTypeModule = {
   filterOperators: EQUALITY_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,
   // SWITCH cells resolve through field.data like ENUM (on/off option labels).
-  cellText: (field, value) => getEnumDisplayValue(field, value),
+  // Most switch fields carry no field.data (no explicit on/off labels), so
+  // this falls through to the raw boolean — yesLabel/noLabel must be
+  // threaded through for that fallback to respect the caller's locale
+  // instead of silently defaulting to English.
+  cellText: (field, value, ctx) => getEnumDisplayValue(field, value, ctx.yesLabel, ctx.noLabel),
   serializeFormValue: () => KEEP,
   serializeDetailValue: () => KEEP,
   rendersOwnLabel: true,

@@ -113,6 +113,17 @@ describe('cell text', () => {
     expect(getFieldTypeModule(FieldType.SWITCH).cellText(f, 'open', cellCtx)).toBe('Open');
   });
 
+  it('renders a plain boolean SWITCH (no field.data) through the caller yes/no labels', () => {
+    // Most SWITCH fields carry no on/off option text (they map straight from
+    // a Doctrine bool column, e.g. Actor::esProveedor) — cellText falls
+    // through to the raw boolean and must still honor the caller's
+    // localized labels instead of defaulting to English.
+    const f = { ...textField().name('active').label('Active').build(), type: FieldType.SWITCH };
+    const esCtx = { yesLabel: 'Sí', noLabel: 'No' };
+    expect(getFieldTypeModule(FieldType.SWITCH).cellText(f, true, esCtx)).toBe('Sí');
+    expect(getFieldTypeModule(FieldType.SWITCH).cellText(f, false, esCtx)).toBe('No');
+  });
+
   it('keeps SELECT values raw (no field.data lookup)', () => {
     const f = enumField([{ value: 'open', text: 'Open' }]).name('status').label('Status').build();
     expect(getFieldTypeModule(FieldType.SELECT).cellText(f, 'open', cellCtx)).toBe('open');

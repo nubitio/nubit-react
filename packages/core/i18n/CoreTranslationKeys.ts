@@ -37,6 +37,10 @@ export interface CoreTranslationKeys {
   'form.loading': string;
   'form.groupOther': string;
   'grid.noRecords': string;
+  'grid.accessDeniedTitle': string;
+  'grid.accessDeniedDescription': string;
+  'grid.loadErrorTitle': string;
+  'grid.loadErrorDescription': string;
   'grid.selectRequired': string;
   'grid.loading': string;
   'grid.buttonNew': string;

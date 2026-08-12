@@ -124,6 +124,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const [expandedKeys, setExpandedKeys] = useState<Set<unknown>>(() => new Set());
   const [isGridLoading, setIsGridLoading] = useState(!options.manualLoad);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [loadError, setLoadError] = useState<{ status?: number } | null>(null);
   const isMobile = useIsMobile();
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [expandedCardKeys, setExpandedCardKeys] = useState<Set<unknown>>(() => new Set());
@@ -401,15 +402,27 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       loadOptions.take = pageSize;
     }
 
-    const result = await source.load(loadOptions);
-    if (seq !== loadSeqRef.current) return rowsRef.current; // superseded
-    rowsRef.current = result.data;
-    setRows(result.data);
-    setTotalCount(result.totalCount);
-    setGridSummary(result.gridSummary ?? null);
-    setIsGridLoading(false);
-    onContentReadyRef.current?.();
-    return result.data;
+    try {
+      const result = await source.load(loadOptions);
+      if (seq !== loadSeqRef.current) return rowsRef.current; // superseded
+      rowsRef.current = result.data;
+      setRows(result.data);
+      setTotalCount(result.totalCount);
+      setGridSummary(result.gridSummary ?? null);
+      setLoadError(null);
+      setIsGridLoading(false);
+      onContentReadyRef.current?.();
+      return result.data;
+    } catch (error) {
+      if (seq !== loadSeqRef.current) return rowsRef.current; // superseded
+      rowsRef.current = [];
+      setRows([]);
+      setTotalCount(0);
+      setGridSummary(null);
+      setLoadError({ status: (error as { status?: number } | null)?.status });
+      setIsGridLoading(false);
+      return [];
+    }
   }, [filterOperators, filters, options.data, options.gridSummary, options.manualLoad, options.paging, page, pageSize, sort, source]);
 
   useEffect(() => {
@@ -1894,7 +1907,22 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             )}
             {rows.length === 0 && !isGridLoading && (
               <GridEmptyStateView
-                emptyState={options.emptyState}
+                emptyState={
+                  loadError
+                    ? {
+                        title:
+                          loadError.status === 403
+                            ? t('grid.accessDeniedTitle')
+                            : t('grid.loadErrorTitle'),
+                        description:
+                          loadError.status === 403
+                            ? t('grid.accessDeniedDescription')
+                            : t('grid.loadErrorDescription'),
+                        icon: loadError.status === 403 ? 'lock' : 'warning-circle',
+                        variant: 'danger' as const,
+                      }
+                    : options.emptyState
+                }
                 fallbackTitle={t('grid.noRecords')}
               />
             )}

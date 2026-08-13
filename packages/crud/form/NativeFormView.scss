@@ -499,7 +499,14 @@
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  // Never shrink below content height: .nb-form sits inside a dialog body
+  // that already scrolls (.nb-dialog__body { overflow: auto }), so a section
+  // with more fields than fit the available height should push the dialog
+  // to scroll, not compress below its own content — min-height: 0 (a flex
+  // item's default-overriding reset) was letting sections with many/tall
+  // fields get squashed by their column-flex siblings, so the squashed
+  // section's overflow: visible content bled down over the next section.
+  flex-shrink: 0;
   overflow: visible;
   padding: 18px 0 22px;
 }

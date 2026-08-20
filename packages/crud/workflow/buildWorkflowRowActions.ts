@@ -1,5 +1,5 @@
 import type { CoreHttpClient, DataRecord } from '@nubitio/core';
-import type { WorkflowSchema } from '@nubitio/hydra';
+import type { WorkflowSchema } from '../schema/ResourceSchema';
 import type { ResourceToolbarAction } from '../crud/ResourceConfig';
 
 export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
@@ -20,8 +20,7 @@ export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
     .filter((transition) => transition.from.includes(current))
     .filter(
       (transition) =>
-        !transition.roles?.length ||
-        transition.roles.some((role) => roles.includes(role)),
+        !transition.roles?.length || transition.roles.some((role) => roles.includes(role)),
     )
     .map((transition) => ({
       text: transition.label ?? transition.name,
@@ -49,9 +48,7 @@ export function buildWorkflowRowActions<T extends DataRecord = DataRecord>(
         });
         if (!response.ok) {
           const detail = await response.text().catch(() => '');
-          throw new Error(
-            detail || `Transition "${transition.name}" failed (${response.status})`,
-          );
+          throw new Error(detail || `Transition "${transition.name}" failed (${response.status})`);
         }
         onDone?.();
       },

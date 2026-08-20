@@ -1,13 +1,37 @@
 import { createContext, useContext, useMemo } from 'react';
 import type { DataRecord } from '@nubitio/core';
-import type { EmbeddedLinesSchema, WorkflowSchema } from '@nubitio/hydra';
 import type { Field } from '../field/Field';
 import type { FormLayout } from '../form/FormLayout';
+import type { ResourceFormDetail } from '../crud/ResourceConfig';
 
 import { resolveSmartCrudFields } from '../crud/resolveSmartCrudFields';
 import type { SmartCrudFieldContract } from '../crud/fieldContract';
 import type { SummaryItem } from '../summary';
 import { useFallbackResourceSchema } from './useFallbackResourceSchema';
+
+/** Transport-neutral workflow metadata understood by CRUD renderers. */
+export interface WorkflowTransitionSchema {
+  name: string;
+  from: string[];
+  to: string;
+  label?: string;
+  roles?: string[];
+}
+
+export interface WorkflowSchema {
+  field: string;
+  transitions: WorkflowTransitionSchema[];
+}
+
+/** Transport-neutral master-detail metadata understood by CRUD renderers. */
+export interface EmbeddedLinesSchema {
+  propertyName: string;
+  lineClass: string;
+  lineEntityClass?: string;
+  routePath: string;
+  parentQueryParam: string;
+  reloadUrl: string;
+}
 
 export interface ResourceSchemaRequest {
   apiUrl: string;
@@ -24,6 +48,7 @@ export interface ResourceSchemaResolution {
   workflow?: WorkflowSchema;
   summaryFields?: SummaryItem[];
   embeddedLines?: EmbeddedLinesSchema[];
+  resolveFormDetail?: (formDetail?: ResourceFormDetail) => ResourceFormDetail | undefined;
 }
 
 export interface ResourceSchemaResolver {
@@ -58,6 +83,7 @@ function resolveWithRuntimeErrors(
   workflow?: WorkflowSchema,
   summaryFields?: SummaryItem[],
   embeddedLines?: EmbeddedLinesSchema[],
+  resolveFormDetail?: ResourceSchemaResolution['resolveFormDetail'],
 ): ResourceSchemaResolution {
   try {
     return {
@@ -69,6 +95,7 @@ function resolveWithRuntimeErrors(
       workflow,
       summaryFields,
       embeddedLines,
+      resolveFormDetail,
     };
   } catch (runtimeError) {
     return {
@@ -80,6 +107,7 @@ function resolveWithRuntimeErrors(
       workflow,
       summaryFields,
       embeddedLines,
+      resolveFormDetail,
     };
   }
 }
@@ -129,6 +157,7 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
         workflow: schemaMeta.workflow,
         formLayout: schemaMeta.formLayout,
         summaryFields: schemaMeta.summaryFields,
+        resolveFormDetail: schemaMeta.resolveFormDetail,
       };
     }
 
@@ -151,6 +180,7 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
       baseline.workflow,
       baseline.summaryFields,
       baseline.embeddedLines,
+      baseline.resolveFormDetail,
     );
   }, [baseline, fieldContract, fieldSource, manualFields, schemaMeta, schemaResolver]);
 }

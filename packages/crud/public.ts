@@ -93,8 +93,16 @@ export { buildFields } from './field/buildFields';
 export type { FieldInput } from './field/buildFields';
 export { FieldBuilder } from './field/FieldBuilder';
 export { FieldType } from './field/FieldType';
-export { registerFieldType, listRegisteredFieldTypes, getFieldTypeModule } from './field/registry/registry';
-export type { FieldControlKind, FieldFormWidth, FieldTypeModule } from './field/registry/FieldTypeModule';
+export {
+  registerFieldType,
+  listRegisteredFieldTypes,
+  getFieldTypeModule,
+} from './field/registry/registry';
+export type {
+  FieldControlKind,
+  FieldFormWidth,
+  FieldTypeModule,
+} from './field/registry/FieldTypeModule';
 export { BETWEEN_VALUE_SEPARATOR } from './field/registry/shared';
 export type { Field, FieldDef, LoadOption } from './field/Field';
 export type {
@@ -193,7 +201,11 @@ export type {
   DataGridSummaryItem,
   DataGridViewOptions,
 } from './datagrid/DataGridViewOptions';
-export type { ColumnGroupDef, ColumnHeaderCell, ResolvedColumnHeaders } from './datagrid/ColumnGroup';
+export type {
+  ColumnGroupDef,
+  ColumnHeaderCell,
+  ResolvedColumnHeaders,
+} from './datagrid/ColumnGroup';
 export {
   buildGroupBoundaryClassName,
   resolveColumnHeaders,
@@ -223,6 +235,9 @@ export type {
   ResourceSchemaProviderProps,
   ResourceSchemaResolution,
   ResourceSchemaResolver,
+  EmbeddedLinesSchema,
+  WorkflowSchema,
+  WorkflowTransitionSchema,
 } from './schema/ResourceSchema';
 export { ResourceStoreProvider } from './data/ResourceStore';
 export { createRestResourceStore } from './data/restResourceStore';

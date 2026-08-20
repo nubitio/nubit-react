@@ -4,7 +4,8 @@
  * These are pure data types — no React, no hooks, no side effects.
  */
 
-import type { FormLayout } from '@nubitio/crud';
+import type { EmbeddedLinesSchema, FormLayout, WorkflowSchema } from '@nubitio/crud';
+export type { EmbeddedLinesSchema, WorkflowSchema, WorkflowTransitionSchema } from '@nubitio/crud';
 
 // ---------------------------------------------------------------------------
 // Raw Hydra JSON-LD shapes (from /api/docs.jsonld)
@@ -142,19 +143,6 @@ export interface HydraSupportedOperation {
   method?: string;
 }
 
-export interface WorkflowTransitionSchema {
-  name: string;
-  from: string[];
-  to: string;
-  label?: string;
-  roles?: string[];
-}
-
-export interface WorkflowSchema {
-  field: string;
-  transitions: WorkflowTransitionSchema[];
-}
-
 export interface SequenceSchema {
   field: string;
   name?: string;
@@ -164,15 +152,6 @@ export interface SequenceSchema {
 }
 
 /** Master-detail line metadata from nubitio/admin-bundle EmbeddedLinesDocumentationNormalizer. */
-export interface EmbeddedLinesSchema {
-  propertyName: string;
-  lineClass: string;
-  lineEntityClass?: string;
-  routePath: string;
-  parentQueryParam: string;
-  reloadUrl: string;
-}
-
 export interface HydraClass {
   '@id': string; // e.g. "#Branch"
   '@type': string; // e.g. "Class"

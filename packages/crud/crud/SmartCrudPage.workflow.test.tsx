@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildWorkflowRowActions } from '../workflow/buildWorkflowRowActions';
-import type { WorkflowSchema } from '@nubitio/hydra';
+import type { WorkflowSchema } from '../schema/ResourceSchema';
 
 const workflow: WorkflowSchema = {
   field: 'status',
@@ -12,24 +12,18 @@ const workflow: WorkflowSchema = {
 
 describe('SmartCrudPage workflow row actions', () => {
   it('exposes transitions matching the current state', () => {
-    const actions = buildWorkflowRowActions(
-      { id: 7, status: 'open' },
-      workflow,
-      '/api/orders',
-      ['ROLE_USER'],
-    );
+    const actions = buildWorkflowRowActions({ id: 7, status: 'open' }, workflow, '/api/orders', [
+      'ROLE_USER',
+    ]);
 
     expect(actions).toHaveLength(1);
     expect(actions[0]?.text).toBe('Enviar a cocina');
   });
 
   it('filters transitions by role', () => {
-    const actions = buildWorkflowRowActions(
-      { id: 7, status: 'served' },
-      workflow,
-      '/api/orders',
-      ['ROLE_USER'],
-    );
+    const actions = buildWorkflowRowActions({ id: 7, status: 'served' }, workflow, '/api/orders', [
+      'ROLE_USER',
+    ]);
 
     expect(actions).toHaveLength(0);
   });

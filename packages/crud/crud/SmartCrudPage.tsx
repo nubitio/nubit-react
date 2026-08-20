@@ -10,7 +10,6 @@ import type { FieldInput } from '../field/buildFields';
 import { useRouting } from './routing/useRouting';
 import { logDevHint } from './devHint';
 import { useCoreHttpClient, useCoreTranslation, useMercureSubscription } from '@nubitio/core';
-import { getSchemaResolver, resolveInferredFormDetail, useSchemaContext } from '@nubitio/hydra';
 import { Button, Skeleton } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import { useSmartCrudRoles } from './SmartCrudRolesContext';
@@ -113,8 +112,6 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
   const internalGridRef = useRef<GridHandle | null>(null);
   const effectiveGridRef = gridRef ?? internalGridRef;
 
-  const { data: schemaData } = useSchemaContext();
-
   const hasManualFields =
     !resource.fieldContract && Array.isArray(resource.fields) && resource.fields.length > 0;
 
@@ -127,6 +124,7 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
     workflow,
     summaryFields: inferredSummaryFields,
     embeddedLines,
+    resolveFormDetail,
   } = useResolvedResourceFields({
     apiUrl: resource.apiUrl,
     manualFields: hasManualFields ? buildFields(resource.fields as FieldInput[]) : undefined,
@@ -137,24 +135,16 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
     const detail = resource.formDetail;
     if (!detail || detail.inferFields === false) return false;
     if (detail.fields && detail.fields.length > 0) return false;
-    if ((embeddedLines?.length ?? 0) > 0) return true;
-    if (!schemaData) return false;
-
-    return getSchemaResolver(schemaData).hasEmbeddedLines(resource.apiUrl);
-  }, [embeddedLines, resource.apiUrl, resource.formDetail, schemaData]);
+    return (embeddedLines?.length ?? 0) > 0;
+  }, [embeddedLines, resource.formDetail]);
 
   const resolvedBaseResource = useMemo(() => {
     const withFormDetail = {
       ...resource,
-      formDetail: resolveInferredFormDetail(
-        resource.apiUrl,
-        resource.formDetail,
-        schemaData,
-        embeddedLines,
-      ),
+      formDetail: resolveFormDetail?.(resource.formDetail) ?? resource.formDetail,
     };
     return resolveCrudResource(withFormDetail);
-  }, [embeddedLines, resource, schemaData]);
+  }, [resolveFormDetail, resource]);
 
   // Dev hint: log a defineResource() snippet once per resource URL when fields
   // were auto-inferred. No-op in production.
@@ -333,7 +323,7 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
 
   if (
     (!hasManualFields && isLoading) ||
-    (awaitingFormDetailInference && (!schemaData || inferredFormDetailFieldCount === 0))
+    (awaitingFormDetailInference && inferredFormDetailFieldCount === 0)
   ) {
     return <CrudSkeleton />;
   }

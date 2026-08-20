@@ -26,7 +26,14 @@ export function useResourceSchema<T extends DataRecord = DataRecord>(
       return { fields: [], isLoading, error, supportedOperations: [] };
     }
 
-    const resolved = getSchemaResolver(data).resolveResource(apiUrl);
-    return { ...resolved, error: resolved.error, isLoading: false };
+    const resolver = getSchemaResolver(data);
+    const resolved = resolver.resolveResource(apiUrl);
+    return {
+      ...resolved,
+      error: resolved.error,
+      isLoading: false,
+      resolveFormDetail: (formDetail) =>
+        resolver.resolveFormDetail(apiUrl, formDetail, resolved.embeddedLines),
+    };
   }, [data, enabled, isLoading, error, apiUrl]);
 }

@@ -51,7 +51,6 @@
   },
   "peerDependencies": {
     "@nubitio/core": "workspace:^",
-    "@nubitio/hydra": "workspace:^",
     "@nubitio/ui": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     "@tiptap/extension-link": "^3.0.0",

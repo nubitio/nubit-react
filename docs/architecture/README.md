@@ -7,13 +7,14 @@ Symfony/API Platform contract.
 
 ## Start here
 
-| Doc | When to read |
-| --- | --- |
-| [Pipeline](./pipeline.md) | "How does a PHP entity become a React screen?" |
-| [Field resolution](./field-resolution.md) | "Why is this field a select / hidden / currency?" |
-| [Complexity tiers](./tiers.md) | "How much frontend code do I need?" |
-| [Breakpoints](./breakpoints.md) | "Where do I put a breakpoint to debug X?" |
-| [Migration v1](./migration-v1.md) | "What changed in v0.6 / what breaks in v1.0?" |
+| Doc                                                          | When to read                                               |
+| ------------------------------------------------------------ | ---------------------------------------------------------- |
+| [Pipeline](./pipeline.md)                                    | "How does a PHP entity become a React screen?"             |
+| [Field resolution](./field-resolution.md)                    | "Why is this field a select / hidden / currency?"          |
+| [Complexity tiers](./tiers.md)                               | "How much frontend code do I need?"                        |
+| [Breakpoints](./breakpoints.md)                              | "Where do I put a breakpoint to debug X?"                  |
+| [Migration v1](./migration-v1.md)                            | "What changed in v0.6 / what breaks in v1.0?"              |
+| [Privacy, analytics and flags](./privacy-analytics-flags.md) | "How do browser telemetry and rollout controls stay safe?" |
 
 ## Golden path (simple CRUD)
 

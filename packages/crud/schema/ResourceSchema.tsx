@@ -144,7 +144,21 @@ export function useResolvedResourceFields<T extends DataRecord = DataRecord>({
 
   return useMemo(() => {
     if (fieldSource === 'manual-contract') {
-      return resolveWithRuntimeErrors(() => resolveSmartCrudFields({ contract: fieldContract }));
+      const resolved = resolveWithRuntimeErrors(
+        () => resolveSmartCrudFields({ contract: fieldContract }),
+        schemaMeta.supportedOperations ?? [],
+        schemaMeta.formLayout,
+        schemaMeta.workflow,
+        schemaMeta.summaryFields,
+        schemaMeta.embeddedLines,
+        schemaMeta.resolveFormDetail,
+      );
+
+      return {
+        ...resolved,
+        isLoading: schemaMeta.isLoading,
+        error: resolved.error ?? schemaMeta.error,
+      };
     }
 
     if (fieldSource === 'manual-fields') {

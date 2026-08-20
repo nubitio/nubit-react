@@ -110,6 +110,8 @@ export function SearchableAppDropdown({
 
   useEffect(() => {
     if (open) return;
+    // Search results are ephemeral state scoped to one menu opening.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchQuery('');
     setRemoteOptions([]);
     setLoading(false);

@@ -308,6 +308,8 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
       _supportedOperations: supportedOperations,
       rowActions,
     } as ResourceConfig<T>;
+    // `fields` intentionally preserves identity when a manual field contract changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     effectiveGridRef,
     fields,

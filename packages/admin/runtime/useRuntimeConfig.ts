@@ -52,6 +52,9 @@ export function useRuntimeConfig({
   }, [apiBaseUrl, enabled, path]);
 
   useEffect(() => {
+    // Runtime config is loaded from an external endpoint. The state transition
+    // is intentionally owned by refresh so manual and initial loads agree.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
 

@@ -74,6 +74,9 @@ export function SessionProvider({
   }, [apiBaseUrl, mePath]);
 
   useEffect(() => {
+    // Initial session discovery is an external-system synchronization; state
+    // updates happen after the fetch resolves, not synchronously in this effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
 

@@ -389,6 +389,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   // (e.g. recalculate a `total` from line items).
   // Cleanup is handled automatically by useEvents' own unmount effect.
   const onDetailRowsChangedRef = React.useRef(resolvedResource.onDetailRowsChanged);
+  // Event subscriptions must retain their identity while invoking the latest callback.
+  // eslint-disable-next-line react-hooks/refs
   onDetailRowsChangedRef.current = resolvedResource.onDetailRowsChanged;
 
   React.useEffect(() => {
@@ -481,6 +483,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
 
   const toolbar = useMemo(() => {
     const base =
+      // Toolbar extension callbacks deliberately receive imperative handles.
+      // eslint-disable-next-line react-hooks/refs
       resolveResourceToolbar(resolvedResource, {
         resource: resolvedResource,
         selectedRow: selectedRows[0],
@@ -552,6 +556,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
       return undefined;
     }
     if (typeof aboveGridSlot === 'function') {
+      // The public slot contract deliberately exposes the grid's imperative handle.
+      // eslint-disable-next-line react-hooks/refs
       return aboveGridSlot({
         resource: resolvedResource,
         gridRef,

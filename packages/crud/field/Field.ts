@@ -6,7 +6,10 @@ import type { FormLayoutHint } from '../form/resolveFieldColSpan';
 import React from 'react';
 import type { DataRecord } from '@nubitio/core';
 
-export type LoadOption = Record<string, any>;
+export interface LoadOption {
+  prependData?: unknown[];
+  [key: string]: unknown;
+}
 
 export interface FieldButton {
   name?: string;

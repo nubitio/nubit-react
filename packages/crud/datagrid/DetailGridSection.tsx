@@ -20,6 +20,8 @@ export function DetailGridSection({ fields, url }: { fields: Field[]; url: strin
 
   useEffect(() => {
     const source = resourceStoreFactory({ url, idField: getIdField(fields), httpClient });
+    // A changed resource starts a new external load and must expose loading immediately.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     source
       .load({})

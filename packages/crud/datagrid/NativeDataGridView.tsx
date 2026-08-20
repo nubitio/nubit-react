@@ -52,7 +52,6 @@ import { SummaryFooter } from './SummaryFooter';
 import {
   ACTIONS_COL_WIDTH,
   CHECKBOX_COL_WIDTH,
-  computeAutoColumnWidths,
   computeLayoutWidth,
   DETAIL_COL_WIDTH,
   getColumnWidth,
@@ -72,6 +71,8 @@ import {
   SelectionActionsMenu,
 } from './gridToolbar';
 import { useGridDataLoader } from './useGridDataLoader';
+import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
+import { useAutoColumnWidths } from './useAutoColumnWidths';
 
 type SortRule = { selector: string; desc: boolean };
 
@@ -137,7 +138,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const syncHorizontalScrollRef = useRef<() => void>(() => {});
   const [containerWidth, setContainerWidth] = useState(0);
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
-  const [autoColWidths, setAutoColWidths] = useState<Record<string, number>>({});
   const resizingRef = useRef<{ name: string; startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
@@ -202,126 +202,26 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     return () => observer.disconnect();
   }, []);
 
-  useLayoutEffect(() => {
-    const tbody = tbodyRef.current;
-    const thead = theadRef.current;
-    const tfoot = tfootRef.current;
-    const hScroll = hScrollRef.current;
-    if (!tbody) return;
+  useSynchronizedGridScroll(
+    { theadRef, tbodyRef, tfootRef, hScrollRef, syncRef: syncHorizontalScrollRef },
+    {
+      rowsLength: rows.length,
+      visibleFieldCount: visibleFields.length,
+      colWidths,
+      containerWidth,
+      summaryFieldCount: options.summaryFields?.length ?? 0,
+    },
+  );
 
-    let syncing = false;
-
-    const applyScrollLeft = (scrollLeft: number) => {
-      syncing = true;
-      if (tbody.scrollLeft !== scrollLeft) tbody.scrollLeft = scrollLeft;
-      if (thead && thead.scrollLeft !== scrollLeft) thead.scrollLeft = scrollLeft;
-      if (tfoot && tfoot.scrollLeft !== scrollLeft) tfoot.scrollLeft = scrollLeft;
-      if (hScroll && hScroll.scrollLeft !== scrollLeft) hScroll.scrollLeft = scrollLeft;
-      syncing = false;
-    };
-
-    const clampAndSync = () => {
-      const maxScroll = Math.max(0, tbody.scrollWidth - tbody.clientWidth);
-      applyScrollLeft(Math.min(tbody.scrollLeft, maxScroll));
-    };
-
-    syncHorizontalScrollRef.current = clampAndSync;
-    clampAndSync();
-
-    const onBodyScroll = () => {
-      if (syncing) return;
-      applyScrollLeft(tbody.scrollLeft);
-    };
-
-    const onFooterScroll = () => {
-      if (syncing || !hScroll) return;
-      applyScrollLeft(hScroll.scrollLeft);
-    };
-
-    // tbody itself is overflow-x: hidden (see .nb-datagrid__table > tbody) so
-    // it never grows its own horizontal scrollbar — .nb-datagrid__hscroll
-    // below is the single visible one. That means trackpad/shift+wheel
-    // horizontal gestures made while hovering the rows no longer move
-    // anything on their own; forward them here so that UX isn't lost.
-    const onWheel = (e: WheelEvent) => {
-      const horizontalDelta = e.deltaX !== 0 ? e.deltaX : e.shiftKey ? e.deltaY : 0;
-      if (horizontalDelta === 0) return;
-      const maxScroll = Math.max(0, tbody.scrollWidth - tbody.clientWidth);
-      if (maxScroll === 0) return;
-      e.preventDefault();
-      applyScrollLeft(Math.min(maxScroll, Math.max(0, tbody.scrollLeft + horizontalDelta)));
-    };
-
-    tbody.addEventListener('scroll', onBodyScroll, { passive: true });
-    tbody.addEventListener('wheel', onWheel, { passive: false });
-    hScroll?.addEventListener('scroll', onFooterScroll, { passive: true });
-
-    const layoutObserver = new ResizeObserver(() => clampAndSync());
-    layoutObserver.observe(tbody);
-    if (thead) layoutObserver.observe(thead);
-    if (tfoot) layoutObserver.observe(tfoot);
-
-    return () => {
-      tbody.removeEventListener('scroll', onBodyScroll);
-      tbody.removeEventListener('wheel', onWheel);
-      hScroll?.removeEventListener('scroll', onFooterScroll);
-      layoutObserver.disconnect();
-    };
-  }, [rows.length, visibleFields.length, colWidths, containerWidth, options.summaryFields?.length]);
-
-  // Content-driven auto width (DevExtreme-style columnAutoWidth): measure
-  // after the current page has rendered, using the real header/body font so
-  // it matches whatever theme/density is active, then size columns that
-  // don't have an explicit width to fit their content instead of sitting at
-  // the flat 120px default. Recomputes per page since the "widest cell"
-  // naturally changes as rows change.
-  //
-  // setState always goes through setIfChanged: computeAutoColumnWidths (and
-  // the {} empty case) return a brand-new object every call, and this effect
-  // depends on values (visibleFields, filterRemoteOptions, t) that aren't
-  // guaranteed referentially stable from their own callers. Setting an
-  // unconditionally-new object on every run turns that into a real infinite
-  // render loop — setIfChanged makes the update a no-op once the values
-  // stop actually differing, regardless of how often the effect itself reruns.
-  useLayoutEffect(() => {
-    const setIfChanged = (next: Record<string, number>) => {
-      setAutoColWidths((prev) => {
-        const prevKeys = Object.keys(prev);
-        const nextKeys = Object.keys(next);
-        if (
-          prevKeys.length === nextKeys.length &&
-          nextKeys.every((key) => prev[key] === next[key])
-        ) {
-          return prev;
-        }
-        return next;
-      });
-    };
-
-    if (rows.length === 0 || visibleFields.length === 0) {
-      setIfChanged({});
-      return;
-    }
-    const sampleHeaderCell = theadRef.current?.querySelector('th');
-    const sampleBodyCell = tbodyRef.current?.querySelector('td');
-    if (!sampleHeaderCell || !sampleBodyCell) return;
-
-    const headerStyle = getComputedStyle(sampleHeaderCell);
-    const bodyStyle = getComputedStyle(sampleBodyCell);
-    const headerFont = `${headerStyle.fontWeight} ${headerStyle.fontSize} ${headerStyle.fontFamily}`;
-    const bodyFont = `${bodyStyle.fontWeight} ${bodyStyle.fontSize} ${bodyStyle.fontFamily}`;
-
-    setIfChanged(
-      computeAutoColumnWidths({
-        fields: visibleFields,
-        rows,
-        bodyFont,
-        headerFont,
-        getCellText: (field, row) =>
-          getCellText(field, row, filterRemoteOptions[field.name], t('common.yes'), t('common.no')),
-      }),
-    );
-  }, [rows, visibleFields, filterRemoteOptions, t]);
+  const autoColWidths = useAutoColumnWidths({
+    theadRef,
+    tbodyRef,
+    fields: visibleFields,
+    rows,
+    remoteOptions: filterRemoteOptions,
+    yesLabel: t('common.yes'),
+    noLabel: t('common.no'),
+  });
 
   useEffect(() => {
     if (!openRowMenu) return;

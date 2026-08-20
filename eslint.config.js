@@ -21,16 +21,15 @@ export default tseslint.config(
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      // React Compiler diagnostics: known debt in the large grid/form views,
-      // tracked for refactor — keep visible as warnings without failing CI.
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/refs': 'warn',
+      'react-hooks/set-state-in-effect': 'error',
+      'react-hooks/refs': 'error',
     },
   },
   {
     files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   {

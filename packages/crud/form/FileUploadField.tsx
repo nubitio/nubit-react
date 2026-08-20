@@ -108,6 +108,8 @@ export function FileUploadField({
   useEffect(() => {
     revokeLocalPreview();
     const path = resolveMediaPath(existingMedia);
+    // Reset the editor when its controlled media value changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreviewUrl(imageMode ? path : null);
     setFileName(resolveMediaFileName(existingMedia, path));
     setFileUrl(path);

@@ -2,7 +2,7 @@
 
 Opinionated React admin stack for API Platform / Hydra backends — and any REST API.
 
-Seven packages, published lockstep under the `@nubitio` npm scope:
+Nine packages, published lockstep under the `@nubitio` npm scope:
 
 | Package | Description |
 | --- | --- |
@@ -12,7 +12,9 @@ Seven packages, published lockstep under the `@nubitio` npm scope:
 | [`@nubitio/crud`](packages/crud) | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
 | [`@nubitio/hydra`](packages/hydra) | Schema discovery and data sources from Hydra/OpenAPI docs |
 | [`@nubitio/dashboard`](packages/dashboard) | Declarative dashboards: stat cards, bar/donut charts, tables |
+| [`@nubitio/devextreme`](packages/devextreme) | Optional DevExtreme grid and form adapters |
 | [`@nubitio/react-admin`](packages/react-admin) | Batteries-included umbrella — install this one |
+| [`@nubitio/eject`](packages/eject) | CLI for generating explicit fields and pages from discovered schemas |
 
 ## Architecture
 

@@ -271,7 +271,7 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
           return true;
         },
       }),
-      [options.onBatchSave, refresh, source],
+      [activeFilter, options, refresh, source, t],
     );
 
     const handleSelectionChanged = useCallback(
@@ -363,7 +363,7 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
         hasPendingEditsRef.current = false;
         refresh();
       },
-      [options.onBatchSave, refresh],
+      [options, refresh],
     );
 
     const handleEditCanceled = useCallback(() => {
@@ -386,7 +386,7 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
         if (!rowData || options.canDeleteRow?.(rowData) === false) return;
         setConfirmRow(rowData);
       },
-      [options.canDeleteRow],
+      [options],
     );
 
     const renderRowActions = useCallback(
@@ -419,15 +419,7 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
           </div>
         );
       },
-      [
-        options.allowDelete,
-        options.allowEdit,
-        options.canDeleteRow,
-        options.canEditRow,
-        options.onEdit,
-        requestDelete,
-        t,
-      ],
+      [options, requestDelete, t],
     );
 
     const remoteOperations = resolveDxRemoteOperations(options);
@@ -449,7 +441,7 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
 
         return <DevExtremeDetailGridSection fields={detailFields} url={detailUrl} />;
       },
-      [idField, options.detailFields, options.detailUrl],
+      [idField, options],
     );
 
     const showToolbar = options.toolbarVisible !== false;

@@ -65,6 +65,8 @@ export const CrudDialogView = forwardRef<CrudDialogViewEvents, CrudDialogViewOpt
 
     useEffect(() => {
       if (options.title) {
+        // Keep the legacy uncontrolled title API synchronized with its option.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTitle(options.title);
       }
     }, [options.title]);

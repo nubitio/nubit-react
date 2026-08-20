@@ -181,6 +181,8 @@ export function DateRangePicker({
   // ── Sync controlled values → month ────────────────────────────────────────
   useEffect(() => {
     const anchor = parseIsoDate(startValue) ?? parseIsoDate(endValue);
+    // Controlled values define which month the calendar should display.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (anchor) setMonth(startOfMonth(anchor));
   }, [startValue]); // eslint-disable-line react-hooks/exhaustive-deps
 

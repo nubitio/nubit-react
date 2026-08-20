@@ -28,6 +28,8 @@ export function DevExtremeDetailGridSection({ fields, url }: DevExtremeDetailGri
 
   useEffect(() => {
     const source = resourceStoreFactory({ url, idField });
+    // A changed detail resource starts a new external load.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     source
       .load({})

@@ -54,6 +54,9 @@ export function MercureProvider({ hubUrl: hubUrlOverride, children }: MercurePro
       return;
     }
 
+    // Catch a discovery update that may have happened between initialization
+    // and subscription before listening for subsequent external changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDiscoveredHubUrl(mercureManager.getHubUrl());
     return mercureManager.onHubUrlChange(setDiscoveredHubUrl);
   }, [hubUrlOverride]);

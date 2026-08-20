@@ -200,6 +200,8 @@ export function AuditTrailPanel({
 
   useEffect(() => {
     if (!visible) {
+      // Closing the controlled drawer resets stale request state for its next open.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFetchState({ status: 'idle' });
       return;
     }

@@ -96,6 +96,27 @@ export function renderRowActionItem(
   return renderSelectionActionItem(action, index, false, onBeforeClick);
 }
 
+/** Row actions menu content: regular actions, then danger actions in their own group. */
+export function renderRowMenuActions(
+  actions: ResourceToolbarAction[],
+  permissions: string[],
+  onBeforeClick?: () => void,
+) {
+  const regular = actions.filter((a) => a.type !== 'danger');
+  const danger = actions.filter((a) => a.type === 'danger');
+
+  return (
+    <>
+      {regular.map((action, idx) => renderRowActionItem(action, idx, permissions, onBeforeClick))}
+      {danger.length > 0 && (
+        <div className="nb-datagrid__actions-danger-group">
+          {danger.map((action, idx) => renderRowActionItem(action, idx, permissions, onBeforeClick))}
+        </div>
+      )}
+    </>
+  );
+}
+
 const DROPDOWN_OPENED_EVENT = 'lookup:opened';
 
 export function SelectionActionsMenu({

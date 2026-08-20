@@ -58,14 +58,13 @@ import {
   getPageRange,
   INLINE_ACTIONS_COL_WIDTH,
   lockColumnWidth,
-  MIN_COL_WIDTH,
   PAGE_SIZE_OPTIONS,
 } from './gridLayoutUtils';
 import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gridFieldUtils';
 import {
   buildToolbar,
   isToolbarActionVisible,
-  renderRowActionItem,
+  renderRowMenuActions,
   renderToolbarButton,
   SelectionActionsMenu,
 } from './gridToolbar';
@@ -73,6 +72,7 @@ import { useGridDataLoader } from './useGridDataLoader';
 import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
 import { useAutoColumnWidths } from './useAutoColumnWidths';
 import { useGridSelection } from './useGridSelection';
+import { useColumnResize } from './useColumnResize';
 import { buildNativeRowActions } from './nativeRowActions';
 
 type SortRule = { selector: string; desc: boolean };
@@ -138,7 +138,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const syncHorizontalScrollRef = useRef<() => void>(() => {});
   const [containerWidth, setContainerWidth] = useState(0);
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
-  const resizingRef = useRef<{ name: string; startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
     onContentReadyRef.current = options.onContentReady;
@@ -595,35 +594,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     });
   };
 
-  const handleResizeMouseDown = (fieldName: string) => (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const th = (event.currentTarget as HTMLElement).closest('th') as HTMLTableCellElement | null;
-    if (!th) return;
-
-    resizingRef.current = {
-      name: fieldName,
-      startX: event.clientX,
-      startWidth: th.offsetWidth,
-    };
-
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      if (!resizingRef.current) return;
-      const resize = resizingRef.current;
-      const next = Math.max(MIN_COL_WIDTH, resize.startWidth + (moveEvent.clientX - resize.startX));
-      setColWidths((current) => ({ ...current, [resize.name]: next }));
-      requestAnimationFrame(() => syncHorizontalScrollRef.current());
-    };
-    const onMouseUp = () => {
-      resizingRef.current = null;
-      syncHorizontalScrollRef.current();
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  };
+  const handleResizeMouseDown = useColumnResize({ setColWidths, syncHorizontalScrollRef });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasCheckbox = options.selectionMode === 'multiple';
@@ -924,24 +895,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
   const renderRowMenuContent = () => {
     if (!openRowMenu) return null;
-    const regular = openRowMenu.actions.filter((a) => a.type !== 'danger');
-    const danger = openRowMenu.actions.filter((a) => a.type === 'danger');
-    const closeCurrentRowMenu = () => setOpenRowMenu(null);
-
-    return (
-      <>
-        {regular.map((action, idx) =>
-          renderRowActionItem(action, idx, toolbarPermissions, closeCurrentRowMenu),
-        )}
-        {danger.length > 0 && (
-          <div className="nb-datagrid__actions-danger-group">
-            {danger.map((action, idx) =>
-              renderRowActionItem(action, idx, toolbarPermissions, closeCurrentRowMenu),
-            )}
-          </div>
-        )}
-      </>
-    );
+    return renderRowMenuActions(openRowMenu.actions, toolbarPermissions, () => setOpenRowMenu(null));
   };
 
   const pageStart = totalCount > 0 ? page * pageSize + 1 : 0;

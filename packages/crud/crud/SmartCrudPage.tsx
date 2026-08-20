@@ -116,14 +116,12 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
   const { data: schemaData } = useSchemaContext();
 
   const hasManualFields =
-    !resource.fieldContract &&
-    Array.isArray(resource.fields) &&
-    resource.fields.length > 0;
+    !resource.fieldContract && Array.isArray(resource.fields) && resource.fields.length > 0;
 
   const {
-    fields,
     isLoading,
     error,
+    fields,
     supportedOperations,
     formLayout: inferredFormLayout,
     workflow,
@@ -205,7 +203,11 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
       source = 'hydra';
     }
 
-    const permissionsSource = resource.permissions ? 'explicit' : supportedOperations.length > 0 ? 'inferred' : 'default';
+    const permissionsSource = resource.permissions
+      ? 'explicit'
+      : supportedOperations.length > 0
+        ? 'inferred'
+        : 'default';
 
     registerResource({
       apiUrl: resource.apiUrl,
@@ -329,8 +331,7 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
 
   if (
     (!hasManualFields && isLoading) ||
-    (awaitingFormDetailInference &&
-      (!schemaData || inferredFormDetailFieldCount === 0))
+    (awaitingFormDetailInference && (!schemaData || inferredFormDetailFieldCount === 0))
   ) {
     return <CrudSkeleton />;
   }
@@ -375,7 +376,9 @@ export function SchemaCrudPage<T extends DataRecord = DataRecord>({
 }
 
 /** @deprecated Use {@link SchemaCrudPageProps} instead. */
-export interface SmartCrudPageProps<T extends DataRecord = DataRecord> extends SchemaCrudPageProps<T> {
+export interface SmartCrudPageProps<
+  T extends DataRecord = DataRecord,
+> extends SchemaCrudPageProps<T> {
   /**
    * @deprecated Use `defineFieldContract()` / `defineFields()` on the resource instead.
    */

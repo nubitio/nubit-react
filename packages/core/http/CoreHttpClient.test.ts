@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CoreHttpClient, createCoreHttpClient } from './CoreHttpClient';
+import { createCoreHttpClient } from './CoreHttpClient';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-function makeResponse(status: number, body: unknown = {}, headers: Record<string, string> = {}): Response {
+function makeResponse(
+  status: number,
+  body: unknown = {},
+  headers: Record<string, string> = {},
+): Response {
   const init: ResponseInit = {
     status,
     headers: { 'Content-Type': 'application/json', ...headers },
@@ -136,7 +140,9 @@ describe('response handling', () => {
     const client = createCoreHttpClient({ baseUrl: '/api/' });
     await client.patch('items/1', { name: 'Updated' });
     const init = fetchMock.mock.calls[0][1] as RequestInit;
-    expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/merge-patch+json');
+    expect((init.headers as Record<string, string>)['Content-Type']).toBe(
+      'application/merge-patch+json',
+    );
   });
 
   it('does not set Content-Type for FormData body', async () => {
@@ -153,7 +159,11 @@ describe('response handling', () => {
 describe('error handling', () => {
   it('throws with error message from response detail field', async () => {
     fetchMock.mockResolvedValueOnce(makeResponse(400, { detail: 'Validation failed' }));
-    const client = createCoreHttpClient({ baseUrl: '/api/', refreshPath: 'auth/refresh', loginPath: 'auth/login' });
+    const client = createCoreHttpClient({
+      baseUrl: '/api/',
+      refreshPath: 'auth/refresh',
+      loginPath: 'auth/login',
+    });
     await expect(client.get('items')).rejects.toMatchObject({
       message: 'Validation failed',
       status: 400,
@@ -162,7 +172,11 @@ describe('error handling', () => {
 
   it('falls back to message field when detail is absent', async () => {
     fetchMock.mockResolvedValueOnce(makeResponse(422, { message: 'Unprocessable entity' }));
-    const client = createCoreHttpClient({ baseUrl: '/api/', refreshPath: 'auth/refresh', loginPath: 'auth/login' });
+    const client = createCoreHttpClient({
+      baseUrl: '/api/',
+      refreshPath: 'auth/refresh',
+      loginPath: 'auth/login',
+    });
     await expect(client.get('items')).rejects.toMatchObject({
       message: 'Unprocessable entity',
     });
@@ -171,7 +185,12 @@ describe('error handling', () => {
   it('calls onError callback on non-401 errors', async () => {
     const onError = vi.fn();
     fetchMock.mockResolvedValueOnce(makeResponse(500, { detail: 'Server error' }));
-    const client = createCoreHttpClient({ baseUrl: '/api/', onError, refreshPath: 'auth/refresh', loginPath: 'auth/login' });
+    const client = createCoreHttpClient({
+      baseUrl: '/api/',
+      onError,
+      refreshPath: 'auth/refresh',
+      loginPath: 'auth/login',
+    });
     await expect(client.get('items')).rejects.toThrow();
     expect(onError).toHaveBeenCalledOnce();
   });

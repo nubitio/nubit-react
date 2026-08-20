@@ -39,6 +39,8 @@ export type CreateNubitAppConfig = {
   locale?: string;
   timezone?: string;
   currency?: string;
+  /** Base URL for generated theme CSS files. Default `/themes/`. */
+  themeBasePath?: string;
   menu: NubitAppMenuItem[] | ((ctx: NubitAppMenuContext) => NubitAppMenuItem[]);
   routes: NubitAppRoute[];
   /**

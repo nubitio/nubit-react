@@ -1,5 +1,4 @@
 import type { DataRecord } from '@nubitio/core';
-import type { Field } from '../field/Field';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 import type { BackendAdapter } from './BackendAdapter';
 
@@ -83,9 +82,13 @@ export const HydraAdapter: BackendAdapter = {
     const r = response as Record<string, unknown>;
     const member = r['hydra:member'];
     if (Array.isArray(member)) {
-      return { items: member as DataRecord[], total: Number(r['hydra:totalItems'] ?? member.length) };
+      return {
+        items: member as DataRecord[],
+        total: Number(r['hydra:totalItems'] ?? member.length),
+      };
     }
-    if (Array.isArray(response)) return { items: response as DataRecord[], total: (response as unknown[]).length };
+    if (Array.isArray(response))
+      return { items: response as DataRecord[], total: (response as unknown[]).length };
     return { items: [], total: 0 };
   },
 
@@ -95,12 +98,16 @@ export const HydraAdapter: BackendAdapter = {
     const directId = entityValue['id'];
     if (typeof directId === 'string' || typeof directId === 'number') return `${base}/${directId}`;
     const directValue = entityValue[field.valueField];
-    if (field.valueField !== '_iri' && (typeof directValue === 'string' || typeof directValue === 'number')) {
+    if (
+      field.valueField !== '_iri' &&
+      (typeof directValue === 'string' || typeof directValue === 'number')
+    ) {
       return `${base}/${directValue}`;
     }
     for (const key of ['code', 'uuid', 'slug'] as const) {
       const candidate = entityValue[key];
-      if (typeof candidate === 'string' || typeof candidate === 'number') return `${base}/${candidate}`;
+      if (typeof candidate === 'string' || typeof candidate === 'number')
+        return `${base}/${candidate}`;
     }
     return undefined;
   },

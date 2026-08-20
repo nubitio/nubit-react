@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useScreenSize } from './useScreenSize';
 
 export interface AdminMenuSubItem {
@@ -118,10 +118,7 @@ export const AdminSidebarMenu = ({
   );
 
   return (
-    <div
-      className={`nb-admin-menu${compactMode ? ' compact' : ''}`}
-      onPointerDown={openMenu}
-    >
+    <div className={`nb-admin-menu${compactMode ? ' compact' : ''}`} onPointerDown={openMenu}>
       <div className="nb-admin-menu-container theme-dependent">
         <nav className="nb-admin-menu__nav" aria-label="Main navigation">
           {items.map((item) => {

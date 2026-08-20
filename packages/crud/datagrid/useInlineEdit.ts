@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { CoreHttpClient, DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
@@ -84,7 +84,9 @@ export function useInlineEdit({
   // Stable refs so async callbacks always see the latest values without
   // needing to be recreated on every render.
   const draftRowsRef = useRef(draftRows);
-  draftRowsRef.current = draftRows; // eslint-disable-line react-hooks/refs
+  useLayoutEffect(() => {
+    draftRowsRef.current = draftRows;
+  }, [draftRows]);
 
   const optsRef = useRef({
     url,
@@ -96,7 +98,18 @@ export function useInlineEdit({
     onSaveError,
     onBatchSave,
   });
-  optsRef.current = { url, idField, adapter, httpClient, fields, onSaveSuccess, onSaveError, onBatchSave }; // eslint-disable-line react-hooks/refs
+  useLayoutEffect(() => {
+    optsRef.current = {
+      url,
+      idField,
+      adapter,
+      httpClient,
+      fields,
+      onSaveSuccess,
+      onSaveError,
+      onBatchSave,
+    };
+  }, [adapter, fields, httpClient, idField, onBatchSave, onSaveError, onSaveSuccess, url]);
 
   const isEditing = useCallback((key: unknown) => draftRows.has(key), [draftRows]);
 
@@ -120,7 +133,8 @@ export function useInlineEdit({
       const draft = draftRows.get(key);
       if (!draft) return false;
       return optsRef.current.fields.some(
-        (field) => canEditFieldInline(field) && !valuesEqual(draft[field.name], original[field.name]),
+        (field) =>
+          canEditFieldInline(field) && !valuesEqual(draft[field.name], original[field.name]),
       );
     },
     [draftRows],
@@ -199,7 +213,13 @@ export function useInlineEdit({
 
   // Returns true on success so saveAll can count successes.
   const doSaveRow = useCallback(async (key: unknown): Promise<boolean> => {
-    const { url: u, adapter: a, httpClient: http, fields: fs, onSaveError: onErr } = optsRef.current;
+    const {
+      url: u,
+      adapter: a,
+      httpClient: http,
+      fields: fs,
+      onSaveError: onErr,
+    } = optsRef.current;
     const draft = draftRowsRef.current.get(key);
     if (!draft) return false;
 
@@ -241,15 +261,21 @@ export function useInlineEdit({
       onErr?.(key, err);
       // Map 422 violations onto field-level errors
       if (
-        typeof err === 'object' && err !== null &&
-        'status' in err && (err as { status: number }).status === 422 &&
+        typeof err === 'object' &&
+        err !== null &&
+        'status' in err &&
+        (err as { status: number }).status === 422 &&
         'data' in err
       ) {
         const data = (err as { data: unknown }).data;
         if (typeof data === 'object' && data !== null && 'violations' in data) {
-          const violations = (data as { violations: Array<{ propertyPath: string; message: string }> }).violations ?? [];
+          const violations =
+            (data as { violations: Array<{ propertyPath: string; message: string }> }).violations ??
+            [];
           const fieldErrors: Record<string, string> = {};
-          violations.forEach((v) => { fieldErrors[v.propertyPath] = v.message; });
+          violations.forEach((v) => {
+            fieldErrors[v.propertyPath] = v.message;
+          });
           setRowErrors((prev) => new Map(prev).set(key, fieldErrors));
         }
       }
@@ -326,7 +352,9 @@ export function useInlineEdit({
     }
     const keys = Array.from(draftRowsRef.current.keys());
     const results = await Promise.allSettled(keys.map((key) => doSaveRow(key)));
-    const anySuccess = results.some((r) => r.status === 'fulfilled' && (r as PromiseFulfilledResult<boolean>).value);
+    const anySuccess = results.some(
+      (r) => r.status === 'fulfilled' && (r as PromiseFulfilledResult<boolean>).value,
+    );
     if (anySuccess) optsRef.current.onSaveSuccess?.();
     return anySuccess;
   }, [doSaveBatch, doSaveRow]);

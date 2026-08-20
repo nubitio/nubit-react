@@ -12,7 +12,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { AppDropdown, Button, ConfirmDialog, IconButton } from '@nubitio/ui';
-import { type ResourceLoadOptions, useResourceStoreFactory } from '../data/ResourceStore';
+import { useResourceStoreFactory } from '../data/ResourceStore';
 import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import { FieldType } from '../field/FieldType';
@@ -21,7 +21,7 @@ import { formatSummaryValue, resolveSummaryText } from '../summary';
 
 import { useEvents, useCoreHttpClient, useCoreTranslation } from '@nubitio/core';
 import { DATA_GRID_EVENTS } from './DataGridEvents';
-import type { DataGridSummaryItem, DataGridViewOptions } from './DataGridViewOptions';
+import type { DataGridViewOptions } from './DataGridViewOptions';
 import type { GridHandle } from './GridHandle';
 import type { FilterRule } from '../field/FilterRule';
 
@@ -54,7 +54,6 @@ import {
   CHECKBOX_COL_WIDTH,
   computeAutoColumnWidths,
   computeLayoutWidth,
-  DEFAULT_COL_WIDTH,
   DETAIL_COL_WIDTH,
   getColumnWidth,
   getPageRange,
@@ -67,12 +66,12 @@ import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gri
 import {
   buildToolbar,
   getResolvedRowActions,
-  getToolbarKey,
   isToolbarActionVisible,
   renderRowActionItem,
   renderToolbarButton,
   SelectionActionsMenu,
 } from './gridToolbar';
+import { useGridDataLoader } from './useGridDataLoader';
 
 type SortRule = { selector: string; desc: boolean };
 
@@ -104,10 +103,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         ),
     [options.fields, options.visibleColumns],
   );
-  const [rows, setRows] = useState<DataRecord[]>([]);
-  const rowsRef = useRef<DataRecord[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [gridSummary, setGridSummary] = useState<Record<string, unknown> | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Array<string | number>>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
@@ -122,9 +117,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const [confirmRow, setConfirmRow] = useState<DataRecord | null>(null);
   const [page, setPage] = useState(0);
   const [expandedKeys, setExpandedKeys] = useState<Set<unknown>>(() => new Set());
-  const [isGridLoading, setIsGridLoading] = useState(!options.manualLoad);
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [loadError, setLoadError] = useState<{ status?: number } | null>(null);
   const isMobile = useIsMobile();
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [expandedCardKeys, setExpandedCardKeys] = useState<Set<unknown>>(() => new Set());
@@ -154,6 +147,43 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   useEffect(() => {
     onRowPreparedRef.current = options.onRowPrepared;
   }, [options.onRowPrepared]);
+
+  const source = useMemo(
+    () =>
+      resourceStoreFactory({
+        url: options.url,
+        idField,
+        defaultFilterRules: options.filter as unknown[][] | undefined,
+        defaultSortRules: sort,
+        httpClient,
+      }),
+    [httpClient, idField, options.filter, options.url, resourceStoreFactory, sort],
+  );
+
+  const notifyContentReady = useCallback(() => onContentReadyRef.current?.(), []);
+  const {
+    rows,
+    rowsRef,
+    totalCount,
+    gridSummary,
+    isLoading: isGridLoading,
+    setIsLoading: setIsGridLoading,
+    loadError,
+    loadRows,
+  } = useGridDataLoader({
+    source,
+    fields: options.fields,
+    filters,
+    filterOperators,
+    sort,
+    page,
+    pageSize,
+    paging: options.paging ?? true,
+    manualLoad: options.manualLoad ?? false,
+    data: options.data,
+    suppliedGridSummary: options.gridSummary,
+    onContentReady: notifyContentReady,
+  });
 
   // Row actions menu: close on outside click, Escape, or when rows change
   const closeRowMenu = useCallback(() => {
@@ -361,74 +391,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     }
   }, [confirmRow, openRowMenu, closeRowMenu]);
 
-  const source = useMemo(
-    () =>
-      resourceStoreFactory({
-        url: options.url,
-        idField,
-        defaultFilterRules: options.filter as unknown[][] | undefined,
-        defaultSortRules: sort,
-        httpClient,
-      }),
-    [httpClient, idField, options.filter, options.url, resourceStoreFactory, sort],
-  );
-
-  const fieldsRef = useRef(options.fields);
-  fieldsRef.current = options.fields;
-
-  // Monotonically-increasing counter; each load call captures its own version.
-  // If a newer load completes first, older results are discarded (stale-response guard).
-  const loadSeqRef = useRef(0);
-
-  const loadRows = useCallback(async () => {
-    if (options.data) {
-      rowsRef.current = options.data;
-      setRows(options.data);
-      setTotalCount(options.data.length);
-      setGridSummary(options.gridSummary ?? null);
-      setIsGridLoading(false);
-      onContentReadyRef.current?.();
-      return options.data;
-    }
-    if (options.manualLoad) return rowsRef.current;
-    setIsGridLoading(true);
-    const seq = ++loadSeqRef.current;
-    const loadOptions: ResourceLoadOptions = {
-      filter: buildFilterExpression(filters, filterOperators, fieldsRef.current),
-      sort,
-    };
-    if (options.paging ?? true) {
-      loadOptions.skip = page * pageSize;
-      loadOptions.take = pageSize;
-    }
-
-    try {
-      const result = await source.load(loadOptions);
-      if (seq !== loadSeqRef.current) return rowsRef.current; // superseded
-      rowsRef.current = result.data;
-      setRows(result.data);
-      setTotalCount(result.totalCount);
-      setGridSummary(result.gridSummary ?? null);
-      setLoadError(null);
-      setIsGridLoading(false);
-      onContentReadyRef.current?.();
-      return result.data;
-    } catch (error) {
-      if (seq !== loadSeqRef.current) return rowsRef.current; // superseded
-      rowsRef.current = [];
-      setRows([]);
-      setTotalCount(0);
-      setGridSummary(null);
-      setLoadError({ status: (error as { status?: number } | null)?.status });
-      setIsGridLoading(false);
-      return [];
-    }
-  }, [filterOperators, filters, options.data, options.gridSummary, options.manualLoad, options.paging, page, pageSize, sort, source]);
-
-  useEffect(() => {
-    void loadRows();
-  }, [loadRows]);
-
   useEffect(() => {
     rows.forEach((row, rowIndex) => onRowPreparedRef.current?.({ data: row, rowIndex }));
   }, [rows]);
@@ -472,33 +434,46 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     onBatchSave: options.onBatchSave,
   });
 
-  const dirtyRowCount = useMemo(
-    () =>
-      rows.filter((row) => {
-        const key = row[idField] ?? row;
-        return inlineEdit.draftRows.has(key) && inlineEdit.hasDraftChanges(key, row);
-      }).length,
-    [rows, idField, inlineEdit.draftRows, inlineEdit.hasDraftChanges],
-  );
+  const dirtyRowCount = rows.filter((row) => {
+    const key = row[idField] ?? row;
+    return inlineEdit.draftRows.has(key) && inlineEdit.hasDraftChanges(key, row);
+  }).length;
   const hasPendingInlineEdits = dirtyRowCount > 0;
+  const { activeCell, stopCellEdit } = inlineEdit;
 
   // Close the active cell editor when clicking outside the grid or its popovers.
   useEffect(() => {
-    if (!inlineEdit.activeCell) return;
+    if (!activeCell) return;
     const handler = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (target.closest('.nb-datagrid__edit-cell')) return;
       if (target.closest(INLINE_EDIT_PORTAL_SELECTOR)) return;
-      inlineEdit.stopCellEdit();
+      stopCellEdit();
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [inlineEdit.activeCell, inlineEdit.stopCellEdit]);
+  }, [activeCell, stopCellEdit]);
 
   // Snapshot of mutable state read by the imperative handle. Updated after every render
   // so handle methods always see current values without the handle itself being rebuilt.
-  const handleStateRef = useRef({ selectedKeys, filters, filterOperators, loadRows, idField, inlineEdit });
-  handleStateRef.current = { selectedKeys, filters, filterOperators, loadRows, idField, inlineEdit }; // eslint-disable-line react-hooks/refs
+  const handleStateRef = useRef({
+    selectedKeys,
+    filters,
+    filterOperators,
+    loadRows,
+    idField,
+    inlineEdit,
+  });
+  useLayoutEffect(() => {
+    handleStateRef.current = {
+      selectedKeys,
+      filters,
+      filterOperators,
+      loadRows,
+      idField,
+      inlineEdit,
+    };
+  }, [filterOperators, filters, idField, inlineEdit, loadRows, selectedKeys]);
 
   useImperativeHandle(
     ref,
@@ -563,7 +538,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       hasEditData: () => handleStateRef.current.inlineEdit.draftRows.size > 0,
       saveChanges: () => handleStateRef.current.inlineEdit.saveAll(),
     }),
-    [getRowKey, options.fields, t],
+    [getRowKey, options.fields, rowsRef, setIsGridLoading, t],
   );
 
   const selectedRows = rows.filter((row) => selectedKeys.includes(getRowKey(row)));
@@ -608,7 +583,10 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
           },
         ]
       : []),
-    ...(options.allowEdit && rowEditable(row) && !canInlineEditMode && (options.onEdit || options.events?.EDIT)
+    ...(options.allowEdit &&
+    rowEditable(row) &&
+    !canInlineEditMode &&
+    (options.onEdit || options.events?.EDIT)
       ? [
           {
             text: t('grid.buttonEdit'),
@@ -787,8 +765,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const hasCheckbox = options.selectionMode === 'multiple';
   const allPageSelected =
     hasCheckbox && rows.length > 0 && rows.every((row) => selectedKeys.includes(getRowKey(row)));
-  const somePageSelected =
-    hasCheckbox && selectedKeys.length > 0 && !allPageSelected;
+  const somePageSelected = hasCheckbox && selectedKeys.length > 0 && !allPageSelected;
 
   const toggleSelectAll = () => {
     if (!hasCheckbox || rows.length === 0) return;
@@ -896,7 +873,16 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       distributed += share;
     });
     return result;
-  }, [visibleFields, colWidths, autoColWidths, hasCheckbox, hasDetail, hasRowActions, containerWidth, actionsColWidth]);
+  }, [
+    visibleFields,
+    colWidths,
+    autoColWidths,
+    hasCheckbox,
+    hasDetail,
+    hasRowActions,
+    containerWidth,
+    actionsColWidth,
+  ]);
 
   const columnHeaders = useMemo(
     () => resolveColumnHeaders(visibleFields, options.columnGroupDefs),
@@ -1074,7 +1060,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       })) ?? [];
 
     return [...bulkSelection, ...(toolbar.selection ?? [])];
-  }, [options.bulkActions, options.onBulkAction, t, toolbar.selection]);
+  }, [options, t, toolbar.selection]);
   // Quick search targets the first text-like filterable column. Columns with a
   // formatter are skipped: their displayed text differs from the raw value, so
   // a contains-filter on them would not match what the user sees.
@@ -1121,7 +1107,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       <div
         className={`view-wrapper ${options.mode === 'full' || !options.mode ? 'view-wrapper-datagrid-list list-page' : ''}`}
       >
-        <div className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}`}>
+        <div
+          className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}`}
+        >
           {options.aboveGrid ? (
             <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
           ) : null}
@@ -1209,7 +1197,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 placeholder={t('grid.searchPlaceholder', { column: quickSearchField.label })}
                 aria-label={t('grid.filterColumn', { column: quickSearchField.label })}
                 value={filterInputs[quickSearchField.name] ?? ''}
-                onChange={(event) => applyFilterInputDebounced(quickSearchField, event.target.value)}
+                onChange={(event) =>
+                  applyFilterInputDebounced(quickSearchField, event.target.value)
+                }
               />
               {(filterInputs[quickSearchField.name] ?? '') !== '' && (
                 <button
@@ -1302,10 +1292,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               {cardMetaFields.length > 0 && (
                                 <dl className="nb-datagrid__card-meta">
                                   {cardMetaFields.map((field, metaIndex) => (
-                                    <div
-                                      key={field.name}
-                                      className="nb-datagrid__card-meta-row"
-                                    >
+                                    <div key={field.name} className="nb-datagrid__card-meta-row">
                                       <dt>{field.label}</dt>
                                       <dd>
                                         {renderCell(
@@ -1406,504 +1393,517 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     })}
               </ul>
             ) : (
-            <table
-              className={[
-                'nb-datagrid__table',
-                hasGroupedHeaders ? 'nb-datagrid__table--grouped-headers' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              style={tableLayoutStyle}
-              aria-label={options.title}
-              aria-rowcount={totalCount || rows.length}
-            >
-              <GridColumnGroup
-                fields={visibleFields}
-                colWidths={resolvedColWidths}
-                hasCheckbox={hasCheckbox}
-                hasDetail={hasDetail}
-                hasRowActions={hasRowActions}
-              />
-              <thead ref={theadRef}>
-                {hasGroupedHeaders ? (
-                  <>
-                    {columnHeaders.bandRows.map((bandRow, bandRowIndex) => (
-                      <tr key={`band-${bandRowIndex}`} className="nb-datagrid__header-band-row">
-                        {bandRowIndex === 0 && options.detailFields && (
+              <table
+                className={[
+                  'nb-datagrid__table',
+                  hasGroupedHeaders ? 'nb-datagrid__table--grouped-headers' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={tableLayoutStyle}
+                aria-label={options.title}
+                aria-rowcount={totalCount || rows.length}
+              >
+                <GridColumnGroup
+                  fields={visibleFields}
+                  colWidths={resolvedColWidths}
+                  hasCheckbox={hasCheckbox}
+                  hasDetail={hasDetail}
+                  hasRowActions={hasRowActions}
+                />
+                <thead ref={theadRef}>
+                  {hasGroupedHeaders ? (
+                    <>
+                      {columnHeaders.bandRows.map((bandRow, bandRowIndex) => (
+                        <tr key={`band-${bandRowIndex}`} className="nb-datagrid__header-band-row">
+                          {bandRowIndex === 0 && options.detailFields && (
+                            <th
+                              rowSpan={headerRowCount}
+                              className="nb-datagrid__detail-cell"
+                              style={{ top: 0 }}
+                            />
+                          )}
+                          {bandRowIndex === 0 && hasCheckbox && (
+                            <th
+                              rowSpan={headerRowCount}
+                              className="nb-datagrid__select-cell"
+                              style={{ top: 0 }}
+                            >
+                              {renderSelectAllCheckbox()}
+                            </th>
+                          )}
+                          {(() => {
+                            let leafOffset = 0;
+                            return bandRow.map((cell, cellIndex) => {
+                              const rendered = renderGroupHeaderCell(
+                                cell,
+                                cellIndex,
+                                bandRowIndex,
+                                bandRow,
+                                leafOffset,
+                              );
+                              if (cell.kind === 'group') {
+                                leafOffset += cell.colSpan;
+                              }
+                              return rendered;
+                            });
+                          })()}
+                          {bandRowIndex === 0 && hasRowActions && (
+                            <th
+                              rowSpan={headerRowCount}
+                              className="nb-datagrid__actions-cell"
+                              style={{ top: 0 }}
+                            />
+                          )}
+                        </tr>
+                      ))}
+                      <tr className="nb-datagrid__header-leaf-row">
+                        {options.detailFields && (
                           <th
-                            rowSpan={headerRowCount}
                             className="nb-datagrid__detail-cell"
-                            style={{ top: 0 }}
+                            style={{
+                              ...lockColumnWidth(DETAIL_COL_WIDTH),
+                              top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                            }}
                           />
                         )}
-                        {bandRowIndex === 0 && hasCheckbox && (
+                        {hasCheckbox && (
                           <th
-                            rowSpan={headerRowCount}
                             className="nb-datagrid__select-cell"
-                            style={{ top: 0 }}
-                          >
-                            {renderSelectAllCheckbox()}
-                          </th>
+                            style={{
+                              ...lockColumnWidth(CHECKBOX_COL_WIDTH),
+                              top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                            }}
+                          />
                         )}
-                        {(() => {
-                          let leafOffset = 0;
-                          return bandRow.map((cell, cellIndex) => {
-                            const rendered = renderGroupHeaderCell(
-                              cell,
-                              cellIndex,
-                              bandRowIndex,
-                              bandRow,
-                              leafOffset,
-                            );
-                            if (cell.kind === 'group') {
-                              leafOffset += cell.colSpan;
-                            }
-                            return rendered;
-                          });
-                        })()}
-                        {bandRowIndex === 0 && hasRowActions && (
+                        {visibleFields.map((field) =>
+                          renderFieldHeader(field, {
+                            stickyTop: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                          }),
+                        )}
+                        {hasRowActions && (
                           <th
-                            rowSpan={headerRowCount}
                             className="nb-datagrid__actions-cell"
-                            style={{ top: 0 }}
+                            style={{
+                              ...lockColumnWidth(actionsColWidth),
+                              top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
+                            }}
                           />
                         )}
                       </tr>
-                    ))}
-                    <tr className="nb-datagrid__header-leaf-row">
-                      {options.detailFields && (
-                        <th
-                          className="nb-datagrid__detail-cell"
-                          style={{
-                            ...lockColumnWidth(DETAIL_COL_WIDTH),
-                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
-                          }}
-                        />
-                      )}
+                    </>
+                  ) : (
+                    <tr>
+                      {options.detailFields && <th className="nb-datagrid__detail-cell" />}
                       {hasCheckbox && (
-                        <th
-                          className="nb-datagrid__select-cell"
-                          style={{
-                            ...lockColumnWidth(CHECKBOX_COL_WIDTH),
-                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
-                          }}
-                        />
+                        <th className="nb-datagrid__select-cell">{renderSelectAllCheckbox()}</th>
                       )}
-                      {visibleFields.map((field) =>
-                        renderFieldHeader(field, {
-                          stickyTop: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
-                        }),
-                      )}
-                      {hasRowActions && (
-                        <th
-                          className="nb-datagrid__actions-cell"
-                          style={{
-                            ...lockColumnWidth(actionsColWidth),
-                            top: `calc(var(--nb-datagrid-header-height) * ${columnHeaders.groupDepth})`,
-                          }}
-                        />
-                      )}
+                      {visibleFields.map((field) => renderFieldHeader(field))}
+                      {hasRowActions && <th className="nb-datagrid__actions-cell" />}
                     </tr>
-                  </>
-                ) : (
-                  <tr>
-                    {options.detailFields && <th className="nb-datagrid__detail-cell" />}
-                    {hasCheckbox && (
-                      <th className="nb-datagrid__select-cell">{renderSelectAllCheckbox()}</th>
-                    )}
-                    {visibleFields.map((field) => renderFieldHeader(field))}
-                    {hasRowActions && <th className="nb-datagrid__actions-cell" />}
-                  </tr>
-                )}
-                {(options.filterRow ?? true) && (
-                  <tr className="nb-datagrid__filter-row">
-                    {options.detailFields && <td className="nb-datagrid__detail-cell" />}
-                    {hasCheckbox && <td className="nb-datagrid__select-cell" />}
-                    {visibleFields.map((field) => {
-                      const filterCellWidth = getColumnWidth(field, resolvedColWidths);
-                      return (
-                        <td
-                          key={field.name}
-                          style={lockColumnWidth(filterCellWidth)}
-                          className={
-                            [
-                              field.filterable === false
-                                ? 'nb-datagrid__filter-cell--noop'
-                                : '',
-                              (filterInputs[field.name] ?? '').trim()
-                                ? 'nb-datagrid__filter-cell--active'
-                                : '',
-                              buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
-                            ]
-                              .filter(Boolean)
-                              .join(' ') || undefined
-                          }
-                        >
-                          {field.filterable ? renderFilterCell(field) : null}
-                        </td>
-                      );
-                    })}
-                    {hasRowActions && <td className="nb-datagrid__actions-cell" />}
-                  </tr>
-                )}
-                {options.errorMessage && (
-                  <tr className="nb-datagrid__error-row">
-                    <td colSpan={colSpan}>
-                      <div className="nb-datagrid__error-message" role="alert">
-                        <i className="ph ph-warning-circle" aria-hidden="true" />
-                        <span>{options.errorMessage}</span>
-                        {options.onDismissError && (
-                          <button
-                            type="button"
-                            className="nb-datagrid__error-close"
-                            aria-label={t('dialog.close')}
-                            onClick={options.onDismissError}
-                          >
-                            <i className="ph ph-x" aria-hidden="true" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </thead>
-              <tbody ref={tbodyRef}>
-                {rows.length === 0 && isGridLoading ? (
-                  Array.from({ length: 7 }, (_, i) => (
-                    <tr key={`skeleton-${i}`} className="nb-datagrid__skeleton-row">
+                  )}
+                  {(options.filterRow ?? true) && (
+                    <tr className="nb-datagrid__filter-row">
                       {options.detailFields && <td className="nb-datagrid__detail-cell" />}
-                      {hasCheckbox && (
-                        <td className="nb-datagrid__select-cell">
-                          <div
-                            className="nb-datagrid__skeleton-cell"
-                            style={{ width: 16, height: 16 }}
-                          />
-                        </td>
-                      )}
-                      {visibleFields.map((field) => (
-                        <td key={field.name}>
-                          <div className="nb-datagrid__skeleton-cell" />
-                        </td>
-                      ))}
+                      {hasCheckbox && <td className="nb-datagrid__select-cell" />}
+                      {visibleFields.map((field) => {
+                        const filterCellWidth = getColumnWidth(field, resolvedColWidths);
+                        return (
+                          <td
+                            key={field.name}
+                            style={lockColumnWidth(filterCellWidth)}
+                            className={
+                              [
+                                field.filterable === false ? 'nb-datagrid__filter-cell--noop' : '',
+                                (filterInputs[field.name] ?? '').trim()
+                                  ? 'nb-datagrid__filter-cell--active'
+                                  : '',
+                                buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
+                              ]
+                                .filter(Boolean)
+                                .join(' ') || undefined
+                            }
+                          >
+                            {field.filterable ? renderFilterCell(field) : null}
+                          </td>
+                        );
+                      })}
                       {hasRowActions && <td className="nb-datagrid__actions-cell" />}
                     </tr>
-                  ))
-                ) : rows.length === 0 ? (
-                  <tr>
-                    <td colSpan={colSpan} className="nb-datagrid__empty-td" />
-                  </tr>
-                ) : (
-                  rows.map((row, rowIndex) => {
-                    const key = row[idField] ?? rowIndex;
-                    const selected = selectedKeys.includes(getRowKey(row, rowIndex));
-                    const editing = inlineEdit.draftRows.has(key);
-                    const rowHasChanges = editing && inlineEdit.hasDraftChanges(key, row);
-                    const saving = inlineEdit.savingRows.has(key);
-                    const rowDraft = inlineEdit.draftRows.get(key) ?? row;
-                    const rowFieldErrors = inlineEdit.rowErrors.get(key);
-                    const rowInRowEdit = rowInlineMode && editing;
-                    const detailFields =
-                      typeof options.detailFields === 'function'
-                        ? options.detailFields(row)
-                        : options.detailFields;
-                    const detailUrl = options.detailUrl?.replace('{id}', String(key));
-                    const expanded = expandedKeys.has(key);
-                    const rowActions: ResourceToolbarAction[] = buildRowActions(row);
+                  )}
+                  {options.errorMessage && (
+                    <tr className="nb-datagrid__error-row">
+                      <td colSpan={colSpan}>
+                        <div className="nb-datagrid__error-message" role="alert">
+                          <i className="ph ph-warning-circle" aria-hidden="true" />
+                          <span>{options.errorMessage}</span>
+                          {options.onDismissError && (
+                            <button
+                              type="button"
+                              className="nb-datagrid__error-close"
+                              aria-label={t('dialog.close')}
+                              onClick={options.onDismissError}
+                            >
+                              <i className="ph ph-x" aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </thead>
+                <tbody ref={tbodyRef}>
+                  {rows.length === 0 && isGridLoading ? (
+                    Array.from({ length: 7 }, (_, i) => (
+                      <tr key={`skeleton-${i}`} className="nb-datagrid__skeleton-row">
+                        {options.detailFields && <td className="nb-datagrid__detail-cell" />}
+                        {hasCheckbox && (
+                          <td className="nb-datagrid__select-cell">
+                            <div
+                              className="nb-datagrid__skeleton-cell"
+                              style={{ width: 16, height: 16 }}
+                            />
+                          </td>
+                        )}
+                        {visibleFields.map((field) => (
+                          <td key={field.name}>
+                            <div className="nb-datagrid__skeleton-cell" />
+                          </td>
+                        ))}
+                        {hasRowActions && <td className="nb-datagrid__actions-cell" />}
+                      </tr>
+                    ))
+                  ) : rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={colSpan} className="nb-datagrid__empty-td" />
+                    </tr>
+                  ) : (
+                    rows.map((row, rowIndex) => {
+                      const key = row[idField] ?? rowIndex;
+                      const selected = selectedKeys.includes(getRowKey(row, rowIndex));
+                      const editing = inlineEdit.draftRows.has(key);
+                      const rowHasChanges = editing && inlineEdit.hasDraftChanges(key, row);
+                      const saving = inlineEdit.savingRows.has(key);
+                      const rowDraft = inlineEdit.draftRows.get(key) ?? row;
+                      const rowFieldErrors = inlineEdit.rowErrors.get(key);
+                      const rowInRowEdit = rowInlineMode && editing;
+                      const detailFields =
+                        typeof options.detailFields === 'function'
+                          ? options.detailFields(row)
+                          : options.detailFields;
+                      const detailUrl = options.detailUrl?.replace('{id}', String(key));
+                      const expanded = expandedKeys.has(key);
+                      const rowActions: ResourceToolbarAction[] = buildRowActions(row);
 
-                    return (
-                      <React.Fragment key={String(key)}>
-                        <tr
-                          className={[
-                            'nb-datagrid__row',
-                            expanded ? 'nb-datagrid__row--expanded' : '',
-                            selected ? 'nb-datagrid__row--selected' : '',
-                            rowInRowEdit ? 'nb-datagrid__row--editing' : '',
-                            rowHasChanges ? 'nb-datagrid__row--dirty' : '',
-                            saving ? 'nb-datagrid__row--saving' : '',
-                          ].filter(Boolean).join(' ')}
-                          tabIndex={0}
-                          aria-selected={selected}
-                          onClick={() => {
-                            if (rowInRowEdit) return;
-                            selectRow(row);
-                          }}
-                          onDoubleClick={() => {
-                            if (rowInRowEdit || inlineEdit.activeCell) return;
-                            if (options.allowEdit && rowEditable(row) && rowInlineMode && canInlineEditMode) {
-                              inlineEdit.startEdit(row);
-                              return;
-                            }
-                            if (options.allowEdit && (options.onEdit || options.events?.EDIT)) {
-                              if (options.onEdit) options.onEdit(row);
-                              else emit(options.events!.EDIT!, { row });
-                              return;
-                            }
-                            if (options.allowView && options.onView) {
-                              options.onView(row);
-                            }
-                          }}
-                          onKeyDown={(event) => {
-                            if (inlineEdit.activeCell && event.key === 'Escape') {
-                              inlineEdit.stopCellEdit();
-                            } else if (rowInRowEdit && event.key === 'Escape') {
-                              inlineEdit.cancelEdit(key);
-                            } else if (rowInRowEdit && event.key === 'Enter' && showRowInlineActions) {
-                              void inlineEdit.saveRow(key);
-                            } else if (
-                              !editing &&
-                              event.key === 'Enter' &&
-                              options.allowEdit &&
-                              rowInlineMode &&
-                              canInlineEditMode &&
-                              rowEditable(row)
-                            ) {
-                              inlineEdit.startEdit(row);
-                            } else if (
-                              !editing &&
-                              event.key === 'Enter' &&
-                              options.allowEdit &&
-                              (options.onEdit || options.events?.EDIT)
-                            ) {
-                              if (options.onEdit) options.onEdit(row);
-                              else emit(options.events!.EDIT!, { row });
-                            } else if (
-                              !editing &&
-                              event.key === 'Enter' &&
-                              options.allowView &&
-                              options.onView
-                            ) {
-                              options.onView(row);
-                            } else if (
-                              !editing &&
-                              event.key === 'Delete' &&
-                              options.allowDelete &&
-                              (options.onDelete || options.events?.DELETE)
-                            ) {
-                              setConfirmRow(row);
-                            } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                              event.preventDefault();
-                              const allRows = event.currentTarget
-                                .closest('tbody')
-                                ?.querySelectorAll<HTMLTableRowElement>('tr.nb-datagrid__row');
-                              if (!allRows) return;
-                              const idx = Array.from(allRows).indexOf(event.currentTarget);
-                              const next = allRows[event.key === 'ArrowUp' ? idx - 1 : idx + 1];
-                              if (next) {
-                                next.focus();
-                                selectRow(rows[event.key === 'ArrowUp' ? idx - 1 : idx + 1]);
-                              }
-                            }
-                          }}
-                        >
-                          {options.detailFields && (
-                            <td className="nb-datagrid__detail-cell">
-                              {detailUrl && detailFields && (
-                                <button
-                                  type="button"
-                                  className={`nb-datagrid__expand-button${expanded ? ' is-expanded' : ''}`}
-                                  aria-label={
-                                    expanded ? t('grid.collapseDetail') : t('grid.expandDetail')
-                                  }
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    setExpandedKeys((current) => {
-                                      const next = new Set(current);
-                                      if (next.has(key)) next.delete(key);
-                                      else next.add(key);
-                                      return next;
-                                    });
-                                  }}
-                                >
-                                  <i
-                                    className={`ph ${expanded ? 'ph-caret-down' : 'ph-caret-right'}`}
-                                    aria-hidden="true"
-                                  />
-                                </button>
-                              )}
-                            </td>
-                          )}
-                          {hasCheckbox && (
-                            <td className="nb-datagrid__select-cell">
-                              <input
-                                type="checkbox"
-                                checked={selected}
-                                onChange={() => selectRow(row)}
-                                onClick={(event) => event.stopPropagation()}
-                                aria-label={t('grid.selectRow')}
-                              />
-                            </td>
-                          )}
-                          {visibleFields.map((field, columnIndex) => {
-                            const width = getColumnWidth(field, resolvedColWidths);
-                            const editable =
-                              options.allowEdit &&
-                              !options.editDisabled &&
-                              rowEditable(row) &&
-                              canEditFieldInline(field);
-                            const cellActive = inlineEdit.isCellActive(key, field.name);
-                            const cellDirty = editing && inlineEdit.isCellDirty(key, field.name, row);
-                            const showCellEditor =
-                              editable &&
-                              ((rowInRowEdit && editing) || (cellEditMode && cellActive));
-                            const displayRow = editing ? rowDraft : row;
-                            const cellClassName = [
-                              showCellEditor ? 'nb-datagrid__edit-cell' : 'nb-datagrid__data-cell',
-                              editable && canInlineEditMode ? 'nb-datagrid__cell--editable' : '',
-                              cellDirty ? 'nb-datagrid__cell--dirty' : '',
-                              cellActive ? 'nb-datagrid__cell--active' : '',
-                              buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
+                      return (
+                        <React.Fragment key={String(key)}>
+                          <tr
+                            className={[
+                              'nb-datagrid__row',
+                              expanded ? 'nb-datagrid__row--expanded' : '',
+                              selected ? 'nb-datagrid__row--selected' : '',
+                              rowInRowEdit ? 'nb-datagrid__row--editing' : '',
+                              rowHasChanges ? 'nb-datagrid__row--dirty' : '',
+                              saving ? 'nb-datagrid__row--saving' : '',
                             ]
                               .filter(Boolean)
-                              .join(' ');
-
-                            const beginInlineEdit = () => {
-                              if (!editable) return;
+                              .join(' ')}
+                            tabIndex={0}
+                            aria-selected={selected}
+                            onClick={() => {
+                              if (rowInRowEdit) return;
                               selectRow(row);
-                              if (cellEditMode) {
-                                inlineEdit.startCellEdit(row, field.name);
-                              } else if (rowInlineMode && !editing) {
+                            }}
+                            onDoubleClick={() => {
+                              if (rowInRowEdit || inlineEdit.activeCell) return;
+                              if (
+                                options.allowEdit &&
+                                rowEditable(row) &&
+                                rowInlineMode &&
+                                canInlineEditMode
+                              ) {
                                 inlineEdit.startEdit(row);
+                                return;
                               }
-                            };
+                              if (options.allowEdit && (options.onEdit || options.events?.EDIT)) {
+                                if (options.onEdit) options.onEdit(row);
+                                else emit(options.events!.EDIT!, { row });
+                                return;
+                              }
+                              if (options.allowView && options.onView) {
+                                options.onView(row);
+                              }
+                            }}
+                            onKeyDown={(event) => {
+                              if (inlineEdit.activeCell && event.key === 'Escape') {
+                                inlineEdit.stopCellEdit();
+                              } else if (rowInRowEdit && event.key === 'Escape') {
+                                inlineEdit.cancelEdit(key);
+                              } else if (
+                                rowInRowEdit &&
+                                event.key === 'Enter' &&
+                                showRowInlineActions
+                              ) {
+                                void inlineEdit.saveRow(key);
+                              } else if (
+                                !editing &&
+                                event.key === 'Enter' &&
+                                options.allowEdit &&
+                                rowInlineMode &&
+                                canInlineEditMode &&
+                                rowEditable(row)
+                              ) {
+                                inlineEdit.startEdit(row);
+                              } else if (
+                                !editing &&
+                                event.key === 'Enter' &&
+                                options.allowEdit &&
+                                (options.onEdit || options.events?.EDIT)
+                              ) {
+                                if (options.onEdit) options.onEdit(row);
+                                else emit(options.events!.EDIT!, { row });
+                              } else if (
+                                !editing &&
+                                event.key === 'Enter' &&
+                                options.allowView &&
+                                options.onView
+                              ) {
+                                options.onView(row);
+                              } else if (
+                                !editing &&
+                                event.key === 'Delete' &&
+                                options.allowDelete &&
+                                (options.onDelete || options.events?.DELETE)
+                              ) {
+                                setConfirmRow(row);
+                              } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                                event.preventDefault();
+                                const allRows = event.currentTarget
+                                  .closest('tbody')
+                                  ?.querySelectorAll<HTMLTableRowElement>('tr.nb-datagrid__row');
+                                if (!allRows) return;
+                                const idx = Array.from(allRows).indexOf(event.currentTarget);
+                                const next = allRows[event.key === 'ArrowUp' ? idx - 1 : idx + 1];
+                                if (next) {
+                                  next.focus();
+                                  selectRow(rows[event.key === 'ArrowUp' ? idx - 1 : idx + 1]);
+                                }
+                              }
+                            }}
+                          >
+                            {options.detailFields && (
+                              <td className="nb-datagrid__detail-cell">
+                                {detailUrl && detailFields && (
+                                  <button
+                                    type="button"
+                                    className={`nb-datagrid__expand-button${expanded ? ' is-expanded' : ''}`}
+                                    aria-label={
+                                      expanded ? t('grid.collapseDetail') : t('grid.expandDetail')
+                                    }
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setExpandedKeys((current) => {
+                                        const next = new Set(current);
+                                        if (next.has(key)) next.delete(key);
+                                        else next.add(key);
+                                        return next;
+                                      });
+                                    }}
+                                  >
+                                    <i
+                                      className={`ph ${expanded ? 'ph-caret-down' : 'ph-caret-right'}`}
+                                      aria-hidden="true"
+                                    />
+                                  </button>
+                                )}
+                              </td>
+                            )}
+                            {hasCheckbox && (
+                              <td className="nb-datagrid__select-cell">
+                                <input
+                                  type="checkbox"
+                                  checked={selected}
+                                  onChange={() => selectRow(row)}
+                                  onClick={(event) => event.stopPropagation()}
+                                  aria-label={t('grid.selectRow')}
+                                />
+                              </td>
+                            )}
+                            {visibleFields.map((field, columnIndex) => {
+                              const width = getColumnWidth(field, resolvedColWidths);
+                              const editable =
+                                options.allowEdit &&
+                                !options.editDisabled &&
+                                rowEditable(row) &&
+                                canEditFieldInline(field);
+                              const cellActive = inlineEdit.isCellActive(key, field.name);
+                              const cellDirty =
+                                editing && inlineEdit.isCellDirty(key, field.name, row);
+                              const showCellEditor =
+                                editable &&
+                                ((rowInRowEdit && editing) || (cellEditMode && cellActive));
+                              const displayRow = editing ? rowDraft : row;
+                              const cellClassName = [
+                                showCellEditor
+                                  ? 'nb-datagrid__edit-cell'
+                                  : 'nb-datagrid__data-cell',
+                                editable && canInlineEditMode ? 'nb-datagrid__cell--editable' : '',
+                                cellDirty ? 'nb-datagrid__cell--dirty' : '',
+                                cellActive ? 'nb-datagrid__cell--active' : '',
+                                buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
+                              ]
+                                .filter(Boolean)
+                                .join(' ');
 
-                            if (showCellEditor) {
+                              const beginInlineEdit = () => {
+                                if (!editable) return;
+                                selectRow(row);
+                                if (cellEditMode) {
+                                  inlineEdit.startCellEdit(row, field.name);
+                                } else if (rowInlineMode && !editing) {
+                                  inlineEdit.startEdit(row);
+                                }
+                              };
+
+                              if (showCellEditor) {
+                                return (
+                                  <td
+                                    key={field.name}
+                                    style={{ ...lockColumnWidth(width), textAlign: field.align }}
+                                    className={cellClassName}
+                                  >
+                                    <InlineEditCell
+                                      field={field}
+                                      rowKey={key}
+                                      draft={rowDraft}
+                                      onChange={(name, value) =>
+                                        inlineEdit.updateDraft(key, name, value)
+                                      }
+                                      errors={rowFieldErrors}
+                                      disabled={saving}
+                                      allRemoteOptions={filterRemoteOptions}
+                                      httpClient={httpClient}
+                                      t={t}
+                                      autoFocus
+                                    />
+                                  </td>
+                                );
+                              }
+
                               return (
                                 <td
                                   key={field.name}
                                   style={{ ...lockColumnWidth(width), textAlign: field.align }}
                                   className={cellClassName}
+                                  title={getCellText(
+                                    field,
+                                    displayRow,
+                                    filterRemoteOptions[field.name],
+                                    t('common.yes'),
+                                    t('common.no'),
+                                  )}
+                                  onClick={(event) => {
+                                    if (!editable || !canInlineEditMode) return;
+                                    event.stopPropagation();
+                                    beginInlineEdit();
+                                  }}
                                 >
-                                  <InlineEditCell
-                                    field={field}
-                                    rowKey={key}
-                                    draft={rowDraft}
-                                    onChange={(name, value) =>
-                                      inlineEdit.updateDraft(key, name, value)
-                                    }
-                                    errors={rowFieldErrors}
-                                    disabled={saving}
-                                    allRemoteOptions={filterRemoteOptions}
-                                    httpClient={httpClient}
-                                    t={t}
-                                    autoFocus
-                                  />
+                                  {renderCell(
+                                    field,
+                                    displayRow,
+                                    rowIndex,
+                                    columnIndex,
+                                    filterRemoteOptions[field.name],
+                                    t('common.yes'),
+                                    t('common.no'),
+                                  )}
                                 </td>
                               );
-                            }
-
-                            return (
+                            })}
+                            {hasRowActions && (
                               <td
-                                key={field.name}
-                                style={{ ...lockColumnWidth(width), textAlign: field.align }}
-                                className={cellClassName}
-                                title={getCellText(
-                                  field,
-                                  displayRow,
-                                  filterRemoteOptions[field.name],
-                                  t('common.yes'),
-                                  t('common.no'),
-                                )}
-                                onClick={(event) => {
-                                  if (!editable || !canInlineEditMode) return;
-                                  event.stopPropagation();
-                                  beginInlineEdit();
-                                }}
+                                className="nb-datagrid__actions-cell"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                {renderCell(
-                                  field,
-                                  displayRow,
-                                  rowIndex,
-                                  columnIndex,
-                                  filterRemoteOptions[field.name],
-                                  t('common.yes'),
-                                  t('common.no'),
+                                {rowInRowEdit && showRowInlineActions ? (
+                                  <div className="nb-datagrid__inline-actions">
+                                    <button
+                                      type="button"
+                                      className="nb-datagrid__inline-btn nb-datagrid__inline-btn--save"
+                                      disabled={saving}
+                                      aria-label={t('grid.inlineSaveRow')}
+                                      title={t('grid.inlineSaveRow')}
+                                      onClick={() => void inlineEdit.saveRow(key)}
+                                    >
+                                      <i className="ph ph-check" aria-hidden="true" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="nb-datagrid__inline-btn nb-datagrid__inline-btn--cancel"
+                                      disabled={saving}
+                                      aria-label={t('grid.inlineCancelRow')}
+                                      title={t('grid.inlineCancelRow')}
+                                      onClick={() => inlineEdit.cancelEdit(key)}
+                                    >
+                                      <i className="ph ph-x" aria-hidden="true" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="nb-datagrid__row-actions">
+                                    {rowActions.length > 0 && (
+                                      <IconButton
+                                        icon="ph ph-dots-three-vertical"
+                                        label={t('grid.buttonActions')}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const rect = (
+                                            e.currentTarget as HTMLElement
+                                          ).getBoundingClientRect();
+                                          const rowKey = key;
+
+                                          // Resolve actions at click time (avoids fragile re-lookup later)
+                                          const actionsAtOpen: ResourceToolbarAction[] =
+                                            buildRowActions(row).filter((a) =>
+                                              isToolbarActionVisible(a, toolbarPermissions),
+                                            );
+
+                                          setOpenRowMenu((current) =>
+                                            current && current.key === rowKey
+                                              ? null
+                                              : { key: rowKey, rect, actions: actionsAtOpen },
+                                          );
+                                        }}
+                                      />
+                                    )}
+                                  </div>
                                 )}
                               </td>
-                            );
-                          })}
-                          {hasRowActions && (
-                            <td
-                              className="nb-datagrid__actions-cell"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {rowInRowEdit && showRowInlineActions ? (
-                                <div className="nb-datagrid__inline-actions">
-                                  <button
-                                    type="button"
-                                    className="nb-datagrid__inline-btn nb-datagrid__inline-btn--save"
-                                    disabled={saving}
-                                    aria-label={t('grid.inlineSaveRow')}
-                                    title={t('grid.inlineSaveRow')}
-                                    onClick={() => void inlineEdit.saveRow(key)}
-                                  >
-                                    <i className="ph ph-check" aria-hidden="true" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="nb-datagrid__inline-btn nb-datagrid__inline-btn--cancel"
-                                    disabled={saving}
-                                    aria-label={t('grid.inlineCancelRow')}
-                                    title={t('grid.inlineCancelRow')}
-                                    onClick={() => inlineEdit.cancelEdit(key)}
-                                  >
-                                    <i className="ph ph-x" aria-hidden="true" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="nb-datagrid__row-actions">
-                                  {rowActions.length > 0 && (
-                                    <IconButton
-                                      icon="ph ph-dots-three-vertical"
-                                      label={t('grid.buttonActions')}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const rect = (
-                                          e.currentTarget as HTMLElement
-                                        ).getBoundingClientRect();
-                                        const rowKey = key;
-
-                                        // Resolve actions at click time (avoids fragile re-lookup later)
-                                        const actionsAtOpen: ResourceToolbarAction[] = buildRowActions(
-                                          row,
-                                        ).filter((a) => isToolbarActionVisible(a, toolbarPermissions));
-
-                                        setOpenRowMenu((current) =>
-                                          current && current.key === rowKey
-                                            ? null
-                                            : { key: rowKey, rect, actions: actionsAtOpen },
-                                        );
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                          )}
-                        </tr>
-                        {expanded && detailUrl && detailFields && (
-                          <tr className="nb-datagrid__detail-row">
-                            <td colSpan={colSpan}>
-                              <DetailGridSection fields={detailFields} url={detailUrl} />
-                            </td>
+                            )}
                           </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })
-                )}
-              </tbody>
-              <SummaryFooter
-                fields={visibleFields}
-                hasCheckbox={hasCheckbox}
-                hasDetail={hasDetail}
-                hasRowActions={hasRowActions}
-                rows={rows}
-                summaryFields={options.summaryFields}
-                gridSummary={gridSummary}
-                footerRef={tfootRef}
-                colWidths={resolvedColWidths}
-              />
-            </table>
+                          {expanded && detailUrl && detailFields && (
+                            <tr className="nb-datagrid__detail-row">
+                              <td colSpan={colSpan}>
+                                <DetailGridSection fields={detailFields} url={detailUrl} />
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                </tbody>
+                <SummaryFooter
+                  fields={visibleFields}
+                  hasCheckbox={hasCheckbox}
+                  hasDetail={hasDetail}
+                  hasRowActions={hasRowActions}
+                  rows={rows}
+                  summaryFields={options.summaryFields}
+                  gridSummary={gridSummary}
+                  footerRef={tfootRef}
+                  colWidths={resolvedColWidths}
+                />
+              </table>
             )}
             {rows.length === 0 && !isGridLoading && (
               <GridEmptyStateView
@@ -1948,9 +1948,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             <div className="nb-datagrid__card-summary">
               {options.summaryFields!.map((item, index) => (
                 <div key={index} className="nb-datagrid__card-summary-item">
-                  {item.label && (
-                    <span className="nb-datagrid__summary-label">{item.label}</span>
-                  )}
+                  {item.label && <span className="nb-datagrid__summary-label">{item.label}</span>}
                   <span className="nb-datagrid__summary-value">
                     {item.column && gridSummary && item.column in gridSummary
                       ? formatSummaryValue(gridSummary[item.column], item)
@@ -2042,10 +2040,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 role="group"
                 aria-labelledby="nb-datagrid-page-size-label"
               >
-                <span
-                  className="nb-datagrid__pager-size-label"
-                  id="nb-datagrid-page-size-label"
-                >
+                <span className="nb-datagrid__pager-size-label" id="nb-datagrid-page-size-label">
                   {t('grid.rowsPerPage')}
                 </span>
                 <AppDropdown

@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import type { GridHandle } from '../datagrid/GridHandle';
-import type { Field, FieldDef } from '../field/Field';
+import type { FieldDef } from '../field/Field';
 import type { FieldInput } from '../field/buildFields';
 import type { FilterRule } from '../field/FilterRule';
 import type { DataRecord, FormEventNames } from '@nubitio/core';

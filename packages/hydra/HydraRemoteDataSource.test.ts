@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { CoreHttpClient } from '@nubitio/core';
 import { HydraRemoteDataSource } from './HydraRemoteDataSource';
 
@@ -9,9 +11,36 @@ const makeSource = (overrides = {}) =>
     ...overrides,
   });
 
+type ProtocolFixtures = {
+  loadOptionCases: Array<{
+    name: string;
+    input: Record<string, unknown>;
+    expected: Record<string, unknown>;
+    absent?: string[];
+  }>;
+  responseCases: Array<{
+    name: string;
+    body: unknown;
+    headers: Record<string, string>;
+    expected: { totalCount: number; gridSummary: Record<string, unknown> | null };
+  }>;
+};
+
+const protocolFixtures = JSON.parse(
+  readFileSync(join(process.cwd(), 'contracts/x-grid-protocol.fixtures.json'), 'utf8'),
+) as ProtocolFixtures;
+
 // ── prepareLoadOptions ────────────────────────────────────────────────────────
 
 describe('HydraRemoteDataSource.prepareLoadOptions', () => {
+  protocolFixtures.loadOptionCases.forEach((fixture) => {
+    it(`satisfies protocol fixture: ${fixture.name}`, () => {
+      const result = makeSource().prepareLoadOptions(fixture.input);
+      expect(result).toMatchObject(fixture.expected);
+      fixture.absent?.forEach((key) => expect(result).not.toHaveProperty(key));
+    });
+  });
+
   it('passes through load options unchanged when no defaults are set', () => {
     const ds = makeSource();
     const result = ds.prepareLoadOptions({ filter: [], sort: [] });
@@ -49,7 +78,10 @@ describe('HydraRemoteDataSource.prepareLoadOptions', () => {
       defaultFilterRules: [['active', '=', true]],
     });
     const result = ds.prepareLoadOptions({ filter: ['name', '=', 'test'] });
-    expect(result.filter).toEqual([['active', '=', true], ['name', '=', 'test']]);
+    expect(result.filter).toEqual([
+      ['active', '=', true],
+      ['name', '=', 'test'],
+    ]);
   });
 
   it('coerces FilterRule objects into tuple filters for query serialization', () => {
@@ -78,9 +110,7 @@ describe('HydraRemoteDataSource.prepareLoadOptions', () => {
 describe('HydraRemoteDataSource.makeFilterRules', () => {
   it('serializes filter rules to query string format', () => {
     const ds = makeSource();
-    const result = ds.makeFilterRules([
-      { field: 'name', operator: 'contains', value: 'laptop' },
-    ]);
+    const result = ds.makeFilterRules([{ field: 'name', operator: 'contains', value: 'laptop' }]);
     expect(result).toBe('filter[]=["name","contains","laptop"]');
   });
 
@@ -102,6 +132,19 @@ describe('HydraRemoteDataSource.makeFilterRules', () => {
 // ── load ──────────────────────────────────────────────────────────────────────
 
 describe('HydraRemoteDataSource.load', () => {
+  protocolFixtures.responseCases.forEach((fixture) => {
+    it(`satisfies protocol fixture: ${fixture.name}`, async () => {
+      const httpClient = {
+        get: async () => ({ data: fixture.body, headers: new Headers(fixture.headers) }),
+      } as unknown as CoreHttpClient;
+
+      const result = await makeSource({ httpClient }).load({});
+
+      expect(result.totalCount).toBe(fixture.expected.totalCount);
+      expect(result.gridSummary).toEqual(fixture.expected.gridSummary);
+    });
+  });
+
   it('reads array responses with x-total-count headers', async () => {
     const httpClient = {
       get: async () => ({
@@ -163,7 +206,10 @@ describe('HydraRemoteDataSource.load', () => {
   it('drops a prepended item already present in the fetched page', async () => {
     const httpClient = {
       get: async () => ({
-        data: [{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }],
+        data: [
+          { id: 1, name: 'OC-000001' },
+          { id: 2, name: 'OC-000002' },
+        ],
         headers: new Headers(),
       }),
     } as unknown as CoreHttpClient;
@@ -171,7 +217,10 @@ describe('HydraRemoteDataSource.load', () => {
 
     const result = await ds.load({ prependData: [{ id: 1, name: 'OC-000001' }] });
 
-    expect(result.data).toEqual([{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }]);
+    expect(result.data).toEqual([
+      { id: 1, name: 'OC-000001' },
+      { id: 2, name: 'OC-000002' },
+    ]);
   });
 
   it('keeps a prepended item that is not in the fetched page', async () => {
@@ -185,7 +234,10 @@ describe('HydraRemoteDataSource.load', () => {
 
     const result = await ds.load({ prependData: [{ id: 1, name: 'OC-000001' }] });
 
-    expect(result.data).toEqual([{ id: 1, name: 'OC-000001' }, { id: 2, name: 'OC-000002' }]);
+    expect(result.data).toEqual([
+      { id: 1, name: 'OC-000001' },
+      { id: 2, name: 'OC-000002' },
+    ]);
   });
 
   it('drops an appended item already present in the fetched page', async () => {
@@ -256,7 +308,10 @@ describe('HydraRemoteDataSource.load', () => {
     } as unknown as CoreHttpClient;
     const ds = makeSource({ httpClient });
 
-    await ds.load({ prependData: [{ id: 2, name: 'OC-000002' }], appendData: [{ id: 3, name: 'OC-000003' }] });
+    await ds.load({
+      prependData: [{ id: 2, name: 'OC-000002' }],
+      appendData: [{ id: 3, name: 'OC-000003' }],
+    });
 
     expect(capturedParams).not.toHaveProperty('prependData');
     expect(capturedParams).not.toHaveProperty('appendData');

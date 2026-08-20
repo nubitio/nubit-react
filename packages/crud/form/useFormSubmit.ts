@@ -35,7 +35,7 @@ export const useFormSubmit = (
   validateFn: () => boolean,
 ) => {
   const { t } = useCoreTranslation();
-  const { confirm, notify } = useCoreRuntime();
+  const { notify } = useCoreRuntime();
 
   const adapter = options.adapter ?? HydraAdapter;
   const getIdField = () => options.fields.find((f) => f.isIdentity)?.name ?? '';

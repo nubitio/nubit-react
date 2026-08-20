@@ -165,7 +165,7 @@ export function createNubitApp(config: CreateNubitAppConfig): NubitApp {
   function App() {
     return (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
+        <ThemeProvider basePath={config.themeBasePath}>
           <SessionProvider apiBaseUrl={apiBaseUrl}>
             <NubitAuthenticatedApp config={config} />
           </SessionProvider>

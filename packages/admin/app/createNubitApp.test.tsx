@@ -34,6 +34,10 @@ function mockMeResponse(status: number, body?: unknown) {
         } as Response;
       }
 
+      if (url.includes('/themes/')) {
+        return new Response('', { status: 200, headers: { 'Content-Type': 'text/css' } });
+      }
+
       throw new Error(`Unexpected fetch: ${url}`);
     }),
   );
@@ -53,6 +57,7 @@ describe('createNubitApp', () => {
   it('boots the shell with declarative menu and routes for an internal session', async () => {
     const { App } = createNubitApp({
       title: 'Nubit Admin',
+      themeBasePath: 'data:text/css,',
       homePath: '/products',
       menu: [
         { text: 'Products', icon: 'ph ph-package', path: '/products' },
@@ -80,6 +85,7 @@ describe('createNubitApp', () => {
 
     const { App } = createNubitApp({
       title: 'Nubit Admin',
+      themeBasePath: 'data:text/css,',
       menu: [],
       routes: [{ path: '/products', element: <div>products page</div> }],
       login: {
@@ -101,6 +107,7 @@ describe('createNubitApp', () => {
   it('applies a custom filterMenu callback after role filtering', async () => {
     const { App } = createNubitApp({
       title: 'Ops Panel',
+      themeBasePath: 'data:text/css,',
       menu: [
         { text: 'Dashboard', path: '/dashboard' },
         { text: 'Reports', path: '/reports' },

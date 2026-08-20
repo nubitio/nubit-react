@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Badge, IconButton, useFloatingPanel } from '@nubitio/ui';
 
 export interface AdminHeaderAction {
@@ -32,18 +32,9 @@ function ActionPopover({ action }: { action: AdminHeaderAction }) {
   if (action.onClick) {
     return (
       <div className="nb-admin-messages">
-        <IconButton
-          icon={action.icon}
-          label={action.label}
-          onClick={action.onClick}
-        />
+        <IconButton icon={action.icon} label={action.label} onClick={action.onClick} />
         {!!action.badge && action.badge > 0 && (
-          <Badge
-            variant="danger"
-            size="sm"
-            pill
-            aria-label={`${action.badge} ${action.label}`}
-          >
+          <Badge variant="danger" size="sm" pill aria-label={`${action.badge} ${action.label}`}>
             {action.badge > 99 ? '99+' : action.badge}
           </Badge>
         )}
@@ -52,34 +43,17 @@ function ActionPopover({ action }: { action: AdminHeaderAction }) {
   }
 
   return (
-    <div
-      className="nb-admin-header-popover"
-      ref={containerRef}
-    >
+    <div className="nb-admin-header-popover" ref={containerRef}>
       <div className="nb-admin-messages">
-        <IconButton
-          icon={action.icon}
-          label={action.label}
-          aria-expanded={open}
-          onClick={toggle}
-        />
+        <IconButton icon={action.icon} label={action.label} aria-expanded={open} onClick={toggle} />
         {!!action.badge && action.badge > 0 && (
-          <Badge
-            variant="danger"
-            size="sm"
-            pill
-            aria-label={`${action.badge} ${action.label}`}
-          >
+          <Badge variant="danger" size="sm" pill aria-label={`${action.badge} ${action.label}`}>
             {action.badge > 99 ? '99+' : action.badge}
           </Badge>
         )}
       </div>
       {open && action.renderPanel && (
-        <div
-          className="nb-admin-header-popover__panel"
-          role="dialog"
-          aria-label={action.label}
-        >
+        <div className="nb-admin-header-popover__panel" role="dialog" aria-label={action.label}>
           {action.renderPanel({ close: () => setOpen(false) })}
         </div>
       )}
@@ -106,11 +80,7 @@ function UserMenuPopover({
         onClick={toggle}
       />
       {open && (
-        <div
-          className="nb-admin-header-popover__panel"
-          role="dialog"
-          aria-label="User menu"
-        >
+        <div className="nb-admin-header-popover__panel" role="dialog" aria-label="User menu">
           {renderUserMenu({ close: () => setOpen(false) })}
         </div>
       )}

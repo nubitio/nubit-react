@@ -1,5 +1,4 @@
 import type { DataRecord } from '@nubitio/core';
-import type { Field } from '../field/Field';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 import type { BackendAdapter } from './BackendAdapter';
 
@@ -64,7 +63,10 @@ export const RestAdapter: BackendAdapter = {
     const r = response as Record<string, unknown>;
     const items = r['items'] ?? r['data'] ?? r['results'];
     if (Array.isArray(items)) {
-      return { items: items as DataRecord[], total: Number(r['total'] ?? r['count'] ?? items.length) };
+      return {
+        items: items as DataRecord[],
+        total: Number(r['total'] ?? r['count'] ?? items.length),
+      };
     }
     return { items: [], total: 0 };
   },

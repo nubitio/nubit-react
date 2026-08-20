@@ -14,7 +14,7 @@ import { createAuditFieldLabelResolver } from './AuditTrail';
 import { DialogStoreProvider } from './DialogStoreProvider';
 import { useCrudDialogStore } from './useCrudDialogStore';
 import type { DialogMode } from './dialogStore';
-import { Button, ConfirmDialog } from '@nubitio/ui';
+import { ConfirmDialog } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 import type { FormHandle } from '../form/FormHandle';
@@ -187,13 +187,14 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     () => datagridFields.filter((field) => !field.isIdentity),
     [datagridFields],
   );
-  const columnChooserState = useColumnChooser(resolvedResource as ResourceConfig, columnChooserFields);
+  const columnChooserState = useColumnChooser(
+    resolvedResource as ResourceConfig,
+    columnChooserFields,
+  );
   // Per-row gates are taken from the raw resource permissions: they are
   // predicates, not booleans, so they bypass the boolean resolution above.
   const rawPermissions =
-    typeof resolvedResource.permissions === 'function'
-      ? undefined
-      : resolvedResource.permissions;
+    typeof resolvedResource.permissions === 'function' ? undefined : resolvedResource.permissions;
   const routeAwareGridFields = useMemo(
     () =>
       datagridFields.map((field) => {
@@ -479,7 +480,6 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   );
 
   const toolbar = useMemo(() => {
-
     const base =
       resolveResourceToolbar(resolvedResource, {
         resource: resolvedResource,
@@ -538,7 +538,13 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     }
 
     return (row) => [...(base ?? []), auditAction(row)];
-  }, [hasAuditTrail, openAuditTrail, resolvedResource.auditTrail?.rowAction, resolvedResource.rowActions, t]);
+  }, [
+    hasAuditTrail,
+    openAuditTrail,
+    resolvedResource.auditTrail?.rowAction,
+    resolvedResource.rowActions,
+    t,
+  ]);
 
   const aboveGridSlot = aboveGridOverride ?? resolvedResource.aboveGrid;
   const aboveGridContent = (() => {

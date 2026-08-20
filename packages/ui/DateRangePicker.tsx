@@ -14,12 +14,7 @@
  */
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  applyDateMask,
-  getFirstDayOfWeek,
-  parseDisplayDate,
-  weekDayLabels,
-} from './DatePicker';
+import { applyDateMask, getFirstDayOfWeek, parseDisplayDate, weekDayLabels } from './DatePicker';
 import { useUiStrings } from './UiStrings';
 import { useFloatingPanel } from './useFloatingPanel';
 import './DateRangePicker.scss';
@@ -58,15 +53,21 @@ const parseIsoDate = (value?: string | null) => {
 
 const cx = (...vals: Array<string | false | null | undefined>) => vals.filter(Boolean).join(' ');
 
-const getLocale = (override?: string) => override || document.documentElement.lang || navigator.language || 'en-US';
+const getLocale = (override?: string) =>
+  override || document.documentElement.lang || navigator.language || 'en-US';
 
 const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-const addMonths = (date: Date, months: number) => new Date(date.getFullYear(), date.getMonth() + months, 1);
+const addMonths = (date: Date, months: number) =>
+  new Date(date.getFullYear(), date.getMonth() + months, 1);
 
 const formatDisplayDate = (value?: string | null, locale?: string) => {
   const date = parseIsoDate(value);
   if (!date) return '';
-  return new Intl.DateTimeFormat(getLocale(locale), { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat(getLocale(locale), {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
 };
 
 const formatMonthLabel = (date: Date, locale?: string) =>
@@ -79,7 +80,12 @@ type RangeDay = {
   disabled: boolean;
 };
 
-const buildCalendarDays = (month: Date, min?: string, max?: string, locale?: string): RangeDay[] => {
+const buildCalendarDays = (
+  month: Date,
+  min?: string,
+  max?: string,
+  locale?: string,
+): RangeDay[] => {
   const first = startOfMonth(month);
   const firstDayOfWeek = getFirstDayOfWeek(locale);
   const offset = (first.getDay() - firstDayOfWeek + 7) % 7;
@@ -148,7 +154,6 @@ export function DateRangePicker({
   const endDisplay = formatDisplayDate(endValue, resolvedLocale);
   const startIso = parseIsoDate(startValue) ? (startValue as string) : null;
   const endIso = parseIsoDate(endValue) ? (endValue as string) : null;
-  const hasRange = Boolean(startIso && endIso);
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<SelectionPhase>('idle');
@@ -166,7 +171,10 @@ export function DateRangePicker({
   const startInputRef = useRef<HTMLInputElement | null>(null);
   const endInputRef = useRef<HTMLInputElement | null>(null);
 
-  const days = useMemo(() => buildCalendarDays(month, min, max, resolvedLocale), [month, min, max, resolvedLocale]);
+  const days = useMemo(
+    () => buildCalendarDays(month, min, max, resolvedLocale),
+    [month, min, max, resolvedLocale],
+  );
   const weekdayLbls = useMemo(() => weekDayLabels(resolvedLocale), [resolvedLocale]);
   const todayIso = toIsoDate(new Date());
 
@@ -208,33 +216,40 @@ export function DateRangePicker({
     setOpen(false);
   }, [setOpen]);
 
-  const commitRange = useCallback((start: string, end: string) => {
-    // Normalize: ensure start <= end
-    const [a, b] = start <= end ? [start, end] : [end, start];
-    onChange?.(a, b);
-    closePanel();
-    window.setTimeout(() => startInputRef.current?.focus());
-  }, [onChange, closePanel]);
+  const commitRange = useCallback(
+    (start: string, end: string) => {
+      // Normalize: ensure start <= end
+      const [a, b] = start <= end ? [start, end] : [end, start];
+      onChange?.(a, b);
+      closePanel();
+      window.setTimeout(() => startInputRef.current?.focus());
+    },
+    [onChange, closePanel],
+  );
 
   // ── Calendar day click (two-phase selection) ──────────────────────────────
-  const handleDayClick = useCallback((iso: string) => {
-    if (phase === 'idle') {
-      // First click → set start, wait for end
-      setPendingStart(iso);
-      setPhase('selecting-end');
-    } else {
-      // Second click → commit range
-      const start = pendingStart ?? iso;
-      commitRange(start, iso);
-    }
-  }, [phase, pendingStart, commitRange]);
+  const handleDayClick = useCallback(
+    (iso: string) => {
+      if (phase === 'idle') {
+        // First click → set start, wait for end
+        setPendingStart(iso);
+        setPhase('selecting-end');
+      } else {
+        // Second click → commit range
+        const start = pendingStart ?? iso;
+        commitRange(start, iso);
+      }
+    },
+    [phase, pendingStart, commitRange],
+  );
 
   // ── Range visual state for each day ──────────────────────────────────────
   const getEffectiveRange = (): { effectiveStart: string | null; effectiveEnd: string | null } => {
     if (phase === 'selecting-end' && pendingStart) {
       const effectiveEnd = hoverIso ?? null;
       return {
-        effectiveStart: pendingStart <= (effectiveEnd ?? pendingStart) ? pendingStart : effectiveEnd,
+        effectiveStart:
+          pendingStart <= (effectiveEnd ?? pendingStart) ? pendingStart : effectiveEnd,
         effectiveEnd: pendingStart <= (effectiveEnd ?? pendingStart) ? effectiveEnd : pendingStart,
       };
     }
@@ -307,7 +322,9 @@ export function DateRangePicker({
     if (e.key === 'Enter') {
       e.preventDefault();
       const parsed = parseDisplayDate(startText);
-      if (parsed) { onChange?.(parsed, endIso ?? ''); }
+      if (parsed) {
+        onChange?.(parsed, endIso ?? '');
+      }
       endInputRef.current?.focus();
     } else if (e.key === 'ArrowDown' || e.key === 'F4') {
       e.preventDefault();
@@ -319,7 +336,9 @@ export function DateRangePicker({
     if (e.key === 'Enter') {
       e.preventDefault();
       const parsed = parseDisplayDate(endText);
-      if (parsed) { onChange?.(startIso ?? '', parsed); }
+      if (parsed) {
+        onChange?.(startIso ?? '', parsed);
+      }
     } else if (e.key === 'ArrowDown' || e.key === 'F4') {
       e.preventDefault();
       if (!readOnly && !disabled) setOpen(true);
@@ -341,7 +360,6 @@ export function DateRangePicker({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div ref={rootRef} className={cx('nb-date-range-picker', className)}>
-
       {/* ── Trigger ── */}
       <div
         ref={triggerRef}
@@ -437,122 +455,136 @@ export function DateRangePicker({
       )}
 
       {/* ── Panel ── */}
-      {open && createPortal(
-        <div
-          ref={panelRef}
-          className="nb-date-range-picker__panel"
-          role="dialog"
-          aria-label={strings.selectDateRange}
-          style={panelStyle}
-        >
-          {/* Header */}
-          <div className="nb-date-range-picker__header">
-            <button
-              type="button"
-              className="nb-date-range-picker__nav"
-              aria-label={strings.previousMonth}
-              onClick={() => setMonth((m) => addMonths(m, -1))}
-            >
-              <i className="ph ph-caret-left" aria-hidden="true" />
-            </button>
-            <div className="nb-date-range-picker__month" aria-live="polite">
-              {formatMonthLabel(month, resolvedLocale)}
-            </div>
-            <button
-              type="button"
-              className="nb-date-range-picker__nav"
-              aria-label={strings.nextMonth}
-              onClick={() => setMonth((m) => addMonths(m, 1))}
-            >
-              <i className="ph ph-caret-right" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* Weekdays */}
-          <div className="nb-date-range-picker__weekdays" aria-hidden="true">
-            {weekdayLbls.map((label, i) => <span key={`${label}-${i}`}>{label}</span>)}
-          </div>
-
-          {/* Phase banner */}
-          {phase === 'selecting-end' && (
-            <div className="nb-date-range-picker__phase-banner">
-              <i className="ph ph-info" aria-hidden="true" />
-              Ahora selecciona la fecha de fin
-            </div>
-          )}
-
-          {/* Day grid */}
+      {open &&
+        createPortal(
           <div
-            className="nb-date-range-picker__days"
-            role="grid"
-            aria-label={formatMonthLabel(month, resolvedLocale)}
+            ref={panelRef}
+            className="nb-date-range-picker__panel"
+            role="dialog"
+            aria-label={strings.selectDateRange}
+            style={panelStyle}
           >
-            {days.map((day) => {
-              const role = getDayRoleInRange(day.iso, effectiveStart, effectiveEnd);
-              return (
-                <button
-                  key={day.iso}
-                  type="button"
-                  className={cx(
-                    'nb-date-range-picker__day',
-                    !day.inCurrentMonth && 'nb-date-range-picker__day--muted',
-                    day.iso === todayIso && 'nb-date-range-picker__day--today',
-                    role === 'start' && 'nb-date-range-picker__day--range-start',
-                    role === 'end' && 'nb-date-range-picker__day--range-end',
-                    role === 'in-range' && 'nb-date-range-picker__day--in-range',
-                    role === 'single' && 'nb-date-range-picker__day--range-single',
-                    phase === 'selecting-end' && 'nb-date-range-picker__day--selecting',
-                  )}
-                  disabled={day.disabled}
-                  role="gridcell"
-                  aria-selected={role !== 'none'}
-                  onMouseEnter={() => phase === 'selecting-end' && setHoverIso(day.iso)}
-                  onMouseLeave={() => phase === 'selecting-end' && setHoverIso(null)}
-                  onClick={() => !day.disabled && handleDayClick(day.iso)}
-                >
-                  <span className="nb-date-range-picker__day-inner">{day.date.getDate()}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Footer */}
-          <div className="nb-date-range-picker__footer">
-            <button
-              type="button"
-              className="nb-date-range-picker__text-button"
-              onClick={() => { onChange?.('', ''); closePanel(); }}
-            >
-              {strings.clear}
-            </button>
-            {phase === 'selecting-end' ? (
+            {/* Header */}
+            <div className="nb-date-range-picker__header">
               <button
                 type="button"
-                className="nb-date-range-picker__text-button"
-                onClick={() => { setPendingStart(null); setPhase('idle'); setHoverIso(null); }}
+                className="nb-date-range-picker__nav"
+                aria-label={strings.previousMonth}
+                onClick={() => setMonth((m) => addMonths(m, -1))}
               >
-                {strings.cancel}
+                <i className="ph ph-caret-left" aria-hidden="true" />
               </button>
-            ) : (
+              <div className="nb-date-range-picker__month" aria-live="polite">
+                {formatMonthLabel(month, resolvedLocale)}
+              </div>
+              <button
+                type="button"
+                className="nb-date-range-picker__nav"
+                aria-label={strings.nextMonth}
+                onClick={() => setMonth((m) => addMonths(m, 1))}
+              >
+                <i className="ph ph-caret-right" aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Weekdays */}
+            <div className="nb-date-range-picker__weekdays" aria-hidden="true">
+              {weekdayLbls.map((label, i) => (
+                <span key={`${label}-${i}`}>{label}</span>
+              ))}
+            </div>
+
+            {/* Phase banner */}
+            {phase === 'selecting-end' && (
+              <div className="nb-date-range-picker__phase-banner">
+                <i className="ph ph-info" aria-hidden="true" />
+                Ahora selecciona la fecha de fin
+              </div>
+            )}
+
+            {/* Day grid */}
+            <div
+              className="nb-date-range-picker__days"
+              role="grid"
+              aria-label={formatMonthLabel(month, resolvedLocale)}
+            >
+              {days.map((day) => {
+                const role = getDayRoleInRange(day.iso, effectiveStart, effectiveEnd);
+                return (
+                  <button
+                    key={day.iso}
+                    type="button"
+                    className={cx(
+                      'nb-date-range-picker__day',
+                      !day.inCurrentMonth && 'nb-date-range-picker__day--muted',
+                      day.iso === todayIso && 'nb-date-range-picker__day--today',
+                      role === 'start' && 'nb-date-range-picker__day--range-start',
+                      role === 'end' && 'nb-date-range-picker__day--range-end',
+                      role === 'in-range' && 'nb-date-range-picker__day--in-range',
+                      role === 'single' && 'nb-date-range-picker__day--range-single',
+                      phase === 'selecting-end' && 'nb-date-range-picker__day--selecting',
+                    )}
+                    disabled={day.disabled}
+                    role="gridcell"
+                    aria-selected={role !== 'none'}
+                    onMouseEnter={() => phase === 'selecting-end' && setHoverIso(day.iso)}
+                    onMouseLeave={() => phase === 'selecting-end' && setHoverIso(null)}
+                    onClick={() => !day.disabled && handleDayClick(day.iso)}
+                  >
+                    <span className="nb-date-range-picker__day-inner">{day.date.getDate()}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="nb-date-range-picker__footer">
               <button
                 type="button"
                 className="nb-date-range-picker__text-button"
                 onClick={() => {
-                  const today = toIsoDate(new Date());
-                  setMonth(startOfMonth(new Date()));
-                  if (!startIso) { onChange?.(today, endIso ?? ''); }
-                  else if (!endIso) { onChange?.(startIso, today); }
-                  else { onChange?.(today, today); }
+                  onChange?.('', '');
                   closePanel();
                 }}
               >
-                {strings.today}
+                {strings.clear}
               </button>
-            )}
-          </div>
-        </div>,
-        document.body,
-      )}
+              {phase === 'selecting-end' ? (
+                <button
+                  type="button"
+                  className="nb-date-range-picker__text-button"
+                  onClick={() => {
+                    setPendingStart(null);
+                    setPhase('idle');
+                    setHoverIso(null);
+                  }}
+                >
+                  {strings.cancel}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="nb-date-range-picker__text-button"
+                  onClick={() => {
+                    const today = toIsoDate(new Date());
+                    setMonth(startOfMonth(new Date()));
+                    if (!startIso) {
+                      onChange?.(today, endIso ?? '');
+                    } else if (!endIso) {
+                      onChange?.(startIso, today);
+                    } else {
+                      onChange?.(today, today);
+                    }
+                    closePanel();
+                  }}
+                >
+                  {strings.today}
+                </button>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

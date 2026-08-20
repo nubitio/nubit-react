@@ -2,11 +2,14 @@ import type { ReactNode } from 'react';
 import type { DataGridEventNames, DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { FilterRule } from '../field/FilterRule';
-import type { GridHandle } from './GridHandle';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { SummaryItem } from '../summary';
 import type { BulkAction } from '../crud/BulkAction';
-import type { ResourceEmptyState, ResourceRowActions, ResourceToolbarItems } from '../crud/ResourceConfig';
+import type {
+  ResourceEmptyState,
+  ResourceRowActions,
+  ResourceToolbarItems,
+} from '../crud/ResourceConfig';
 import type { ColumnGroupDef } from './ColumnGroup';
 
 export interface DataGridSelectionChangedEvent {

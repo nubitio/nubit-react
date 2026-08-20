@@ -64,7 +64,6 @@ import {
 import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gridFieldUtils';
 import {
   buildToolbar,
-  getResolvedRowActions,
   isToolbarActionVisible,
   renderRowActionItem,
   renderToolbarButton,
@@ -73,6 +72,8 @@ import {
 import { useGridDataLoader } from './useGridDataLoader';
 import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
 import { useAutoColumnWidths } from './useAutoColumnWidths';
+import { useGridSelection } from './useGridSelection';
+import { buildNativeRowActions } from './nativeRowActions';
 
 type SortRule = { selector: string; desc: boolean };
 
@@ -104,7 +105,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         ),
     [options.fields, options.visibleColumns],
   );
-  const [selectedKeys, setSelectedKeys] = useState<Array<string | number>>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
   const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -183,6 +183,28 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     data: options.data,
     suppliedGridSummary: options.gridSummary,
     onContentReady: notifyContentReady,
+  });
+
+  const notifySelectionChanged = useCallback(
+    (nextRows: DataRecord[]) => {
+      options.onSelectionChanged?.({ selectedRowsData: nextRows });
+      emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
+    },
+    [emit, options],
+  );
+  const {
+    selectedKeys,
+    selectedRows,
+    selectRow,
+    allPageSelected,
+    somePageSelected,
+    toggleSelectAll,
+    resetSelection,
+  } = useGridSelection({
+    rows,
+    getRowKey,
+    multiple: options.selectionMode === 'multiple',
+    onChange: notifySelectionChanged,
   });
 
   // Row actions menu: close on outside click, Escape, or when rows change
@@ -386,7 +408,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       refresh: () => void handleStateRef.current.loadRows(),
       reset: () => {
         clearTimeout(filterDebounceRef.current);
-        setSelectedKeys([]);
+        resetSelection();
         setFilters({});
         setFilterInputs({});
         setFilterOperators(computeDefaultOperators(options.fields));
@@ -438,89 +460,31 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       hasEditData: () => handleStateRef.current.inlineEdit.draftRows.size > 0,
       saveChanges: () => handleStateRef.current.inlineEdit.saveAll(),
     }),
-    [getRowKey, options.fields, rowsRef, setIsGridLoading, t],
+    [getRowKey, options.fields, resetSelection, rowsRef, setIsGridLoading, t],
   );
-
-  const selectedRows = rows.filter((row) => selectedKeys.includes(getRowKey(row)));
-
-  const applySelection = useCallback(
-    (nextKeys: Array<string | number>) => {
-      setSelectedKeys(nextKeys);
-      const nextRows = rows.filter((item) => nextKeys.includes(getRowKey(item)));
-      options.onSelectionChanged?.({ selectedRowsData: nextRows });
-      emit(DATA_GRID_EVENTS.SELECTION_CHANGED, nextRows);
-    },
-    [emit, getRowKey, options, rows],
-  );
-
-  const selectRow = (row: DataRecord) => {
-    const key = getRowKey(row);
-    const nextKeys =
-      options.selectionMode === 'multiple'
-        ? selectedKeys.includes(key)
-          ? selectedKeys.filter((selectedKey) => selectedKey !== key)
-          : [...selectedKeys, key]
-        : [key];
-
-    applySelection(nextKeys);
-  };
 
   const rowEditable = (row: DataRecord): boolean => options.canEditRow?.(row) !== false;
   const rowDeletable = (row: DataRecord): boolean => options.canDeleteRow?.(row) !== false;
 
-  const buildRowActions = (row: DataRecord): ResourceToolbarAction[] => [
-    ...(options.allowEdit &&
-    rowEditable(row) &&
-    rowInlineMode &&
-    canInlineEditMode &&
-    !inlineEdit.isEditing(row[idField])
-      ? [
-          {
-            text: t('grid.inlineEditRow'),
-            icon: 'ph-pencil-simple',
-            disabled: options.editDisabled,
-            onClick: () => inlineEdit.startEdit(row),
-          },
-        ]
-      : []),
-    ...(options.allowEdit &&
-    rowEditable(row) &&
-    !canInlineEditMode &&
-    (options.onEdit || options.events?.EDIT)
-      ? [
-          {
-            text: t('grid.buttonEdit'),
-            icon: 'ph-pencil-simple',
-            disabled: options.editDisabled,
-            onClick: () => {
-              if (options.onEdit) options.onEdit(row);
-              else emit(options.events!.EDIT!, { row });
-            },
-          },
-        ]
-      : []),
-    ...(options.allowView && options.onView
-      ? [
-          {
-            text: t('grid.buttonView'),
-            icon: 'ph-eye',
-            onClick: () => options.onView!(row),
-          },
-        ]
-      : []),
-    ...getResolvedRowActions(row, options.rowActions),
-    ...(options.allowDelete && rowDeletable(row) && (options.onDelete || options.events?.DELETE)
-      ? [
-          {
-            text: t('grid.buttonDelete'),
-            icon: 'ph-trash',
-            type: 'danger' as const,
-            disabled: options.deleteDisabled,
-            onClick: () => setConfirmRow(row),
-          },
-        ]
-      : []),
-  ];
+  const buildRowActions = (row: DataRecord): ResourceToolbarAction[] =>
+    buildNativeRowActions({
+      row,
+      options,
+      labels: {
+        inlineEdit: t('grid.inlineEditRow'),
+        edit: t('grid.buttonEdit'),
+        view: t('grid.buttonView'),
+        delete: t('grid.buttonDelete'),
+      },
+      editable: rowEditable(row),
+      deletable: rowDeletable(row),
+      rowInlineMode,
+      canInlineEditMode,
+      inlineEditing: inlineEdit.isEditing(row[idField]),
+      startInlineEdit: () => inlineEdit.startEdit(row),
+      emitEdit: () => emit(options.events!.EDIT!, { row }),
+      requestDelete: () => setConfirmRow(row),
+    });
 
   const openRow = (row: DataRecord) => {
     if (options.allowEdit && rowEditable(row) && rowInlineMode && canInlineEditMode) {
@@ -663,18 +627,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasCheckbox = options.selectionMode === 'multiple';
-  const allPageSelected =
-    hasCheckbox && rows.length > 0 && rows.every((row) => selectedKeys.includes(getRowKey(row)));
-  const somePageSelected = hasCheckbox && selectedKeys.length > 0 && !allPageSelected;
-
-  const toggleSelectAll = () => {
-    if (!hasCheckbox || rows.length === 0) return;
-    if (allPageSelected) {
-      applySelection([]);
-      return;
-    }
-    applySelection(rows.map(getRowKey));
-  };
 
   const renderSelectAllCheckbox = () => (
     <input

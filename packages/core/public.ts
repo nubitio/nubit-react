@@ -66,6 +66,23 @@ export type {
 export { CoreRuntimeProvider, useCoreRuntime } from './runtime';
 export type { CoreNotificationType, CoreRuntime, CoreRuntimeProviderProps } from './runtime';
 
+// ── Feature flags ─────────────────────────────────────────────────────────────
+export {
+  FeatureFlagsProvider,
+  StaticFeatureFlagClient,
+  useBooleanFlag,
+  useFeatureFlags,
+  useNumberFlag,
+  useObjectFlag,
+  useStringFlag,
+} from './featureFlags';
+export type {
+  FeatureFlagClient,
+  FeatureFlagEvaluationContext,
+  FeatureFlagsProviderProps,
+  FeatureFlagValues,
+} from './featureFlags';
+
 // ── Mercure (real-time) ───────────────────────────────────────────────────────
 export {
   MercureProvider,

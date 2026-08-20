@@ -24,18 +24,35 @@
 }
 
 .nb-form--with-detail {
-  // Content-driven: the dialog sizes around the form, while the detail grid
-  // owns its internal scroll when line items exceed available space.
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 // ── Master-detail layout ───────────────────────────────────────────────────────
+//
+// Drawers and dialogs stack: header on top, line grid filling remaining height.
+// The old side-by-side track (`minmax(280px, 332px) minmax(560px, 1fr)`) needed
+// ~900px plus chrome, which overflowed the default `lg` drawer (880px) and left
+// a blank master column when every header field is `visibleOnForm: false`.
+// Page mode keeps the two-column layout — it has the viewport width to spare.
 
 .nb-form__master-detail {
   align-items: stretch;
   display: grid;
+  flex: 1 1 auto;
   gap: var(--space-4);
-  grid-template-columns: minmax(280px, 332px) minmax(560px, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 0;
+}
+
+.nb-form--page:not(.nb-form--detail-only) .nb-form__master-detail {
+  grid-template-columns: minmax(280px, 332px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.nb-form--detail-only .nb-form__master-detail {
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .nb-form--with-detail .nb-form__master-detail {
@@ -57,8 +74,8 @@
   overflow: hidden;
 }
 
-// Cabecera master-detail: contenido inset; el scrollbar overlay queda en el borde de columna.
-.nb-form--with-detail .nb-form__master-panel {
+// Page-mode cabecera: inset so the column scrollbar sits on the split edge.
+.nb-form--page:not(.nb-form--detail-only) .nb-form__master-panel {
   padding: 0 var(--space-5) 0 var(--space-4);
 }
 
@@ -87,6 +104,30 @@
   overflow: hidden;
 }
 
+// Drawer: same fill contract as page mode so a detail-only form (Órdenes de
+// Compra, etc.) uses the panel instead of sitting in the top-right corner.
+.nb-drawer__body:has(.nb-form--with-detail) {
+  overflow: hidden;
+}
+
+.nb-drawer__body .nb-form--with-detail {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nb-drawer__body .nb-form__master-detail {
+  height: 100%;
+  overflow: hidden;
+}
+
+.nb-drawer__body .nb-form__detail {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
 .nb-form__master-panel,
 .nb-form__detail-panel {
   min-height: 0;
@@ -95,10 +136,14 @@
 
 .nb-form__master-panel {
   display: block;
+  min-height: 0;
 }
 
 .nb-form__detail-panel {
   display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 // ── Field grid ─────────────────────────────────────────────────────────────────
@@ -541,10 +586,18 @@
 }
 
 .nb-form__detail {
+  flex: 1 1 auto;
   height: auto;
   max-height: min(calc(100dvh - 220px), 640px);
   min-height: 0;
   width: 100%;
+}
+
+// Drawer and page shells own the viewport height — drop the dialog cap so the
+// line grid fills remaining space instead of leaving a blank band below.
+.nb-drawer__body .nb-form__detail,
+.nb-crud-page-shell__body .nb-form__detail {
+  max-height: none;
 }
 
 .nb-form__section-title {
@@ -1072,8 +1125,10 @@
     padding: 16px;
   }
 
-  .nb-form__master-detail {
-    grid-template-columns: 1fr;
+  .nb-form__master-detail,
+  .nb-form--page:not(.nb-form--detail-only) .nb-form__master-detail {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .nb-form__field {

@@ -106,8 +106,10 @@ export function isShortField(field: Field): boolean {
 function canUseHalfColumn(context: FieldColSpanContext): boolean {
   if (isMobileViewport(context)) return false;
 
-  // Master-detail forms render in a narrow left panel (~332px), not full page width.
-  if (context.hasMasterDetail) return false;
+  // Page-mode master-detail: header sits in a ~332px left column.
+  // Drawer/dialog master-detail stack vertically, so the header uses the
+  // full surface width (and half-columns on lg/xl drawers).
+  if (context.hasMasterDetail && context.presentationMode === 'page') return false;
 
   if (context.presentationMode === 'page') {
     return true;

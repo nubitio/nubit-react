@@ -41,6 +41,7 @@ import { getFieldTypeModule } from '../field/registry/registry';
 import type { DetailCellProps, FormControlContext } from '../field/registry/FieldTypeModule';
 import { renderDefaultDetailCell } from '../field/registry/controlHelpers';
 import { useFormState } from './useFormState';
+import { hasVisibleFormFields } from './formFieldVisibility';
 
 type EventRowPayload = FormDataRecord & { row?: FormDataRecord };
 
@@ -875,11 +876,24 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     />
   ) : null;
 
+  const presentationMode = options.presentationContext?.presentationMode ?? 'dialog';
+  const hasMasterFields = hasVisibleFormFields(fields, fieldState);
+  const isDetailOnly = Boolean(options.detailFields) && !hasMasterFields;
+  const formClassName = [
+    'nb-form',
+    options.detailFields ? 'nb-form--with-detail' : '',
+    isDetailOnly ? 'nb-form--detail-only' : '',
+    `nb-form--${presentationMode}`,
+    options.className ?? '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div className={`nb-form${options.detailFields ? ' nb-form--with-detail' : ''} ${options.className ?? ''}`}>
+    <div className={formClassName}>
       {options.detailFields ? (
         <div className="nb-form__master-detail">
-          <div className="nb-form__master-panel">{renderLayout(formLayoutModel)}</div>
+          {hasMasterFields && <div className="nb-form__master-panel">{renderLayout(formLayoutModel)}</div>}
           <div className="nb-form__detail-panel">{detailGrid}</div>
         </div>
       ) : (

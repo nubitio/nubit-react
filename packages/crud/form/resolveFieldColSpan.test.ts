@@ -152,6 +152,17 @@ describe('resolveFieldColSpan', () => {
     expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailPage)).toBe(12);
   });
 
+  it('lets drawer master-detail forms use half columns (stacked header)', () => {
+    const masterDetailDrawer = buildFieldColSpanContext({
+      presentationMode: 'drawer',
+      hasMasterDetail: true,
+      drawerWidth: 880,
+      viewportWidth: 1280,
+    });
+    expect(resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), masterDetailDrawer)).toBe(6);
+    expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailDrawer)).toBe(6);
+  });
+
   it('honours layout metadata', () => {
     expect(
       resolveFieldColSpan(

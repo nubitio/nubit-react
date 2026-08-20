@@ -14,7 +14,20 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    setupFiles: ['./vitest.setup.ts'],
     include: ['packages/**/*.test.ts', 'packages/**/*.test.tsx'],
+    coverage: {
+      provider: 'v8',
+      include: ['packages/**/*.{ts,tsx}'],
+      exclude: ['packages/**/*.test.{ts,tsx}', 'packages/**/dist/**', 'packages/**/public.ts'],
+      reporter: ['text-summary', 'json-summary'],
+      thresholds: {
+        statements: 47,
+        branches: 39,
+        functions: 45,
+        lines: 49,
+      },
+    },
     alias: {
       '@nubitio/react-admin': pkg('react-admin'),
       '@nubitio/core': pkg('core'),

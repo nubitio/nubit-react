@@ -22,10 +22,10 @@ export default defineConfig({
       exclude: ['packages/**/*.test.{ts,tsx}', 'packages/**/dist/**', 'packages/**/public.ts'],
       reporter: ['text-summary', 'json-summary'],
       thresholds: {
-        statements: 48,
-        branches: 40,
+        statements: 49,
+        branches: 41,
         functions: 47,
-        lines: 50,
+        lines: 51,
       },
     },
     alias: {

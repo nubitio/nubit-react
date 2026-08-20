@@ -11,8 +11,6 @@ import React, {
 import Form, { SimpleItem } from 'devextreme-react/form';
 
 import { useCoreHttpClient, useCoreTranslation, useEvents } from '@nubitio/core';
-import type { CoreTranslationKeys, DataRecord } from '@nubitio/core';
-import type { Field } from '@nubitio/crud';
 import {
   FORM_ERRORS_EVENT,
   FORM_EVENTS,
@@ -30,74 +28,10 @@ import { mapApiViolations } from '@nubitio/crud';
 import type { FormDataRecord } from '@nubitio/crud';
 
 import { DevExtremeFormDetailGrid } from './DevExtremeFormDetailGrid';
+import { validateField, withDetailRowKeys } from './formValidation';
 import { mapFieldsToDxFormItems } from './mapFieldsToDxFormItems';
 
 type EventRowPayload = FormDataRecord & { row?: FormDataRecord };
-
-function isEmptyValue(value: unknown): boolean {
-  return value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0);
-}
-
-function withDetailRowKeys(rows: FormDataRecord[]): FormDataRecord[] {
-  return rows.map((row) => ({
-    ...row,
-    __rowKey: typeof row.__rowKey === 'string' ? row.__rowKey : crypto.randomUUID(),
-  }));
-}
-
-function validateField(
-  field: Field,
-  value: unknown,
-  formData: FormDataRecord,
-  t: (key: keyof CoreTranslationKeys, options?: DataRecord) => string,
-): string | null {
-  if (field.required && isEmptyValue(value)) {
-    return t('form.fieldRequired', { label: field.label });
-  }
-
-  for (const rule of field.validators ?? []) {
-    if (rule.type === 'required' && isEmptyValue(value)) {
-      return rule.options.message ?? t('form.fieldRequired', { label: field.label });
-    }
-    if (
-      rule.type === 'email' &&
-      typeof value === 'string' &&
-      value !== '' &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-    ) {
-      return rule.options.message ?? t('form.invalidEmail');
-    }
-    if (rule.type === 'numeric' && value !== '' && value != null && Number.isNaN(Number(value))) {
-      return rule.options.message ?? t('form.invalidNumeric');
-    }
-    if (rule.type === 'pattern' && typeof value === 'string' && !new RegExp(rule.options.pattern).test(value)) {
-      return rule.options.message ?? t('form.invalidPattern');
-    }
-    if (rule.type === 'stringLength' && typeof value === 'string') {
-      if (rule.options.min !== undefined && value.length < rule.options.min) {
-        return rule.options.message ?? t('form.stringTooShort');
-      }
-      if (rule.options.max !== undefined && value.length > rule.options.max) {
-        return rule.options.message ?? t('form.stringTooLong');
-      }
-    }
-    if (rule.type === 'range' && value !== '' && value != null) {
-      const numericValue = Number(value);
-      if (rule.options.min !== undefined && numericValue < rule.options.min) {
-        return rule.options.message ?? t('form.outOfRange');
-      }
-      if (rule.options.max !== undefined && numericValue > rule.options.max) {
-        return rule.options.message ?? t('form.outOfRange');
-      }
-    }
-    if (rule.type === 'custom') {
-      const valid = rule.options.validationCallback({ value, data: formData });
-      if (!valid) return rule.options.message ?? t('validation.defaultError');
-    }
-  }
-
-  return null;
-}
 
 export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((options, ref) => {
   const { t } = useCoreTranslation();
@@ -151,8 +85,7 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
       if (field.type === FieldType.FILE) {
         const uploaded = accessors.getUploadedFile(field.name);
         const hasExisting = accessors.getExistingMedia(field.name) !== null;
-        value =
-          uploaded?.iri != null || (hasExisting && uploaded === undefined) ? 'present' : null;
+        value = uploaded?.iri != null || (hasExisting && uploaded === undefined) ? 'present' : null;
       }
 
       const error = validateField(field, value, accessors.getFormData(), t);
@@ -253,7 +186,12 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
     (payload: { row: FormDataRecord }) => {
       resetPrependData();
       captureExistingMedia(payload.row);
-      const row = normalizeFormData(payload.row, options.fields, options.adapter, accessors.getPrependDataMap());
+      const row = normalizeFormData(
+        payload.row,
+        options.fields,
+        options.adapter,
+        accessors.getPrependDataMap(),
+      );
       resetUploadSession();
       setErrors({});
       setDetailErrors({});
@@ -308,25 +246,43 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
     if (options.operation === 'edit' && options.rowData) {
       applyEditPayload({ row: options.rowData });
     }
-  }, [applyAddPayload, applyEditPayload, options.operation, options.operationVersion, options.rowData]);
+  }, [
+    applyAddPayload,
+    applyEditPayload,
+    options.operation,
+    options.operationVersion,
+    options.rowData,
+  ]);
 
   useEffect(() => {
     const subs = [
       on<unknown>(scopedFormErrorsEvent, (formErrors) => {
-        const mapped = mapApiViolations(formErrors, detailPropertyName, t('validation.defaultError'));
+        const mapped = mapApiViolations(
+          formErrors,
+          detailPropertyName,
+          t('validation.defaultError'),
+        );
         setErrors((current) => ({ ...current, ...mapped.fieldErrors }));
         setDetailErrors(mapped.detailErrors);
       }),
     ];
 
     if (options.events?.ADD) {
-      subs.push(on(options.events.ADD, (payload: EventRowPayload | undefined) => applyAddPayload(payload)));
+      subs.push(
+        on(options.events.ADD, (payload: EventRowPayload | undefined) => applyAddPayload(payload)),
+      );
     }
     if (options.events?.EDIT) {
-      subs.push(on(options.events.EDIT, (payload: { row: FormDataRecord }) => applyEditPayload(payload)));
+      subs.push(
+        on(options.events.EDIT, (payload: { row: FormDataRecord }) => applyEditPayload(payload)),
+      );
     }
     if (options.events?.DELETE) {
-      subs.push(on(options.events.DELETE, (payload: { row: FormDataRecord }) => handleDeleteRef.current(payload)));
+      subs.push(
+        on(options.events.DELETE, (payload: { row: FormDataRecord }) =>
+          handleDeleteRef.current(payload),
+        ),
+      );
     }
     if (options.events?.SAVE) {
       subs.push(on(options.events.SAVE, () => handleSaveRef.current()));
@@ -357,18 +313,32 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
       reloadDetailData: () => undefined,
       setValues: (data) => {
         resetPrependData();
-        setNextFormData(normalizeFormData(data, options.fields, undefined, accessors.getPrependDataMap()));
+        setNextFormData(
+          normalizeFormData(data, options.fields, undefined, accessors.getPrependDataMap()),
+        );
       },
       save: () => handleSaveRef.current(),
       deleteRow: (row) => handleDeleteRef.current({ row }),
       setReadonly: (field, value) =>
-        setFieldState((current) => ({ ...current, [field]: { ...current[field], readonly: value } })),
+        setFieldState((current) => ({
+          ...current,
+          [field]: { ...current[field], readonly: value },
+        })),
       setDisabled: (field, value) =>
-        setFieldState((current) => ({ ...current, [field]: { ...current[field], disabled: value } })),
+        setFieldState((current) => ({
+          ...current,
+          [field]: { ...current[field], disabled: value },
+        })),
       enableValidation: (field) =>
-        setFieldState((current) => ({ ...current, [field]: { ...current[field], validationEnabled: true } })),
+        setFieldState((current) => ({
+          ...current,
+          [field]: { ...current[field], validationEnabled: true },
+        })),
       disableValidation: (field) =>
-        setFieldState((current) => ({ ...current, [field]: { ...current[field], validationEnabled: false } })),
+        setFieldState((current) => ({
+          ...current,
+          [field]: { ...current[field], validationEnabled: false },
+        })),
       setError: (field, message) => setErrors((current) => ({ ...current, [field]: message })),
       showField: (field) =>
         setFieldState((current) => ({ ...current, [field]: { ...current[field], hidden: false } })),
@@ -447,8 +417,12 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
           <FileUploadField
             field={field}
             existingMedia={accessors.getExistingMedia(field.name)}
-            disabled={fieldState[field.name]?.disabled ?? field.disabled ?? options.editable === false}
-            readOnly={fieldState[field.name]?.readonly ?? field.readonly ?? options.editable === false}
+            disabled={
+              fieldState[field.name]?.disabled ?? field.disabled ?? options.editable === false
+            }
+            readOnly={
+              fieldState[field.name]?.readonly ?? field.readonly ?? options.editable === false
+            }
             invalid={!!errors[field.name]}
             uploadUrl={field.url ?? `${options.url}/upload`}
             httpClient={httpClient}
@@ -456,7 +430,9 @@ export const DevExtremeFormView = forwardRef<FormHandle, FormViewOptions>((optio
             onUploaded={(entry) => upsertUploadedFile(entry)}
             onCleared={(fieldName) => clearExistingMedia(fieldName)}
           />
-          {errors[field.name] ? <span className="nb-dx-form__error">{errors[field.name]}</span> : null}
+          {errors[field.name] ? (
+            <span className="nb-dx-form__error">{errors[field.name]}</span>
+          ) : null}
         </div>
       ))}
 

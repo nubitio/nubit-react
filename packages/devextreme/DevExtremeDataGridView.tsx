@@ -41,34 +41,13 @@ import { ConfirmDialog } from '@nubitio/ui';
 
 import { mergeGridFilters } from './convertDxFilterToNubit';
 import { DevExtremeDetailGridSection } from './DevExtremeDetailGridSection';
+import {
+  DX_PAGE_SIZE_OPTIONS,
+  isHeaderFilterLookup,
+  resolveDxEditMode,
+  resolveDxRemoteOperations,
+} from './dxGridConfig';
 import { mapFieldsToDxColumns } from './mapFieldsToDxColumns';
-
-type DxEditMode = 'row' | 'cell' | 'batch' | 'popup';
-
-function resolveDxEditMode(editMode: DataGridViewOptions['editMode']): DxEditMode | null {
-  if (!editMode || editMode === 'popup') return null;
-  return editMode;
-}
-
-const DX_PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-function resolveDxRemoteOperations(options: DataGridViewOptions) {
-  if (options.data) return false;
-  const filterRow = options.filterRow ?? true;
-  return {
-    // Header filter derives values from the loaded page — keep grouping/filtering
-    // off so CustomStore.load is not called in a loop for distinct values.
-    filtering: filterRow,
-    grouping: false,
-    summary: false,
-    sorting: true,
-    paging: options.paging ?? true,
-  };
-}
-
-function isHeaderFilterLookup(loadOptions: Record<string, unknown>): boolean {
-  return Array.isArray(loadOptions.group) || loadOptions.requireGroupCount === true;
-}
 
 export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions>(
   (options, ref) => {
@@ -244,7 +223,8 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
         getSelectedRow: () => selectedRowsRef.current[0],
         getSelectedRowKeys: () => selectedKeysRef.current,
         getSelectedRows: () => selectedRowsRef.current,
-        getFilter: () => mergeGridFilters(routingFilterRef.current, activeFilter, fieldsRef.current),
+        getFilter: () =>
+          mergeGridFilters(routingFilterRef.current, activeFilter, fieldsRef.current),
         filter: (filterRule: FilterRule | null) => {
           const nextFilter = filterRule
             ? [filterRule.field, filterRule.operator, filterRule.value]
@@ -275,7 +255,10 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
     );
 
     const handleSelectionChanged = useCallback(
-      (event: { selectedRowsData?: Array<Record<string, unknown>>; selectedRowKeys?: unknown[] }) => {
+      (event: {
+        selectedRowsData?: Array<Record<string, unknown>>;
+        selectedRowKeys?: unknown[];
+      }) => {
         const rows = (event.selectedRowsData ?? []) as DataRecord[];
         selectedRowsRef.current = rows;
         selectedKeysRef.current = event.selectedRowKeys ?? rows.map((row) => row[idField]);
@@ -477,59 +460,61 @@ export const DevExtremeDataGridView = forwardRef<GridHandle, DataGridViewOptions
                 onEditCanceled={handleEditCanceled}
                 onEditingChange={handleEditingChange}
               >
-          {typeof remoteOperations === 'object' ? <RemoteOperations {...remoteOperations} /> : null}
-          <LoadPanel enabled showPane shading={false} />
-          {options.selectionMode === 'multiple' ? (
-            <Selection mode="multiple" showCheckBoxesMode="always" />
-          ) : (
-            <Selection mode="single" />
-          )}
-          {showPaging ? (
-            <>
-              <Paging enabled pageSize={pageSize} />
-              <Pager
-                visible
-                showInfo
-                showPageSizeSelector
-                allowedPageSizes={DX_PAGE_SIZE_OPTIONS}
-                displayMode="full"
-              />
-            </>
-          ) : (
-            <Paging enabled={false} />
-          )}
-          <Sorting mode="single" />
-          {showFilterRow ? <FilterRow visible applyFilter="auto" /> : null}
-          {options.headerFilter ? <HeaderFilter visible /> : null}
-          {showToolbar ? <Toolbar visible /> : null}
-          {hasMasterDetail ? <MasterDetail enabled render={renderMasterDetail} /> : null}
-          {inlineEditing && dxEditMode ? (
-            <Editing
-              mode={dxEditMode}
-              allowUpdating={
-                options.allowEdit !== false &&
-                options.fields.some(
-                  (field) => field.type !== FieldType.FILE && canEditFieldInline(field),
-                )
-              }
-              useIcons
-              selectTextOnEditStart
-            />
-          ) : null}
-          {columns.map((column) => (
-            <Column key={column.dataField} {...column} />
-          ))}
-          {!inlineEditing && (options.allowDelete || options.allowEdit) ? (
-            <Column
-              caption=""
-              width={110}
-              allowSorting={false}
-              allowFiltering={false}
-              allowEditing={false}
-              cellRender={renderRowActions}
-            />
-          ) : null}
-          <Item name="searchPanel" />
+                {typeof remoteOperations === 'object' ? (
+                  <RemoteOperations {...remoteOperations} />
+                ) : null}
+                <LoadPanel enabled showPane shading={false} />
+                {options.selectionMode === 'multiple' ? (
+                  <Selection mode="multiple" showCheckBoxesMode="always" />
+                ) : (
+                  <Selection mode="single" />
+                )}
+                {showPaging ? (
+                  <>
+                    <Paging enabled pageSize={pageSize} />
+                    <Pager
+                      visible
+                      showInfo
+                      showPageSizeSelector
+                      allowedPageSizes={DX_PAGE_SIZE_OPTIONS}
+                      displayMode="full"
+                    />
+                  </>
+                ) : (
+                  <Paging enabled={false} />
+                )}
+                <Sorting mode="single" />
+                {showFilterRow ? <FilterRow visible applyFilter="auto" /> : null}
+                {options.headerFilter ? <HeaderFilter visible /> : null}
+                {showToolbar ? <Toolbar visible /> : null}
+                {hasMasterDetail ? <MasterDetail enabled render={renderMasterDetail} /> : null}
+                {inlineEditing && dxEditMode ? (
+                  <Editing
+                    mode={dxEditMode}
+                    allowUpdating={
+                      options.allowEdit !== false &&
+                      options.fields.some(
+                        (field) => field.type !== FieldType.FILE && canEditFieldInline(field),
+                      )
+                    }
+                    useIcons
+                    selectTextOnEditStart
+                  />
+                ) : null}
+                {columns.map((column) => (
+                  <Column key={column.dataField} {...column} />
+                ))}
+                {!inlineEditing && (options.allowDelete || options.allowEdit) ? (
+                  <Column
+                    caption=""
+                    width={110}
+                    allowSorting={false}
+                    allowFiltering={false}
+                    allowEditing={false}
+                    cellRender={renderRowActions}
+                  />
+                ) : null}
+                <Item name="searchPanel" />
               </DataGrid>
             </div>
             <ConfirmDialog

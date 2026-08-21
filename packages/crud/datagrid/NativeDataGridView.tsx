@@ -33,12 +33,12 @@ import {
   getDefaultFilterOperator,
   joinBetweenValue,
 } from './FilterRow';
+import { useGridQueryState } from './useGridQueryState';
 import { getCellText, getIdField, renderCell } from './cellRendering';
 import { DetailGridSection } from './DetailGridSection';
 import { canEditFieldInline, useInlineEdit } from './useInlineEdit';
 import { INLINE_EDIT_PORTAL_SELECTOR, InlineEditCell } from './InlineEditCell';
 import { GridEmptyStateView } from './GridEmptyStateView';
-import { BETWEEN_VALUE_SEPARATOR, splitBetweenValue } from '../field/registry/shared';
 
 import { useIsMobile } from './useIsMobile';
 import {
@@ -76,8 +76,6 @@ import { useGridSelection } from './useGridSelection';
 import { useColumnResize } from './useColumnResize';
 import { buildNativeRowActions } from './nativeRowActions';
 
-type SortRule = { selector: string; desc: boolean };
-
 export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((options, ref) => {
   const { t } = useCoreTranslation();
   const httpClient = useCoreHttpClient();
@@ -106,18 +104,36 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         ),
     [options.fields, options.visibleColumns],
   );
-  const [filters, setFilters] = useState<Record<string, string>>({});
-  const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
-  const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [filterOperators, setFilterOperators] = useState<Record<string, string>>(() =>
-    computeDefaultOperators(options.fields),
-  );
+  const {
+    filters,
+    filterInputs,
+    filterOperators,
+    sort,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    goToPreviousPage,
+    goToNextPage,
+    toggleSort,
+    sortBy,
+    toggleSortDirection,
+    applyFilterInputsImmediate,
+    applyFilterInputDebounced,
+    applyFilterOperator,
+    clearFilter,
+    operatorFor,
+    resetQuery,
+    replaceFilters,
+  } = useGridQueryState({
+    fields: options.fields,
+    initialSort: options.sort,
+    initialPageSize: options.pageSize,
+    onFilterChange: options.onFilterChange,
+  });
   const [filterRemoteOptions, setFilterRemoteOptions] = useState<Record<string, DataRecord[]>>({});
   const loadedFilterOptionsRef = useRef<Set<string>>(new Set());
-  const [sort, setSort] = useState<SortRule[]>(options.sort ?? []);
-  const [pageSize, setPageSize] = useState(options.pageSize ?? 20);
   const [confirmRow, setConfirmRow] = useState<DataRecord | null>(null);
-  const [page, setPage] = useState(0);
   const [expandedKeys, setExpandedKeys] = useState<Set<unknown>>(() => new Set());
   const [loadingMessage, setLoadingMessage] = useState('');
   const isMobile = useIsMobile();
@@ -415,13 +431,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       hideLoading: () => setIsGridLoading(false),
       refresh: () => void handleStateRef.current.loadRows(),
       reset: () => {
-        clearTimeout(filterDebounceRef.current);
         resetSelection();
-        setFilters({});
-        setFilterInputs({});
-        setFilterOperators(computeDefaultOperators(options.fields));
-        setSort([]);
-        setPage(0);
+        resetQuery();
         setExpandedKeys(new Set());
       },
       loadData: () => Promise.resolve(rowsRef.current),
@@ -459,16 +470,21 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 ),
             }
           : computeDefaultOperators(options.fields);
-        clearTimeout(filterDebounceRef.current);
-        setFilters(nextFilters);
-        setFilterInputs(nextFilters);
-        setFilterOperators(nextOperators);
-        setPage(0);
+        replaceFilters(nextFilters, nextOperators);
       },
       hasEditData: () => handleStateRef.current.inlineEdit.draftRows.size > 0,
       saveChanges: () => handleStateRef.current.inlineEdit.saveAll(),
     }),
-    [getRowKey, options.fields, resetSelection, rowsRef, setIsGridLoading, t],
+    [
+      getRowKey,
+      options.fields,
+      replaceFilters,
+      resetQuery,
+      resetSelection,
+      rowsRef,
+      setIsGridLoading,
+      t,
+    ],
   );
 
   const rowEditable = (row: DataRecord): boolean => options.canEditRow?.(row) !== false;
@@ -509,32 +525,10 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     }
   };
 
-  // Filter handlers shared by the desktop filter row, the mobile filter sheet
-  // and the mobile quick-search bar.
-  const applyFilterInputsImmediate = (nextInputs: Record<string, string>) => {
-    clearTimeout(filterDebounceRef.current);
-    setFilterInputs(nextInputs);
-    setFilters(nextInputs);
-    setPage(0);
-    options.onFilterChange?.(nextInputs);
-  };
-
-  const applyFilterInputDebounced = (field: Field, nextValue: string) => {
-    const nextInputs = { ...filterInputs, [field.name]: nextValue };
-    if (nextValue === '') delete nextInputs[field.name];
-    setFilterInputs(nextInputs);
-    clearTimeout(filterDebounceRef.current);
-    filterDebounceRef.current = setTimeout(() => {
-      setFilters(nextInputs);
-      setPage(0);
-      options.onFilterChange?.(nextInputs);
-    }, 300);
-  };
-
   const renderFilterCell = (field: Field) => (
     <FilterCell
       field={field}
-      operator={filterOperators[field.name] ?? getDefaultFilterOperator(field)}
+      operator={operatorFor(field)}
       remoteOptions={filterRemoteOptions[field.name] ?? []}
       value={filterInputs[field.name] ?? ''}
       onInputChange={(nextValue) => applyFilterInputDebounced(field, nextValue)}
@@ -549,28 +543,8 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
         if (nextValue === '') delete nextInputs[field.name];
         applyFilterInputsImmediate(nextInputs);
       }}
-      onOperatorChange={(nextOperator) => {
-        setFilterOperators((prev) => ({
-          ...prev,
-          [field.name]: nextOperator,
-        }));
-        const currentValue = filterInputs[field.name];
-        if (currentValue) {
-          const nextInputs = { ...filterInputs };
-          if (nextOperator === 'between' && !currentValue.includes(BETWEEN_VALUE_SEPARATOR)) {
-            nextInputs[field.name] = joinBetweenValue(currentValue, '');
-          }
-          if (nextOperator !== 'between' && currentValue.includes(BETWEEN_VALUE_SEPARATOR)) {
-            nextInputs[field.name] = splitBetweenValue(currentValue).find(Boolean) ?? '';
-          }
-          applyFilterInputsImmediate(nextInputs);
-        }
-      }}
-      onClear={() => {
-        const nextInputs = { ...filterInputs };
-        delete nextInputs[field.name];
-        applyFilterInputsImmediate(nextInputs);
-      }}
+      onOperatorChange={(nextOperator) => applyFilterOperator(field, nextOperator)}
+      onClear={() => clearFilter(field)}
     />
   );
 
@@ -590,17 +564,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       }
     }
     setConfirmRow(null);
-  };
-
-  const toggleSort = (field: Field) => {
-    if (!field.sortable) return;
-    setPage(0);
-    setSort((current) => {
-      const existing = current.find((rule) => rule.selector === field.name);
-      if (!existing) return [{ selector: field.name, desc: false }];
-      if (!existing.desc) return [{ selector: field.name, desc: true }];
-      return [];
-    });
   };
 
   const handleResizeMouseDown = useColumnResize({ setColWidths, syncHorizontalScrollRef });
@@ -1823,7 +1786,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 <button
                   type="button"
                   className="nb-datagrid__pager-btn"
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  onClick={goToPreviousPage}
                   disabled={page === 0}
                   aria-label={t('grid.previousPage')}
                 >
@@ -1849,7 +1812,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 <button
                   type="button"
                   className="nb-datagrid__pager-btn"
-                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  onClick={() => goToNextPage(totalPages)}
                   disabled={page + 1 >= totalPages}
                   aria-label={t('grid.nextPage')}
                 >
@@ -1987,12 +1950,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                                 label: field.label,
                               })),
                             ]}
-                            onChange={(value) => {
-                              setPage(0);
-                              setSort(
-                                value ? [{ selector: value, desc: sort[0]?.desc ?? false }] : [],
-                              );
-                            }}
+                            onChange={(value) => sortBy(value || null)}
                             showFieldLabel={false}
                           />
                           <IconButton
@@ -2001,14 +1959,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                               sort[0]?.desc ? t('grid.sortDescending') : t('grid.sortAscending')
                             }
                             disabled={!sort[0]}
-                            onClick={() => {
-                              setPage(0);
-                              setSort((current) =>
-                                current[0]
-                                  ? [{ selector: current[0].selector, desc: !current[0].desc }]
-                                  : current,
-                              );
-                            }}
+                            onClick={toggleSortDirection}
                           />
                         </div>
                       </div>

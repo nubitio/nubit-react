@@ -1,0 +1,5 @@
+# Bulk reformats — noise in `git blame`. Enable once with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: apply prettier across the codebase
+90ebde23b45cf4c0c6ad1879fae62f1dd022a22c

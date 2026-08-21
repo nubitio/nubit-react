@@ -28,6 +28,12 @@ jobs:
       - name: Lint
         run: pnpm lint:strict
 
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Package boundaries
+        run: pnpm validate:boundaries
+
       - name: Typecheck
         run: pnpm typecheck
 

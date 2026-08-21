@@ -13,4 +13,17 @@ describe('registerFieldType', () => {
   it('rejects overriding built-in FieldType values', () => {
     expect(() => registerFieldType(FieldType.TEXT, textTypeModule)).toThrow(/built-in/);
   });
+
+  it('falls back to the text module for unregistered and Object.prototype keys', () => {
+    for (const key of [
+      'nope',
+      'constructor',
+      'toString',
+      'valueOf',
+      'hasOwnProperty',
+      '__proto__',
+    ]) {
+      expect(getFieldTypeModule(key), `module for "${key}"`).toBe(textTypeModule);
+    }
+  });
 });

@@ -71,7 +71,10 @@ export function listRegisteredFieldTypes(): string[] {
 }
 
 export function getFieldTypeModule(type: FieldType | string): FieldTypeModule {
-  if (type in FIELD_TYPE_MODULES) {
+  // `Object.hasOwn`, not `in`: inherited Object.prototype keys ("constructor",
+  // "toString", …) would otherwise resolve to prototype members instead of
+  // falling back to the text module.
+  if (Object.hasOwn(FIELD_TYPE_MODULES, type)) {
     return FIELD_TYPE_MODULES[type as FieldType];
   }
 

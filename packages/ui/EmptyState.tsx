@@ -23,10 +23,10 @@ export interface EmptyStateProps {
 }
 
 const DEFAULT_ICONS: Record<EmptyStateVariant, string> = {
-  default:  'folder-open',
-  danger:   'warning-circle',
-  warning:  'warning',
-  success:  'check-circle',
+  default: 'folder-open',
+  danger: 'warning-circle',
+  warning: 'warning',
+  success: 'check-circle',
 };
 
 export const EmptyState = ({
@@ -57,12 +57,8 @@ export const EmptyState = ({
         <i className={`ph ph-${iconName}`} aria-hidden="true" />
       </div>
       <p className="nb-empty-state__title">{title}</p>
-      {description && (
-        <p className="nb-empty-state__description">{description}</p>
-      )}
-      {action && (
-        <div className="nb-empty-state__action">{action}</div>
-      )}
+      {description && <p className="nb-empty-state__description">{description}</p>}
+      {action && <div className="nb-empty-state__action">{action}</div>}
     </div>
   );
 };

@@ -8,8 +8,6 @@ export interface HydraResourceStoreProviderProps {
 
 export function HydraResourceStoreProvider({ children }: HydraResourceStoreProviderProps) {
   return (
-    <ResourceStoreProvider factory={createHydraResourceStore}>
-      {children}
-    </ResourceStoreProvider>
+    <ResourceStoreProvider factory={createHydraResourceStore}>{children}</ResourceStoreProvider>
   );
 }

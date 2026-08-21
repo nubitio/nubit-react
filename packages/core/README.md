@@ -24,11 +24,7 @@ import { CoreProvider } from '@nubitio/core';
 
 export function App() {
   return (
-    <CoreProvider
-      apiBaseUrl="https://api.example.com"
-      timezone="UTC"
-      locale="en"
-    >
+    <CoreProvider apiBaseUrl="https://api.example.com" timezone="UTC" locale="en">
       {/* your app */}
     </CoreProvider>
   );
@@ -102,12 +98,12 @@ See `CoreHttpClientConfig` for all options.
 
 ## Key exports
 
-| Export | Description |
-|--------|-------------|
-| `CoreProvider` | Root provider — wraps HTTP, i18n, React Query, and runtime config |
-| `CoreHttpClient` | Type-safe HTTP client with error normalisation + pluggable auth refresh |
-| `dispatch` / `useEvents` | Lightweight event bus for cross-component communication |
-| `createCrudEvents` | Factory for typed CRUD event sets |
-| `MercureProvider` | Real-time SSE integration via Mercure hub |
-| `DateUtils` | Timezone-aware date formatting powered by Luxon |
-| `coreTranslationsEs` / `coreTranslationsEn` | Built-in translations for Spanish and English |
+| Export                                      | Description                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| `CoreProvider`                              | Root provider — wraps HTTP, i18n, React Query, and runtime config       |
+| `CoreHttpClient`                            | Type-safe HTTP client with error normalisation + pluggable auth refresh |
+| `dispatch` / `useEvents`                    | Lightweight event bus for cross-component communication                 |
+| `createCrudEvents`                          | Factory for typed CRUD event sets                                       |
+| `MercureProvider`                           | Real-time SSE integration via Mercure hub                               |
+| `DateUtils`                                 | Timezone-aware date formatting powered by Luxon                         |
+| `coreTranslationsEs` / `coreTranslationsEn` | Built-in translations for Spanish and English                           |

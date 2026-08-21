@@ -143,7 +143,10 @@ function renderPage(
           >
             <MemoryRouter initialEntries={[entry]}>
               <Routes>
-                <Route path="/:id" element={<SmartCrudPage resource={resource} formRef={formRef} />} />
+                <Route
+                  path="/:id"
+                  element={<SmartCrudPage resource={resource} formRef={formRef} />}
+                />
                 <Route path="/" element={<SmartCrudPage resource={resource} formRef={formRef} />} />
               </Routes>
             </MemoryRouter>
@@ -197,8 +200,12 @@ describe('grid filter row per field type', () => {
     await waitFor(() => expect(container.textContent).toContain('Laptop'));
 
     // TEXT gets a text input, NUMBER/CURRENCY a numeric input.
-    expect(container.querySelectorAll('input.nb-datagrid__filter-input[type="text"]').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('input.nb-datagrid__filter-input[type="number"]').length).toBe(2);
+    expect(
+      container.querySelectorAll('input.nb-datagrid__filter-input[type="text"]').length,
+    ).toBeGreaterThan(0);
+    expect(
+      container.querySelectorAll('input.nb-datagrid__filter-input[type="number"]').length,
+    ).toBe(2);
     // DATE gets the date picker editor.
     expect(container.querySelector('.nb-datagrid__filter-date')).not.toBeNull();
     // ENUM gets the all-values dropdown (AppDropdown renders derived ids).
@@ -222,7 +229,11 @@ describe('form controls per field type', () => {
     expect(document.querySelector('input#nb-form-price[type="number"]')).not.toBeNull();
     // DatePicker renders its own input wired to the field id.
     expect(document.querySelector('#nb-form-soldOn')).not.toBeNull();
-    expect(document.querySelector('input[name="active"][type="checkbox"], .nb-form__checkbox input[type="checkbox"]')).not.toBeNull();
+    expect(
+      document.querySelector(
+        'input[name="active"][type="checkbox"], .nb-form__checkbox input[type="checkbox"]',
+      ),
+    ).not.toBeNull();
     // Enum renders the lookup combobox.
     expect(document.querySelector('input#nb-form-status[role="combobox"]')).not.toBeNull();
     expect(document.querySelector('textarea#nb-form-notes')).not.toBeNull();

@@ -1,10 +1,7 @@
 import { getCoreLocale, getCoreTimezone, type DataRecord } from '@nubitio/core';
 import type { Field } from '../Field';
 import type { BackendAdapter } from '../../adapter/BackendAdapter';
-import type {
-  FilterOperator,
-  SerializedFieldValue,
-} from './FieldTypeModule';
+import type { FilterOperator, SerializedFieldValue } from './FieldTypeModule';
 
 // ─── Display helpers (moved verbatim from NativeDataGridView) ─────────────────
 

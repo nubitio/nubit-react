@@ -1,5 +1,9 @@
 import { useReducer, useCallback, useEffect } from 'react';
-import { useEvents, type EventSubscription as Subscription, type FormEventNames } from '@nubitio/core';
+import {
+  useEvents,
+  type EventSubscription as Subscription,
+  type FormEventNames,
+} from '@nubitio/core';
 import type { SmartCrudOperation } from './fieldOperationSemantics';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 
@@ -23,10 +27,7 @@ function areEqualValues(left: unknown, right: unknown): boolean {
   return false;
 }
 
-function areEqualFormData(
-  left: FormDataRecord | null,
-  right: FormDataRecord | null,
-): boolean {
+function areEqualFormData(left: FormDataRecord | null, right: FormDataRecord | null): boolean {
   if (left === right) {
     return true;
   }
@@ -43,7 +44,8 @@ function areEqualFormData(
   }
 
   return leftKeys.every(
-    (key) => Object.prototype.hasOwnProperty.call(right, key) && areEqualValues(left[key], right[key]),
+    (key) =>
+      Object.prototype.hasOwnProperty.call(right, key) && areEqualValues(left[key], right[key]),
   );
 }
 
@@ -84,16 +86,17 @@ function stateFromRouting(routingState: RoutingSnapshot): CrudState {
 
 function crudReducer(state: CrudState, action: CrudAction): CrudState {
   switch (action.type) {
-    case 'sync-routing':
-      {
-        const nextState = stateFromRouting(action.routingState);
-        return state.activeOperation === nextState.activeOperation &&
-          areEqualFormData(state.formData, nextState.formData)
-          ? state
-          : nextState;
-      }
+    case 'sync-routing': {
+      const nextState = stateFromRouting(action.routingState);
+      return state.activeOperation === nextState.activeOperation &&
+        areEqualFormData(state.formData, nextState.formData)
+        ? state
+        : nextState;
+    }
     case 'set-form-data':
-      return areEqualFormData(state.formData, action.data) ? state : { ...state, formData: action.data };
+      return areEqualFormData(state.formData, action.data)
+        ? state
+        : { ...state, formData: action.data };
     case 'create':
       return state.activeOperation === 'create' && areEqualFormData(state.formData, {})
         ? state
@@ -199,5 +202,12 @@ export function useSmartCrudOperation(
     };
   }, [events?.ADD, events?.CANCEL, events?.EDIT, events?.SUCCESS, on]);
 
-  return { activeOperation, formData, handleFormDataChange, startCreate, startEdit, resetOperation };
+  return {
+    activeOperation,
+    formData,
+    handleFormDataChange,
+    startCreate,
+    startEdit,
+    resetOperation,
+  };
 }

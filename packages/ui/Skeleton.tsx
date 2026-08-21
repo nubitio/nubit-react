@@ -22,13 +22,7 @@ export const Skeleton = ({
   lines = 1,
   className,
 }: SkeletonProps) => {
-  const base = [
-    'nb-skeleton',
-    `nb-skeleton--${variant}`,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const base = ['nb-skeleton', `nb-skeleton--${variant}`, className].filter(Boolean).join(' ');
 
   if (variant === 'text' && lines > 1) {
     return (
@@ -38,7 +32,7 @@ export const Skeleton = ({
             key={i}
             className={base}
             style={{
-              width: i === lines - 1 ? '70%' : fmtSize(width) ?? '100%',
+              width: i === lines - 1 ? '70%' : (fmtSize(width) ?? '100%'),
             }}
             aria-hidden="true"
           />

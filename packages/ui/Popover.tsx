@@ -43,35 +43,20 @@ export interface PopoverProps {
   className?: string;
 }
 
-export const Popover = ({
-  trigger,
-  panel,
-  align = 'end',
-  ariaLabel,
-  className,
-}: PopoverProps) => {
+export const Popover = ({ trigger, panel, align = 'end', ariaLabel, className }: PopoverProps) => {
   const { open, setOpen, toggle, containerRef } = useFloatingPanel();
 
   return (
     <div
       ref={containerRef}
-      className={[
-        'nb-popover',
-        `nb-popover--${align}`,
-        open && 'nb-popover--open',
-        className,
-      ]
+      className={['nb-popover', `nb-popover--${align}`, open && 'nb-popover--open', className]
         .filter(Boolean)
         .join(' ')}
     >
       {trigger({ open, toggle })}
 
       {open && (
-        <div
-          className="nb-popover__panel"
-          role="dialog"
-          aria-label={ariaLabel}
-        >
+        <div className="nb-popover__panel" role="dialog" aria-label={ariaLabel}>
           {panel({ close: () => setOpen(false) })}
         </div>
       )}

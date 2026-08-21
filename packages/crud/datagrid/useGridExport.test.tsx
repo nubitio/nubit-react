@@ -60,7 +60,10 @@ describe('useGridExport', () => {
 
   it('exposes the error and stops loading when the export request fails', async () => {
     const failure = new Error('network down');
-    const source = { load: vi.fn(), export: vi.fn().mockRejectedValue(failure) } as unknown as ResourceStore;
+    const source = {
+      load: vi.fn(),
+      export: vi.fn().mockRejectedValue(failure),
+    } as unknown as ResourceStore;
 
     const { result } = renderHook(() => useGridExport({ source, ...baseProps }));
 

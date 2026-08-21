@@ -42,9 +42,7 @@ export function mapFieldsToDxColumns(
 ): DxColumnDef[] {
   return fields
     .filter((field) => field.visible && !field.hidden)
-    .filter(
-      (field) => visibleColumns == null || visibleColumns.includes(field.name),
-    )
+    .filter((field) => visibleColumns == null || visibleColumns.includes(field.name))
     .sort(
       (left, right) =>
         (left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER),

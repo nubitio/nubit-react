@@ -128,18 +128,28 @@ describe('resolveFieldColSpan', () => {
   });
 
   it('uses half columns for compact types in drawer lg/page', () => {
-    expect(resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), drawerLgContext)).toBe(6);
-    expect(resolveFieldColSpan(field({ type: FieldType.CURRENCY, name: 'amount' }), pageContext)).toBe(6);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), drawerLgContext),
+    ).toBe(6);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.CURRENCY, name: 'amount' }), pageContext),
+    ).toBe(6);
   });
 
   it('defaults plain text fields to full width without layoutHint', () => {
     expect(resolveFieldColSpan(field({ name: 'description' }), drawerLgContext)).toBe(12);
-    expect(resolveFieldColSpan(field({ type: FieldType.TEXTAREA, name: 'description' }), pageContext)).toBe(12);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.TEXTAREA, name: 'description' }), pageContext),
+    ).toBe(12);
   });
 
   it('defaults drawer md/dialog to single column', () => {
-    expect(resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), drawerMdContext)).toBe(12);
-    expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), dialogContext)).toBe(12);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), drawerMdContext),
+    ).toBe(12);
+    expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), dialogContext)).toBe(
+      12,
+    );
   });
 
   it('keeps master-detail page forms in a single column', () => {
@@ -148,8 +158,12 @@ describe('resolveFieldColSpan', () => {
       hasMasterDetail: true,
       viewportWidth: 1280,
     });
-    expect(resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), masterDetailPage)).toBe(12);
-    expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailPage)).toBe(12);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), masterDetailPage),
+    ).toBe(12);
+    expect(
+      resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailPage),
+    ).toBe(12);
   });
 
   it('lets drawer master-detail forms use half columns (stacked header)', () => {
@@ -159,8 +173,12 @@ describe('resolveFieldColSpan', () => {
       drawerWidth: 880,
       viewportWidth: 1280,
     });
-    expect(resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), masterDetailDrawer)).toBe(6);
-    expect(resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailDrawer)).toBe(6);
+    expect(
+      resolveFieldColSpan(field({ type: FieldType.DATE, name: 'issuedAt' }), masterDetailDrawer),
+    ).toBe(6);
+    expect(
+      resolveFieldColSpan(field({ layoutHint: 'short', name: 'code' }), masterDetailDrawer),
+    ).toBe(6);
   });
 
   it('honours layout metadata', () => {
@@ -171,16 +189,10 @@ describe('resolveFieldColSpan', () => {
       ),
     ).toBe(12);
     expect(
-      resolveFieldColSpan(
-        field({ name: 'custom', layoutHint: 'fullWidth' }),
-        drawerLgContext,
-      ),
+      resolveFieldColSpan(field({ name: 'custom', layoutHint: 'fullWidth' }), drawerLgContext),
     ).toBe(12);
     expect(
-      resolveFieldColSpan(
-        field({ name: 'custom', layoutHint: 'short' }),
-        drawerLgContext,
-      ),
+      resolveFieldColSpan(field({ name: 'custom', layoutHint: 'short' }), drawerLgContext),
     ).toBe(6);
   });
 });
@@ -191,7 +203,13 @@ describe('resolveFieldsColSpans orphan handling', () => {
       [
         field({ layoutHint: 'short', name: 'phone' }),
         field({ layoutHint: 'short', name: 'email' }),
-        field({ layoutHint: 'lookup', name: 'priceList', type: FieldType.ENTITY, textField: 'name', valueField: 'id' }),
+        field({
+          layoutHint: 'lookup',
+          name: 'priceList',
+          type: FieldType.ENTITY,
+          textField: 'name',
+          valueField: 'id',
+        }),
       ],
       drawerLgContext,
     );
@@ -224,7 +242,13 @@ describe('layoutHint-driven layouts', () => {
         field({ layoutHint: 'long', name: 'address' }),
         field({ layoutHint: 'short', name: 'phone' }),
         field({ layoutHint: 'short', name: 'email' }),
-        field({ layoutHint: 'lookup', name: 'priceList', type: FieldType.ENTITY, textField: 'name', valueField: 'id' }),
+        field({
+          layoutHint: 'lookup',
+          name: 'priceList',
+          type: FieldType.ENTITY,
+          textField: 'name',
+          valueField: 'id',
+        }),
       ],
       drawerLgContext,
     );
@@ -241,7 +265,13 @@ describe('layoutHint-driven layouts', () => {
     const spans = resolveFieldsColSpans(
       [
         field({ layoutHint: 'short', name: 'code', maxLength: 12 }),
-        field({ layoutHint: 'lookup', name: 'category', type: FieldType.ENTITY, textField: 'name', valueField: 'id' }),
+        field({
+          layoutHint: 'lookup',
+          name: 'category',
+          type: FieldType.ENTITY,
+          textField: 'name',
+          valueField: 'id',
+        }),
         field({ layoutHint: 'fullWidth', name: 'title' }),
         field({ layoutHint: 'money', name: 'salePrice', type: FieldType.CURRENCY }),
         field({ layoutHint: 'money', name: 'purchasePrice', type: FieldType.CURRENCY }),

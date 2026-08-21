@@ -80,11 +80,7 @@ export const Avatar = ({
   const initials = getAvatarInitials(owner);
   const hue = getAvatarHue(owner);
 
-  const classes = [
-    'nb-avatar',
-    shape === 'square' && 'nb-avatar--square',
-    className,
-  ]
+  const classes = ['nb-avatar', shape === 'square' && 'nb-avatar--square', className]
     .filter(Boolean)
     .join(' ');
 
@@ -93,12 +89,14 @@ export const Avatar = ({
       className={classes}
       role="img"
       aria-label={alt ?? (owner || 'Avatar')}
-      style={{
-        width: px,
-        height: px,
-        fontSize: Math.round(px * 0.38),
-        '--avatar-hue': hue,
-      } as React.CSSProperties}
+      style={
+        {
+          width: px,
+          height: px,
+          fontSize: Math.round(px * 0.38),
+          '--avatar-hue': hue,
+        } as React.CSSProperties
+      }
     >
       {initials}
     </span>

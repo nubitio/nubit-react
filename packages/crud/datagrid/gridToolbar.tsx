@@ -10,7 +10,11 @@ export function getToolbarKey(action: ResourceToolbarAction, index: number): str
   return action.key ?? action.text ?? String(index);
 }
 
-export function renderToolbarButton(action: ResourceToolbarAction, index: number, iconOnly = false) {
+export function renderToolbarButton(
+  action: ResourceToolbarAction,
+  index: number,
+  iconOnly = false,
+) {
   if (action.visible === false) return null;
   const icon = normalizeIcon(action.icon);
   const variant =
@@ -110,7 +114,9 @@ export function renderRowMenuActions(
       {regular.map((action, idx) => renderRowActionItem(action, idx, permissions, onBeforeClick))}
       {danger.length > 0 && (
         <div className="nb-datagrid__actions-danger-group">
-          {danger.map((action, idx) => renderRowActionItem(action, idx, permissions, onBeforeClick))}
+          {danger.map((action, idx) =>
+            renderRowActionItem(action, idx, permissions, onBeforeClick),
+          )}
         </div>
       )}
     </>

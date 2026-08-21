@@ -22,31 +22,51 @@ describe('computeAnchoredStyle', () => {
   it('positions below the anchor with start alignment and matched width', () => {
     window.innerWidth = 1024;
     window.innerHeight = 768;
-    const style = computeAnchoredStyle(fakeAnchor({ top: 100, bottom: 130, left: 40, right: 200, width: 160, height: 30 }), {
-      matchAnchorWidth: true,
-      minWidth: 72,
+    const style = computeAnchoredStyle(
+      fakeAnchor({ top: 100, bottom: 130, left: 40, right: 200, width: 160, height: 30 }),
+      {
+        matchAnchorWidth: true,
+        minWidth: 72,
+      },
+    );
+    expect(style).toMatchObject({
+      position: 'fixed',
+      left: '40px',
+      width: '160px',
+      top: '134px',
+      visibility: 'visible',
     });
-    expect(style).toMatchObject({ position: 'fixed', left: '40px', width: '160px', top: '134px', visibility: 'visible' });
   });
 
   it('flips above the anchor when space below drops under the threshold', () => {
     window.innerWidth = 1024;
     window.innerHeight = 768;
-    const style = computeAnchoredStyle(fakeAnchor({ top: 700, bottom: 730, left: 40, right: 200, width: 160, height: 30 }), {
-      minWidth: 190,
-      flipThreshold: 200,
+    const style = computeAnchoredStyle(
+      fakeAnchor({ top: 700, bottom: 730, left: 40, right: 200, width: 160, height: 30 }),
+      {
+        minWidth: 190,
+        flipThreshold: 200,
+        zIndex: 1600,
+      },
+    );
+    expect(style).toMatchObject({
+      bottom: `${768 - 700 + 4}px`,
+      top: 'auto',
+      width: '190px',
       zIndex: 1600,
     });
-    expect(style).toMatchObject({ bottom: `${768 - 700 + 4}px`, top: 'auto', width: '190px', zIndex: 1600 });
   });
 
   it('right-aligns with end alignment, clamped to the viewport gutter', () => {
     window.innerWidth = 300;
     window.innerHeight = 768;
-    const style = computeAnchoredStyle(fakeAnchor({ top: 10, bottom: 40, left: 200, right: 296, width: 96, height: 30 }), {
-      align: 'end',
-      minWidth: 190,
-    });
+    const style = computeAnchoredStyle(
+      fakeAnchor({ top: 10, bottom: 40, left: 200, right: 296, width: 96, height: 30 }),
+      {
+        align: 'end',
+        minWidth: 190,
+      },
+    );
     expect(style).toMatchObject({ left: `${300 - 190 - 8}px` });
   });
 });

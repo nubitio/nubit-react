@@ -12,9 +12,7 @@ export type CrudDataGridView = ForwardRefExoticComponent<
   DataGridViewOptions & RefAttributes<GridHandle>
 >;
 
-export type CrudFormView = ForwardRefExoticComponent<
-  FormViewOptions & RefAttributes<FormHandle>
->;
+export type CrudFormView = ForwardRefExoticComponent<FormViewOptions & RefAttributes<FormHandle>>;
 
 export interface CrudViewComponents {
   DataGridView: CrudDataGridView;

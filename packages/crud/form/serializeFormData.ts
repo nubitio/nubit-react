@@ -1,6 +1,9 @@
 import { Field } from '../field/Field';
 import { getFieldTypeModule } from '../field/registry/registry';
-import type { SerializedFieldValue, SerializeFieldContext } from '../field/registry/FieldTypeModule';
+import type {
+  SerializedFieldValue,
+  SerializeFieldContext,
+} from '../field/registry/FieldTypeModule';
 import type { UploadedFile } from './UploadedFile';
 import type { FormDataRecord } from './FormDataSnapshot';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
@@ -94,7 +97,11 @@ export function serializeDetailRows(
   detailFields.forEach((field) => {
     const typeModule = getFieldTypeModule(field.type);
     details.forEach((detail) => {
-      applySerializedValue(detail, field, typeModule.serializeDetailValue(field, detail[field.name], adapter));
+      applySerializedValue(
+        detail,
+        field,
+        typeModule.serializeDetailValue(field, detail[field.name], adapter),
+      );
     });
   });
 

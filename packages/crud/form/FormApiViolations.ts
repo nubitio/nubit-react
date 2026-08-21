@@ -23,7 +23,8 @@ function normalizePath(path: string): string {
 function readViolation(value: unknown): ApiViolation | null {
   if (!value || typeof value !== 'object') return null;
   const record = value as Record<string, unknown>;
-  const propertyPath = typeof record['propertyPath'] === 'string' ? record['propertyPath'] : undefined;
+  const propertyPath =
+    typeof record['propertyPath'] === 'string' ? record['propertyPath'] : undefined;
   const message = typeof record['message'] === 'string' ? record['message'] : undefined;
   if (!propertyPath && !message) return null;
   return { propertyPath, message };

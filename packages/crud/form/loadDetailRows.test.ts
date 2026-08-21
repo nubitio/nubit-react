@@ -15,7 +15,11 @@ describe('loadDetailRows', () => {
       }),
     );
 
-    const rows = await loadDetailRows(httpClient, '/api/sales_document_lines?document=9', HydraAdapter);
+    const rows = await loadDetailRows(
+      httpClient,
+      '/api/sales_document_lines?document=9',
+      HydraAdapter,
+    );
 
     expect(rows).toEqual([{ id: 1, quantity: '2.00' }]);
   });

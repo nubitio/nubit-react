@@ -50,7 +50,17 @@ export function EntityDropdown({
     if (filters.length > 0) builder.filters(filters);
 
     return builder.build();
-  }, [filters, itemFormatter, label, placeholder, searchEnabled, searchExpr, textField, url, valueField]);
+  }, [
+    filters,
+    itemFormatter,
+    label,
+    placeholder,
+    searchEnabled,
+    searchExpr,
+    textField,
+    url,
+    valueField,
+  ]);
 
   return (
     <NativeEntitySelect

@@ -64,13 +64,13 @@ export function App() {
 
 ## The stack
 
-| Package | What it provides |
-| --- | --- |
-| `@nubitio/core` | HTTP client, event bus, i18n, Mercure SSE, date utilities |
-| `@nubitio/ui` | Visual primitives and theme system |
-| `@nubitio/admin` | Responsive admin shell (sidebar, header) |
-| `@nubitio/crud` | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
-| `@nubitio/hydra` | Schema discovery and data sources from Hydra/OpenAPI docs |
+| Package          | What it provides                                           |
+| ---------------- | ---------------------------------------------------------- |
+| `@nubitio/core`  | HTTP client, event bus, i18n, Mercure SSE, date utilities  |
+| `@nubitio/ui`    | Visual primitives and theme system                         |
+| `@nubitio/admin` | Responsive admin shell (sidebar, header)                   |
+| `@nubitio/crud`  | Declarative CRUD engine: field DSL, forms, datagrids, RBAC |
+| `@nubitio/hydra` | Schema discovery and data sources from Hydra/OpenAPI docs  |
 
 Each package is also published separately if you only need part of the stack.
 

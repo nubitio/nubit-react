@@ -63,9 +63,7 @@ export function FeatureHubLayout({
   const compact = density === 'compact';
   const densityClass = compact ? ' nb-feature-hub--compact' : '';
   const showBanner =
-    banner &&
-    banner.visible !== false &&
-    (!compact || banner.showInCompact === true);
+    banner && banner.visible !== false && (!compact || banner.showInCompact === true);
 
   if (location.pathname === normalizedBase || location.pathname === `${normalizedBase}/`) {
     return <Navigate to={defaultPath} replace />;
@@ -113,7 +111,10 @@ export function FeatureHubLayout({
           className={`nb-feature-hub__banner nb-feature-hub__banner--${banner.tone ?? 'info'}`}
           role="status"
         >
-          <i className={normalizeIcon(banner.icon ?? 'ph-info') ?? 'ph ph-info'} aria-hidden="true" />
+          <i
+            className={normalizeIcon(banner.icon ?? 'ph-info') ?? 'ph ph-info'}
+            aria-hidden="true"
+          />
           <span>{banner.message}</span>
         </div>
       )}

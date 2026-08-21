@@ -33,11 +33,11 @@
 // Dark mode: reduce saturation slightly to avoid visual noise
 @media (prefers-color-scheme: dark) {
   .nb-avatar {
-    background: oklch(48% 0.10 calc(var(--avatar-hue, 218) * 1deg));
+    background: oklch(48% 0.1 calc(var(--avatar-hue, 218) * 1deg));
   }
 }
 
 // Dark theme — keyed off ThemeProvider's data-theme attribute (prefix-independent)
 [data-theme='dark'] .nb-avatar {
-  background: oklch(48% 0.10 calc(var(--avatar-hue, 218) * 1deg));
+  background: oklch(48% 0.1 calc(var(--avatar-hue, 218) * 1deg));
 }

@@ -48,7 +48,11 @@ describe('FieldBuilder', () => {
   });
 
   it('sets field type correctly', () => {
-    const numField = new FieldBuilder().name('qty').label('Cantidad').type(FieldType.NUMBER).build();
+    const numField = new FieldBuilder()
+      .name('qty')
+      .label('Cantidad')
+      .type(FieldType.NUMBER)
+      .build();
     expect(numField.type).toBe(FieldType.NUMBER);
 
     const dateField = new FieldBuilder().name('date').label('Fecha').type(FieldType.DATE).build();
@@ -212,7 +216,10 @@ describe('FieldBuilder', () => {
     });
 
     it('build() returns a snapshot — mutating the returned field does not affect a second build', () => {
-      const builder = new FieldBuilder().name('x').label('X').visibleWhen(() => true);
+      const builder = new FieldBuilder()
+        .name('x')
+        .label('X')
+        .visibleWhen(() => true);
       const first = builder.build();
       const second = builder.build();
 

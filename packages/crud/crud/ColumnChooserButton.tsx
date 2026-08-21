@@ -25,7 +25,9 @@ export function ColumnChooserButton({
           label={triggerLabel}
           aria-expanded={open}
           className={
-            state.isCustomized ? 'nb-column-chooser__trigger nb-column-chooser__trigger--active' : undefined
+            state.isCustomized
+              ? 'nb-column-chooser__trigger nb-column-chooser__trigger--active'
+              : undefined
           }
           onClick={toggle}
         />

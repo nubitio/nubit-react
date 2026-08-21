@@ -1,9 +1,5 @@
 import type { CrudViewMode, CrudViewModeConfig } from '../crud/ResourceConfig';
-import {
-  DEFAULT_DRAWER_WIDTH,
-  resolveDrawerWidth,
-  type CrudDrawerSize,
-} from './drawerSizes';
+import { DEFAULT_DRAWER_WIDTH, resolveDrawerWidth, type CrudDrawerSize } from './drawerSizes';
 
 export type { CrudDrawerSize };
 

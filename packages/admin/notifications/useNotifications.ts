@@ -20,7 +20,9 @@ function readCollectionItems(body: unknown): NotificationItem[] {
     return [];
   }
 
-  const member = (body as Record<string, unknown>)['hydra:member'] ?? (body as Record<string, unknown>)['member'];
+  const member =
+    (body as Record<string, unknown>)['hydra:member'] ??
+    (body as Record<string, unknown>)['member'];
 
   return Array.isArray(member) ? (member as NotificationItem[]) : [];
 }

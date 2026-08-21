@@ -100,7 +100,11 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
           if (expr !== '') params[sortParam] = expr;
         }
 
-        if (searchParam != null && typeof options.searchValue === 'string' && options.searchValue !== '') {
+        if (
+          searchParam != null &&
+          typeof options.searchValue === 'string' &&
+          options.searchValue !== ''
+        ) {
           params[searchParam] = options.searchValue;
         }
 
@@ -109,7 +113,8 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
         }
 
         const result = await request<
-          DataRecord[] | { items?: DataRecord[]; data?: DataRecord[]; total?: number; totalCount?: number }
+          | DataRecord[]
+          | { items?: DataRecord[]; data?: DataRecord[]; total?: number; totalCount?: number }
         >(appendQuery(url, params));
         if (result === null) return { data: [], totalCount: 0, summary: null, gridSummary: null };
 
@@ -117,7 +122,9 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
         const data = Array.isArray(body) ? body : (body.items ?? body.data ?? []);
         const headerTotal = Number(result.headers.get('x-total-count'));
         const totalCount = Array.isArray(body)
-          ? (Number.isFinite(headerTotal) && headerTotal > 0 ? headerTotal : body.length)
+          ? Number.isFinite(headerTotal) && headerTotal > 0
+            ? headerTotal
+            : body.length
           : (body.total ?? body.totalCount ?? data.length);
 
         const gridSummaryHeader = result.headers.get('x-grid-summary');

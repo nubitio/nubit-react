@@ -12,5 +12,7 @@ export function resolvePath(source: unknown, path?: string): unknown {
 export function resolveArray(source: unknown, path: string): Record<string, unknown>[] {
   const value = resolvePath(source, path);
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is Record<string, unknown> => item !== null && typeof item === 'object');
+  return value.filter(
+    (item): item is Record<string, unknown> => item !== null && typeof item === 'object',
+  );
 }

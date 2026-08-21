@@ -44,8 +44,8 @@ export interface MercureProviderProps {
  * in sync whenever the URL changes.
  */
 export function MercureProvider({ hubUrl: hubUrlOverride, children }: MercureProviderProps) {
-  const [discoveredHubUrl, setDiscoveredHubUrl] = useState<string | null>(
-    () => mercureManager.getHubUrl(),
+  const [discoveredHubUrl, setDiscoveredHubUrl] = useState<string | null>(() =>
+    mercureManager.getHubUrl(),
   );
 
   useEffect(() => {

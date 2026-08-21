@@ -16,8 +16,6 @@ export function applyFormDetailFormFieldOverrides(
   }
 
   return fields.map((field) =>
-    field.name === propertyName
-      ? { ...field, visibleOnForm: false, hidden: true }
-      : field,
+    field.name === propertyName ? { ...field, visibleOnForm: false, hidden: true } : field,
   );
 }

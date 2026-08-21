@@ -10,7 +10,9 @@ export function useDashboardData(
   periodParamNames: { start: string; end: string } = DEFAULT_PERIOD_PARAM_NAMES,
 ): DashboardDataResult {
   const http = useCoreHttpClient();
-  const params = period ? { [periodParamNames.start]: period.start, [periodParamNames.end]: period.end } : undefined;
+  const params = period
+    ? { [periodParamNames.start]: period.start, [periodParamNames.end]: period.end }
+    : undefined;
 
   const query = useQuery({
     queryKey: ['nb-dashboard', dataUrl, params],
@@ -26,7 +28,11 @@ export function useDashboardData(
   return {
     data: query.data ?? {},
     loading: query.isLoading,
-    error: query.error ? (query.error instanceof Error ? query.error.message : 'Failed to load dashboard') : null,
+    error: query.error
+      ? query.error instanceof Error
+        ? query.error.message
+        : 'Failed to load dashboard'
+      : null,
     refetch: () => {
       void query.refetch();
     },

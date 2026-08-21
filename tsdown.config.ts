@@ -1,6 +1,14 @@
 import { defineConfig } from 'tsdown';
 
-const NUBIT_PACKAGES = ['@nubitio/core', '@nubitio/crud', '@nubitio/ui', '@nubitio/admin', '@nubitio/hydra', '@nubitio/dashboard', '@nubitio/devextreme'];
+const NUBIT_PACKAGES = [
+  '@nubitio/core',
+  '@nubitio/crud',
+  '@nubitio/ui',
+  '@nubitio/admin',
+  '@nubitio/hydra',
+  '@nubitio/dashboard',
+  '@nubitio/devextreme',
+];
 
 // Every runtime dependency/peer of any package must stay external — the root
 // package.json only has devDependencies, so tsdown cannot infer these itself.

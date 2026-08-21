@@ -111,7 +111,12 @@ describe('parseHydraDoc', () => {
           {
             '@type': 'SupportedProperty',
             title: 'product',
-            property: { '@id': '#Entrypoint/product', '@type': 'Link', label: 'product', range: '#Product' },
+            property: {
+              '@id': '#Entrypoint/product',
+              '@type': 'Link',
+              label: 'product',
+              range: '#Product',
+            },
             readable: true,
             writeable: false,
             required: false,
@@ -240,7 +245,12 @@ describe('parseHydraDoc', () => {
             {
               '@type': 'SupportedProperty',
               title: 'category',
-              property: { '@id': '#Entrypoint/category', '@type': 'Link', label: 'category', range: '#Category' },
+              property: {
+                '@id': '#Entrypoint/category',
+                '@type': 'Link',
+                label: 'category',
+                range: '#Category',
+              },
               readable: true,
               writeable: false,
               required: false,
@@ -281,7 +291,12 @@ describe('parseHydraDoc', () => {
             {
               '@type': 'SupportedProperty',
               title: 'item',
-              property: { '@id': '#Entrypoint/item', '@type': 'Link', label: 'item', range: '#Item' },
+              property: {
+                '@id': '#Entrypoint/item',
+                '@type': 'Link',
+                label: 'item',
+                range: '#Item',
+              },
               readable: true,
               writeable: false,
               required: false,

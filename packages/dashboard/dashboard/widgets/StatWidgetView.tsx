@@ -33,11 +33,7 @@ export function StatWidgetView({ widget, data, loading }: Props) {
   const trend = resolveTrend(widget, data);
 
   const trendDirection =
-    trend.value === null || trend.value === 0
-      ? 'flat'
-      : trend.value > 0
-        ? 'up'
-        : 'down';
+    trend.value === null || trend.value === 0 ? 'flat' : trend.value > 0 ? 'up' : 'down';
 
   const trendClass =
     trendDirection === 'flat'
@@ -65,7 +61,9 @@ export function StatWidgetView({ widget, data, loading }: Props) {
     >
       <div className="nb-dashboard-stat__content">
         {widget.icon && (
-          <span className={`nb-dashboard-stat__icon nb-dashboard-stat__icon--${widget.iconTone ?? 'accent'}`}>
+          <span
+            className={`nb-dashboard-stat__icon nb-dashboard-stat__icon--${widget.iconTone ?? 'accent'}`}
+          >
             <i className={`ph ${widget.icon}`} aria-hidden="true" />
           </span>
         )}

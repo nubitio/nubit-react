@@ -16,7 +16,9 @@ export function barChartWidget(config: Omit<BarChartWidgetConfig, 'type'>): BarC
   return { type: 'bar-chart', menuVisible: false, valueFormat: 'currency', height: 200, ...config };
 }
 
-export function donutChartWidget(config: Omit<DonutChartWidgetConfig, 'type'>): DonutChartWidgetConfig {
+export function donutChartWidget(
+  config: Omit<DonutChartWidgetConfig, 'type'>,
+): DonutChartWidgetConfig {
   return {
     type: 'donut-chart',
     menuVisible: false,
@@ -30,11 +32,15 @@ export function tableWidget(config: Omit<TableWidgetConfig, 'type'>): TableWidge
   return { type: 'table', menuVisible: false, ...config };
 }
 
-export function lineChartWidget(config: Omit<LineChartWidgetConfig, 'type'>): LineChartWidgetConfig {
+export function lineChartWidget(
+  config: Omit<LineChartWidgetConfig, 'type'>,
+): LineChartWidgetConfig {
   return { type: 'line-chart', menuVisible: false, showGrid: true, height: 240, ...config };
 }
 
-export function areaChartWidget(config: Omit<AreaChartWidgetConfig, 'type'>): AreaChartWidgetConfig {
+export function areaChartWidget(
+  config: Omit<AreaChartWidgetConfig, 'type'>,
+): AreaChartWidgetConfig {
   return { type: 'area-chart', menuVisible: false, showGrid: true, height: 240, ...config };
 }
 

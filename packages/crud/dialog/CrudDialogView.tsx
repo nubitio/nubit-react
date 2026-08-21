@@ -4,7 +4,8 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import { AppDialog, Button } from '@nubitio/ui';
 import { useCoreTranslation, useEvents, type DialogEventNames } from '@nubitio/core';
 
-const getIsXSmall = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 575.98px)').matches;
+const getIsXSmall = () =>
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 575.98px)').matches;
 
 function useIsXSmall() {
   const [isXSmall, setIsXSmall] = useState(getIsXSmall);
@@ -149,11 +150,7 @@ export const CrudDialogView = forwardRef<CrudDialogViewEvents, CrudDialogViewOpt
         footer={
           (options.footerVisible ?? true) ? (
             <div className={`form-popup-buttons-container ${width <= 360 ? 'flex-buttons' : ''}`}>
-              <Button
-                variant="secondary"
-                onClick={onCancelClick}
-                disabled={isProcessing}
-              >
+              <Button variant="secondary" onClick={onCancelClick} disabled={isProcessing}>
                 {options.negativeText ?? t('dialog.buttonCancel')}
               </Button>
               {(options.saveVisible ?? true) && (

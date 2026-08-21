@@ -56,9 +56,7 @@ export function FilterPanel<T extends string = string>({
   const filteredOptions = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return category.options;
-    return category.options.filter((option) =>
-      String(option.label).toLowerCase().includes(query),
-    );
+    return category.options.filter((option) => String(option.label).toLowerCase().includes(query));
   }, [category.options, search]);
 
   const layoutClass = layout === 'toolbar' ? ' nb-filter-panel--toolbar' : '';
@@ -82,7 +80,9 @@ export function FilterPanel<T extends string = string>({
         />
       ))}
       {showSearch && filteredOptions.length === 0 && (
-        <span className="nb-filter-panel__empty">{category.emptyMessage ?? 'Sin coincidencias'}</span>
+        <span className="nb-filter-panel__empty">
+          {category.emptyMessage ?? 'Sin coincidencias'}
+        </span>
       )}
     </div>
   );
@@ -105,10 +105,14 @@ export function FilterPanel<T extends string = string>({
               />
             </div>
           )}
-          <div className="nb-filter-panel__scroll nb-filter-panel__scroll--grow">{categoryChips}</div>
+          <div className="nb-filter-panel__scroll nb-filter-panel__scroll--grow">
+            {categoryChips}
+          </div>
           {status && (
             <>
-              <span className="nb-filter-panel__title nb-filter-panel__title--status">{status.title}</span>
+              <span className="nb-filter-panel__title nb-filter-panel__title--status">
+                {status.title}
+              </span>
               <SegmentedControl
                 options={status.options}
                 value={status.value}

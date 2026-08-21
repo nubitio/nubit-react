@@ -18,7 +18,7 @@ entity, radio, switch, checkbox, file, tags, html, none.
 
 ## Field-Type module
 
-One module per FieldType that owns *all* behaviour for that type behind a
+One module per FieldType that owns _all_ behaviour for that type behind a
 single interface (`FieldTypeModule`): filter operators, serialization,
 validation, plain-text cell formatting (`cellText`), grid cell rendering
 (`CellRender`), and form control rendering (`ControlRender`). Pure logic and

@@ -63,8 +63,8 @@ describe('runCli', () => {
   });
 
   it('rejects unknown commands', async () => {
-    await expect(
-      runCli({ ...context(), command: 'remove', target: 'fields' }),
-    ).rejects.toThrow('Unknown command: remove fields');
+    await expect(runCli({ ...context(), command: 'remove', target: 'fields' })).rejects.toThrow(
+      'Unknown command: remove fields',
+    );
   });
 });

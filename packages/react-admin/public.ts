@@ -114,8 +114,7 @@ export {
   noneField,
   FieldBuilder,
 } from '@nubitio/crud';
-export type { Field,
-  FieldInput, FieldDef, LoadOption, EnumOption } from '@nubitio/crud';
+export type { Field, FieldInput, FieldDef, LoadOption, EnumOption } from '@nubitio/crud';
 export type {
   FormatterFn,
   GridCellContext,
@@ -158,8 +157,31 @@ export { MercureProvider, useMercureHub, useMercureSubscription } from '@nubitio
 export type { MercureProviderProps } from '@nubitio/core';
 
 // ── UI primitives ─────────────────────────────────────────────────────────────
-export { AppDialog, AppDropdown, ConfirmDialog, AppToolbar, Card, ThemeProvider, ThemeContext, useTheme, ThemeSwitcher } from '@nubitio/ui';
-export type { AppDialogProps, AppDropdownOption, AppDropdownProps, AppDropdownVariant, ConfirmDialogProps, AppToolbarProps, CardProps, ThemeProviderProps, ThemeContextValue, Theme, ThemeMode, ThemeSwitcherProps } from '@nubitio/ui';
+export {
+  AppDialog,
+  AppDropdown,
+  ConfirmDialog,
+  AppToolbar,
+  Card,
+  ThemeProvider,
+  ThemeContext,
+  useTheme,
+  ThemeSwitcher,
+} from '@nubitio/ui';
+export type {
+  AppDialogProps,
+  AppDropdownOption,
+  AppDropdownProps,
+  AppDropdownVariant,
+  ConfirmDialogProps,
+  AppToolbarProps,
+  CardProps,
+  ThemeProviderProps,
+  ThemeContextValue,
+  Theme,
+  ThemeMode,
+  ThemeSwitcherProps,
+} from '@nubitio/ui';
 
 // ── Hydra/OpenAPI adapter ─────────────────────────────────────────────────────
 export {
@@ -174,12 +196,7 @@ export {
   mapHydraSchemaToFields,
   resolveRangeTag,
 } from '@nubitio/hydra';
-export type {
-  UseSchemaContextResult,
-  HydraApiDoc,
-  OpenApiDoc,
-  ApiDoc,
-} from '@nubitio/hydra';
+export type { UseSchemaContextResult, HydraApiDoc, OpenApiDoc, ApiDoc } from '@nubitio/hydra';
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export {
@@ -291,7 +308,12 @@ export type {
 export { initCoreI18n } from '@nubitio/core';
 
 // ── Backend adapters & data stores ────────────────────────────────────────────
-export { RestAdapter, HydraAdapter, ResourceStoreProvider, createRestResourceStore } from '@nubitio/crud';
+export {
+  RestAdapter,
+  HydraAdapter,
+  ResourceStoreProvider,
+  createRestResourceStore,
+} from '@nubitio/crud';
 export type { BackendAdapter, ResourceStoreProviderProps, RestQueryDialect } from '@nubitio/crud';
 
 // ── UI primitives & localization ──────────────────────────────────────────────

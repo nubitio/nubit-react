@@ -28,7 +28,11 @@ export function LineChartWidgetView({ widget, data, loading }: Props) {
   return (
     <StatCard
       title={widget.title}
-      headerExtra={widget.subtitle ? <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span> : undefined}
+      headerExtra={
+        widget.subtitle ? (
+          <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>
+        ) : undefined
+      }
       menuVisible={widget.menuVisible}
       isLoading={loading}
       className="nb-dashboard-chart-card"
@@ -40,7 +44,11 @@ export function LineChartWidgetView({ widget, data, loading }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               {widget.showGrid !== false && (
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--border-color)"
+                  vertical={false}
+                />
               )}
               <XAxis
                 dataKey={widget.xKey}
@@ -56,9 +64,7 @@ export function LineChartWidgetView({ widget, data, loading }: Props) {
                 tickFormatter={(v: number) => formatDashboardValue(v, widget.valueFormat)}
               />
               <Tooltip
-                content={
-                  <ChartTooltip labelFormat={widget.valueFormat} series={widget.series} />
-                }
+                content={<ChartTooltip labelFormat={widget.valueFormat} series={widget.series} />}
               />
               {widget.showLegend && <Legend wrapperStyle={{ fontSize: 12 }} />}
               {widget.series.map((series, index) => (

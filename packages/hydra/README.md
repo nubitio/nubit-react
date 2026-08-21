@@ -33,9 +33,7 @@ import { SchemaProvider, useResourceSchema, HydraRemoteDataSource } from '@nubit
 export function App() {
   return (
     <CoreConfigProvider apiBaseUrl="https://api.example.com" locale="es" timezone="America/Lima">
-      <SchemaProvider>
-        {/* CRUD pages that call useResourceSchema('products') */}
-      </SchemaProvider>
+      <SchemaProvider>{/* CRUD pages that call useResourceSchema('products') */}</SchemaProvider>
     </CoreConfigProvider>
   );
 }

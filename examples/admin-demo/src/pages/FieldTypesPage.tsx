@@ -17,9 +17,33 @@ import {
  * grid/form, backed by an in-memory store (no backend required).
  */
 const SEED = [
-  { id: 1, name: 'Laptop', qty: 3, price: 1234.5, soldOn: '2026-05-01', status: 'open', active: true },
-  { id: 2, name: 'Mouse', qty: 12, price: 25.99, soldOn: '2026-05-12', status: 'closed', active: false },
-  { id: 3, name: 'Monitor', qty: 5, price: 349, soldOn: '2026-06-01', status: 'open', active: true },
+  {
+    id: 1,
+    name: 'Laptop',
+    qty: 3,
+    price: 1234.5,
+    soldOn: '2026-05-01',
+    status: 'open',
+    active: true,
+  },
+  {
+    id: 2,
+    name: 'Mouse',
+    qty: 12,
+    price: 25.99,
+    soldOn: '2026-05-12',
+    status: 'closed',
+    active: false,
+  },
+  {
+    id: 3,
+    name: 'Monitor',
+    qty: 5,
+    price: 349,
+    soldOn: '2026-06-01',
+    status: 'open',
+    active: true,
+  },
 ];
 
 const memoryStore = () => ({

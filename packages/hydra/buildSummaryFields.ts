@@ -8,6 +8,9 @@ export function buildSummaryFieldsFromSchema(schema: HydraResourceSchema): Summa
       column: field.name,
       summaryType: field.crudHints?.summaryType ?? 'sum',
       valueFormat: field.crudHints?.format === 'currency' ? 'currency' : undefined,
-      label: field['hydra:title'] && field['hydra:title'] !== field.name ? field['hydra:title'] : undefined,
+      label:
+        field['hydra:title'] && field['hydra:title'] !== field.name
+          ? field['hydra:title']
+          : undefined,
     }));
 }

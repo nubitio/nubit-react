@@ -10,12 +10,15 @@ export interface TextProps extends HTMLAttributes<HTMLSpanElement> {
   as?: 'span' | 'p';
 }
 
-export function Text({ children, tone = 'default', as: Tag = 'span', className, ...props }: TextProps) {
+export function Text({
+  children,
+  tone = 'default',
+  as: Tag = 'span',
+  className,
+  ...props
+}: TextProps) {
   return (
-    <Tag
-      className={joinClasses(tone === 'muted' && 'nb-text-muted', className)}
-      {...props}
-    >
+    <Tag className={joinClasses(tone === 'muted' && 'nb-text-muted', className)} {...props}>
       {children}
     </Tag>
   );

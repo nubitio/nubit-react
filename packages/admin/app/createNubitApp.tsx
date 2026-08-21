@@ -27,7 +27,9 @@ import type {
 function defaultUserMenu({ username, close, logout }: NubitAppUserMenuContext) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 180 }}>
-      <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{username ?? 'User'}</span>
+      <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        {username ?? 'User'}
+      </span>
       <button
         type="button"
         onClick={() => {
@@ -41,9 +43,7 @@ function defaultUserMenu({ username, close, logout }: NubitAppUserMenuContext) {
   );
 }
 
-function buildMenuContext(
-  session: ReturnType<typeof useSession>,
-): NubitAppMenuContext {
+function buildMenuContext(session: ReturnType<typeof useSession>): NubitAppMenuContext {
   const profile = session.session.status === 'authenticated' ? session.session.profile : undefined;
 
   return {
@@ -57,7 +57,9 @@ function buildMenuContext(
 
 function resolveShellMenu(config: CreateNubitAppConfig, ctx: NubitAppMenuContext) {
   const declared = resolveAppMenu(config.menu, ctx);
-  const roleScoped = declared.some((item) => item.roles !== undefined || item.items?.some((sub) => sub.roles !== undefined))
+  const roleScoped = declared.some(
+    (item) => item.roles !== undefined || item.items?.some((sub) => sub.roles !== undefined),
+  )
     ? filterMenuByRoles(declared, ctx.roles)
     : declared.map(({ text, path, icon, items }) => ({ text, path, icon, items }));
 
@@ -157,9 +159,11 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
 }
 
 export function createNubitApp(config: CreateNubitAppConfig): NubitApp {
-  const queryClient = config.queryClient ?? new QueryClient({
-    defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
-  });
+  const queryClient =
+    config.queryClient ??
+    new QueryClient({
+      defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
+    });
   const apiBaseUrl = config.apiBaseUrl ?? '/api/';
 
   function App() {

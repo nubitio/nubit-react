@@ -22,7 +22,11 @@ export function BarChartWidgetView({ widget, data, loading }: Props) {
   return (
     <StatCard
       title={widget.title}
-      headerExtra={widget.subtitle ? <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span> : undefined}
+      headerExtra={
+        widget.subtitle ? (
+          <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>
+        ) : undefined
+      }
       menuVisible={widget.menuVisible}
       isLoading={loading}
       className="nb-dashboard-chart-card"
@@ -30,7 +34,12 @@ export function BarChartWidgetView({ widget, data, loading }: Props) {
       {rows.length === 0 ? (
         <div className="nb-dashboard-chart-empty">No data</div>
       ) : (
-        <div className="nb-dashboard-bar-chart" style={{ height }} role="img" aria-label={widget.title}>
+        <div
+          className="nb-dashboard-bar-chart"
+          style={{ height }}
+          role="img"
+          aria-label={widget.title}
+        >
           {rows.map((row, index) => {
             const label = String(row[widget.xKey] ?? '');
             const value = toNumber(row[widget.yKey]);

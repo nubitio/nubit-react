@@ -74,7 +74,9 @@ describe('DashboardPage customization', () => {
     await user.click(screen.getByRole('button', { name: 'Customize dashboard' }));
     await user.click(screen.getByRole('button', { name: 'Hide Widget A' }));
 
-    const stored = JSON.parse(window.localStorage.getItem('nb-dashboard-layout:test-dashboard') ?? '{}');
+    const stored = JSON.parse(
+      window.localStorage.getItem('nb-dashboard-layout:test-dashboard') ?? '{}',
+    );
     expect(stored.kpis.hidden).toEqual(['a']);
   });
 

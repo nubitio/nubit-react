@@ -43,7 +43,15 @@ describe('NotificationPanel', () => {
 
   it('renders each notification and marks it read on click', async () => {
     getMock.mockResolvedValue({
-      data: [{ id: 1, subject: 'Invoice confirmed', body: 'INV-0001', read: false, createdAt: new Date().toISOString() }],
+      data: [
+        {
+          id: 1,
+          subject: 'Invoice confirmed',
+          body: 'INV-0001',
+          read: false,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     });
     patchMock.mockResolvedValue({ data: {} });
 
@@ -52,12 +60,22 @@ describe('NotificationPanel', () => {
     const item = await screen.findByText('Invoice confirmed');
     await userEvent.click(item);
 
-    await waitFor(() => expect(patchMock).toHaveBeenCalledWith('/api/notifications/1', { read: true }));
+    await waitFor(() =>
+      expect(patchMock).toHaveBeenCalledWith('/api/notifications/1', { read: true }),
+    );
   });
 
   it('shows a "mark all as read" action only when there are unread notifications', async () => {
     getMock.mockResolvedValue({
-      data: [{ id: 1, subject: 'Read already', body: '', read: true, createdAt: new Date().toISOString() }],
+      data: [
+        {
+          id: 1,
+          subject: 'Read already',
+          body: '',
+          read: true,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     });
 
     renderPanel();

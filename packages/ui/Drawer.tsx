@@ -83,7 +83,10 @@ export const Drawer: React.FC<DrawerProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -91,11 +94,9 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   return createPortal(
     <div
-      className={[
-        'nb-drawer-root',
-        isOpen && 'nb-drawer-root--open',
-        `nb-drawer-root--${side}`,
-      ].filter(Boolean).join(' ')}
+      className={['nb-drawer-root', isOpen && 'nb-drawer-root--open', `nb-drawer-root--${side}`]
+        .filter(Boolean)
+        .join(' ')}
       aria-hidden={!isOpen}
       style={{ pointerEvents: isOpen ? undefined : 'none' }}
     >
@@ -119,9 +120,11 @@ export const Drawer: React.FC<DrawerProps> = ({
         style={{ width: formatWidth(width) }}
       >
         {/* Header */}
-        {(title !== undefined) && (
+        {title !== undefined && (
           <header className="nb-drawer__header">
-            <h2 className="nb-drawer__title" id={titleId}>{title}</h2>
+            <h2 className="nb-drawer__title" id={titleId}>
+              {title}
+            </h2>
             <IconButton
               className="nb-drawer__close"
               icon="ph ph-x"

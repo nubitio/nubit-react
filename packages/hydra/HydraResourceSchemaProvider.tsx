@@ -18,9 +18,5 @@ export function HydraResourceSchemaProvider({ children }: HydraResourceSchemaPro
     [],
   );
 
-  return (
-    <ResourceSchemaProvider resolver={resolver}>
-      {children}
-    </ResourceSchemaProvider>
-  );
+  return <ResourceSchemaProvider resolver={resolver}>{children}</ResourceSchemaProvider>;
 }

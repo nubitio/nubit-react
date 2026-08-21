@@ -45,9 +45,7 @@ describe('fieldToCodeLine', () => {
       ),
     ).toContain("entityField('/api/customers', 'id', 'name')");
     expect(
-      fieldToCodeLine(
-        field({ type: FieldType.ENUM, data: [{ value: 'new', text: 'New' }] }),
-      ),
+      fieldToCodeLine(field({ type: FieldType.ENUM, data: [{ value: 'new', text: 'New' }] })),
     ).toContain('enumField([{ value: "new", text: "New" }])');
     expect(fieldToCodeLine(field({ type: FieldType.FILE, url: undefined }))).toContain(
       "fileField('/api/media')",

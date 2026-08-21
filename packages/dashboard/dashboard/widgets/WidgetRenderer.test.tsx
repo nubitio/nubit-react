@@ -6,7 +6,13 @@ describe('WidgetRenderer', () => {
   it('renders a progress widget from valuePath/maxPath', () => {
     render(
       <WidgetRenderer
-        widget={{ type: 'progress', id: 'quota', title: 'Quota', valuePath: 'used', maxPath: 'limit' }}
+        widget={{
+          type: 'progress',
+          id: 'quota',
+          title: 'Quota',
+          valuePath: 'used',
+          maxPath: 'limit',
+        }}
         data={{ used: 30, limit: 120 }}
       />,
     );
@@ -25,7 +31,12 @@ describe('WidgetRenderer', () => {
           series: [{ key: 'value' }],
           height: 120,
         }}
-        data={{ rows: [{ label: 'Jan', value: 10 }, { label: 'Feb', value: 20 }] }}
+        data={{
+          rows: [
+            { label: 'Jan', value: 10 },
+            { label: 'Feb', value: 20 },
+          ],
+        }}
       />,
     );
     expect(screen.getByText('Trend')).toBeTruthy();

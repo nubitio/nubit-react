@@ -54,18 +54,18 @@ Swap only one view if needed:
 
 ## Supported today
 
-| Feature | DevExtreme adapter |
-|---------|-------------------|
-| Remote paging / sort | `CustomStore` → `ResourceStore` |
-| Server-side filters | `convertDxFilterToNubit` + per-field `buildFilterTerms` |
-| Routing filters (`CrudPage` URL state) | merged via `mergeGridFilters` |
-| Popup CRUD (add/edit/delete) | toolbar + command column |
-| Inline edit `row` / `cell` / `batch` | `Editing` + `CustomStore.update` |
-| Batch save hook | `onBatchSave` / `GridHandle.saveChanges()` |
-| Dialog form save | `useFormSubmit` + dxForm |
-| Master-detail form lines | `DevExtremeFormDetailGrid` |
-| Expanded-row grid detail | `DevExtremeDetailGridSection` via `MasterDetail` |
-| File fields | `FileUploadField` from `@nubitio/crud` |
+| Feature                                | DevExtreme adapter                                      |
+| -------------------------------------- | ------------------------------------------------------- |
+| Remote paging / sort                   | `CustomStore` → `ResourceStore`                         |
+| Server-side filters                    | `convertDxFilterToNubit` + per-field `buildFilterTerms` |
+| Routing filters (`CrudPage` URL state) | merged via `mergeGridFilters`                           |
+| Popup CRUD (add/edit/delete)           | toolbar + command column                                |
+| Inline edit `row` / `cell` / `batch`   | `Editing` + `CustomStore.update`                        |
+| Batch save hook                        | `onBatchSave` / `GridHandle.saveChanges()`              |
+| Dialog form save                       | `useFormSubmit` + dxForm                                |
+| Master-detail form lines               | `DevExtremeFormDetailGrid`                              |
+| Expanded-row grid detail               | `DevExtremeDetailGridSection` via `MasterDetail`        |
+| File fields                            | `FileUploadField` from `@nubitio/crud`                  |
 
 ## Demo
 

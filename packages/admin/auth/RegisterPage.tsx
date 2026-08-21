@@ -37,9 +37,7 @@ function joinApiPath(apiBaseUrl: string, path: string): string {
 }
 
 function initialValues(fields: RegisterField[]): Record<string, string> {
-  return Object.fromEntries(
-    fields.map((field) => [field.name, field.defaultValue ?? '']),
-  );
+  return Object.fromEntries(fields.map((field) => [field.name, field.defaultValue ?? '']));
 }
 
 export function RegisterPage({
@@ -74,7 +72,10 @@ export function RegisterPage({
         credentials: 'include',
         body: JSON.stringify(values),
       });
-      const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+        message?: string;
+      } | null;
       if (!response.ok) {
         setError(body?.error ?? body?.message ?? 'Registration failed');
         return;

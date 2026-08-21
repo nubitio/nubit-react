@@ -66,7 +66,10 @@ describe('useFormState', () => {
     act(() => result.current.upsertUploadedFile({ name: 'doc', iri: '/media/2' }));
 
     expect(result.current.accessors.getUploadedFiles()).toEqual([{ name: 'doc', iri: '/media/2' }]);
-    expect(result.current.accessors.getUploadedFile('doc')).toEqual({ name: 'doc', iri: '/media/2' });
+    expect(result.current.accessors.getUploadedFile('doc')).toEqual({
+      name: 'doc',
+      iri: '/media/2',
+    });
   });
 
   it('edit mode and existing media round-trip through intents and accessors', () => {

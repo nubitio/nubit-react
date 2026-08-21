@@ -1,12 +1,6 @@
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultInputControl } from '../controlHelpers';
-import {
-  defaultBuildFilterTerms,
-  getPrimitiveDisplay,
-  KEEP,
-  set,
-  TEXT_OPERATORS,
-} from '../shared';
+import { defaultBuildFilterTerms, getPrimitiveDisplay, KEEP, set, TEXT_OPERATORS } from '../shared';
 
 export const passwordTypeModule: FieldTypeModule = {
   controlKind: 'password',

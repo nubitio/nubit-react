@@ -3,10 +3,11 @@ import type { CrudHints } from './types';
 const warned = new Set<string>();
 
 function isDev(): boolean {
-  return typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.endsWith('.localhost')
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.endsWith('.localhost'))
   );
 }
 

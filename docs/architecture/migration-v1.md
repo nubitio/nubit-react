@@ -34,9 +34,7 @@ const products = defineResource('/api/products', {
   fieldContract: defineFields({
     source: 'hydra',
     strategy: 'augment',
-    directives: [
-      { kind: 'override', key: 'sku', patch: { label: 'SKU code' } },
-    ],
+    directives: [{ kind: 'override', key: 'sku', patch: { label: 'SKU code' } }],
   }),
 });
 ```
@@ -90,9 +88,9 @@ via the existing rule-3 mapping.
 
 ## x-crud hint aliases
 
-| Deprecated | Replacement |
-| --- | --- |
-| `hidden: true` | `hideInGrid: true` |
+| Deprecated             | Replacement         |
+| ---------------------- | ------------------- |
+| `hidden: true`         | `hideInGrid: true`  |
 | `visibleOnForm: false` | `showInForm: false` |
 
 Legacy keys still work; dev builds log a one-time warning per field.

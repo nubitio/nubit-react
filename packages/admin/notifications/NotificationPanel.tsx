@@ -51,16 +51,16 @@ export function NotificationPanel({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => items.filter((item) => !item.read).forEach((item) => markAsRead(item.id))}
+            onClick={() =>
+              items.filter((item) => !item.read).forEach((item) => markAsRead(item.id))
+            }
           >
             {markAllReadLabel}
           </Button>
         )}
       </div>
 
-      {!loading && items.length === 0 && (
-        <EmptyState icon="bell-slash" title={emptyTitle} />
-      )}
+      {!loading && items.length === 0 && <EmptyState icon="bell-slash" title={emptyTitle} />}
 
       <ul className="nb-notification-panel__list">
         {items.map((item) => (
@@ -75,7 +75,9 @@ export function NotificationPanel({
             >
               <span className="nb-notification-panel__item-subject">{item.subject}</span>
               <span className="nb-notification-panel__item-body">{item.body}</span>
-              <span className="nb-notification-panel__item-time">{formatRelativeTime(item.createdAt)}</span>
+              <span className="nb-notification-panel__item-time">
+                {formatRelativeTime(item.createdAt)}
+              </span>
             </button>
           </li>
         ))}

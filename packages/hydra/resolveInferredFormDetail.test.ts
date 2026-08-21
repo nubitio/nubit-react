@@ -113,7 +113,12 @@ describe('resolveInferredFormDetail', () => {
       fields: [{ name: 'custom', type: 'text' as const, label: 'Custom' }],
     } as ResourceFormDetail;
 
-    const result = resolveInferredFormDetail('/api/sales_documents', manual, schemaData, embeddedLines);
+    const result = resolveInferredFormDetail(
+      '/api/sales_documents',
+      manual,
+      schemaData,
+      embeddedLines,
+    );
 
     expect(result).toBe(manual);
   });
@@ -134,9 +139,9 @@ describe('resolveInferredFormDetail', () => {
   it('returns formDetail unchanged when schema data is missing', () => {
     const formDetail = { propertyName: 'lines' };
 
-    expect(resolveInferredFormDetail('/api/sales_documents', formDetail, undefined, embeddedLines)).toBe(
-      formDetail,
-    );
+    expect(
+      resolveInferredFormDetail('/api/sales_documents', formDetail, undefined, embeddedLines),
+    ).toBe(formDetail);
   });
 
   it('returns formDetail unchanged when embedded lines metadata is absent', () => {
@@ -149,6 +154,8 @@ describe('resolveInferredFormDetail', () => {
     };
     const data = { ...schemaData, doc: docWithoutEmbeddedLines };
 
-    expect(resolveInferredFormDetail('/api/sales_documents', formDetail, data, [])).toBe(formDetail);
+    expect(resolveInferredFormDetail('/api/sales_documents', formDetail, data, [])).toBe(
+      formDetail,
+    );
   });
 });

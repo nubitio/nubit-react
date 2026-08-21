@@ -10,9 +10,7 @@ export function createRemoteSource(
   resourceStoreFactory: ResourceStoreFactory,
   prependData?: FormDataRecord[],
 ): ResourceStore {
-  const options = prependData?.length
-    ? [{ prependData }, ...field.loadOptions]
-    : field.loadOptions;
+  const options = prependData?.length ? [{ prependData }, ...field.loadOptions] : field.loadOptions;
   return resourceStoreFactory({
     url: field.url ?? '',
     idField: field.valueField,
@@ -55,7 +53,8 @@ export function fieldSearchExpr(field: Field): string[] {
 }
 
 export function inputValue(value: unknown): string | number | readonly string[] | undefined {
-  if (value instanceof Date) return value.toLocaleDateString('en-CA', { timeZone: getCoreTimezone() });
+  if (value instanceof Date)
+    return value.toLocaleDateString('en-CA', { timeZone: getCoreTimezone() });
   if (typeof value === 'string' || typeof value === 'number') return value;
   return value == null ? '' : String(value);
 }

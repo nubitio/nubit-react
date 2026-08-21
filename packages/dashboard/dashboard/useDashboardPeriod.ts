@@ -13,7 +13,9 @@ export interface DashboardPeriodState {
   setCustomRange: (start: string, end: string) => void;
 }
 
-export function useDashboardPeriod(config?: DashboardPeriodConfig): DashboardPeriodState | undefined {
+export function useDashboardPeriod(
+  config?: DashboardPeriodConfig,
+): DashboardPeriodState | undefined {
   const presets = config?.presets ?? DEFAULT_PERIOD_PRESETS;
   const defaultPreset = config?.defaultPreset ?? presets[0]?.key ?? '7d';
   const allowCustomRange = config?.allowCustomRange ?? true;

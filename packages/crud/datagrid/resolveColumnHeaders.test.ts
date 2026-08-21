@@ -9,11 +9,7 @@ import {
   resolveFieldGroupBoundaries,
 } from './resolveColumnHeaders';
 
-const field = (
-  name: string,
-  label: string,
-  columnGroup?: string | string[],
-): Field => ({
+const field = (name: string, label: string, columnGroup?: string | string[]): Field => ({
   ...textField().name(name).label(label).build(),
   ...(columnGroup !== undefined ? { columnGroup } : {}),
 });
@@ -94,9 +90,23 @@ describe('resolveColumnHeaders', () => {
     ]);
 
     expect(result.bandRows[0]).toEqual([
-      { kind: 'group', key: 'entries', label: 'Entries', colSpan: 1, align: 'center', className: undefined },
+      {
+        kind: 'group',
+        key: 'entries',
+        label: 'Entries',
+        colSpan: 1,
+        align: 'center',
+        className: undefined,
+      },
       { kind: 'ungrouped', field: expect.objectContaining({ name: 'note' }), rowSpan: 2 },
-      { kind: 'group', key: 'entries', label: 'Entries', colSpan: 1, align: 'center', className: undefined },
+      {
+        kind: 'group',
+        key: 'entries',
+        label: 'Entries',
+        colSpan: 1,
+        align: 'center',
+        className: undefined,
+      },
     ]);
   });
 
@@ -126,8 +136,22 @@ describe('resolveColumnHeaders', () => {
       },
     ]);
     expect(result.bandRows[1]).toEqual([
-      { kind: 'group', key: 'entries', label: 'Entradas', colSpan: 1, align: 'center', className: undefined },
-      { kind: 'group', key: 'exits', label: 'Salidas', colSpan: 1, align: 'center', className: undefined },
+      {
+        kind: 'group',
+        key: 'entries',
+        label: 'Entradas',
+        colSpan: 1,
+        align: 'center',
+        className: undefined,
+      },
+      {
+        kind: 'group',
+        key: 'exits',
+        label: 'Salidas',
+        colSpan: 1,
+        align: 'center',
+        className: undefined,
+      },
     ]);
     expect(result.leafRow).toHaveLength(2);
   });

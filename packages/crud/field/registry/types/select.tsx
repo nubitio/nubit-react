@@ -2,12 +2,7 @@ import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { FilterValueDropdown } from '../filterHelpers';
 import { NativeEnumSelect } from '../../../form/LookupControls';
-import {
-  defaultBuildFilterTerms,
-  EQUALITY_OPERATORS,
-  getPrimitiveDisplay,
-  KEEP,
-} from '../shared';
+import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getPrimitiveDisplay, KEEP } from '../shared';
 
 export const selectTypeModule: FieldTypeModule = {
   controlKind: 'select',

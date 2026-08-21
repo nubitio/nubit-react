@@ -9,12 +9,7 @@ export interface RowActionsProps {
 }
 
 /** Context menu preset for table row overflow actions. */
-export function RowActions({
-  items,
-  triggerLabel,
-  align = 'right',
-  className,
-}: RowActionsProps) {
+export function RowActions({ items, triggerLabel, align = 'right', className }: RowActionsProps) {
   const strings = useUiStrings();
 
   if (items.length === 0) {

@@ -13,7 +13,13 @@ interface GridExportOptions {
 }
 
 /** Downloads every row matching the grid's current filters/sort (not just the current page). */
-export function useGridExport({ source, fields, filters, filterOperators, sort }: GridExportOptions) {
+export function useGridExport({
+  source,
+  fields,
+  filters,
+  filterOperators,
+  sort,
+}: GridExportOptions) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<unknown>(null);
 

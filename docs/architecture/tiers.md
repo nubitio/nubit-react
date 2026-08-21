@@ -6,11 +6,11 @@ How much code you need per feature class.
 
 **When:** flat CRUD — products, customers, categories.
 
-| Layer | Work |
-| --- | --- |
-| PHP | Entity + `#[ApiResource]` + `#[ApiFilter(DataGridFilter)]` + `x-crud` per field |
-| Frontend | `defineResource(url)` + `<SchemaCrudPage />` + menu route |
-| Processor | None |
+| Layer     | Work                                                                            |
+| --------- | ------------------------------------------------------------------------------- |
+| PHP       | Entity + `#[ApiResource]` + `#[ApiFilter(DataGridFilter)]` + `x-crud` per field |
+| Frontend  | `defineResource(url)` + `<SchemaCrudPage />` + menu route                       |
+| Processor | None                                                                            |
 
 **Example:** `nubit-skeleton/src/Entity/Product.php` + `ProductsPage.tsx` (3 lines).
 
@@ -18,9 +18,9 @@ How much code you need per feature class.
 
 **When:** tweak inferred fields without duplicating the full schema.
 
-| Layer | Work |
-| --- | --- |
-| PHP | Same as Tier 1 |
+| Layer    | Work                                                          |
+| -------- | ------------------------------------------------------------- |
+| PHP      | Same as Tier 1                                                |
 | Frontend | `defineFieldContract({ source: 'hydra', directives: [...] })` |
 
 Use `override`, `remove`, `prepend`, `append` directives — not a full manual `fields` array.
@@ -29,11 +29,11 @@ Use `override`, `remove`, `prepend`, `append` directives — not a full manual `
 
 **When:** documents with lines, workflows, sequences, row-level locks.
 
-| Layer | Work |
-| --- | --- |
-| PHP | Parent + child entities, serialization groups, `#[EmbeddedLines]`, optional `#[Sequence]` / `#[Workflow]`, custom `StateProcessor` |
-| Frontend | `formDetail` overrides only (fields inferred from `x-embedded-lines`), `permissions.canEditRow`, `viewMode` |
-| Processor | `AbstractEmbeddedLinesProcessor` subclass |
+| Layer     | Work                                                                                                                               |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| PHP       | Parent + child entities, serialization groups, `#[EmbeddedLines]`, optional `#[Sequence]` / `#[Workflow]`, custom `StateProcessor` |
+| Frontend  | `formDetail` overrides only (fields inferred from `x-embedded-lines`), `permissions.canEditRow`, `viewMode`                        |
+| Processor | `AbstractEmbeddedLinesProcessor` subclass                                                                                          |
 
 **Example:** `Invoice.php` + `InvoicesPage.tsx`.
 

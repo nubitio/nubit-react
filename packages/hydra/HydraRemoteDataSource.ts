@@ -84,13 +84,11 @@ function isFilterTuple(rule: unknown): rule is FilterTuple {
   );
 }
 
-function isFilterRuleObject(rule: unknown): rule is { field: string; operator: string; value: unknown } {
+function isFilterRuleObject(
+  rule: unknown,
+): rule is { field: string; operator: string; value: unknown } {
   return (
-    !!rule &&
-    typeof rule === 'object' &&
-    'field' in rule &&
-    'operator' in rule &&
-    'value' in rule
+    !!rule && typeof rule === 'object' && 'field' in rule && 'operator' in rule && 'value' in rule
   );
 }
 
@@ -285,15 +283,17 @@ export class HydraRemoteDataSource implements ResourceStore {
       this.config.defaultFilterRules ?? [],
     );
 
-    return convertPaginationParams(stripAdapterOnlyParams({
-      ...withDefaults,
-      filter: normalizedFilters,
-      sort: normalizeSortRules(
-        withDefaults.sort ?? [],
-        this.config.defaultSortRules ?? [],
-        this.config.idField,
-      ),
-    }));
+    return convertPaginationParams(
+      stripAdapterOnlyParams({
+        ...withDefaults,
+        filter: normalizedFilters,
+        sort: normalizeSortRules(
+          withDefaults.sort ?? [],
+          this.config.defaultSortRules ?? [],
+          this.config.idField,
+        ),
+      }),
+    );
   }
 
   async load(loadOptions: ResourceLoadOptions): Promise<GridData<DataRecord>> {
@@ -327,7 +327,11 @@ export class HydraRemoteDataSource implements ResourceStore {
   }
 
   async export(loadOptions: ResourceLoadOptions): Promise<ResourceExportResult> {
-    const preparedOptions = this.prepareLoadOptions({ ...loadOptions, skip: undefined, take: undefined });
+    const preparedOptions = this.prepareLoadOptions({
+      ...loadOptions,
+      skip: undefined,
+      take: undefined,
+    });
     delete preparedOptions.itemsPerPage;
     delete preparedOptions.page;
 
@@ -344,7 +348,8 @@ export class HydraRemoteDataSource implements ResourceStore {
   }
 
   async byKey(key: unknown): Promise<DataRecord | null> {
-    const id = typeof key === 'object' && key !== null ? (key as DataRecord)[this.config.idField] : key;
+    const id =
+      typeof key === 'object' && key !== null ? (key as DataRecord)[this.config.idField] : key;
     if (id === undefined) return null;
 
     const loadOptions = applyLoadOptionDefaults({}, this.config.options ?? []);
@@ -378,7 +383,12 @@ export class HydraRemoteDataSource implements ResourceStore {
     // sides, so check those first and only fall back to @id/idField for
     // IRI-only entities that never had one.
     const itemKey = (item: DataRecord): unknown =>
-      item['id'] ?? item['code'] ?? item['uuid'] ?? item['slug'] ?? item['@id'] ?? item[this.config.idField];
+      item['id'] ??
+      item['code'] ??
+      item['uuid'] ??
+      item['slug'] ??
+      item['@id'] ??
+      item[this.config.idField];
     const dedupeAgainst = (extra: DataRecord[], existing: DataRecord[]): DataRecord[] => {
       const existingKeys = new Set(existing.map(itemKey));
       return extra.filter((item) => !existingKeys.has(itemKey(item)));

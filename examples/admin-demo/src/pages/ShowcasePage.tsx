@@ -127,7 +127,11 @@ export function ShowcasePage() {
                 Drawer
               </Button>
             </div>
-            <CollapsibleSection label="Collapsible section" open={sectionOpen} onToggle={() => setSectionOpen((v) => !v)}>
+            <CollapsibleSection
+              label="Collapsible section"
+              open={sectionOpen}
+              onToggle={() => setSectionOpen((v) => !v)}
+            >
               <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
                 Hidden content lives here — useful for advanced filters or settings.
               </p>
@@ -182,8 +186,8 @@ export function ShowcasePage() {
                   dateTime="2026-06-12T08:23:00"
                 >
                   <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                    Phone: <s style={{ color: 'var(--error-color)' }}>903 303 704</s>{' '}
-                    → <span style={{ color: 'var(--success-color)' }}>999 888 777</span>
+                    Phone: <s style={{ color: 'var(--error-color)' }}>903 303 704</s> →{' '}
+                    <span style={{ color: 'var(--success-color)' }}>999 888 777</span>
                   </p>
                 </TimelineItem>
                 <TimelineItem
@@ -258,7 +262,12 @@ export function ShowcasePage() {
         onCancel={() => setConfirmOpen(false)}
       />
 
-      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="Demo drawer" width={420}>
+      <Drawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title="Demo drawer"
+        width={420}
+      >
         <p style={{ marginTop: 0 }}>Drawers slide in from the side and keep the page visible.</p>
         <Skeleton variant="text" lines={4} />
       </Drawer>

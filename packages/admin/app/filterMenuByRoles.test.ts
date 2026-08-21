@@ -30,7 +30,12 @@ describe('filterMenuByRoles', () => {
 
     expect(menu).toEqual([
       { text: 'Panel', path: '/dashboard', icon: undefined },
-      { text: 'Ops', path: undefined, icon: undefined, items: [{ text: 'Orders', path: '/orders' }] },
+      {
+        text: 'Ops',
+        path: undefined,
+        icon: undefined,
+        items: [{ text: 'Orders', path: '/orders' }],
+      },
     ]);
   });
 });

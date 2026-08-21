@@ -37,13 +37,19 @@ function Shell({ children }: { children?: React.ReactNode }) {
 
 function setLargeScreen() {
   vi.mocked(screenSizeModule.useScreenSize).mockReturnValue({
-    isXSmall: false, isSmall: false, isMedium: false, isLarge: true,
+    isXSmall: false,
+    isSmall: false,
+    isMedium: false,
+    isLarge: true,
   });
 }
 
 function setSmallScreen() {
   vi.mocked(screenSizeModule.useScreenSize).mockReturnValue({
-    isXSmall: true, isSmall: false, isMedium: false, isLarge: false,
+    isXSmall: true,
+    isSmall: false,
+    isMedium: false,
+    isLarge: false,
   });
 }
 
@@ -53,7 +59,11 @@ describe('AdminShell rendering', () => {
   beforeEach(setLargeScreen);
 
   it('renders children', () => {
-    render(<Shell><span>hello world</span></Shell>);
+    render(
+      <Shell>
+        <span>hello world</span>
+      </Shell>,
+    );
     expect(screen.getByText('hello world')).toBeDefined();
   });
 
@@ -84,7 +94,9 @@ describe('AdminShell menu state — large screen', () => {
     render(<Shell />);
     const body = document.querySelector('.nb-admin-shell__body');
     expect(body?.classList.contains('is-open')).toBe(true);
-    act(() => { fireEvent.click(screen.getByLabelText('Toggle menu')); });
+    act(() => {
+      fireEvent.click(screen.getByLabelText('Toggle menu'));
+    });
     expect(body?.classList.contains('is-closed')).toBe(true);
   });
 
@@ -111,7 +123,9 @@ describe('AdminShell menu state — small screen', () => {
 
   it('scrim overlay is shown when menu is open on small screen', () => {
     render(<Shell />);
-    act(() => { fireEvent.click(screen.getByLabelText('Toggle menu')); });
+    act(() => {
+      fireEvent.click(screen.getByLabelText('Toggle menu'));
+    });
     expect(document.querySelector('.nb-admin-shell__scrim')).not.toBeNull();
   });
 

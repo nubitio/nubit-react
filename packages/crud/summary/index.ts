@@ -6,8 +6,4 @@ export type {
   SummaryTextContext,
   SummaryType,
 } from './SummaryTypes';
-export {
-  computeSummaryValue,
-  formatSummaryValue,
-  resolveSummaryText,
-} from './SummaryUtils';
+export { computeSummaryValue, formatSummaryValue, resolveSummaryText } from './SummaryUtils';

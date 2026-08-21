@@ -8,8 +8,8 @@ import type { Field } from '../../field/Field';
  * - If field.permissions.visible is set and userRoles has no intersection → filter out the field
  * - If field.permissions.editable is set and userRoles has no intersection → mark field as disabled
  *
-  * Identity fields (isIdentity === true) are always kept regardless of permissions
-  * so grids and forms can resolve row keys consistently.
+ * Identity fields (isIdentity === true) are always kept regardless of permissions
+ * so grids and forms can resolve row keys consistently.
  */
 export function useFieldPermissions(fields: Field[], userRoles: string[]): Field[] {
   return useMemo(() => {

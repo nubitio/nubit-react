@@ -203,11 +203,7 @@ function resolveEntityValueField(relatedSchema: HydraResourceSchema | undefined)
 }
 
 function isStringLikeField(field: HydraFieldSchema): boolean {
-  return (
-    field.range === undefined ||
-    field.range === 'xmls:string' ||
-    field.range === 'xsd:string'
-  );
+  return field.range === undefined || field.range === 'xmls:string' || field.range === 'xsd:string';
 }
 
 function resolveEntityTextField(
@@ -404,14 +400,14 @@ export function mapHydraSchemaToFields(
       }
 
       const base =
-        fieldSchema.crudHints?.format === 'currency'
-          ? currencyField().readonly(true)
-          : noneField();
+        fieldSchema.crudHints?.format === 'currency' ? currencyField().readonly(true) : noneField();
       const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       stampMappingReason(
         field,
-        fieldSchema.crudHints?.format === 'currency' ? 'rule-3 display-only+currency' : 'rule-3 display-only',
+        fieldSchema.crudHints?.format === 'currency'
+          ? 'rule-3 display-only+currency'
+          : 'rule-3 display-only',
         applyCrudHints(field, fieldSchema.crudHints),
       );
       fields.push(field);
@@ -527,7 +523,11 @@ export function mapHydraSchemaToFields(
         ? (urlLookup?.(resourceClass) ?? `/api/${pluralize(toDashCase(resourceClass))}`)
         : '';
       const valueField = resolveEntityValueField(relatedSchema);
-      const textField = resolveEntityTextField(relatedSchema, valueField, fieldSchema.crudHints?.textField);
+      const textField = resolveEntityTextField(
+        relatedSchema,
+        valueField,
+        fieldSchema.crudHints?.textField,
+      );
       // A to-many relation (ManyToMany/OneToMany) needs a multi-select control, not the
       // single-picker ENTITY renders — TAGS is the multi-valued counterpart, backed by the
       // exact same remote resource (see the TagsFieldBuilder doc comment for why the naming
@@ -549,7 +549,11 @@ export function mapHydraSchemaToFields(
     // Rule 9 — xmls:string and unknown → textField (safe fallback)
     const built = textField().name(name).label(label).required(required).build();
     const field: Field = { ...built, filterable };
-    stampMappingReason(field, `rule-9 text (range=${range ?? 'none'})`, applyCrudHints(field, fieldSchema.crudHints));
+    stampMappingReason(
+      field,
+      `rule-9 text (range=${range ?? 'none'})`,
+      applyCrudHints(field, fieldSchema.crudHints),
+    );
     fields.push(field);
   }
 

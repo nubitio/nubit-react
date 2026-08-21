@@ -239,7 +239,15 @@ export function collectOperationSemanticsIssues(
   if (allowedOperations) {
     const allowedOperationSet = new Set(allowedOperations);
     OPERATIONS.forEach((operation) => {
-      applyProperty(semantics, issues, owner, operation, 'visible', allowedOperationSet.has(operation), 'only');
+      applyProperty(
+        semantics,
+        issues,
+        owner,
+        operation,
+        'visible',
+        allowedOperationSet.has(operation),
+        'only',
+      );
     });
   }
 
@@ -307,9 +315,7 @@ export function applyFieldOperationSemantics<T extends DataRecord>(
 
   return {
     ...field,
-    ...(target === 'form'
-      ? { visibleOnForm: resolved.visible }
-      : { visible: resolved.visible }),
+    ...(target === 'form' ? { visibleOnForm: resolved.visible } : { visible: resolved.visible }),
     hidden: !resolved.visible,
     required: resolved.required,
     readonly: resolved.readonly,

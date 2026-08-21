@@ -73,7 +73,9 @@ export function useDashboardLayout(
       if (!layout) return section.widgets;
 
       const byId = new Map(section.widgets.map((widget) => [widget.id, widget]));
-      const ordered = layout.order.map((wid) => byId.get(wid)).filter((w): w is DashboardWidget => !!w);
+      const ordered = layout.order
+        .map((wid) => byId.get(wid))
+        .filter((w): w is DashboardWidget => !!w);
       const remaining = section.widgets.filter((widget) => !layout.order.includes(widget.id));
       return [...ordered, ...remaining].filter((widget) => !layout.hidden.includes(widget.id));
     },
@@ -135,5 +137,14 @@ export function useDashboardLayout(
 
   if (!enabled) return undefined;
 
-  return { editMode, setEditMode, getSectionWidgets, hiddenWidgets, hideWidget, showWidget, moveWidget, resetLayout };
+  return {
+    editMode,
+    setEditMode,
+    getSectionWidgets,
+    hiddenWidgets,
+    hideWidget,
+    showWidget,
+    moveWidget,
+    resetLayout,
+  };
 }

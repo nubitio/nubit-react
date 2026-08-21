@@ -27,7 +27,10 @@ export function ChartTooltip({ active, label, payload, labelFormat, series }: Pr
           const seriesConfig = series?.find((s) => s.key === item.dataKey);
           return (
             <li key={String(item.dataKey)} className="nb-dashboard-chart-tooltip__item">
-              <span className="nb-dashboard-chart-tooltip__swatch" style={{ background: item.color }} />
+              <span
+                className="nb-dashboard-chart-tooltip__swatch"
+                style={{ background: item.color }}
+              />
               <span className="nb-dashboard-chart-tooltip__name">{item.name}</span>
               <span className="nb-dashboard-chart-tooltip__value">
                 {formatDashboardValue(item.value, seriesConfig?.valueFormat ?? labelFormat)}

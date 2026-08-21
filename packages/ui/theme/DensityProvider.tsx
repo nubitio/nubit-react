@@ -37,8 +37,6 @@ export const DensityProvider = ({ children }: { children: React.ReactNode }) => 
   }, []);
 
   return (
-    <DensityContext.Provider value={{ density, toggleDensity }}>
-      {children}
-    </DensityContext.Provider>
+    <DensityContext.Provider value={{ density, toggleDensity }}>{children}</DensityContext.Provider>
   );
 };

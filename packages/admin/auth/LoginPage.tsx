@@ -59,9 +59,7 @@ export function LoginPage({
           style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 320, padding: 8 }}
         >
           <h2 style={{ margin: 0 }}>{title}</h2>
-          {hint && (
-            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{hint}</p>
-          )}
+          {hint && <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{hint}</p>}
           <TextField
             placeholder="Email"
             value={username}

@@ -64,7 +64,11 @@ declare module 'devextreme-react/data-grid' {
     enabled?: boolean;
     render?: (detailInfo: { data?: Record<string, unknown> }) => ReactNode;
   }>;
-  export const LoadPanel: ComponentType<{ enabled?: boolean; showPane?: boolean; shading?: boolean }>;
+  export const LoadPanel: ComponentType<{
+    enabled?: boolean;
+    showPane?: boolean;
+    shading?: boolean;
+  }>;
 }
 
 declare module 'devextreme-react/form' {

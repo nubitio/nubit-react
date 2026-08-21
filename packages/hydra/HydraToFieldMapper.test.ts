@@ -18,9 +18,7 @@ const schemaWith = (fields: Partial<HydraFieldSchema>[]): HydraResourceSchema =>
 describe('mapHydraSchemaToFields', () => {
   it('maps enum-carrying string properties to a select with humanised labels', () => {
     const fields = mapHydraSchemaToFields(
-      schemaWith([
-        { name: 'type', range: 'xsd:string', enumOptions: ['invoice', 'credit_note'] },
-      ]),
+      schemaWith([{ name: 'type', range: 'xsd:string', enumOptions: ['invoice', 'credit_note'] }]),
     );
 
     const typeField = fields.find((f) => f.name === 'type');
@@ -79,7 +77,13 @@ describe('mapHydraSchemaToFields', () => {
         { name: 'number', range: 'xsd:string', writeable: true },
         { name: 'status', range: 'xsd:string' },
       ]),
-      sequence: { field: 'number', name: 'order', prefix: 'ORD-', padding: 4, scope: ['restaurant'] },
+      sequence: {
+        field: 'number',
+        name: 'order',
+        prefix: 'ORD-',
+        padding: 4,
+        scope: ['restaurant'],
+      },
     });
 
     const number = fields.find((f) => f.name === 'number');
@@ -163,7 +167,11 @@ describe('x-crud format: currency', () => {
   it('applies the readonly x-crud hint on writeable fields', () => {
     const fields = mapHydraSchemaToFields(
       schemaWith([
-        { name: 'lineTotal', range: 'xsd:decimal', crudHints: { format: 'currency', readonly: true } },
+        {
+          name: 'lineTotal',
+          range: 'xsd:decimal',
+          crudHints: { format: 'currency', readonly: true },
+        },
       ]),
     );
     const lineTotal = fields.find((f) => f.name === 'lineTotal');
@@ -174,7 +182,12 @@ describe('x-crud format: currency', () => {
   it('maps hinted read-only decimals to readonly currency fields', () => {
     const fields = mapHydraSchemaToFields(
       schemaWith([
-        { name: 'total', range: 'xsd:decimal', writeable: false, crudHints: { format: 'currency' } },
+        {
+          name: 'total',
+          range: 'xsd:decimal',
+          writeable: false,
+          crudHints: { format: 'currency' },
+        },
       ]),
     );
     const total = fields.find((f) => f.name === 'total');
@@ -188,7 +201,14 @@ describe('x-crud entity relation display field', () => {
     className: 'CentroCosto',
     apiUrl: '/api/centro_costos',
     fields: [
-      { name: 'codigo', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
+      {
+        name: 'codigo',
+        propertyType: 'rdf:Property',
+        required: true,
+        readable: true,
+        writeable: true,
+        range: 'xsd:string',
+      },
       {
         name: 'nombre',
         propertyType: 'rdf:Property',
@@ -206,8 +226,22 @@ describe('x-crud entity relation display field', () => {
       className: 'Actor',
       apiUrl: '/api/actors',
       fields: [
-        { name: 'codigo', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
-        { name: 'nombre', propertyType: 'rdf:Property', required: true, readable: true, writeable: true, range: 'xsd:string' },
+        {
+          name: 'codigo',
+          propertyType: 'rdf:Property',
+          required: true,
+          readable: true,
+          writeable: true,
+          range: 'xsd:string',
+        },
+        {
+          name: 'nombre',
+          propertyType: 'rdf:Property',
+          required: true,
+          readable: true,
+          writeable: true,
+          range: 'xsd:string',
+        },
       ],
     };
     const fields = mapHydraSchemaToFields(

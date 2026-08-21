@@ -172,7 +172,6 @@
   z-index: var(--z-shell-popover);
 }
 
-
 // Notification badge — sits on top of header icon buttons.
 .nb-admin-messages > .nb-badge {
   align-items: center;
@@ -279,7 +278,9 @@
     margin-right: var(--space-4);
     opacity: 0.5;
     transform: rotate(45deg);
-    transition: transform var(--transition-base), opacity var(--transition-base);
+    transition:
+      transform var(--transition-base),
+      opacity var(--transition-base);
     width: 7px;
 
     &.is-expanded {

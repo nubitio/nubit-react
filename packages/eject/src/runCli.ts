@@ -38,9 +38,12 @@ export async function runCli(ctx: {
   }
 
   if (command === 'eject' && target === 'page') {
-    const positional = rest.filter((arg) => !arg.startsWith('--') && arg !== docsUrl && arg !== outPath);
+    const positional = rest.filter(
+      (arg) => !arg.startsWith('--') && arg !== docsUrl && arg !== outPath,
+    );
     const [componentName, apiUrl] = positional;
-    if (!componentName || !apiUrl) throw new Error('Usage: nubit eject page <ComponentName> <apiUrl>');
+    if (!componentName || !apiUrl)
+      throw new Error('Usage: nubit eject page <ComponentName> <apiUrl>');
 
     const title = flag('--title', componentName.replace(/Page$/, ''));
     const code = renderPageModule(componentName, apiUrl, title);

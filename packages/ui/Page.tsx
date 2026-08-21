@@ -13,15 +13,7 @@ export interface PageProps extends HTMLAttributes<HTMLDivElement> {
   gap?: SpaceScale;
 }
 
-export function Page({
-  children,
-  fill,
-  wide,
-  narrow,
-  gap = 5,
-  className,
-  ...props
-}: PageProps) {
+export function Page({ children, fill, wide, narrow, gap = 5, className, ...props }: PageProps) {
   return (
     <div
       className={joinClasses(

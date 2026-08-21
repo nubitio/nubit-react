@@ -65,7 +65,9 @@ export const CollapsibleSection = ({
 
   return (
     <div
-      className={['nb-collapsible', open && 'nb-collapsible--open', className].filter(Boolean).join(' ')}
+      className={['nb-collapsible', open && 'nb-collapsible--open', className]
+        .filter(Boolean)
+        .join(' ')}
       data-testid={testId}
     >
       <div className="nb-collapsible__header">
@@ -80,9 +82,7 @@ export const CollapsibleSection = ({
           <span className="nb-collapsible__label">{label}</span>
           <i className="ph ph-caret-down nb-collapsible__chevron" aria-hidden="true" />
         </button>
-        {trailing && (
-          <div className="nb-collapsible__trailing">{trailing}</div>
-        )}
+        {trailing && <div className="nb-collapsible__trailing">{trailing}</div>}
       </div>
 
       <div

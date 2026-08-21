@@ -17,7 +17,13 @@ export interface FieldButton {
   options?: {
     icon?: string;
     stylingMode?: string;
-    onClick?: (event: unknown, form: { getFieldValue: (name: string) => unknown; setFieldValue: (name: string, value: unknown) => void }) => void;
+    onClick?: (
+      event: unknown,
+      form: {
+        getFieldValue: (name: string) => unknown;
+        setFieldValue: (name: string, value: unknown) => void;
+      },
+    ) => void;
   };
 }
 

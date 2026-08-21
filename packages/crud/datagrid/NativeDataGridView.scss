@@ -505,13 +505,16 @@
     background var(--transition-fast),
     box-shadow var(--transition-fast);
 
-  .nb-datagrid--zebra &:nth-child(even) td:not(.nb-datagrid__cell--dirty):not(.nb-datagrid__cell--active) {
+  .nb-datagrid--zebra
+    &:nth-child(even)
+    td:not(.nb-datagrid__cell--dirty):not(.nb-datagrid__cell--active) {
     // Use the explicit zebra token — ~3.5% darker than white, clearly visible at 13px.
     // The old inline color-mix formula produced ~#fbfbfc which was imperceptible.
     background: var(--grid-row-alt-bg);
   }
 
-  &:hover td:not(.nb-datagrid__cell--dirty):not(.nb-datagrid__cell--active):not(.nb-datagrid__edit-cell) {
+  &:hover
+    td:not(.nb-datagrid__cell--dirty):not(.nb-datagrid__cell--active):not(.nb-datagrid__edit-cell) {
     background: var(--grid-row-hover-bg, var(--surface-2));
   }
 
@@ -1228,16 +1231,34 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
 }
 
 // Vary widths per column position to simulate real content lengths
-.nb-datagrid__skeleton-row td:nth-child(3n+1) .nb-datagrid__skeleton-cell { max-width: 75%; }
-.nb-datagrid__skeleton-row td:nth-child(3n+2) .nb-datagrid__skeleton-cell { max-width: 55%; }
-.nb-datagrid__skeleton-row td:nth-child(3n)   .nb-datagrid__skeleton-cell { max-width: 90%; }
+.nb-datagrid__skeleton-row td:nth-child(3n + 1) .nb-datagrid__skeleton-cell {
+  max-width: 75%;
+}
+.nb-datagrid__skeleton-row td:nth-child(3n + 2) .nb-datagrid__skeleton-cell {
+  max-width: 55%;
+}
+.nb-datagrid__skeleton-row td:nth-child(3n) .nb-datagrid__skeleton-cell {
+  max-width: 90%;
+}
 // Stagger the animation so rows shimmer at slightly different phases
-.nb-datagrid__skeleton-row:nth-child(2) .nb-datagrid__skeleton-cell { animation-delay: -0.3s; }
-.nb-datagrid__skeleton-row:nth-child(3) .nb-datagrid__skeleton-cell { animation-delay: -0.6s; }
-.nb-datagrid__skeleton-row:nth-child(4) .nb-datagrid__skeleton-cell { animation-delay: -0.9s; }
-.nb-datagrid__skeleton-row:nth-child(5) .nb-datagrid__skeleton-cell { animation-delay: -0.4s; }
-.nb-datagrid__skeleton-row:nth-child(6) .nb-datagrid__skeleton-cell { animation-delay: -1.1s; }
-.nb-datagrid__skeleton-row:nth-child(7) .nb-datagrid__skeleton-cell { animation-delay: -0.7s; }
+.nb-datagrid__skeleton-row:nth-child(2) .nb-datagrid__skeleton-cell {
+  animation-delay: -0.3s;
+}
+.nb-datagrid__skeleton-row:nth-child(3) .nb-datagrid__skeleton-cell {
+  animation-delay: -0.6s;
+}
+.nb-datagrid__skeleton-row:nth-child(4) .nb-datagrid__skeleton-cell {
+  animation-delay: -0.9s;
+}
+.nb-datagrid__skeleton-row:nth-child(5) .nb-datagrid__skeleton-cell {
+  animation-delay: -0.4s;
+}
+.nb-datagrid__skeleton-row:nth-child(6) .nb-datagrid__skeleton-cell {
+  animation-delay: -1.1s;
+}
+.nb-datagrid__skeleton-row:nth-child(7) .nb-datagrid__skeleton-cell {
+  animation-delay: -0.7s;
+}
 
 @keyframes skeleton-pulse {
   0% {
@@ -1965,7 +1986,9 @@ $inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
   background: $inline-edit-dirty-bg;
 }
 
-.nb-datagrid--zebra .nb-datagrid__row:nth-child(even) td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active),
+.nb-datagrid--zebra
+  .nb-datagrid__row:nth-child(even)
+  td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active),
 .nb-datagrid__row:hover td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active),
 .nb-datagrid__row--selected td.nb-datagrid__cell--dirty:not(.nb-datagrid__cell--active) {
   background: $inline-edit-dirty-bg;
@@ -2134,7 +2157,9 @@ $inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 15px;
-  transition: background 0.1s, color 0.1s;
+  transition:
+    background 0.1s,
+    color 0.1s;
 
   &:disabled {
     opacity: 0.4;

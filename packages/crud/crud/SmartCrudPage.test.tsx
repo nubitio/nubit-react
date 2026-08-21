@@ -58,10 +58,7 @@ const resource = defineResource(API_URL, {
   mercure: false,
   adapter: RestAdapter,
   routing: { routeParam: 'id' },
-  fields: [
-    identityField().build(),
-    textField().name('name').label('Name').build(),
-  ],
+  fields: [identityField().build(), textField().name('name').label('Name').build()],
 });
 
 // Regression fixture for the "Nuevo does nothing in editMode: 'batch'" bug:
@@ -77,10 +74,7 @@ const batchResource = defineResource(API_URL, {
   adapter: RestAdapter,
   routing: { routeParam: 'id' },
   editMode: 'batch',
-  fields: [
-    identityField().build(),
-    textField().name('name').label('Name').build(),
-  ],
+  fields: [identityField().build(), textField().name('name').label('Name').build()],
 });
 
 // ── Test doubles ───────────────────────────────────────────────────────────────
@@ -137,8 +131,14 @@ function renderPage(
           <ResourceStoreProvider factory={() => makeStore(loadSpy)}>
             <MemoryRouter initialEntries={[entry]}>
               <Routes>
-                <Route path="/:id" element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />} />
-                <Route path="/" element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />} />
+                <Route
+                  path="/:id"
+                  element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />}
+                />
+                <Route
+                  path="/"
+                  element={<SmartCrudPage resource={resourceUnderTest} formRef={formRef} />}
+                />
               </Routes>
             </MemoryRouter>
           </ResourceStoreProvider>
@@ -196,7 +196,10 @@ describe('CRUD engine ↔ RestAdapter wiring', () => {
     });
 
     await waitFor(() => expect(http.patch).toHaveBeenCalledTimes(1));
-    expect(http.patch).toHaveBeenCalledWith(`${API_URL}/7`, expect.objectContaining({ name: 'Edited' }));
+    expect(http.patch).toHaveBeenCalledWith(
+      `${API_URL}/7`,
+      expect.objectContaining({ name: 'Edited' }),
+    );
     expect(http.post).not.toHaveBeenCalled();
   });
 
@@ -247,6 +250,9 @@ describe("editMode: 'batch' still renders the add/edit dialog", () => {
     });
 
     await waitFor(() => expect(http.patch).toHaveBeenCalledTimes(1));
-    expect(http.patch).toHaveBeenCalledWith(`${API_URL}/7`, expect.objectContaining({ name: 'Edited' }));
+    expect(http.patch).toHaveBeenCalledWith(
+      `${API_URL}/7`,
+      expect.objectContaining({ name: 'Edited' }),
+    );
   });
 });

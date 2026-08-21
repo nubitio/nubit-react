@@ -66,7 +66,10 @@ export function PlanPanel({
   }
 
   return (
-    <section className={`nb-plan-panel${className ? ` ${className}` : ''}`} aria-labelledby="plan-panel-title">
+    <section
+      className={`nb-plan-panel${className ? ` ${className}` : ''}`}
+      aria-labelledby="plan-panel-title"
+    >
       <header className="nb-plan-panel__header">
         <div>
           <h2 id="plan-panel-title" className="nb-plan-panel__title">
@@ -104,7 +107,9 @@ export function PlanPanel({
                 ) : null}
               </div>
               <p className="nb-plan-card__price">{plan.priceLabel}</p>
-              {plan.description ? <p className="nb-plan-card__description">{plan.description}</p> : null}
+              {plan.description ? (
+                <p className="nb-plan-card__description">{plan.description}</p>
+              ) : null}
               <ul className="nb-plan-card__features">
                 {plan.features.map((feature) => (
                   <li key={feature}>{feature}</li>

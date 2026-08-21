@@ -6,7 +6,10 @@ import { ThemeSwitcher } from './ThemeSwitcher';
 
 beforeEach(() => {
   // Silence CSS fetch side-effects from ThemeProvider's setThemeToDOM
-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(null, { status: 200 }))));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() => Promise.resolve(new Response(null, { status: 200 }))),
+  );
 });
 
 afterEach(() => {
@@ -35,7 +38,10 @@ function stubMatchMedia(preferssDark = false) {
     addListener: vi.fn(),
     removeListener: vi.fn(),
   } as unknown as MediaQueryList;
-  vi.stubGlobal('matchMedia', vi.fn(() => mq));
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => mq),
+  );
   return { mq, listeners };
 }
 
@@ -43,7 +49,11 @@ function stubMatchMedia(preferssDark = false) {
 
 function CurrentMode() {
   const { mode, theme } = useTheme();
-  return <span data-testid="mode">{mode}:{theme}</span>;
+  return (
+    <span data-testid="mode">
+      {mode}:{theme}
+    </span>
+  );
 }
 
 function TestThemeProvider(props: Omit<React.ComponentProps<typeof ThemeProvider>, 'basePath'>) {
@@ -52,7 +62,11 @@ function TestThemeProvider(props: Omit<React.ComponentProps<typeof ThemeProvider
 
 function SwitchButton() {
   const { switchTheme } = useTheme();
-  return <button type="button" onClick={switchTheme}>switch</button>;
+  return (
+    <button type="button" onClick={switchTheme}>
+      switch
+    </button>
+  );
 }
 
 // ── initial state ─────────────────────────────────────────────────────────────

@@ -39,7 +39,11 @@ export const Button = ({
       className,
     )}
   >
-    {loading ? <span className="nb-button-spinner" aria-hidden="true" /> : icon ? <i className={icon} aria-hidden="true" /> : null}
+    {loading ? (
+      <span className="nb-button-spinner" aria-hidden="true" />
+    ) : icon ? (
+      <i className={icon} aria-hidden="true" />
+    ) : null}
     {children}
   </button>
 );
@@ -50,7 +54,13 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
   variant?: 'default' | 'danger';
 }
 
-export const IconButton = ({ icon, label, variant = 'default', className, ...props }: IconButtonProps) => (
+export const IconButton = ({
+  icon,
+  label,
+  variant = 'default',
+  className,
+  ...props
+}: IconButtonProps) => (
   <button
     {...props}
     type={props.type ?? 'button'}

@@ -7,11 +7,7 @@ import { HydraAdapter } from '../adapter/HydraAdapter';
 
 export type PrependDataMap = Map<string, FormDataRecord[]>;
 
-function upsertPrependData(
-  store: PrependDataMap,
-  field: Field,
-  item: FormDataRecord,
-): void {
+function upsertPrependData(store: PrependDataMap, field: Field, item: FormDataRecord): void {
   const existing = store.get(field.name);
   if (existing) {
     const nextId = item[field.valueField];

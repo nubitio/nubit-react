@@ -34,20 +34,20 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <CoreProvider http={{ baseUrl: 'https://jsonplaceholder.typicode.com' }}>
         <ResourceStoreProvider factory={restResourceStore}>
-        <ThemeProvider>
-          <BrowserRouter>
-            <AdminShell title="Nubit Demo" menuItems={menu}>
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<DashboardDemoPage />} />
-                <Route path="/showcase" element={<ShowcasePage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/users-dx" element={<UsersDevExtremePage />} />
-                <Route path="/fieldtypes" element={<FieldTypesPage />} />
-              </Routes>
-            </AdminShell>
-          </BrowserRouter>
-        </ThemeProvider>
+          <ThemeProvider>
+            <BrowserRouter>
+              <AdminShell title="Nubit Demo" menuItems={menu}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardDemoPage />} />
+                  <Route path="/showcase" element={<ShowcasePage />} />
+                  <Route path="/users" element={<UsersPage />} />
+                  <Route path="/users-dx" element={<UsersDevExtremePage />} />
+                  <Route path="/fieldtypes" element={<FieldTypesPage />} />
+                </Routes>
+              </AdminShell>
+            </BrowserRouter>
+          </ThemeProvider>
         </ResourceStoreProvider>
       </CoreProvider>
     </QueryClientProvider>

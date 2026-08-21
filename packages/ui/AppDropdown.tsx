@@ -135,37 +135,37 @@ export function AppDropdown({
               aria-labelledby={label ? `${id}-label` : undefined}
               className="nb-dropdown__menu-list"
             >
-            {options.map((option) => {
-              const isActive = option.value === value;
-              return (
-                <li key={option.value} role="presentation">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    disabled={option.disabled}
-                    className={cx(
-                      'nb-dropdown__option',
-                      isActive && 'nb-dropdown__option--active',
-                    )}
-                    onClick={() => {
-                      if (option.disabled) return;
-                      onChange(option.value);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <span className="nb-dropdown__option-content">
-                      {option.iconText && (
-                        <span className="nb-dropdown__option-icon" aria-hidden="true">
-                          {option.iconText}
-                        </span>
+              {options.map((option) => {
+                const isActive = option.value === value;
+                return (
+                  <li key={option.value} role="presentation">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      disabled={option.disabled}
+                      className={cx(
+                        'nb-dropdown__option',
+                        isActive && 'nb-dropdown__option--active',
                       )}
-                      <span>{option.label}</span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+                      onClick={() => {
+                        if (option.disabled) return;
+                        onChange(option.value);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      <span className="nb-dropdown__option-content">
+                        {option.iconText && (
+                          <span className="nb-dropdown__option-icon" aria-hidden="true">
+                            {option.iconText}
+                          </span>
+                        )}
+                        <span>{option.label}</span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             {menuFooter}
           </div>,

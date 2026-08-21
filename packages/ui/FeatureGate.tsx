@@ -39,7 +39,12 @@ export function FeatureGate({
   }
 
   return (
-    <div className="feature-gate--locked" title={lockTooltip} aria-label={lockTooltip} role="presentation">
+    <div
+      className="feature-gate--locked"
+      title={lockTooltip}
+      aria-label={lockTooltip}
+      role="presentation"
+    >
       {children}
     </div>
   );

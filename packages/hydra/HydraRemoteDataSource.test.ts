@@ -326,7 +326,9 @@ describe('HydraRemoteDataSource.export', () => {
     const httpClient = {
       get: async () => ({
         data: blob,
-        headers: new Headers({ 'content-disposition': 'attachment; filename="products-2026-08-20.xlsx"' }),
+        headers: new Headers({
+          'content-disposition': 'attachment; filename="products-2026-08-20.xlsx"',
+        }),
       }),
     } as unknown as CoreHttpClient;
     const ds = makeSource({ httpClient });

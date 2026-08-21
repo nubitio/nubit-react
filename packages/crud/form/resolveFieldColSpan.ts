@@ -1,11 +1,7 @@
 import type { Field } from '../field/Field';
 import { getFieldTypeModule } from '../field/registry/registry';
 import type { FieldFormWidth } from '../field/registry/FieldTypeModule';
-import {
-  DRAWER_WIDTHS,
-  resolveDrawerLayoutBucket,
-  type CrudDrawerSize,
-} from '../view/drawerSizes';
+import { DRAWER_WIDTHS, resolveDrawerLayoutBucket, type CrudDrawerSize } from '../view/drawerSizes';
 
 export type FormLayoutHint =
   | 'short'

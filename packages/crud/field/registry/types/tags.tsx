@@ -49,7 +49,9 @@ export const tagsTypeModule: FieldTypeModule = {
         multiple
         value={Array.isArray(value) ? value.map(String) : []}
         onChange={(event) => {
-          const nextValue = Array.from(event.currentTarget.selectedOptions).map((option) => option.value);
+          const nextValue = Array.from(event.currentTarget.selectedOptions).map(
+            (option) => option.value,
+          );
           setFieldValue(field.name, nextValue);
         }}
       >

@@ -40,7 +40,9 @@ function applyDevExtremeTheme(theme: 'light' | 'dark', basePath: string): void {
  * Swaps DevExtreme base theme CSS when Nubit `data-theme` changes.
  * Mount once inside `ThemeProvider` (typically via `DevExtremeCrudProvider`).
  */
-export function DevExtremeThemeSync({ basePath = '/devextreme-themes/' }: DevExtremeThemeSyncProps) {
+export function DevExtremeThemeSync({
+  basePath = '/devextreme-themes/',
+}: DevExtremeThemeSyncProps) {
   useEffect(() => {
     const sync = () => applyDevExtremeTheme(readNubitTheme(), basePath);
     sync();

@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import type { ResourceSchemaRequest, ResourceSchemaResolution } from './ResourceSchema';
 
-export function useFallbackResourceSchema(request: ResourceSchemaRequest): ResourceSchemaResolution {
+export function useFallbackResourceSchema(
+  request: ResourceSchemaRequest,
+): ResourceSchemaResolution {
   return useMemo(
     () => ({
       fields: [],

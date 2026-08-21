@@ -23,9 +23,7 @@ export async function ejectFieldsFromDocs(
 
   const doc = await response.json();
   const isHydra = doc['@type'] === 'ApiDocumentation' || doc['@type'] === 'hydra:ApiDocumentation';
-  const resourceMap = isHydra
-    ? parseHydraDoc(doc, {})
-    : parseOpenApiDoc(doc);
+  const resourceMap = isHydra ? parseHydraDoc(doc, {}) : parseOpenApiDoc(doc);
 
   const normalizedInput = normalizeUrl(apiUrl);
   const resourceSchema = Object.values(resourceMap).find(

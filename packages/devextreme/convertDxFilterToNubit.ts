@@ -83,10 +83,7 @@ function mapDxOperator(operator: string): string {
  * Converts a DevExtreme filter expression into Nubit/Hydra filter tuples,
  * applying per-field `buildFilterTerms` expansion (e.g. date `between`).
  */
-export function convertDxFilterToNubit(
-  filter: unknown,
-  fields: Field[],
-): unknown[][] {
+export function convertDxFilterToNubit(filter: unknown, fields: Field[]): unknown[][] {
   return flattenDxFilter(filter).flatMap(([fieldName, operator, rawValue]) => {
     const field = fields.find((candidate) => candidate.name === fieldName);
     const mappedOperator = mapDxOperator(operator);

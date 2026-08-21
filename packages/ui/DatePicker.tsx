@@ -36,10 +36,12 @@ type ViewMode = 'days' | 'months' | 'years';
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
-const cx = (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(' ');
+const cx = (...values: Array<string | false | null | undefined>) =>
+  values.filter(Boolean).join(' ');
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-const getLocale = (override?: string) => override || document.documentElement.lang || navigator.language || 'en-US';
+const getLocale = (override?: string) =>
+  override || document.documentElement.lang || navigator.language || 'en-US';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
@@ -50,17 +52,23 @@ const parseIsoDate = (value?: string | null) => {
   if (!value || !ISO_DATE_RE.test(value)) return null;
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(year, month - 1, day);
-  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day)
+    return null;
   return date;
 };
 
 const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-const addMonths = (date: Date, months: number) => new Date(date.getFullYear(), date.getMonth() + months, 1);
+const addMonths = (date: Date, months: number) =>
+  new Date(date.getFullYear(), date.getMonth() + months, 1);
 
 const formatDisplayDate = (value?: string | null, locale?: string) => {
   const date = parseIsoDate(value);
   if (!date) return '';
-  return new Intl.DateTimeFormat(getLocale(locale), { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat(getLocale(locale), {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
 };
 
 const formatMonthLabel = (date: Date, locale?: string) =>
@@ -75,13 +83,20 @@ export const getFirstDayOfWeek = (locale?: string): number => {
     // @ts-expect-error — weekInfo is stage-4, not yet in TS lib
     const info = new Intl.Locale(getLocale(locale)).weekInfo;
     if (info && typeof info.firstDay === 'number') return info.firstDay === 7 ? 0 : info.firstDay;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   const country = (getLocale(locale).split('-')[1] ?? '').toUpperCase();
   const sundayCountries = ['US', 'CA', 'MX', 'CN', 'JP', 'KR', 'SA', 'EG', 'IL', 'BR'];
   return sundayCountries.includes(country) ? 0 : 1;
 };
 
-const buildCalendarDays = (month: Date, min?: string, max?: string, locale?: string): CalendarDay[] => {
+const buildCalendarDays = (
+  month: Date,
+  min?: string,
+  max?: string,
+  locale?: string,
+): CalendarDay[] => {
   const first = startOfMonth(month);
   const firstDayOfWeek = getFirstDayOfWeek(locale);
   const offset = (first.getDay() - firstDayOfWeek + 7) % 7;
@@ -214,7 +229,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   // ── UI state ────────────────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<ViewMode>('days');
   const [month, setMonth] = useState(() => startOfMonth(selectedDate ?? new Date()));
-  const [yearRangeStart, setYearRangeStart] = useState(() => getYearRangeStart(new Date().getFullYear()));
+  const [yearRangeStart, setYearRangeStart] = useState(() =>
+    getYearRangeStart(new Date().getFullYear()),
+  );
   const [focusedIso, setFocusedIso] = useState<string | null>(null);
 
   // ── Text input state ─────────────────────────────────────────────────────
@@ -251,7 +268,10 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     },
   });
 
-  const days = useMemo(() => buildCalendarDays(month, min, max, resolvedLocale), [max, min, month, resolvedLocale]);
+  const days = useMemo(
+    () => buildCalendarDays(month, min, max, resolvedLocale),
+    [max, min, month, resolvedLocale],
+  );
   const weekdayLabels = useMemo(() => weekDayLabels(resolvedLocale), [resolvedLocale]);
   const monthLabels = useMemo(() => getMonthLabels(resolvedLocale), [resolvedLocale]);
   const selectedIso = selectedDate ? toIsoDate(selectedDate) : '';
@@ -272,13 +292,16 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Commit helpers ───────────────────────────────────────────────────────
-  const commitValue = useCallback((nextValue: string) => {
-    onChange?.(nextValue);
-    setOpen(false);
-    setIsEditing(false);
-    setInputText('');
-    window.setTimeout(() => inputRef.current?.focus());
-  }, [onChange, setOpen]);
+  const commitValue = useCallback(
+    (nextValue: string) => {
+      onChange?.(nextValue);
+      setOpen(false);
+      setIsEditing(false);
+      setInputText('');
+      window.setTimeout(() => inputRef.current?.focus());
+    },
+    [onChange, setOpen],
+  );
 
   const handleToday = useCallback(() => {
     const today = toIsoDate(new Date());
@@ -287,10 +310,13 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     commitValue(today);
   }, [min, max, commitValue]);
 
-  const handleClear = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    commitValue('');
-  }, [commitValue]);
+  const handleClear = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      commitValue('');
+    },
+    [commitValue],
+  );
 
   // ── Text input handlers ──────────────────────────────────────────────────
   const handleInputFocus = () => {
@@ -343,32 +369,35 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   };
 
   // ── Calendar keyboard navigation ─────────────────────────────────────────
-  const handleDayKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>, iso: string) => {
-    const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' '];
-    if (!navKeys.includes(e.key)) return;
-    e.preventDefault();
+  const handleDayKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLButtonElement>, iso: string) => {
+      const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' '];
+      if (!navKeys.includes(e.key)) return;
+      e.preventDefault();
 
-    if (e.key === 'Enter' || e.key === ' ') {
-      const day = days.find((d) => d.iso === iso);
-      if (day && !day.disabled) commitValue(iso);
-      return;
-    }
+      if (e.key === 'Enter' || e.key === ' ') {
+        const day = days.find((d) => d.iso === iso);
+        if (day && !day.disabled) commitValue(iso);
+        return;
+      }
 
-    const delta = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key] ?? 0;
-    const current = parseIsoDate(iso);
-    if (!current) return;
-    const next = new Date(current);
-    next.setDate(current.getDate() + delta);
-    const nextIso = toIsoDate(next);
+      const delta = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key] ?? 0;
+      const current = parseIsoDate(iso);
+      if (!current) return;
+      const next = new Date(current);
+      next.setDate(current.getDate() + delta);
+      const nextIso = toIsoDate(next);
 
-    if (next.getMonth() !== month.getMonth() || next.getFullYear() !== month.getFullYear()) {
-      setMonth(startOfMonth(next));
-    }
-    setFocusedIso(nextIso);
-    window.setTimeout(() => {
-      panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${nextIso}"]`)?.focus();
-    }, 0);
-  }, [days, month, commitValue, panelRef]);
+      if (next.getMonth() !== month.getMonth() || next.getFullYear() !== month.getFullYear()) {
+        setMonth(startOfMonth(next));
+      }
+      setFocusedIso(nextIso);
+      window.setTimeout(() => {
+        panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${nextIso}"]`)?.focus();
+      }, 0);
+    },
+    [days, month, commitValue, panelRef],
+  );
 
   // ── View: months ─────────────────────────────────────────────────────────
   const handleMonthSelect = (monthIndex: number) => {
@@ -411,7 +440,10 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
           id={inputId}
           type="text"
           inputMode="numeric"
-          className={cx('nb-date-picker__input', !isEditing && !displayValue && 'nb-date-picker__input--placeholder')}
+          className={cx(
+            'nb-date-picker__input',
+            !isEditing && !displayValue && 'nb-date-picker__input--placeholder',
+          )}
           value={isEditing ? inputText : displayValue}
           placeholder={placeholder}
           disabled={disabled}
@@ -452,168 +484,242 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
       </div>
 
       {/* ── Panel ── */}
-      {open && createPortal(
-        <div
-          ref={panelRef}
-          className="nb-date-picker__panel"
-          role="dialog"
-          aria-label={strings.selectDate}
-          style={panelStyle}
-        >
-          {/* Days view */}
-          {viewMode === 'days' && (
-            <>
-              <div className="nb-date-picker__header">
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.previousMonth} onClick={() => setMonth((m) => addMonths(m, -1))}>
-                  <i className="ph ph-caret-left" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className="nb-date-picker__month nb-date-picker__month--clickable"
-                  aria-label={strings.selectMonthAndYear}
-                  onClick={() => setViewMode('months')}
-                >
-                {formatMonthLabel(month, resolvedLocale)}
-                  <i className="ph ph-caret-down nb-date-picker__month-caret" aria-hidden="true" />
-                </button>
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.nextMonth} onClick={() => setMonth((m) => addMonths(m, 1))}>
-                  <i className="ph ph-caret-right" aria-hidden="true" />
-                </button>
-              </div>
-              <div className="nb-date-picker__weekdays" aria-hidden="true">
-                {weekdayLabels.map((label, i) => <span key={`${label}-${i}`}>{label}</span>)}
-              </div>
-              <div className="nb-date-picker__days" role="grid" aria-label={formatMonthLabel(month, resolvedLocale)}>
-                {days.map((day) => (
+      {open &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="nb-date-picker__panel"
+            role="dialog"
+            aria-label={strings.selectDate}
+            style={panelStyle}
+          >
+            {/* Days view */}
+            {viewMode === 'days' && (
+              <>
+                <div className="nb-date-picker__header">
                   <button
-                    key={day.iso}
-                    data-iso={day.iso}
                     type="button"
-                    className={cx(
-                      'nb-date-picker__day',
-                      !day.inCurrentMonth && 'nb-date-picker__day--muted',
-                      day.iso === selectedIso && 'nb-date-picker__day--selected',
-                      day.iso === todayIso && 'nb-date-picker__day--today',
-                    )}
-                    disabled={day.disabled}
-                    role="gridcell"
-                    aria-selected={day.iso === selectedIso}
-                    tabIndex={day.iso === (focusedIso ?? selectedIso ?? todayIso) ? 0 : -1}
-                    onClick={() => commitValue(day.iso)}
-                    onKeyDown={(e) => handleDayKeyDown(e, day.iso)}
+                    className="nb-date-picker__nav"
+                    aria-label={strings.previousMonth}
+                    onClick={() => setMonth((m) => addMonths(m, -1))}
                   >
-                    {day.date.getDate()}
+                    <i className="ph ph-caret-left" aria-hidden="true" />
                   </button>
-                ))}
-              </div>
-              <div className="nb-date-picker__footer">
-                <button type="button" className="nb-date-picker__text-button" onClick={() => commitValue('')}>{strings.clear}</button>
-                <button type="button" className="nb-date-picker__text-button" onClick={handleToday}>{strings.today}</button>
-              </div>
-            </>
-          )}
-
-          {/* Months view */}
-          {viewMode === 'months' && (
-            <>
-              <div className="nb-date-picker__header">
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.previousYear} onClick={() => setMonth((m) => new Date(m.getFullYear() - 1, m.getMonth(), 1))}>
-                  <i className="ph ph-caret-left" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className="nb-date-picker__month nb-date-picker__month--clickable"
-                  aria-label={strings.selectYear}
-                  onClick={() => {
-                    setYearRangeStart(getYearRangeStart(month.getFullYear()));
-                    setViewMode('years');
-                  }}
-                >
-                  {month.getFullYear()}
-                  <i className="ph ph-caret-down nb-date-picker__month-caret" aria-hidden="true" />
-                </button>
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.nextYear} onClick={() => setMonth((m) => new Date(m.getFullYear() + 1, m.getMonth(), 1))}>
-                  <i className="ph ph-caret-right" aria-hidden="true" />
-                </button>
-              </div>
-              <div className="nb-date-picker__months-grid" role="grid" aria-label={`${month.getFullYear()}`}>
-                {monthLabels.map((label, i) => {
-                  const isSelected = selectedDate
-                    ? selectedDate.getMonth() === i && selectedDate.getFullYear() === month.getFullYear()
-                    : false;
-                  const isCurrent = new Date().getMonth() === i && new Date().getFullYear() === month.getFullYear();
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={cx(
-                        'nb-date-picker__month-cell',
-                        isSelected && 'nb-date-picker__month-cell--selected',
-                        isCurrent && 'nb-date-picker__month-cell--current',
-                      )}
-                      role="gridcell"
-                      aria-selected={isSelected}
-                      onClick={() => handleMonthSelect(i)}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="nb-date-picker__footer">
-                <button type="button" className="nb-date-picker__text-button" onClick={() => setViewMode('days')}>
-                  <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Years view */}
-          {viewMode === 'years' && (
-            <>
-              <div className="nb-date-picker__header">
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.previousYears} onClick={() => setYearRangeStart((y) => y - 12)}>
-                  <i className="ph ph-caret-left" aria-hidden="true" />
-                </button>
-                <div className="nb-date-picker__month">
-                  {yearRangeStart}–{yearRangeStart + 11}
+                  <button
+                    type="button"
+                    className="nb-date-picker__month nb-date-picker__month--clickable"
+                    aria-label={strings.selectMonthAndYear}
+                    onClick={() => setViewMode('months')}
+                  >
+                    {formatMonthLabel(month, resolvedLocale)}
+                    <i
+                      className="ph ph-caret-down nb-date-picker__month-caret"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    className="nb-date-picker__nav"
+                    aria-label={strings.nextMonth}
+                    onClick={() => setMonth((m) => addMonths(m, 1))}
+                  >
+                    <i className="ph ph-caret-right" aria-hidden="true" />
+                  </button>
                 </div>
-                <button type="button" className="nb-date-picker__nav" aria-label={strings.nextYears} onClick={() => setYearRangeStart((y) => y + 12)}>
-                  <i className="ph ph-caret-right" aria-hidden="true" />
-                </button>
-              </div>
-              <div className="nb-date-picker__years-grid" role="grid" aria-label={`${yearRangeStart}–${yearRangeStart + 11}`}>
-                {Array.from({ length: 12 }, (_, i) => yearRangeStart + i).map((year) => {
-                  const isSelected = selectedDate ? selectedDate.getFullYear() === year : false;
-                  const isCurrent = new Date().getFullYear() === year;
-                  return (
+                <div className="nb-date-picker__weekdays" aria-hidden="true">
+                  {weekdayLabels.map((label, i) => (
+                    <span key={`${label}-${i}`}>{label}</span>
+                  ))}
+                </div>
+                <div
+                  className="nb-date-picker__days"
+                  role="grid"
+                  aria-label={formatMonthLabel(month, resolvedLocale)}
+                >
+                  {days.map((day) => (
                     <button
-                      key={year}
+                      key={day.iso}
+                      data-iso={day.iso}
                       type="button"
                       className={cx(
-                        'nb-date-picker__year-cell',
-                        isSelected && 'nb-date-picker__year-cell--selected',
-                        isCurrent && 'nb-date-picker__year-cell--current',
+                        'nb-date-picker__day',
+                        !day.inCurrentMonth && 'nb-date-picker__day--muted',
+                        day.iso === selectedIso && 'nb-date-picker__day--selected',
+                        day.iso === todayIso && 'nb-date-picker__day--today',
                       )}
+                      disabled={day.disabled}
                       role="gridcell"
-                      aria-selected={isSelected}
-                      onClick={() => handleYearSelect(year)}
+                      aria-selected={day.iso === selectedIso}
+                      tabIndex={day.iso === (focusedIso ?? selectedIso ?? todayIso) ? 0 : -1}
+                      onClick={() => commitValue(day.iso)}
+                      onKeyDown={(e) => handleDayKeyDown(e, day.iso)}
                     >
-                      {year}
+                      {day.date.getDate()}
                     </button>
-                  );
-                })}
-              </div>
-              <div className="nb-date-picker__footer">
-                <button type="button" className="nb-date-picker__text-button" onClick={() => setViewMode('months')}>
-                  <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
-                </button>
-              </div>
-            </>
-          )}
-        </div>,
-        document.body,
-      )}
+                  ))}
+                </div>
+                <div className="nb-date-picker__footer">
+                  <button
+                    type="button"
+                    className="nb-date-picker__text-button"
+                    onClick={() => commitValue('')}
+                  >
+                    {strings.clear}
+                  </button>
+                  <button
+                    type="button"
+                    className="nb-date-picker__text-button"
+                    onClick={handleToday}
+                  >
+                    {strings.today}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Months view */}
+            {viewMode === 'months' && (
+              <>
+                <div className="nb-date-picker__header">
+                  <button
+                    type="button"
+                    className="nb-date-picker__nav"
+                    aria-label={strings.previousYear}
+                    onClick={() => setMonth((m) => new Date(m.getFullYear() - 1, m.getMonth(), 1))}
+                  >
+                    <i className="ph ph-caret-left" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="nb-date-picker__month nb-date-picker__month--clickable"
+                    aria-label={strings.selectYear}
+                    onClick={() => {
+                      setYearRangeStart(getYearRangeStart(month.getFullYear()));
+                      setViewMode('years');
+                    }}
+                  >
+                    {month.getFullYear()}
+                    <i
+                      className="ph ph-caret-down nb-date-picker__month-caret"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    className="nb-date-picker__nav"
+                    aria-label={strings.nextYear}
+                    onClick={() => setMonth((m) => new Date(m.getFullYear() + 1, m.getMonth(), 1))}
+                  >
+                    <i className="ph ph-caret-right" aria-hidden="true" />
+                  </button>
+                </div>
+                <div
+                  className="nb-date-picker__months-grid"
+                  role="grid"
+                  aria-label={`${month.getFullYear()}`}
+                >
+                  {monthLabels.map((label, i) => {
+                    const isSelected = selectedDate
+                      ? selectedDate.getMonth() === i &&
+                        selectedDate.getFullYear() === month.getFullYear()
+                      : false;
+                    const isCurrent =
+                      new Date().getMonth() === i &&
+                      new Date().getFullYear() === month.getFullYear();
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        className={cx(
+                          'nb-date-picker__month-cell',
+                          isSelected && 'nb-date-picker__month-cell--selected',
+                          isCurrent && 'nb-date-picker__month-cell--current',
+                        )}
+                        role="gridcell"
+                        aria-selected={isSelected}
+                        onClick={() => handleMonthSelect(i)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="nb-date-picker__footer">
+                  <button
+                    type="button"
+                    className="nb-date-picker__text-button"
+                    onClick={() => setViewMode('days')}
+                  >
+                    <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Years view */}
+            {viewMode === 'years' && (
+              <>
+                <div className="nb-date-picker__header">
+                  <button
+                    type="button"
+                    className="nb-date-picker__nav"
+                    aria-label={strings.previousYears}
+                    onClick={() => setYearRangeStart((y) => y - 12)}
+                  >
+                    <i className="ph ph-caret-left" aria-hidden="true" />
+                  </button>
+                  <div className="nb-date-picker__month">
+                    {yearRangeStart}–{yearRangeStart + 11}
+                  </div>
+                  <button
+                    type="button"
+                    className="nb-date-picker__nav"
+                    aria-label={strings.nextYears}
+                    onClick={() => setYearRangeStart((y) => y + 12)}
+                  >
+                    <i className="ph ph-caret-right" aria-hidden="true" />
+                  </button>
+                </div>
+                <div
+                  className="nb-date-picker__years-grid"
+                  role="grid"
+                  aria-label={`${yearRangeStart}–${yearRangeStart + 11}`}
+                >
+                  {Array.from({ length: 12 }, (_, i) => yearRangeStart + i).map((year) => {
+                    const isSelected = selectedDate ? selectedDate.getFullYear() === year : false;
+                    const isCurrent = new Date().getFullYear() === year;
+                    return (
+                      <button
+                        key={year}
+                        type="button"
+                        className={cx(
+                          'nb-date-picker__year-cell',
+                          isSelected && 'nb-date-picker__year-cell--selected',
+                          isCurrent && 'nb-date-picker__year-cell--current',
+                        )}
+                        role="gridcell"
+                        aria-selected={isSelected}
+                        onClick={() => handleYearSelect(year)}
+                      >
+                        {year}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="nb-date-picker__footer">
+                  <button
+                    type="button"
+                    className="nb-date-picker__text-button"
+                    onClick={() => setViewMode('months')}
+                  >
+                    <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 });

@@ -53,9 +53,7 @@ export function SummaryFooter({
             >
               {item && (
                 <div className="nb-datagrid__summary-cell" style={{ justifyContent }}>
-                  {item.label && (
-                    <span className="nb-datagrid__summary-label">{item.label}</span>
-                  )}
+                  {item.label && <span className="nb-datagrid__summary-label">{item.label}</span>}
                   <span className="nb-datagrid__summary-value">
                     {item.column && gridSummary && item.column in gridSummary
                       ? formatSummaryValue(gridSummary[item.column], item)

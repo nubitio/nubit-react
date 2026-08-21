@@ -1,11 +1,6 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import {
-  defaultBuildFilterTerms,
-  getPrimitiveDisplay,
-  KEEP,
-  TEXT_OPERATORS,
-} from '../shared';
+import { defaultBuildFilterTerms, getPrimitiveDisplay, KEEP, TEXT_OPERATORS } from '../shared';
 
 export const radioTypeModule: FieldTypeModule = {
   controlKind: 'radio',

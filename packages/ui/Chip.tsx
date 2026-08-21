@@ -47,9 +47,7 @@ export const Chip = ({
     >
       {icon && <i className={icon} aria-hidden="true" />}
       {label}
-      {count !== undefined && (
-        <span className="nb-chip__count">{count}</span>
-      )}
+      {count !== undefined && <span className="nb-chip__count">{count}</span>}
     </button>
   );
 };

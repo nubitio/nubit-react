@@ -21,9 +21,7 @@ export function DonutChartWidgetView({ widget, data, loading }: Props) {
   const total = rows.reduce((sum, row) => sum + toNumber(row[widget.valueKey]), 0);
 
   const centerValue =
-    widget.centerValuePath !== undefined
-      ? resolvePath(data, widget.centerValuePath)
-      : total;
+    widget.centerValuePath !== undefined ? resolvePath(data, widget.centerValuePath) : total;
 
   const radius = 38;
   const stroke = 14;
@@ -51,7 +49,11 @@ export function DonutChartWidgetView({ widget, data, loading }: Props) {
   return (
     <StatCard
       title={widget.title}
-      headerExtra={widget.subtitle ? <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span> : undefined}
+      headerExtra={
+        widget.subtitle ? (
+          <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>
+        ) : undefined
+      }
       menuVisible={widget.menuVisible}
       isLoading={loading}
       className="nb-dashboard-chart-card"
@@ -109,9 +111,7 @@ export function DonutChartWidgetView({ widget, data, loading }: Props) {
                       style={{ background: colors[index % colors.length] }}
                     />
                     <span className="nb-dashboard-donut__legend-label">{label}</span>
-                    <span className="nb-dashboard-donut__legend-value">
-                      {pct.toFixed(0)}%
-                    </span>
+                    <span className="nb-dashboard-donut__legend-value">{pct.toFixed(0)}%</span>
                   </li>
                 );
               })}

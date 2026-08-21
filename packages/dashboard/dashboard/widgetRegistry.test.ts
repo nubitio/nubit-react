@@ -1,12 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { getWidgetComponent, isWidgetTypeRegistered, registerWidgetType, type WidgetComponent } from './widgetRegistry';
+import {
+  getWidgetComponent,
+  isWidgetTypeRegistered,
+  registerWidgetType,
+  type WidgetComponent,
+} from './widgetRegistry';
 import './widgets/registerBuiltinWidgets';
 
 const Dummy: WidgetComponent = () => null;
 
 describe('widgetRegistry', () => {
   it('registers built-in widget types on import', () => {
-    for (const type of ['stat', 'bar-chart', 'donut-chart', 'line-chart', 'area-chart', 'progress', 'table']) {
+    for (const type of [
+      'stat',
+      'bar-chart',
+      'donut-chart',
+      'line-chart',
+      'area-chart',
+      'progress',
+      'table',
+    ]) {
       expect(isWidgetTypeRegistered(type)).toBe(true);
     }
   });

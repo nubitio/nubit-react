@@ -7,9 +7,7 @@ import type { Field } from './Field';
  * `Field` object or a builder instance straight from `textField()`,
  * `entityField()`, etc. — calling `.build()` yourself is optional.
  */
-export type FieldInput<TRecord extends DataRecord = DataRecord> =
-  | Field
-  | BaseFieldBuilder<TRecord>;
+export type FieldInput<TRecord extends DataRecord = DataRecord> = Field | BaseFieldBuilder<TRecord>;
 
 /** Normalizes a mixed array of Fields and builders into plain Fields. */
 export function buildFields<TRecord extends DataRecord = DataRecord>(

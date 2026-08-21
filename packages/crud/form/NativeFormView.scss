@@ -195,7 +195,7 @@
   color: var(--text-primary);
   font: inherit;
   font-size: var(--font-size-sm);
-  min-height: var(--control-height-form, 34px);   // was 32px hardcoded
+  min-height: var(--control-height-form, 34px); // was 32px hardcoded
   padding: 4px 8px;
   transition:
     border-color var(--transition-base),
@@ -311,7 +311,9 @@
 }
 
 .nb-form__lookup.has-value .nb-form__control {
-  padding-right: calc(var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1));
+  padding-right: calc(
+    var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1)
+  );
 }
 
 .nb-form__lookup-toggle,
@@ -364,7 +366,6 @@
   position: absolute;
   right: 0;
   z-index: 20;
-
 }
 
 .nb-form__lookup-option,
@@ -386,7 +387,9 @@
   background: transparent;
   border: 0;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 
   &:hover {
     background: var(--control-bg-hover, var(--surface-2));
@@ -815,7 +818,7 @@
 
 .nb-form__detail-table {
   border-collapse: collapse;
-  min-width: 600px;  // reduced — the fill column expands naturally
+  min-width: 600px; // reduced — the fill column expands naturally
   table-layout: fixed;
   width: 100%;
 }
@@ -908,8 +911,8 @@
 
 .nb-form__detail-table td {
   border-bottom: 1px solid var(--border-subtle);
-  overflow: visible;  // allow dropdowns to escape the cell
-  padding: 0;         // controls fill the full cell
+  overflow: visible; // allow dropdowns to escape the cell
+  padding: 0; // controls fill the full cell
   position: relative;
   vertical-align: middle;
 }
@@ -1009,7 +1012,9 @@
   min-height: var(--row-height);
   outline: none;
   padding: 4px var(--grid-cell-padding-x, 8px);
-  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
   width: 100%;
 
   &:focus {
@@ -1053,7 +1058,9 @@
 }
 
 .nb-form__detail-table td .nb-form__lookup.has-value .nb-form__control {
-  padding-right: calc(var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1));
+  padding-right: calc(
+    var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1)
+  );
 }
 
 // Error state on cell controls

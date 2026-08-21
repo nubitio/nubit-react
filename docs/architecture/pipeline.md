@@ -45,13 +45,13 @@ Doctrine ORM (+ listeners: sequence, tenant, audit, soft-delete)
 
 ## Where developers lose the thread
 
-| Step | Risk | Mitigation |
-| --- | --- | --- |
-| x-crud in PHP → UI | Metadata crosses 3 layers | `bin/console nubit:discover`, Nubit DevTools panel |
-| Field inference | 9 mapping rules + heuristics | `logDevHint` in browser console, `field.mappingReason` |
-| Master-detail | Header from Hydra, lines from `x-embedded-lines` inference | Tier 3 checklist in [tiers.md](./tiers.md) |
-| FrankenPHP cache | Stale docs after entity change | `cache:clear` + restart app container |
-| Provider tree | Cryptic "no resolver" errors | See [breakpoints.md](./breakpoints.md) |
+| Step               | Risk                                                       | Mitigation                                             |
+| ------------------ | ---------------------------------------------------------- | ------------------------------------------------------ |
+| x-crud in PHP → UI | Metadata crosses 3 layers                                  | `bin/console nubit:discover`, Nubit DevTools panel     |
+| Field inference    | 9 mapping rules + heuristics                               | `logDevHint` in browser console, `field.mappingReason` |
+| Master-detail      | Header from Hydra, lines from `x-embedded-lines` inference | Tier 3 checklist in [tiers.md](./tiers.md)             |
+| FrankenPHP cache   | Stale docs after entity change                             | `cache:clear` + restart app container                  |
+| Provider tree      | Cryptic "no resolver" errors                               | See [breakpoints.md](./breakpoints.md)                 |
 
 ## Provider tree (frontend boot)
 

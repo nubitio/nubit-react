@@ -8,7 +8,9 @@ describe('resolveMercureTopicOrigin', () => {
   });
 
   it('prefers an explicit mercureTopicOrigin override', () => {
-    expect(resolveMercureTopicOrigin('/api/', 'http://localhost:8000')).toBe('http://localhost:8000');
+    expect(resolveMercureTopicOrigin('/api/', 'http://localhost:8000')).toBe(
+      'http://localhost:8000',
+    );
   });
 
   it('prefers autodiscovered origin over apiBaseUrl and window', () => {
@@ -18,7 +20,9 @@ describe('resolveMercureTopicOrigin', () => {
   });
 
   it('derives the origin from an absolute apiBaseUrl', () => {
-    expect(resolveMercureTopicOrigin('https://api.example.com/v1/')).toBe('https://api.example.com');
+    expect(resolveMercureTopicOrigin('https://api.example.com/v1/')).toBe(
+      'https://api.example.com',
+    );
   });
 
   it('falls back to window.location.origin for relative apiBaseUrl', () => {

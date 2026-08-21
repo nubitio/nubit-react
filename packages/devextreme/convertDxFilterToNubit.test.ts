@@ -77,16 +77,12 @@ describe('flattenDxFilter', () => {
   });
 
   it('flattens compound and-filters', () => {
-    expect(
-      flattenDxFilter([
+    expect(flattenDxFilter([['name', 'contains', 'laptop'], 'and', ['active', '=', true]])).toEqual(
+      [
         ['name', 'contains', 'laptop'],
-        'and',
         ['active', '=', true],
-      ]),
-    ).toEqual([
-      ['name', 'contains', 'laptop'],
-      ['active', '=', true],
-    ]);
+      ],
+    );
   });
 });
 
@@ -99,10 +95,7 @@ describe('convertDxFilterToNubit', () => {
 
   it('expands date between filters into >= and <= pairs', () => {
     expect(
-      convertDxFilterToNubit(
-        ['createdAt', 'between', ['2026-01-01', '2026-01-31']],
-        [dateField],
-      ),
+      convertDxFilterToNubit(['createdAt', 'between', ['2026-01-01', '2026-01-31']], [dateField]),
     ).toEqual([
       ['createdAt', '>=', '2026-01-01'],
       ['createdAt', '<=', '2026-01-31'],

@@ -108,10 +108,7 @@ export const ContextMenu = ({
   ) : null;
 
   return (
-    <div
-      ref={containerRef}
-      className={`nb-context-menu${className ? ` ${className}` : ''}`}
-    >
+    <div ref={containerRef} className={`nb-context-menu${className ? ` ${className}` : ''}`}>
       {trigger ? (
         <span onClick={toggle}>{trigger}</span>
       ) : (

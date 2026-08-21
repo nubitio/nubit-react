@@ -55,10 +55,7 @@ describe('serializeFormFields — numeric fields', () => {
   });
 
   it('does not invent keys for fields absent from the data', () => {
-    const fields = [
-      textField().name('name').build(),
-      currencyField().name('price').build(),
-    ];
+    const fields = [textField().name('name').build(), currencyField().name('price').build()];
 
     const out = serializeFormFields({ name: 'X' }, fields, ctx);
 

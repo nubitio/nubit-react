@@ -106,11 +106,7 @@ export const CoreConfigProvider = ({
     [locale, timezone, apiBaseUrl, currency, mercureTopicOrigin, mercureTenantId],
   );
 
-  return (
-    <CoreConfigContext.Provider value={value}>
-      {children}
-    </CoreConfigContext.Provider>
-  );
+  return <CoreConfigContext.Provider value={value}>{children}</CoreConfigContext.Provider>;
 };
 
 export function useCoreConfig(): CoreConfig {

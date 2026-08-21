@@ -7,10 +7,7 @@ describe('applyFormDetailFormFieldOverrides', () => {
     const lines = textField().name('lines').label('Lines').build();
     const number = textField().name('number').label('Number').build();
 
-    const result = applyFormDetailFormFieldOverrides(
-      [lines, number],
-      { propertyName: 'lines' },
-    );
+    const result = applyFormDetailFormFieldOverrides([lines, number], { propertyName: 'lines' });
 
     expect(result[0].visibleOnForm).toBe(false);
     expect(result[0].hidden).toBe(true);

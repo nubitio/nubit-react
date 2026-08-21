@@ -57,10 +57,18 @@ export function flattenResourceGroups(groups: ResourceConfigGroups): Record<stri
     ...(groups.form?.layout !== undefined ? { formLayout: groups.form.layout } : {}),
     ...(groups.form?.detail !== undefined ? { formDetail: groups.form.detail } : {}),
     ...(groups.grid?.detail !== undefined ? { gridDetail: groups.grid.detail } : {}),
-    ...(groups.grid?.summaryFields !== undefined ? { summaryFields: groups.grid.summaryFields } : {}),
-    ...(groups.grid?.columnPresets !== undefined ? { columnPresets: groups.grid.columnPresets } : {}),
-    ...(groups.grid?.columnGroupDefs !== undefined ? { columnGroupDefs: groups.grid.columnGroupDefs } : {}),
-    ...(groups.grid?.defaultPreset !== undefined ? { defaultPreset: groups.grid.defaultPreset } : {}),
+    ...(groups.grid?.summaryFields !== undefined
+      ? { summaryFields: groups.grid.summaryFields }
+      : {}),
+    ...(groups.grid?.columnPresets !== undefined
+      ? { columnPresets: groups.grid.columnPresets }
+      : {}),
+    ...(groups.grid?.columnGroupDefs !== undefined
+      ? { columnGroupDefs: groups.grid.columnGroupDefs }
+      : {}),
+    ...(groups.grid?.defaultPreset !== undefined
+      ? { defaultPreset: groups.grid.defaultPreset }
+      : {}),
     ...(groups.routing !== undefined ? { routing: groups.routing } : {}),
   };
 }

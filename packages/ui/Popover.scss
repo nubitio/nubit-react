@@ -26,11 +26,21 @@
   }
 
   // Alignment
-  &--end   &__panel { right: 0; }
-  &--start &__panel { left: 0; }
+  &--end &__panel {
+    right: 0;
+  }
+  &--start &__panel {
+    left: 0;
+  }
 }
 
 @keyframes popover-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  useCoreTranslation,
-  type CoreHttpClient,
-  type DataRecord,
-} from '@nubitio/core';
+import { useCoreTranslation, type CoreHttpClient, type DataRecord } from '@nubitio/core';
 import { Field } from '../field/Field';
 import { useResourceStoreFactory } from '../data/ResourceStore';
 import type { FormDataRecord } from './FormDataSnapshot';
@@ -28,7 +24,11 @@ function useLookupDropdown() {
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const idRef = useRef<symbol>(Symbol());
-  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({ position: 'fixed', visibility: 'hidden', margin: 0 });
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({
+    position: 'fixed',
+    visibility: 'hidden',
+    margin: 0,
+  });
 
   const getPositionedMenuStyle = useCallback((): React.CSSProperties => {
     if (!containerRef.current) return { position: 'fixed', visibility: 'hidden', margin: 0 };
@@ -76,12 +76,19 @@ function useLookupDropdown() {
     const checkAriaHidden = () => {
       let el: HTMLElement | null = container.parentElement;
       while (el) {
-        if (el.getAttribute('aria-hidden') === 'true') { setOpen(false); return; }
+        if (el.getAttribute('aria-hidden') === 'true') {
+          setOpen(false);
+          return;
+        }
         el = el.parentElement;
       }
     };
     const mo = new MutationObserver(checkAriaHidden);
-    mo.observe(document.body, { attributes: true, attributeFilter: ['aria-hidden'], subtree: true });
+    mo.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['aria-hidden'],
+      subtree: true,
+    });
     return () => mo.disconnect();
   }, [open]);
 
@@ -100,7 +107,9 @@ function useLookupDropdown() {
   // Strict Mode double-invocation of updater functions causing a double-dispatch.
   useLayoutEffect(() => {
     if (!open) return;
-    document.dispatchEvent(new CustomEvent<{ id: symbol }>(LOOKUP_OPENED_EVENT, { detail: { id: idRef.current } }));
+    document.dispatchEvent(
+      new CustomEvent<{ id: symbol }>(LOOKUP_OPENED_EVENT, { detail: { id: idRef.current } }),
+    );
   }, [open]);
 
   // Outside-click: close immediately on mousedown outside the trigger+panel.
@@ -124,7 +133,15 @@ function useLookupDropdown() {
     const updatePosition = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      if (rect.top >= window.innerHeight || rect.bottom <= 0 || rect.left >= window.innerWidth || rect.right <= 0) { setOpen(false); return; }
+      if (
+        rect.top >= window.innerHeight ||
+        rect.bottom <= 0 ||
+        rect.left >= window.innerWidth ||
+        rect.right <= 0
+      ) {
+        setOpen(false);
+        return;
+      }
       setMenuStyle(getPositionedMenuStyle());
     };
     updatePosition();
@@ -136,13 +153,24 @@ function useLookupDropdown() {
     };
   }, [getPositionedMenuStyle, open]);
 
-  const setOpenWithPosition = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    const next = typeof value === 'function' ? value(open) : value;
-    if (next) setMenuStyle(getPositionedMenuStyle());
-    setOpen(next);
-  }, [getPositionedMenuStyle, open]);
+  const setOpenWithPosition = useCallback(
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      const next = typeof value === 'function' ? value(open) : value;
+      if (next) setMenuStyle(getPositionedMenuStyle());
+      setOpen(next);
+    },
+    [getPositionedMenuStyle, open],
+  );
 
-  return { open, setOpen: setOpenWithPosition, draftQuery, setDraftQuery, containerRef, menuRef, menuStyle };
+  return {
+    open,
+    setOpen: setOpenWithPosition,
+    draftQuery,
+    setDraftQuery,
+    containerRef,
+    menuRef,
+    menuStyle,
+  };
 }
 
 function LookupDropdown({
@@ -192,7 +220,10 @@ function LookupDropdown({
   const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   return (
-    <div ref={containerRef} className={`nb-form__lookup${normalizedValue !== '' ? ' has-value' : ''}`}>
+    <div
+      ref={containerRef}
+      className={`nb-form__lookup${normalizedValue !== '' ? ' has-value' : ''}`}
+    >
       <input
         autoComplete="off"
         className={className}
@@ -209,28 +240,67 @@ function LookupDropdown({
         onBlur={() => {
           // Keep blur timer only for keyboard (Tab) navigation; mouse outside-click
           // is handled by the document mousedown listener in useLookupDropdown.
-          blurTimer.current = setTimeout(() => { setOpen(false); setDraftQuery(null); }, 120);
+          blurTimer.current = setTimeout(() => {
+            setOpen(false);
+            setDraftQuery(null);
+          }, 120);
         }}
         onChange={(event) => onQueryChange(event.currentTarget.value)}
-        onFocus={() => { clearTimeout(blurTimer.current); setOpen(true); }}
+        onFocus={() => {
+          clearTimeout(blurTimer.current);
+          setOpen(true);
+        }}
         onKeyDown={onKeyDown}
       />
       {!disabled && !readOnly && normalizedValue !== '' && (
-        <button type="button" className="nb-form__lookup-clear" aria-label={t('form.lookupClear', { label })} onMouseDown={(e) => e.preventDefault()} onClick={onClear}>
+        <button
+          type="button"
+          className="nb-form__lookup-clear"
+          aria-label={t('form.lookupClear', { label })}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onClear}
+        >
           <i className="ph ph-x" aria-hidden="true" />
         </button>
       )}
       {!disabled && !readOnly && (
-        <button type="button" className="nb-form__lookup-toggle" aria-label={t('form.lookupOpen', { label })} onMouseDown={(e) => e.preventDefault()} onClick={() => { clearTimeout(blurTimer.current); setOpen((prev) => !prev); }}>
-          <i className="ph ph-caret-down" aria-hidden="true" style={{ transition: 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+        <button
+          type="button"
+          className="nb-form__lookup-toggle"
+          aria-label={t('form.lookupOpen', { label })}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            clearTimeout(blurTimer.current);
+            setOpen((prev) => !prev);
+          }}
+        >
+          <i
+            className="ph ph-caret-down"
+            aria-hidden="true"
+            style={{
+              transition: 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          />
         </button>
       )}
-      {open && !disabled && !readOnly && createPortal(
-        <div ref={menuRef} className="nb-form__lookup-menu" id={`${id}-listbox`} role="listbox" style={menuStyle} onScroll={onScroll} onMouseDown={(e) => e.preventDefault()}>
-          {children}
-        </div>,
-        document.body,
-      )}
+      {open &&
+        !disabled &&
+        !readOnly &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="nb-form__lookup-menu"
+            id={`${id}-listbox`}
+            role="listbox"
+            style={menuStyle}
+            onScroll={onScroll}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {children}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -265,7 +335,8 @@ export function NativeEntitySelect({
   const { t } = useCoreTranslation();
   const generatedId = useId();
   const resourceStoreFactory = useResourceStoreFactory();
-  const { open, setOpen, draftQuery, setDraftQuery, containerRef, menuRef, menuStyle } = useLookupDropdown();
+  const { open, setOpen, draftQuery, setDraftQuery, containerRef, menuRef, menuStyle } =
+    useLookupDropdown();
   const [searchedItems, setSearchedItems] = useState<DataRecord[] | null>(null);
   const [selectedItemCache, setSelectedItemCache] = useState<DataRecord | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -273,14 +344,24 @@ export function NativeEntitySelect({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const normalizedValue = String(value && typeof value === 'object' ? fieldKeyValue(field, value as DataRecord) : value ?? '');
+  const normalizedValue = String(
+    value && typeof value === 'object' ? fieldKeyValue(field, value as DataRecord) : (value ?? ''),
+  );
   const items = searchedItems ?? options;
-  const objectValue = value && typeof value === 'object' ? value as DataRecord : null;
-  const cachedSelectedItem = selectedItemCache && String(fieldKeyValue(field, selectedItemCache) ?? '') === normalizedValue ? selectedItemCache : undefined;
-  const objectSelectedItem = objectValue && String(fieldKeyValue(field, objectValue) ?? '') === normalizedValue ? objectValue : undefined;
-  const selectedItem = items.find((item) => String(fieldKeyValue(field, item) ?? '') === normalizedValue)
-    ?? options.find((item) => String(fieldKeyValue(field, item) ?? '') === normalizedValue)
-    ?? cachedSelectedItem ?? objectSelectedItem;
+  const objectValue = value && typeof value === 'object' ? (value as DataRecord) : null;
+  const cachedSelectedItem =
+    selectedItemCache && String(fieldKeyValue(field, selectedItemCache) ?? '') === normalizedValue
+      ? selectedItemCache
+      : undefined;
+  const objectSelectedItem =
+    objectValue && String(fieldKeyValue(field, objectValue) ?? '') === normalizedValue
+      ? objectValue
+      : undefined;
+  const selectedItem =
+    items.find((item) => String(fieldKeyValue(field, item) ?? '') === normalizedValue) ??
+    options.find((item) => String(fieldKeyValue(field, item) ?? '') === normalizedValue) ??
+    cachedSelectedItem ??
+    objectSelectedItem;
   const selectedText = selectedItem ? fieldTextValue(field, selectedItem) : '';
   const query = draftQuery ?? selectedText;
   const controlId = id ?? generatedId;
@@ -291,13 +372,25 @@ export function NativeEntitySelect({
     const source = createRemoteSource(field, httpClient, resourceStoreFactory, prependData);
     if (!source.byKey) return;
     let cancelled = false;
-    source.byKey(value && typeof value === 'object' ? fieldKeyValue(field, value as DataRecord) : value)
+    source
+      .byKey(value && typeof value === 'object' ? fieldKeyValue(field, value as DataRecord) : value)
       .then((item) => {
         if (!cancelled && item) setSelectedItemCache(item);
       })
       .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, [cachedSelectedItem, field, httpClient, normalizedValue, prependData, resourceStoreFactory, selectedItem, value]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    cachedSelectedItem,
+    field,
+    httpClient,
+    normalizedValue,
+    prependData,
+    resourceStoreFactory,
+    selectedItem,
+    value,
+  ]);
 
   useEffect(() => {
     if (!field.url || !field.searchEnabled || !open) return;
@@ -310,12 +403,23 @@ export function NativeEntitySelect({
       setLoading(true);
       setHasMore(true);
       createRemoteSource(field, httpClient, resourceStoreFactory, prependData)
-        .load({ take: 50, skip: 0, searchExpr: fieldSearchExpr(field), searchValue: searchValue === '' ? undefined : searchValue })
+        .load({
+          take: 50,
+          skip: 0,
+          searchExpr: fieldSearchExpr(field),
+          searchValue: searchValue === '' ? undefined : searchValue,
+        })
         .then((result) => {
           setSearchedItems(result.data);
-          setHasMore(result.data.length === 50 && (result.totalCount === undefined || result.data.length < result.totalCount));
+          setHasMore(
+            result.data.length === 50 &&
+              (result.totalCount === undefined || result.data.length < result.totalCount),
+          );
         })
-        .catch(() => { setSearchedItems(null); setHasMore(false); })
+        .catch(() => {
+          setSearchedItems(null);
+          setHasMore(false);
+        })
         .finally(() => setLoading(false));
     }, 250);
     return () => clearTimeout(timer);
@@ -327,19 +431,42 @@ export function NativeEntitySelect({
     const searchValue = (draftQuery ?? '').trim();
     const currentCount = searchedItems ? searchedItems.length : 0;
     createRemoteSource(field, httpClient, resourceStoreFactory, prependData)
-      .load({ take: 50, skip: currentCount, searchExpr: fieldSearchExpr(field), searchValue: searchValue === '' ? undefined : searchValue })
+      .load({
+        take: 50,
+        skip: currentCount,
+        searchExpr: fieldSearchExpr(field),
+        searchValue: searchValue === '' ? undefined : searchValue,
+      })
       .then((result) => {
         setSearchedItems((prev) => {
           const nextItems = [...(prev ?? []), ...result.data];
           const seen = new Set();
-          return nextItems.filter((item) => { const k = fieldKeyValue(field, item); if (seen.has(k)) return false; seen.add(k); return true; });
+          return nextItems.filter((item) => {
+            const k = fieldKeyValue(field, item);
+            if (seen.has(k)) return false;
+            seen.add(k);
+            return true;
+          });
         });
         const nextTotal = currentCount + result.data.length;
-        setHasMore(result.data.length === 50 && (result.totalCount === undefined || nextTotal < result.totalCount));
+        setHasMore(
+          result.data.length === 50 &&
+            (result.totalCount === undefined || nextTotal < result.totalCount),
+        );
       })
       .catch(() => setHasMore(false))
       .finally(() => setLoadingMore(false));
-  }, [draftQuery, field, hasMore, httpClient, loading, loadingMore, prependData, resourceStoreFactory, searchedItems]);
+  }, [
+    draftQuery,
+    field,
+    hasMore,
+    httpClient,
+    loading,
+    loadingMore,
+    prependData,
+    resourceStoreFactory,
+    searchedItems,
+  ]);
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const t = event.currentTarget;
@@ -380,7 +507,11 @@ export function NativeEntitySelect({
 
   return (
     <LookupDropdown
-      activeOptionId={open && items[activeOptionIndex] ? `${controlId}-option-${String(fieldKeyValue(field, items[activeOptionIndex]))}` : undefined}
+      activeOptionId={
+        open && items[activeOptionIndex]
+          ? `${controlId}-option-${String(fieldKeyValue(field, items[activeOptionIndex]))}`
+          : undefined
+      }
       className={className}
       containerRef={containerRef}
       disabled={disabled}
@@ -389,9 +520,20 @@ export function NativeEntitySelect({
       menuRef={menuRef}
       menuStyle={menuStyle}
       normalizedValue={normalizedValue}
-      onClear={() => { setSelectedItemCache(null); setActiveIndex(0); onChange(null, null); setDraftQuery(''); setOpen(true); }}
+      onClear={() => {
+        setSelectedItemCache(null);
+        setActiveIndex(0);
+        onChange(null, null);
+        setDraftQuery('');
+        setOpen(true);
+      }}
       onKeyDown={handleKeyDown}
-      onQueryChange={(v) => { setActiveIndex(0); setDraftQuery(v); setOpen(true); if (v === '') onChange(null, null); }}
+      onQueryChange={(v) => {
+        setActiveIndex(0);
+        setDraftQuery(v);
+        setOpen(true);
+        if (v === '') onChange(null, null);
+      }}
       onScroll={handleScroll}
       open={open}
       query={query}
@@ -400,14 +542,27 @@ export function NativeEntitySelect({
       setDraftQuery={setDraftQuery}
       setOpen={setOpen}
     >
-      {loading && items.length === 0 && <div className="nb-form__lookup-status">{t('form.lookupSearching')}</div>}
-      {!loading && items.length === 0 && <div className="nb-form__lookup-status">{t('form.lookupNoResults')}</div>}
+      {loading && items.length === 0 && (
+        <div className="nb-form__lookup-status">{t('form.lookupSearching')}</div>
+      )}
+      {!loading && items.length === 0 && (
+        <div className="nb-form__lookup-status">{t('form.lookupNoResults')}</div>
+      )}
       {/* Keep stale items visible while a refetch is in flight; unmounting them collapses the open panel (visible blink on every debounced search). */}
       {items.map((item) => {
         const itemValue = fieldKeyValue(field, item);
         const isActive = items[activeOptionIndex] === item;
         return (
-          <button key={String(itemValue)} id={`${controlId}-option-${String(itemValue)}`} type="button" role="option" aria-selected={String(itemValue ?? '') === normalizedValue} className={`nb-form__lookup-option${isActive ? ' is-active' : ''}`} onMouseDown={(e) => e.preventDefault()} onClick={() => selectItem(item)}>
+          <button
+            key={String(itemValue)}
+            id={`${controlId}-option-${String(itemValue)}`}
+            type="button"
+            role="option"
+            aria-selected={String(itemValue ?? '') === normalizedValue}
+            className={`nb-form__lookup-option${isActive ? ' is-active' : ''}`}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => selectItem(item)}
+          >
             {fieldOptionNode(field, item)}
           </button>
         );
@@ -438,19 +593,28 @@ export function NativeEnumSelect({
 }) {
   const { t } = useCoreTranslation();
   const generatedId = useId();
-  const { open, setOpen, draftQuery, setDraftQuery, containerRef, menuRef, menuStyle } = useLookupDropdown();
+  const { open, setOpen, draftQuery, setDraftQuery, containerRef, menuRef, menuStyle } =
+    useLookupDropdown();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const allItems: DataRecord[] = field.data ?? [];
   const normalizedValue = String(value ?? '');
   const selectedItem = allItems.find((item) => String(item['value'] ?? '') === normalizedValue);
-  const selectedText = selectedItem ? String(selectedItem['text'] ?? selectedItem['value'] ?? '') : '';
+  const selectedText = selectedItem
+    ? String(selectedItem['text'] ?? selectedItem['value'] ?? '')
+    : '';
   const query = draftQuery ?? selectedText;
-  const visibleItems = draftQuery != null && draftQuery !== ''
-    ? allItems.filter((item) => String(item['text'] ?? item['value'] ?? '').toLowerCase().includes(draftQuery.toLowerCase()))
-    : allItems;
+  const visibleItems =
+    draftQuery != null && draftQuery !== ''
+      ? allItems.filter((item) =>
+          String(item['text'] ?? item['value'] ?? '')
+            .toLowerCase()
+            .includes(draftQuery.toLowerCase()),
+        )
+      : allItems;
   const controlId = id ?? generatedId;
-  const activeOptionIndex = visibleItems.length === 0 ? 0 : Math.min(activeIndex, visibleItems.length - 1);
+  const activeOptionIndex =
+    visibleItems.length === 0 ? 0 : Math.min(activeIndex, visibleItems.length - 1);
 
   const selectItem = (item: DataRecord) => {
     onChange(item['value'] ?? null);
@@ -485,7 +649,11 @@ export function NativeEnumSelect({
 
   return (
     <LookupDropdown
-      activeOptionId={open && visibleItems[activeOptionIndex] ? `${controlId}-option-${String(visibleItems[activeOptionIndex]['value'] ?? '')}` : undefined}
+      activeOptionId={
+        open && visibleItems[activeOptionIndex]
+          ? `${controlId}-option-${String(visibleItems[activeOptionIndex]['value'] ?? '')}`
+          : undefined
+      }
       className={className}
       containerRef={containerRef}
       disabled={disabled}
@@ -494,9 +662,19 @@ export function NativeEnumSelect({
       menuRef={menuRef}
       menuStyle={menuStyle}
       normalizedValue={normalizedValue}
-      onClear={() => { setActiveIndex(0); onChange(null); setDraftQuery(''); setOpen(true); }}
+      onClear={() => {
+        setActiveIndex(0);
+        onChange(null);
+        setDraftQuery('');
+        setOpen(true);
+      }}
       onKeyDown={handleKeyDown}
-      onQueryChange={(v) => { setActiveIndex(0); setDraftQuery(v); setOpen(true); if (v === '') onChange(null); }}
+      onQueryChange={(v) => {
+        setActiveIndex(0);
+        setDraftQuery(v);
+        setOpen(true);
+        if (v === '') onChange(null);
+      }}
       open={open}
       query={query}
       readOnly={readOnly}
@@ -504,12 +682,23 @@ export function NativeEnumSelect({
       setDraftQuery={setDraftQuery}
       setOpen={setOpen}
     >
-      {visibleItems.length === 0 && <div className="nb-form__lookup-status">{t('form.lookupNoResults')}</div>}
+      {visibleItems.length === 0 && (
+        <div className="nb-form__lookup-status">{t('form.lookupNoResults')}</div>
+      )}
       {visibleItems.map((item) => {
         const itemValue = String(item['value'] ?? '');
         const isActive = visibleItems[activeOptionIndex] === item;
         return (
-          <button key={itemValue} id={`${controlId}-option-${itemValue}`} type="button" role="option" aria-selected={itemValue === normalizedValue} className={`nb-form__lookup-option${isActive ? ' is-active' : ''}`} onMouseDown={(e) => e.preventDefault()} onClick={() => selectItem(item)}>
+          <button
+            key={itemValue}
+            id={`${controlId}-option-${itemValue}`}
+            type="button"
+            role="option"
+            aria-selected={itemValue === normalizedValue}
+            className={`nb-form__lookup-option${isActive ? ' is-active' : ''}`}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => selectItem(item)}
+          >
             {String(item['text'] ?? item['value'] ?? '')}
           </button>
         );

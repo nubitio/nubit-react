@@ -8,8 +8,4 @@ export {
   type CoreRequestConfig,
   type CoreResponseType,
 } from './CoreHttpClient';
-export {
-  CoreHttpProvider,
-  useCoreHttpClient,
-  type CoreHttpProviderProps,
-} from './CoreHttpContext';
+export { CoreHttpProvider, useCoreHttpClient, type CoreHttpProviderProps } from './CoreHttpContext';

@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createRestResourceStore } from './restResourceStore';
 
-function stubFetch(handler: (url: string) => { status?: number; body?: unknown; headers?: Record<string, string> }) {
+function stubFetch(
+  handler: (url: string) => { status?: number; body?: unknown; headers?: Record<string, string> },
+) {
   const calls: string[] = [];
   vi.stubGlobal('fetch', async (url: string) => {
     calls.push(url);
@@ -23,7 +25,12 @@ describe('createRestResourceStore', () => {
     const calls = stubFetch(() => ({ body: [] }));
     const store = createRestResourceStore()({ url: '/api/things', idField: 'id' });
 
-    await store.load({ take: 20, skip: 40, sort: [{ selector: 'name', desc: true }], searchValue: 'foo' });
+    await store.load({
+      take: 20,
+      skip: 40,
+      sort: [{ selector: 'name', desc: true }],
+      searchValue: 'foo',
+    });
 
     const url = new URL(calls[0], 'http://test');
     expect(url.searchParams.get('page')).toBe('3');

@@ -36,7 +36,9 @@ export function TableWidgetView({ widget, data, loading }: Props) {
       title={widget.title}
       headerExtra={
         <div className="nb-dashboard-table__header-extra">
-          {widget.subtitle && <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>}
+          {widget.subtitle && (
+            <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>
+          )}
           {widget.viewAll && (
             <Link to={widget.viewAll.to} className="nb-dashboard-table__view-all">
               {widget.viewAll.label ?? 'View all'}
@@ -63,7 +65,9 @@ export function TableWidgetView({ widget, data, loading }: Props) {
                 {widget.columns.map((column) => (
                   <th
                     key={column.key}
-                    className={column.align ? `nb-dashboard-table__cell--${column.align}` : undefined}
+                    className={
+                      column.align ? `nb-dashboard-table__cell--${column.align}` : undefined
+                    }
                   >
                     {column.label}
                   </th>
@@ -76,7 +80,9 @@ export function TableWidgetView({ widget, data, loading }: Props) {
                   {widget.columns.map((column) => (
                     <td
                       key={column.key}
-                      className={column.align ? `nb-dashboard-table__cell--${column.align}` : undefined}
+                      className={
+                        column.align ? `nb-dashboard-table__cell--${column.align}` : undefined
+                      }
                     >
                       {renderCell(row, column)}
                     </td>

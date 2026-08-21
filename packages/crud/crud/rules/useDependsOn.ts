@@ -51,9 +51,7 @@ export function useDependsOn(fields: Field[], formData: FormDataRecord | null): 
   // dependency values actually change. The structured entries above are
   // used directly for comparison, avoiding the double-parse of the
   // previous implementation.
-  const snapshotKey = JSON.stringify(
-    currentEntries?.map((e) => e.values) ?? null,
-  );
+  const snapshotKey = JSON.stringify(currentEntries?.map((e) => e.values) ?? null);
 
   useEffect(() => {
     // Skip the first run (mount guard — BUG-009)

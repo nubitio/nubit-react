@@ -10,13 +10,13 @@ export interface AccentPreset {
 }
 
 export const ACCENT_PRESETS: AccentPreset[] = [
-  { label: 'Azure',  value: '#1a6fd4' },
-  { label: 'Teal',   value: '#0d9488' },
+  { label: 'Azure', value: '#1a6fd4' },
+  { label: 'Teal', value: '#0d9488' },
   { label: 'Indigo', value: '#4f46e5' },
-  { label: 'Slate',  value: '#475569' },
+  { label: 'Slate', value: '#475569' },
   { label: 'Violet', value: '#7c3aed' },
-  { label: 'Rose',   value: '#e11d48' },
-  { label: 'Amber',  value: '#d97706' },
+  { label: 'Rose', value: '#e11d48' },
+  { label: 'Amber', value: '#d97706' },
 ];
 
 const STORAGE_KEY = 'app-accent-color';

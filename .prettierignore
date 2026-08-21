@@ -1,0 +1,11 @@
+# Build output and generated artifacts — formatting them is noise, and CI's
+# format check must not depend on whether a previous step already built.
+node_modules/
+dist/
+coverage/
+.vite/
+graphify-out/
+pnpm-lock.yaml
+examples/*/public/themes/
+examples/*/public/devextreme-themes/
+examples/*/test-results/

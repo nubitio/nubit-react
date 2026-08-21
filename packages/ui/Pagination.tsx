@@ -28,7 +28,10 @@ export function Pagination({
   }
 
   const windowSize = Math.min(maxVisible, totalPages);
-  const start = Math.max(1, Math.min(page - Math.floor(windowSize / 2), totalPages - windowSize + 1));
+  const start = Math.max(
+    1,
+    Math.min(page - Math.floor(windowSize / 2), totalPages - windowSize + 1),
+  );
   const pages = Array.from({ length: windowSize }, (_, index) => start + index).filter(
     (value) => value <= totalPages,
   );

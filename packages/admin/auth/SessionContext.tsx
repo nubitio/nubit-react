@@ -88,13 +88,16 @@ export function SessionProvider({
     setSession({ status: 'anonymous' });
   }, [apiBaseUrl, logoutPath]);
 
-  const value = useMemo<SessionContextValue>(() => ({
-    session,
-    refresh,
-    logout,
-    roles: session.status === 'authenticated' ? session.profile.roles : [],
-    username: session.status === 'authenticated' ? session.profile.username : null,
-  }), [logout, refresh, session]);
+  const value = useMemo<SessionContextValue>(
+    () => ({
+      session,
+      refresh,
+      logout,
+      roles: session.status === 'authenticated' ? session.profile.roles : [],
+      username: session.status === 'authenticated' ? session.profile.username : null,
+    }),
+    [logout, refresh, session],
+  );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

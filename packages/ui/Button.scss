@@ -36,7 +36,7 @@
 
   &:disabled {
     cursor: default;
-    opacity: 0.60;
+    opacity: 0.6;
   }
 }
 
@@ -186,7 +186,7 @@
 
   &:disabled {
     cursor: default;
-    opacity: 0.50;
+    opacity: 0.5;
   }
 }
 
@@ -214,5 +214,7 @@
 }
 
 @keyframes app-spinner-rotate {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

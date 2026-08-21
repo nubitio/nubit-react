@@ -39,6 +39,8 @@ describe('resolveResourceToolbar', () => {
       }),
     });
 
-    expect(resolveResourceToolbar(target, context(target))).toEqual({ selection: [{ text: 'Abrir A' }] });
+    expect(resolveResourceToolbar(target, context(target))).toEqual({
+      selection: [{ text: 'Abrir A' }],
+    });
   });
 });

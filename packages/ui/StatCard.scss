@@ -71,9 +71,15 @@
     letter-spacing: 0.01em;
     margin-bottom: var(--space-1);
 
-    &--up   { color: var(--success-color); }
-    &--down { color: var(--error-color); }
-    &--flat { color: var(--text-tertiary); }
+    &--up {
+      color: var(--success-color);
+    }
+    &--down {
+      color: var(--error-color);
+    }
+    &--flat {
+      color: var(--text-tertiary);
+    }
   }
 
   // Supporting context — period, units, comparison basis
@@ -109,7 +115,13 @@
     border-left: 3px solid var(--accent-color);
   }
 
-  &--accented-success { border-left: 3px solid var(--success-color); }
-  &--accented-warning { border-left: 3px solid var(--warning-color); }
-  &--accented-danger  { border-left: 3px solid var(--error-color); }
+  &--accented-success {
+    border-left: 3px solid var(--success-color);
+  }
+  &--accented-warning {
+    border-left: 3px solid var(--warning-color);
+  }
+  &--accented-danger {
+    border-left: 3px solid var(--error-color);
+  }
 }

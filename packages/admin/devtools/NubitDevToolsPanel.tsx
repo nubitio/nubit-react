@@ -53,7 +53,9 @@ export function NubitDevToolsPanel() {
           <section className="nb-devtools__section">
             <h4>Active resources ({resources.length})</h4>
             {resources.length === 0 ? (
-              <p className="nb-devtools__empty">Open a SchemaCrudPage to inspect field resolution.</p>
+              <p className="nb-devtools__empty">
+                Open a SchemaCrudPage to inspect field resolution.
+              </p>
             ) : (
               <>
                 <select
@@ -125,7 +127,9 @@ export function NubitDevToolsPanel() {
 
                 {active?.formDetail && active.formDetail.lineFieldCount > 0 && (
                   <>
-                    <h4 className="nb-devtools__subsection">Line fields ({active.formDetail.lineFieldCount})</h4>
+                    <h4 className="nb-devtools__subsection">
+                      Line fields ({active.formDetail.lineFieldCount})
+                    </h4>
                     <table className="nb-devtools__table">
                       <thead>
                         <tr>
@@ -153,7 +157,11 @@ export function NubitDevToolsPanel() {
           </section>
 
           <footer className="nb-devtools__footer">
-            <a href="https://github.com/nubitio/nubit-react/blob/main/docs/architecture/README.md" target="_blank" rel="noreferrer">
+            <a
+              href="https://github.com/nubitio/nubit-react/blob/main/docs/architecture/README.md"
+              target="_blank"
+              rel="noreferrer"
+            >
               Architecture docs
             </a>
           </footer>

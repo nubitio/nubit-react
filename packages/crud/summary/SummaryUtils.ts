@@ -22,7 +22,10 @@ export function computeSummaryValue(rows: DataRecord[], item: SummaryItem): unkn
 
   const type = item.summaryType ?? 'sum';
   if (type === 'custom') return undefined;
-  if (type === 'count') return item.column ? rows.filter((row) => row[item.column!] !== null && row[item.column!] !== undefined).length : rows.length;
+  if (type === 'count')
+    return item.column
+      ? rows.filter((row) => row[item.column!] !== null && row[item.column!] !== undefined).length
+      : rows.length;
 
   const values = numericColumnValues(rows, item.column);
   if (values.length === 0) return 0;
@@ -38,9 +41,13 @@ export function formatSummaryValue(value: unknown, item: SummaryItem): string {
 
   if (typeof value !== 'number') return value == null ? '' : String(value);
 
-  const precision = item.precision ?? (item.valueFormat === 'currency' || item.valueFormat === 'fixedPoint' ? 2 : undefined);
+  const precision =
+    item.precision ??
+    (item.valueFormat === 'currency' || item.valueFormat === 'fixedPoint' ? 2 : undefined);
   const baseOptions: Intl.NumberFormatOptions = {
-    ...(precision !== undefined ? { minimumFractionDigits: precision, maximumFractionDigits: precision } : undefined),
+    ...(precision !== undefined
+      ? { minimumFractionDigits: precision, maximumFractionDigits: precision }
+      : undefined),
   };
 
   if (item.valueFormat === 'currency') {
@@ -60,7 +67,9 @@ export function formatSummaryValue(value: unknown, item: SummaryItem): string {
   }
 
   if (item.valueFormat === 'percent') {
-    return new Intl.NumberFormat(getCoreLocale(), { ...baseOptions, style: 'percent' }).format(value);
+    return new Intl.NumberFormat(getCoreLocale(), { ...baseOptions, style: 'percent' }).format(
+      value,
+    );
   }
 
   if (item.valueFormat && typeof item.valueFormat === 'object') {

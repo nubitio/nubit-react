@@ -12,9 +12,7 @@ function normalizeColumnGroup(field: Field): string[] {
 }
 
 function humanizeGroupKey(key: string): string {
-  return key
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function resolveGroupLabel(key: string, defs?: ColumnGroupDef[]): string {
@@ -29,7 +27,10 @@ function resolveGroupClassName(key: string, defs?: ColumnGroupDef[]): string | u
   return defs?.find((def) => def.key === key)?.className;
 }
 
-export function resolveFieldGroupClassName(field: Field, defs?: ColumnGroupDef[]): string | undefined {
+export function resolveFieldGroupClassName(
+  field: Field,
+  defs?: ColumnGroupDef[],
+): string | undefined {
   const path = normalizeColumnGroup(field);
   if (path.length === 0) return undefined;
   return resolveGroupClassName(path[path.length - 1]!, defs);
@@ -77,10 +78,7 @@ export function resolveFieldGroupBoundaries(
 
 export function buildGroupBoundaryClassName(boundary?: FieldGroupBoundary): string {
   if (!boundary?.groupKey) return '';
-  return [
-    boundary.groupClassName,
-    boundary.isGroupDivider ? 'nb-datagrid__col-group-divider' : '',
-  ]
+  return [boundary.groupClassName, boundary.isGroupDivider ? 'nb-datagrid__col-group-divider' : '']
     .filter(Boolean)
     .join(' ');
 }
@@ -104,10 +102,7 @@ function buildHeaderTree(fields: Field[]): HeaderNode[] {
     for (let index = 0; index < path.length; index += 1) {
       const key = path[index]!;
       const last = level[level.length - 1];
-      let group =
-        last?.type === 'group' && last.key === key
-          ? last
-          : undefined;
+      let group = last?.type === 'group' && last.key === key ? last : undefined;
 
       if (!group) {
         group = { type: 'group', key, children: [] };

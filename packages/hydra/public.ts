@@ -18,38 +18,22 @@ export type { HydraResourceStoreProviderProps } from './HydraResourceStoreProvid
 export { HydraResourceSchemaProvider } from './HydraResourceSchemaProvider';
 export type { HydraResourceSchemaProviderProps } from './HydraResourceSchemaProvider';
 
-export {
-  parseHydraDoc,
-  parseOpenApiDoc,
-} from './openApiParser';
+export { parseHydraDoc, parseOpenApiDoc } from './openApiParser';
 
-export {
-  mapHydraSchemaToFields,
-  resolveRangeTag,
-} from './HydraToFieldMapper';
+export { mapHydraSchemaToFields, resolveRangeTag } from './HydraToFieldMapper';
 export { buildEmbeddedFormDetail, resolveEmbeddedBinding } from './buildEmbeddedFormDetail';
 export { HydraSchemaResolver, getSchemaResolver } from './HydraSchemaResolver';
 export type { ResolvedResourceSchema } from './HydraSchemaResolver';
 export { resolveInferredFormDetail } from './resolveInferredFormDetail';
 export type { EmbeddedLinesSchema } from './types';
 
-export {
-  useHydraMetadata,
-  API_DOC_QUERY_KEY,
-} from './useHydraMetadata';
+export { useHydraMetadata, API_DOC_QUERY_KEY } from './useHydraMetadata';
 
-export {
-  useResourceSchema,
-} from './useResourceSchema';
+export { useResourceSchema } from './useResourceSchema';
 
-export {
-  SchemaProvider,
-  useSchemaContext,
-} from './SchemaContext';
+export { SchemaProvider, useSchemaContext } from './SchemaContext';
 
-export type {
-  UseSchemaContextResult,
-} from './SchemaContext';
+export type { UseSchemaContextResult } from './SchemaContext';
 
 export type {
   HydraApiDoc,

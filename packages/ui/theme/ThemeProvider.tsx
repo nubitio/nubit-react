@@ -53,7 +53,10 @@ function setThemeToDOM(href: string): Promise<void> {
     const id = 'theme-link';
     let link = document.getElementById(id) as HTMLLinkElement | null;
     if (link) {
-      if (link.getAttribute('data-theme-href') === href) { resolve(); return; }
+      if (link.getAttribute('data-theme-href') === href) {
+        resolve();
+        return;
+      }
       link.href = versioned;
       link.setAttribute('data-theme-href', href);
     } else {
@@ -66,7 +69,10 @@ function setThemeToDOM(href: string): Promise<void> {
     }
     // Resolve on error/timeout so the app never hangs waiting for a CSS file.
     const timer = setTimeout(resolve, 5000);
-    const settle = () => { clearTimeout(timer); resolve(); };
+    const settle = () => {
+      clearTimeout(timer);
+      resolve();
+    };
     link.onload = settle;
     link.onerror = settle;
   });

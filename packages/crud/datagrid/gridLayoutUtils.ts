@@ -41,7 +41,9 @@ let measureCanvasContext: CanvasRenderingContext2D | null | undefined;
 function getMeasureContext(): CanvasRenderingContext2D | null {
   if (measureCanvasContext !== undefined) return measureCanvasContext;
   measureCanvasContext =
-    typeof document === 'undefined' ? null : (document.createElement('canvas').getContext('2d') ?? null);
+    typeof document === 'undefined'
+      ? null
+      : (document.createElement('canvas').getContext('2d') ?? null);
   return measureCanvasContext;
 }
 

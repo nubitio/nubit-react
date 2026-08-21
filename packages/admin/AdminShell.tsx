@@ -2,7 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AdminHeader, type AdminHeaderAction } from './AdminHeader';
-import { AdminSidebarMenu, type AdminMenuItem, type AdminSidebarMenuSelectEvent } from './AdminSidebarMenu';
+import {
+  AdminSidebarMenu,
+  type AdminMenuItem,
+  type AdminSidebarMenuSelectEvent,
+} from './AdminSidebarMenu';
 import { useScreenSize } from './useScreenSize';
 import './admin.scss';
 
@@ -50,16 +54,13 @@ export const AdminShell = ({
   );
 
   const getMenuStatus = useCallback(
-    (status: MenuStatus) =>
-      status === getDefaultMenuOpenState() ? null : status,
+    (status: MenuStatus) => (status === getDefaultMenuOpenState() ? null : status),
     [getDefaultMenuOpenState],
   );
 
   const changeMenuStatus = useCallback(
     (reducerFn: (prevStatus: MenuStatus) => MenuStatus) => {
-      setMenuStatus((prev) =>
-        getMenuStatus(reducerFn(getMenuOpenState(prev)) ?? prev),
-      );
+      setMenuStatus((prev) => getMenuStatus(reducerFn(getMenuOpenState(prev)) ?? prev));
     },
     [getMenuOpenState, getMenuStatus],
   );
@@ -149,9 +150,7 @@ export const AdminShell = ({
             onClick={closeMenuFromOverlay}
           />
         )}
-        <main className="nb-admin-shell__content content">
-          {children}
-        </main>
+        <main className="nb-admin-shell__content content">{children}</main>
       </div>
     </div>
   );

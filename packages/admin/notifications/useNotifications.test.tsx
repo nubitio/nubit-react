@@ -73,6 +73,8 @@ describe('useNotifications', () => {
 
     result.current.markAsRead(7);
 
-    await waitFor(() => expect(patchMock).toHaveBeenCalledWith('/api/notifications/7', { read: true }));
+    await waitFor(() =>
+      expect(patchMock).toHaveBeenCalledWith('/api/notifications/7', { read: true }),
+    );
   });
 });

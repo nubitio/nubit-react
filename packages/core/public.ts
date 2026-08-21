@@ -33,12 +33,7 @@ export type {
 } from './event/EventTypes';
 
 // ── I18n ──────────────────────────────────────────────────────────────────────
-export {
-  coreTranslationsEs,
-  coreTranslationsEn,
-  initCoreI18n,
-  useCoreTranslation,
-} from './i18n';
+export { coreTranslationsEs, coreTranslationsEn, initCoreI18n, useCoreTranslation } from './i18n';
 export type { CoreTranslationKeys } from './i18n';
 
 // ── Provider ──────────────────────────────────────────────────────────────────
@@ -46,12 +41,7 @@ export { CoreProvider } from './provider';
 export type { CoreProviderProps } from './provider';
 
 // ── HTTP ──────────────────────────────────────────────────────────────────────
-export {
-  CoreHttpClient,
-  CoreHttpProvider,
-  createCoreHttpClient,
-  useCoreHttpClient,
-} from './http';
+export { CoreHttpClient, CoreHttpProvider, createCoreHttpClient, useCoreHttpClient } from './http';
 export type {
   CoreHttpClientConfig,
   CoreHttpError,

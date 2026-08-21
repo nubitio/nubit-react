@@ -32,14 +32,17 @@ export interface DevToolsProviderProps {
 export function DevToolsProvider({ children, enabled = true }: DevToolsProviderProps) {
   const [resources, setResources] = useState<ResourceDiagnostics[]>([]);
 
-  const registerResource = useCallback((diagnostics: ResourceDiagnostics) => {
-    if (!enabled) return;
-    setResources((prev) => {
-      const next = prev.filter((r) => r.apiUrl !== diagnostics.apiUrl);
-      next.push(diagnostics);
-      return next.sort((a, b) => a.apiUrl.localeCompare(b.apiUrl));
-    });
-  }, [enabled]);
+  const registerResource = useCallback(
+    (diagnostics: ResourceDiagnostics) => {
+      if (!enabled) return;
+      setResources((prev) => {
+        const next = prev.filter((r) => r.apiUrl !== diagnostics.apiUrl);
+        next.push(diagnostics);
+        return next.sort((a, b) => a.apiUrl.localeCompare(b.apiUrl));
+      });
+    },
+    [enabled],
+  );
 
   const clearResources = useCallback(() => setResources([]), []);
 

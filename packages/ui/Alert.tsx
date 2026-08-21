@@ -18,10 +18,7 @@ const ICONS: Record<AlertTone, string> = {
 
 export function Alert({ tone = 'info', children, className }: AlertProps) {
   return (
-    <div
-      className={joinClasses('nb-alert', `nb-alert--${tone}`, className)}
-      role="alert"
-    >
+    <div className={joinClasses('nb-alert', `nb-alert--${tone}`, className)} role="alert">
       <i className={`ph ${ICONS[tone]}`} aria-hidden />
       <span>{children}</span>
     </div>

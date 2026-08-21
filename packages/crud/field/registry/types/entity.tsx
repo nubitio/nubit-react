@@ -83,7 +83,16 @@ export const entityTypeModule: FieldTypeModule = {
       onChange={(nextVal) => onSelectChange(nextVal ? String(nextVal) : '')}
     />
   ),
-  DetailCellRender: ({ field, value, errorClass, allowUpdating, httpClient, remoteOptions, getPrependData, onChange }) => (
+  DetailCellRender: ({
+    field,
+    value,
+    errorClass,
+    allowUpdating,
+    httpClient,
+    remoteOptions,
+    getPrependData,
+    onChange,
+  }) => (
     <NativeEntitySelect
       className={`nb-form__control${errorClass}`}
       disabled={!allowUpdating || field.disabled}

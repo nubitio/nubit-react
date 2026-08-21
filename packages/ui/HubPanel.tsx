@@ -14,12 +14,7 @@ export interface HubPanelProps {
 /**
  * Card shell for feature-hub chrome above a CRUD grid (KPIs, scope tabs, filters).
  */
-export function HubPanel({
-  children,
-  variant = 'card',
-  className = '',
-  testId,
-}: HubPanelProps) {
+export function HubPanel({ children, variant = 'card', className = '', testId }: HubPanelProps) {
   const variantClass = variant === 'flush' ? ' nb-hub-panel--flush' : '';
 
   return (

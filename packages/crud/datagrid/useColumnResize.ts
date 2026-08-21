@@ -1,4 +1,10 @@
-import { useRef, type Dispatch, type MouseEvent as ReactMouseEvent, type RefObject, type SetStateAction } from 'react';
+import {
+  useRef,
+  type Dispatch,
+  type MouseEvent as ReactMouseEvent,
+  type RefObject,
+  type SetStateAction,
+} from 'react';
 import { MIN_COL_WIDTH } from './gridLayoutUtils';
 
 interface ColumnResizeOptions {

@@ -34,7 +34,11 @@ export function DashboardLayoutControls({ layout }: { layout: DashboardLayoutSta
         />
       )}
       {layout.editMode && (
-        <IconButton icon="ph ph-arrow-counter-clockwise" label="Reset layout" onClick={layout.resetLayout} />
+        <IconButton
+          icon="ph ph-arrow-counter-clockwise"
+          label="Reset layout"
+          onClick={layout.resetLayout}
+        />
       )}
       <IconButton
         icon={layout.editMode ? 'ph ph-check' : 'ph ph-sliders-horizontal'}

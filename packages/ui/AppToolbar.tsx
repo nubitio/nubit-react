@@ -27,16 +27,10 @@ export const AppToolbar = ({
           {icon && <i className={icon} aria-hidden="true" />}
           <span className="toolbar-header">{title}</span>
         </div>
-        <div className="nb-toolbar__center">
-          {additionalToolbarContent}
-        </div>
+        <div className="nb-toolbar__center">{additionalToolbarContent}</div>
         <div className="nb-toolbar__end">
           {showRefreshButton && (
-            <IconButton
-              icon="ph ph-arrow-clockwise"
-              label={refreshLabel}
-              onClick={onRefresh}
-            />
+            <IconButton icon="ph ph-arrow-clockwise" label={refreshLabel} onClick={onRefresh} />
           )}
         </div>
       </div>

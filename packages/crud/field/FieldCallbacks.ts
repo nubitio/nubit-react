@@ -1,10 +1,7 @@
 import React from 'react';
 import type { DataRecord } from '@nubitio/core';
 
-export interface GridCellContext<
-  TData extends DataRecord = DataRecord,
-  TValue = unknown,
-> {
+export interface GridCellContext<TData extends DataRecord = DataRecord, TValue = unknown> {
   value?: TValue;
   data: TData;
   rowIndex?: number;

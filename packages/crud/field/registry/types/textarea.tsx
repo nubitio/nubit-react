@@ -1,12 +1,7 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { inputValue } from '../../../form/fieldOptionSource';
-import {
-  defaultBuildFilterTerms,
-  getPrimitiveDisplay,
-  KEEP,
-  TEXT_OPERATORS,
-} from '../shared';
+import { defaultBuildFilterTerms, getPrimitiveDisplay, KEEP, TEXT_OPERATORS } from '../shared';
 
 export const textareaTypeModule: FieldTypeModule = {
   controlKind: 'textarea',

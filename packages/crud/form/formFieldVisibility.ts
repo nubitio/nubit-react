@@ -12,10 +12,7 @@ export interface FormFieldVisibilityState {
  * runtime `fieldState.hidden` all drop the control. Used to collapse the
  * empty master column when a document form is detail-only.
  */
-export function isVisibleFormField(
-  field: Field,
-  fieldState?: FormFieldVisibilityState,
-): boolean {
+export function isVisibleFormField(field: Field, fieldState?: FormFieldVisibilityState): boolean {
   if (field.isIdentity || !field.visibleOnForm || field.hidden || fieldState?.hidden) {
     return false;
   }

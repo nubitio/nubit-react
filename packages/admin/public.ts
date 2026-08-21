@@ -16,7 +16,11 @@ export { AdminHeader } from './AdminHeader';
 export type { AdminHeaderProps } from './AdminHeader';
 
 export { AdminSidebarMenu } from './AdminSidebarMenu';
-export type { AdminSidebarMenuProps, AdminMenuSubItem, AdminSidebarMenuSelectEvent } from './AdminSidebarMenu';
+export type {
+  AdminSidebarMenuProps,
+  AdminMenuSubItem,
+  AdminSidebarMenuSelectEvent,
+} from './AdminSidebarMenu';
 
 export { useScreenSize, useScreenSizeClass } from './useScreenSize';
 

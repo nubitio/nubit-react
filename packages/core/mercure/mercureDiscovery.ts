@@ -40,10 +40,7 @@ export function normalizeMercureHubUrl(hubUrl: string): string {
 
   try {
     const parsed = new URL(hubUrl, window.location.origin);
-    if (
-      parsed.pathname === '/.well-known/mercure' &&
-      parsed.origin !== window.location.origin
-    ) {
+    if (parsed.pathname === '/.well-known/mercure' && parsed.origin !== window.location.origin) {
       return `${window.location.origin}${parsed.pathname}`;
     }
     return parsed.toString();

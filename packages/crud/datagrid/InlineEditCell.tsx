@@ -1,7 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import type { CoreHttpClient, DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
-import type { FieldControlCommonProps, FieldTranslator, FormControlContext } from '../field/registry/FieldTypeModule';
+import type {
+  FieldControlCommonProps,
+  FieldTranslator,
+  FormControlContext,
+} from '../field/registry/FieldTypeModule';
 import { getFieldTypeModule } from '../field/registry/registry';
 
 interface InlineEditCellProps {

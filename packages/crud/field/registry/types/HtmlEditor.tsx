@@ -43,14 +43,19 @@ function ToolbarDivider() {
   return <span className="nb-html-editor__divider" aria-hidden />;
 }
 
-export function HtmlEditor({ id, name, value, disabled, readOnly, hasError, onChange }: HtmlEditorProps) {
+export function HtmlEditor({
+  id,
+  name,
+  value,
+  disabled,
+  readOnly,
+  hasError,
+  onChange,
+}: HtmlEditorProps) {
   const editable = !disabled && !readOnly;
 
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link.configure({ openOnClick: false, autolink: true }),
-    ],
+    extensions: [StarterKit, Link.configure({ openOnClick: false, autolink: true })],
     content: value,
     editable,
     onUpdate: ({ editor: e }) => {
@@ -184,10 +189,7 @@ export function HtmlEditor({ id, name, value, disabled, readOnly, hasError, onCh
       {/* Hidden input so the field participates in native form serialization */}
       <input type="hidden" id={id} name={name} value={value} readOnly />
 
-      <EditorContent
-        editor={editor}
-        className="nb-html-editor__content"
-      />
+      <EditorContent editor={editor} className="nb-html-editor__content" />
     </div>
   );
 }

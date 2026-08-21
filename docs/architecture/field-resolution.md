@@ -18,37 +18,37 @@ resource.fieldContract?.source === 'manual'?
 
 Implemented in `packages/hydra/HydraToFieldMapper.ts`:
 
-| Rule | Condition | Result |
-| --- | --- | --- |
-| 1 | `name === 'id'` or `'@id'` | Hidden identity field |
-| 2 | `readable: false` | Skip |
-| 3 | `writeable: false` | `noneField` (display-only) |
-| 3.5 | `enum` on scalar | `enumField` (select) |
-| 3.55 | `x-crud.format: image\|file` | `imageField` / `fileField` |
-| 3.6 | `x-crud.format: currency` | `currencyField` |
-| 4 | `range: boolean` | `switchField` |
-| 5 | `range: dateTime` | `datetimeField` |
-| 6 | `range: integer` | `numberField` (precision 0) |
-| 7 | `range: decimal` | `numberField` |
-| 8 | entity / `Link` | `entityField` |
-| 9 | fallback | `textField` |
+| Rule | Condition                    | Result                      |
+| ---- | ---------------------------- | --------------------------- |
+| 1    | `name === 'id'` or `'@id'`   | Hidden identity field       |
+| 2    | `readable: false`            | Skip                        |
+| 3    | `writeable: false`           | `noneField` (display-only)  |
+| 3.5  | `enum` on scalar             | `enumField` (select)        |
+| 3.55 | `x-crud.format: image\|file` | `imageField` / `fileField`  |
+| 3.6  | `x-crud.format: currency`    | `currencyField`             |
+| 4    | `range: boolean`             | `switchField`               |
+| 5    | `range: dateTime`            | `datetimeField`             |
+| 6    | `range: integer`             | `numberField` (precision 0) |
+| 7    | `range: decimal`             | `numberField`               |
+| 8    | entity / `Link`              | `entityField`               |
+| 9    | fallback                     | `textField`                 |
 
 After mapping, `x-crud` hints override inferred values.
 
 ## x-crud hint reference
 
-| Hint | Effect | Preferred name |
-| --- | --- | --- |
-| `filterable` | Grid filter row | — |
-| `sortable` | Column sort | — |
-| `hidden` | Hide in **grid** | Prefer `hideInGrid` |
-| `hideInGrid` | Hide in **grid** | ✅ |
-| `visibleOnForm` | Show in form (default true) | Prefer `showInForm` |
-| `showInForm` | Show in form | ✅ |
-| `order` | Column order | — |
-| `format` | `currency` / `image` / `file` | — |
-| `readonly` | Read-only in create/edit form | — |
-| `summable` | Grid footer aggregate | — |
+| Hint            | Effect                        | Preferred name      |
+| --------------- | ----------------------------- | ------------------- |
+| `filterable`    | Grid filter row               | —                   |
+| `sortable`      | Column sort                   | —                   |
+| `hidden`        | Hide in **grid**              | Prefer `hideInGrid` |
+| `hideInGrid`    | Hide in **grid**              | ✅                  |
+| `visibleOnForm` | Show in form (default true)   | Prefer `showInForm` |
+| `showInForm`    | Show in form                  | ✅                  |
+| `order`         | Column order                  | —                   |
+| `format`        | `currency` / `image` / `file` | —                   |
+| `readonly`      | Read-only in create/edit form | —                   |
+| `summable`      | Grid footer aggregate         | —                   |
 
 ## Master-detail (embedded lines)
 

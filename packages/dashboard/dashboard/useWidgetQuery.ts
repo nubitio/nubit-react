@@ -23,7 +23,9 @@ export function useWidgetQuery(
   const http = useCoreHttpClient();
   const usePeriod = query?.usePeriod ?? true;
   const periodParams =
-    usePeriod && period ? { [periodParamNames.start]: period.start, [periodParamNames.end]: period.end } : undefined;
+    usePeriod && period
+      ? { [periodParamNames.start]: period.start, [periodParamNames.end]: period.end }
+      : undefined;
   const params = query ? { ...query.params, ...periodParams } : undefined;
 
   const result = useQuery({
@@ -42,6 +44,10 @@ export function useWidgetQuery(
   return {
     data: result.data ?? {},
     loading: result.isLoading,
-    error: result.error ? (result.error instanceof Error ? result.error.message : 'Failed to load widget') : null,
+    error: result.error
+      ? result.error instanceof Error
+        ? result.error.message
+        : 'Failed to load widget'
+      : null,
   };
 }

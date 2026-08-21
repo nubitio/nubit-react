@@ -4,8 +4,12 @@
 // theme-aware and will be the appropriate subtle shade in each mode.
 
 @keyframes nb-skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .nb-skeleton {

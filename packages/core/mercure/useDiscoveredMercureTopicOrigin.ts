@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  getDiscoveredMercureTopicOrigin,
-  onMercureTopicOriginChange,
-} from './mercureDiscovery';
+import { getDiscoveredMercureTopicOrigin, onMercureTopicOriginChange } from './mercureDiscovery';
 
 /**
  * Returns the Mercure topic origin autodiscovered from Hydra `@id` IRIs.

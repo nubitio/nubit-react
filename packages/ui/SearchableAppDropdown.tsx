@@ -25,7 +25,10 @@ function filterOptions(options: AppDropdownOption[], query: string): AppDropdown
   if (!needle) return options;
 
   return options.filter((option) => {
-    const haystack = [option.label, option.selectedLabel, option.value].filter(Boolean).join(' ').toLowerCase();
+    const haystack = [option.label, option.selectedLabel, option.value]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
     return haystack.includes(needle);
   });
 }

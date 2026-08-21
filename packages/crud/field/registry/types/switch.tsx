@@ -1,12 +1,7 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { FilterValueDropdown } from '../filterHelpers';
-import {
-  defaultBuildFilterTerms,
-  EQUALITY_OPERATORS,
-  getEnumDisplayValue,
-  KEEP,
-} from '../shared';
+import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getEnumDisplayValue, KEEP } from '../shared';
 
 export const switchTypeModule: FieldTypeModule = {
   controlKind: 'switch',

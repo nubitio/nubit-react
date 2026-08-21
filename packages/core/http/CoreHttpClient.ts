@@ -114,11 +114,18 @@ function withParams(url: string, params?: DataRecord): string {
   return `${url}${url.includes('?') ? '&' : '?'}${query}`;
 }
 
-function createHttpError(message: string, status?: number, data?: CoreHttpErrorData): CoreHttpError {
+function createHttpError(
+  message: string,
+  status?: number,
+  data?: CoreHttpErrorData,
+): CoreHttpError {
   return Object.assign(new Error(message), { status, data });
 }
 
-async function readResponseBody<T>(response: Response, responseType?: CoreResponseType): Promise<T> {
+async function readResponseBody<T>(
+  response: Response,
+  responseType?: CoreResponseType,
+): Promise<T> {
   if (response.status === 204) {
     return undefined as T;
   }
@@ -136,9 +143,8 @@ export class CoreHttpClient {
   constructor(private readonly config: CoreHttpClientConfig = {}) {}
 
   private headers(extraHeaders?: Record<string, string>): Record<string, string> {
-    const browserLocale = typeof navigator !== 'undefined'
-      ? navigator.language?.split('-')[0]
-      : undefined;
+    const browserLocale =
+      typeof navigator !== 'undefined' ? navigator.language?.split('-')[0] : undefined;
     const locale = this.config.locale ?? browserLocale ?? 'es';
 
     return {
@@ -155,16 +161,23 @@ export class CoreHttpClient {
     const refreshPath = this.config.refreshPath ?? 'auth/refresh';
     const refreshUrl = joinUrl(this.config.baseUrl ?? '/api/', refreshPath);
 
-    this.refreshPromise ??= globalThis.fetch(refreshUrl, {
-      method: 'POST',
-      credentials: this.config.credentials ?? 'include',
-    }).then(async (response) => {
-      if (!response.ok) {
-        throw createHttpError('Session refresh failed', response.status, await this.safeErrorData(response));
-      }
-    }).finally(() => {
-      this.refreshPromise = null;
-    });
+    this.refreshPromise ??= globalThis
+      .fetch(refreshUrl, {
+        method: 'POST',
+        credentials: this.config.credentials ?? 'include',
+      })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw createHttpError(
+            'Session refresh failed',
+            response.status,
+            await this.safeErrorData(response),
+          );
+        }
+      })
+      .finally(() => {
+        this.refreshPromise = null;
+      });
 
     return this.refreshPromise;
   }
@@ -203,7 +216,12 @@ export class CoreHttpClient {
       headers,
       credentials: this.config.credentials ?? 'include',
       signal: config?.signal,
-      body: body === undefined || body === null ? undefined : body instanceof FormData ? body : JSON.stringify(body),
+      body:
+        body === undefined || body === null
+          ? undefined
+          : body instanceof FormData
+            ? body
+            : JSON.stringify(body),
     });
 
     if (response.ok) {
@@ -237,9 +255,10 @@ export class CoreHttpClient {
         await this.performRefresh();
         return this.request<T>(method, url, body, config, false);
       } catch (refreshError) {
-        const unauthorizedError = refreshError instanceof Error
-          ? Object.assign(refreshError, { status: 401 }) as CoreHttpError
-          : error;
+        const unauthorizedError =
+          refreshError instanceof Error
+            ? (Object.assign(refreshError, { status: 401 }) as CoreHttpError)
+            : error;
         this.config.onUnauthorized?.(unauthorizedError);
         throw unauthorizedError;
       }

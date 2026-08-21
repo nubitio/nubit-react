@@ -2,10 +2,7 @@ export { MercureProvider, MercureContext } from './MercureProvider';
 export type { MercureProviderProps } from './MercureProvider';
 export { useMercureHub } from './useMercureHub';
 export { useMercureSubscription } from './useMercureSubscription';
-export {
-  buildMercureCollectionTopic,
-  resolveMercureTopicOrigin,
-} from './mercureTopics';
+export { buildMercureCollectionTopic, resolveMercureTopicOrigin } from './mercureTopics';
 export {
   discoverMercureFromResponse,
   extractMercureHubUrl,

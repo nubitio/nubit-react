@@ -917,7 +917,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
   const renderRowMenuContent = () => {
     if (!openRowMenu) return null;
-    return renderRowMenuActions(openRowMenu.actions, toolbarPermissions, () => setOpenRowMenu(null));
+    return renderRowMenuActions(openRowMenu.actions, toolbarPermissions, () =>
+      setOpenRowMenu(null),
+    );
   };
 
   const pageStart = totalCount > 0 ? page * pageSize + 1 : 0;

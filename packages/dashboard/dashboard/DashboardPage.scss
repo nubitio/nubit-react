@@ -49,7 +49,9 @@
 }
 
 @keyframes nb-dashboard-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .nb-dashboard-section {
@@ -485,10 +487,18 @@
     font-size: var(--font-size-xs);
   }
 
-  &--success &__fill { background: var(--success-color); }
-  &--warning &__fill { background: var(--warning-color); }
-  &--danger &__fill { background: var(--error-color); }
-  &--info &__fill { background: var(--info-color, var(--accent-color)); }
+  &--success &__fill {
+    background: var(--success-color);
+  }
+  &--warning &__fill {
+    background: var(--warning-color);
+  }
+  &--danger &__fill {
+    background: var(--error-color);
+  }
+  &--info &__fill {
+    background: var(--info-color, var(--accent-color));
+  }
 }
 
 .nb-dashboard-table-card {

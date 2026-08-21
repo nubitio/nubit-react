@@ -156,7 +156,11 @@ export interface FieldTypeModule {
    * (see `normalizeFormData`). When omitted, object/array values are
    * stripped from the row and scalars pass through untouched.
    */
-  normalizeFormValue?(field: Field, value: unknown, ctx: NormalizeFieldContext): SerializedFieldValue;
+  normalizeFormValue?(
+    field: Field,
+    value: unknown,
+    ctx: NormalizeFieldContext,
+  ): SerializedFieldValue;
   /** Per-type detail-row validation beyond the generic required-empty check; valid when omitted. */
   validateDetailValue?(field: Field, value: unknown): boolean;
   /** Operator preselected in the grid filter row (a Field's own `selectedFilterOperation` wins). */
@@ -168,7 +172,11 @@ export interface FieldTypeModule {
   /** Plain-text representation of a row value for grid cells and tooltips. */
   cellText(field: Field, value: unknown, ctx: CellTextContext): string;
   /** Transforms a raw main-form value into its wire format. */
-  serializeFormValue(field: Field, value: unknown, ctx: SerializeFieldContext): SerializedFieldValue;
+  serializeFormValue(
+    field: Field,
+    value: unknown,
+    ctx: SerializeFieldContext,
+  ): SerializedFieldValue;
   /** Transforms a raw detail-grid cell value into its wire format. */
   serializeDetailValue(field: Field, value: unknown, adapter: BackendAdapter): SerializedFieldValue;
   /** True when the control renders its own label (the form omits the outer one). */

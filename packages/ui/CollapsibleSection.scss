@@ -26,9 +26,13 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     text-align: left;
-    transition: background var(--transition-base), color var(--transition-base);
+    transition:
+      background var(--transition-base),
+      color var(--transition-base);
 
-    i { flex-shrink: 0; }
+    i {
+      flex-shrink: 0;
+    }
 
     &:hover {
       background: var(--surface-2);

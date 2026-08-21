@@ -28,7 +28,9 @@
 }
 
 .nb-form__lookup.has-value .nb-form__control {
-  padding-right: calc(var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1));
+  padding-right: calc(
+    var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1)
+  );
 }
 
 .nb-form__lookup-toggle,

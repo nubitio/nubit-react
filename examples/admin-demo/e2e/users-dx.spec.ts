@@ -4,7 +4,9 @@ test.describe('Users DevExtreme page', () => {
   test('grid loads user rows and hides the DevExtreme load panel', async ({ page }) => {
     await page.goto('/users-dx', { waitUntil: 'networkidle' });
 
-    const firstUserRow = page.locator('.dx-datagrid-rowsview .dx-data-row').filter({ hasText: 'Leanne Graham' });
+    const firstUserRow = page
+      .locator('.dx-datagrid-rowsview .dx-data-row')
+      .filter({ hasText: 'Leanne Graham' });
     await expect(firstUserRow).toBeVisible();
 
     await expect(page.locator('.dx-datagrid-filter-row')).toBeVisible();
@@ -21,7 +23,9 @@ test.describe('Users DevExtreme page', () => {
       page.locator('.dx-datagrid-rowsview .dx-data-row').filter({ hasText: 'Leanne Graham' }),
     ).toBeVisible();
 
-    const row = page.locator('.dx-datagrid-rowsview .dx-data-row').filter({ hasText: 'Leanne Graham' });
+    const row = page
+      .locator('.dx-datagrid-rowsview .dx-data-row')
+      .filter({ hasText: 'Leanne Graham' });
     await row.getByRole('button', { name: /delete/i }).click();
 
     const dialog = page.getByRole('alertdialog');

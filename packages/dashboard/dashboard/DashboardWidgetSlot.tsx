@@ -34,7 +34,9 @@ export function DashboardWidgetSlot({
 
   const body = (
     <>
-      {widgetQuery?.error && <div className="nb-dashboard-widget-slot__error">{widgetQuery.error}</div>}
+      {widgetQuery?.error && (
+        <div className="nb-dashboard-widget-slot__error">{widgetQuery.error}</div>
+      )}
       <WidgetRenderer widget={widget} data={effectiveData} loading={effectiveLoading} />
     </>
   );
@@ -46,10 +48,20 @@ export function DashboardWidgetSlot({
   return (
     <div className="nb-dashboard-widget-slot">
       <div className="nb-dashboard-widget-slot__controls">
-        <button type="button" className="nb-dashboard-widget-slot__btn" aria-label={`Move ${widget.title} earlier`} onClick={onMoveUp}>
+        <button
+          type="button"
+          className="nb-dashboard-widget-slot__btn"
+          aria-label={`Move ${widget.title} earlier`}
+          onClick={onMoveUp}
+        >
           <i className="ph ph-caret-up" aria-hidden="true" />
         </button>
-        <button type="button" className="nb-dashboard-widget-slot__btn" aria-label={`Move ${widget.title} later`} onClick={onMoveDown}>
+        <button
+          type="button"
+          className="nb-dashboard-widget-slot__btn"
+          aria-label={`Move ${widget.title} later`}
+          onClick={onMoveDown}
+        >
           <i className="ph ph-caret-down" aria-hidden="true" />
         </button>
         <button

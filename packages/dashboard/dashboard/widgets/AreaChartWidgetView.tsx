@@ -28,7 +28,11 @@ export function AreaChartWidgetView({ widget, data, loading }: Props) {
   return (
     <StatCard
       title={widget.title}
-      headerExtra={widget.subtitle ? <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span> : undefined}
+      headerExtra={
+        widget.subtitle ? (
+          <span className="nb-dashboard-widget__subtitle">{widget.subtitle}</span>
+        ) : undefined
+      }
       menuVisible={widget.menuVisible}
       isLoading={loading}
       className="nb-dashboard-chart-card"
@@ -41,9 +45,17 @@ export function AreaChartWidgetView({ widget, data, loading }: Props) {
             <AreaChart data={rows} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 {widget.series.map((series, index) => {
-                  const color = series.color ?? DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length];
+                  const color =
+                    series.color ?? DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length];
                   return (
-                    <linearGradient key={series.key} id={`nb-area-${widget.id}-${series.key}`} x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      key={series.key}
+                      id={`nb-area-${widget.id}-${series.key}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor={color} stopOpacity={0.35} />
                       <stop offset="95%" stopColor={color} stopOpacity={0.02} />
                     </linearGradient>
@@ -51,7 +63,11 @@ export function AreaChartWidgetView({ widget, data, loading }: Props) {
                 })}
               </defs>
               {widget.showGrid !== false && (
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--border-color)"
+                  vertical={false}
+                />
               )}
               <XAxis
                 dataKey={widget.xKey}
@@ -71,7 +87,8 @@ export function AreaChartWidgetView({ widget, data, loading }: Props) {
               />
               {widget.showLegend && <Legend wrapperStyle={{ fontSize: 12 }} />}
               {widget.series.map((series, index) => {
-                const color = series.color ?? DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length];
+                const color =
+                  series.color ?? DEFAULT_CHART_COLORS[index % DEFAULT_CHART_COLORS.length];
                 return (
                   <Area
                     key={series.key}

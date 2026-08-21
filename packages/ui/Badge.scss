@@ -12,12 +12,12 @@
 .nb-badge {
   align-items: center;
   border: 1px solid transparent;
-  border-radius: var(--radius-xs);   // 2px — rectangular, reads as a state indicator
+  border-radius: var(--radius-xs); // 2px — rectangular, reads as a state indicator
   display: inline-flex;
-  font-size: var(--font-size-xxs);   // 11px — compact for dense tables
+  font-size: var(--font-size-xxs); // 11px — compact for dense tables
   font-weight: var(--font-weight-semibold);
   gap: var(--space-1);
-  letter-spacing: 0.05em;            // essential for legibility of uppercase at 11px
+  letter-spacing: 0.05em; // essential for legibility of uppercase at 11px
   line-height: 1.2;
   min-height: 20px;
   padding: 2px 6px;
@@ -34,8 +34,8 @@
   // ── Pill — for tags, categories, non-state labels ──────────────────────────
   // Override border-radius only. Keep all other rules intact.
   &--pill {
-    border-radius: var(--radius-xl);   // 12px
-    letter-spacing: 0.02em;            // less tracking needed for mixed-case tags
+    border-radius: var(--radius-xl); // 12px
+    letter-spacing: 0.02em; // less tracking needed for mixed-case tags
     text-transform: none;
   }
 
@@ -60,19 +60,28 @@
 
   &--success {
     background: var(--status-success-bg, color-mix(in srgb, var(--success-color) 15%, transparent));
-    border-color: var(--status-success-border, color-mix(in srgb, var(--success-color) 30%, transparent));
+    border-color: var(
+      --status-success-border,
+      color-mix(in srgb, var(--success-color) 30%, transparent)
+    );
     color: var(--status-success-text, var(--success-color));
   }
 
   &--danger {
     background: var(--status-danger-bg, color-mix(in srgb, var(--error-color) 15%, transparent));
-    border-color: var(--status-danger-border, color-mix(in srgb, var(--error-color) 30%, transparent));
+    border-color: var(
+      --status-danger-border,
+      color-mix(in srgb, var(--error-color) 30%, transparent)
+    );
     color: var(--status-danger-text, var(--error-color));
   }
 
   &--warning {
     background: var(--status-warning-bg, color-mix(in srgb, var(--warning-color) 18%, transparent));
-    border-color: var(--status-warning-border, color-mix(in srgb, var(--warning-color) 40%, transparent));
+    border-color: var(
+      --status-warning-border,
+      color-mix(in srgb, var(--warning-color) 40%, transparent)
+    );
     color: var(--status-warning-text, color-mix(in srgb, var(--warning-color) 90%, #000));
   }
 
@@ -101,27 +110,71 @@
   }
 
   // Dot variants — explicit selectors because & mid-selector is invalid in Sass
-  &--dot.nb-badge--primary   { background: var(--accent-color); }
-  &--dot.nb-badge--success   { background: var(--success-color); }
-  &--dot.nb-badge--danger    { background: var(--error-color); }
-  &--dot.nb-badge--warning   { background: var(--warning-color); }
-  &--dot.nb-badge--info      { background: var(--info-color); }
-  &--dot.nb-badge--secondary { background: var(--text-secondary); }
+  &--dot.nb-badge--primary {
+    background: var(--accent-color);
+  }
+  &--dot.nb-badge--success {
+    background: var(--success-color);
+  }
+  &--dot.nb-badge--danger {
+    background: var(--error-color);
+  }
+  &--dot.nb-badge--warning {
+    background: var(--warning-color);
+  }
+  &--dot.nb-badge--info {
+    background: var(--info-color);
+  }
+  &--dot.nb-badge--secondary {
+    background: var(--text-secondary);
+  }
 
   // ── Outlined variant — transparent bg, colored border + text ───────────────
   &--outlined {
-    &.nb-badge--primary   { background: transparent; border-color: var(--accent-color);   color: var(--accent-color); }
-    &.nb-badge--success   { background: transparent; border-color: var(--success-color);  color: var(--success-color); }
-    &.nb-badge--danger    { background: transparent; border-color: var(--error-color);    color: var(--error-color); }
-    &.nb-badge--warning   { background: transparent; border-color: var(--warning-color);  color: color-mix(in srgb, var(--warning-color) 90%, #000); }
-    &.nb-badge--info      { background: transparent; border-color: var(--info-color);     color: var(--info-color); }
-    &.nb-badge--secondary { background: transparent; border-color: var(--text-secondary); color: var(--text-secondary); }
-    &.nb-badge--light     { background: transparent; border-color: var(--border-color);   color: var(--text-primary); }
-    &.nb-badge--dark      { background: transparent; border-color: var(--text-primary);   color: var(--text-primary); }
+    &.nb-badge--primary {
+      background: transparent;
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+    &.nb-badge--success {
+      background: transparent;
+      border-color: var(--success-color);
+      color: var(--success-color);
+    }
+    &.nb-badge--danger {
+      background: transparent;
+      border-color: var(--error-color);
+      color: var(--error-color);
+    }
+    &.nb-badge--warning {
+      background: transparent;
+      border-color: var(--warning-color);
+      color: color-mix(in srgb, var(--warning-color) 90%, #000);
+    }
+    &.nb-badge--info {
+      background: transparent;
+      border-color: var(--info-color);
+      color: var(--info-color);
+    }
+    &.nb-badge--secondary {
+      background: transparent;
+      border-color: var(--text-secondary);
+      color: var(--text-secondary);
+    }
+    &.nb-badge--light {
+      background: transparent;
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+    &.nb-badge--dark {
+      background: transparent;
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+    }
   }
 }
 
-html[data-density="compact"] .nb-badge {
+html[data-density='compact'] .nb-badge {
   font-size: 10px;
   min-height: 16px;
   padding: 1px var(--space-1);

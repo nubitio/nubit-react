@@ -53,7 +53,6 @@ export function usePermissions(
   // on every render (e.g. from a default parameter) does not break memoization.
   const opsKey = supportedOperations.slice().sort().join(',');
 
-
   return useMemo(() => {
     const p = resource.permissions;
     const inferred = fromOperations(supportedOperations);

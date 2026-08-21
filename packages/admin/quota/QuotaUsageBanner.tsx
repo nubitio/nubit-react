@@ -62,8 +62,6 @@ export function QuotaUsageBanner({
   );
 }
 
-export function quotaUsageAboveGrid(
-  banner: ReactNode,
-): () => ReactNode {
+export function quotaUsageAboveGrid(banner: ReactNode): () => ReactNode {
   return () => banner;
 }

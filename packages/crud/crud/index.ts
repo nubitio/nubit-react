@@ -28,11 +28,7 @@ export type {
   ResourceFormDetail,
   ResourceEmptyState,
 } from './ResourceConfig';
-export {
-  defineFieldContract,
-  defineFields,
-  validateFieldContract,
-} from './fieldContract';
+export { defineFieldContract, defineFields, validateFieldContract } from './fieldContract';
 export type {
   SmartCrudFieldContract,
   SmartCrudFieldOperation,
@@ -53,6 +49,13 @@ export { AuditTrailPanel } from './AuditTrailPanel';
 export type { AuditTrailPanelProps } from './AuditTrailPanel';
 export { createCrudEvents } from '@nubitio/core';
 export { DevToolsProvider, useDevTools } from '../devtools/DevToolsContext';
-export type { DevToolsContextValue, ResourceDiagnostics, FieldResolutionSource } from '../devtools/DevToolsContext';
-export type { FormDetailDiagnostics, FormDetailFieldSource } from '../devtools/formDetailDiagnostics';
+export type {
+  DevToolsContextValue,
+  ResourceDiagnostics,
+  FieldResolutionSource,
+} from '../devtools/DevToolsContext';
+export type {
+  FormDetailDiagnostics,
+  FormDetailFieldSource,
+} from '../devtools/formDetailDiagnostics';
 export { isDevEnvironment } from './devHint';

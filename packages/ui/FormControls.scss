@@ -48,7 +48,7 @@
 
 .nb-input {
   appearance: none;
-  background: var(--surface-1);   // clean white — Fluent pattern (not gray fill)
+  background: var(--surface-1); // clean white — Fluent pattern (not gray fill)
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md); // 6px — unified with buttons
   box-sizing: border-box;
@@ -56,7 +56,7 @@
   display: block;
   font: inherit;
   font-size: var(--font-size-md);
-  min-height: var(--control-height-form);   // 34px (was 40px — too tall for ERP)
+  min-height: var(--control-height-form); // 34px (was 40px — too tall for ERP)
   outline: none;
   padding: 0 var(--space-3);
   transition:

@@ -35,20 +35,16 @@ export function ConfirmDialog({
       onClose={onCancel}
       maxWidth={420}
       role="alertdialog"
-      footer={(
+      footer={
         <>
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            autoFocus
-          >
+          <Button variant="secondary" onClick={onCancel} autoFocus>
             {resolvedCancelLabel}
           </Button>
           <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
             {resolvedConfirmLabel}
           </Button>
         </>
-      )}
+      }
     >
       <p className="nb-confirm-dialog__message">{message}</p>
     </AppDialog>

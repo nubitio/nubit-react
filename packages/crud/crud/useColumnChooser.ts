@@ -67,7 +67,8 @@ function resolveChooserFields(resource: ResourceConfig, fields: Field[]): Field[
 function defaultColumnsFor(resource: ResourceConfig, allNames: string[]): string[] {
   if (resource.columnPresets?.length) {
     const preset =
-      resource.columnPresets.find((p) => p.key === resource.defaultPreset) ?? resource.columnPresets[0];
+      resource.columnPresets.find((p) => p.key === resource.defaultPreset) ??
+      resource.columnPresets[0];
     if (preset) return preset.columns.filter((name) => allNames.includes(name));
   }
   return allNames;
@@ -94,7 +95,10 @@ export function useColumnChooser(resource: ResourceConfig, fields: Field[]): Col
         } else {
           next.add(name);
         }
-        writeToStorage(resource.id, allNames.filter((n) => next.has(n)));
+        writeToStorage(
+          resource.id,
+          allNames.filter((n) => next.has(n)),
+        );
         return next;
       });
     },
@@ -112,7 +116,10 @@ export function useColumnChooser(resource: ResourceConfig, fields: Field[]): Col
   }, [defaultNames, resource.id]);
 
   // Preserve field order (Set insertion order can't be relied on across toggles).
-  const visibleColumns = useMemo(() => allNames.filter((name) => visible.has(name)), [allNames, visible]);
+  const visibleColumns = useMemo(
+    () => allNames.filter((name) => visible.has(name)),
+    [allNames, visible],
+  );
 
   const isCustomized =
     visibleColumns.length !== defaultNames.length ||

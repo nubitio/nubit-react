@@ -23,9 +23,9 @@ npm install @nubitio/crud @nubitio/core @nubitio/ui
 ## Setup
 
 ```ts
-import '@nubitio/ui/tokens.css';   // design tokens
-import '@nubitio/ui/style.css';    // UI primitives styles
-import '@nubitio/crud/style.css';  // grid + form styles
+import '@nubitio/ui/tokens.css'; // design tokens
+import '@nubitio/ui/style.css'; // UI primitives styles
+import '@nubitio/crud/style.css'; // grid + form styles
 ```
 
 ## Quick start
@@ -51,31 +51,35 @@ export function ProductsPage() {
 ## Key exports
 
 ### Engine
-| Export | Description |
-|--------|-------------|
+
+| Export           | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
 | `SchemaCrudPage` | Main component — resolves schema, applies rules, renders grid + form |
-| `CrudPage` | Lower-level page if you manage fields manually |
-| `defineResource` | Create a typed `ResourceConfig` for a REST/Hydra resource |
+| `CrudPage`       | Lower-level page if you manage fields manually                       |
+| `defineResource` | Create a typed `ResourceConfig` for a REST/Hydra resource            |
 
 ### Field DSL
+
 `textField`, `numberField`, `dateField`, `datetimeField`, `entityField`, `enumField`, `selectField`, `checkboxField`, `switchField`, `currencyField`, `imageField`, `textareaField`, `passwordField`
 
 Each returns a chainable `FieldBuilder` with `.label()`, `.required()`, `.visibleWhen()`, `.disabledWhen()`, `.onChange()`, `.formatter()`, and more.
 
 ### Backend adapters
-| Export | Description |
-|--------|-------------|
-| `HydraAdapter` | API Platform / JSON-LD + Hydra (default) |
-| `RestAdapter` | Plain REST with `{ data, total }` or array responses |
-| `BackendAdapter` | Interface to implement a custom adapter |
+
+| Export           | Description                                          |
+| ---------------- | ---------------------------------------------------- |
+| `HydraAdapter`   | API Platform / JSON-LD + Hydra (default)             |
+| `RestAdapter`    | Plain REST with `{ data, total }` or array responses |
+| `BackendAdapter` | Interface to implement a custom adapter              |
 
 ### Extension points
-| Export | Description |
-|--------|-------------|
-| `ResourceSchemaProvider` | Supply a custom field schema for a resource |
-| `ResourceStoreProvider` | Supply a custom data store factory |
+
+| Export                   | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| `ResourceSchemaProvider` | Supply a custom field schema for a resource         |
+| `ResourceStoreProvider`  | Supply a custom data store factory                  |
 | `SmartCrudRolesProvider` | Inject RBAC role claims for field-level permissions |
-| `defineFieldContract` | Type-safe field contract for `SchemaCrudPage` |
+| `defineFieldContract`    | Type-safe field contract for `SchemaCrudPage`       |
 
 ## Grid export
 

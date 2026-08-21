@@ -85,7 +85,7 @@
   }
 }
 
-html[data-density="compact"] .nb-context-menu {
+html[data-density='compact'] .nb-context-menu {
   &__dropdown {
     min-width: 170px;
     padding: var(--space-1);

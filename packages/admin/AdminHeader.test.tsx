@@ -139,20 +139,12 @@ describe('AdminHeader badge', () => {
 
 describe('AdminHeader user menu', () => {
   it('renders the user menu trigger when renderUserMenu is provided', () => {
-    render(
-      <AdminHeader
-        renderUserMenu={() => <div>user menu content</div>}
-      />,
-    );
+    render(<AdminHeader renderUserMenu={() => <div>user menu content</div>} />);
     expect(screen.getByLabelText('User menu')).toBeDefined();
   });
 
   it('opens user menu on click', () => {
-    render(
-      <AdminHeader
-        renderUserMenu={() => <div>user menu content</div>}
-      />,
-    );
+    render(<AdminHeader renderUserMenu={() => <div>user menu content</div>} />);
     fireEvent.click(screen.getByLabelText('User menu'));
     expect(screen.getByText('user menu content')).toBeDefined();
   });

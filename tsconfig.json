@@ -24,6 +24,12 @@
       "@nubitio/devextreme": ["packages/devextreme/public.ts"]
     }
   },
-  "include": ["packages/**/*.ts", "packages/**/*.tsx", "global.d.ts", "vitest.config.ts", "tsdown.config.ts"],
+  "include": [
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "global.d.ts",
+    "vitest.config.ts",
+    "tsdown.config.ts"
+  ],
   "exclude": ["**/dist/**", "**/node_modules/**", "examples/**"]
 }

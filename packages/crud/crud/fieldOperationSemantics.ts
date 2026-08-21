@@ -172,17 +172,24 @@ function validateResolvedSemantics(
   return issues;
 }
 
-export function normalizeFieldOperationSemantics(
+/**
+ * Folds a behavior into per-operation semantics, recording every contradiction
+ * it meets rather than stopping at the first.
+ *
+ * The two exported entry points differ only in what they do with the issues —
+ * one throws, the other reports — so the fold itself lives here once.
+ */
+function buildSemantics(
   behavior: SmartCrudFieldOperationBehavior | undefined,
-  owner = 'Field operation semantics',
-): SmartCrudNormalizedFieldOperationSemantics {
+  owner: string,
+): { semantics: SmartCrudPartialOperationSemantics; issues: string[] } {
   const semantics = createEmptySemantics();
+  const issues: string[] = [];
 
   if (!behavior) {
-    return semantics;
+    return { semantics, issues };
   }
 
-  const issues: string[] = [];
   const allowedOperations = normalizeOnly(behavior.only);
 
   if (allowedOperations) {
@@ -209,6 +216,15 @@ export function normalizeFieldOperationSemantics(
   applyStateInput(semantics, issues, owner, 'edit', behavior.edit);
 
   issues.push(...validateResolvedSemantics(owner, semantics));
+
+  return { semantics, issues };
+}
+
+export function normalizeFieldOperationSemantics(
+  behavior: SmartCrudFieldOperationBehavior | undefined,
+  owner = 'Field operation semantics',
+): SmartCrudNormalizedFieldOperationSemantics {
+  const { semantics, issues } = buildSemantics(behavior, owner);
 
   if (issues.length > 0) {
     throw new SmartCrudFieldOperationSemanticsError(
@@ -222,44 +238,14 @@ export function normalizeFieldOperationSemantics(
 
 /**
  * Validates field operation semantics and returns any issues found,
- * without throwing. Uses the same validation logic as
- * `normalizeFieldOperationSemantics` but collects issues instead of
- * throwing `SmartCrudFieldOperationSemanticsError`.
+ * without throwing — the reporting counterpart of
+ * `normalizeFieldOperationSemantics`, which throws on the same input.
  */
 export function collectOperationSemanticsIssues(
   owner: string,
   behavior: SmartCrudFieldOperationBehavior | undefined,
 ): string[] {
-  if (!behavior) return [];
-
-  const semantics = createEmptySemantics();
-  const issues: string[] = [];
-  const allowedOperations = normalizeOnly(behavior.only);
-
-  if (allowedOperations) {
-    const allowedOperationSet = new Set(allowedOperations);
-    OPERATIONS.forEach((operation) => {
-      applyProperty(
-        semantics,
-        issues,
-        owner,
-        operation,
-        'visible',
-        allowedOperationSet.has(operation),
-        'only',
-      );
-    });
-  }
-
-  applyFlagInput(semantics, issues, owner, 'visible', behavior.visible);
-  applyFlagInput(semantics, issues, owner, 'required', behavior.required);
-  applyFlagInput(semantics, issues, owner, 'readonly', behavior.readonly);
-  applyFlagInput(semantics, issues, owner, 'disabled', behavior.disabled);
-  applyStateInput(semantics, issues, owner, 'create', behavior.create);
-  applyStateInput(semantics, issues, owner, 'edit', behavior.edit);
-
-  issues.push(...validateResolvedSemantics(owner, semantics));
-  return issues;
+  return buildSemantics(behavior, owner).issues;
 }
 
 function resolveBaseVisibility(field: Partial<SmartCrudFieldOperationDefaults>): boolean {

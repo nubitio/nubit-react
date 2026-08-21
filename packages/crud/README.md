@@ -76,3 +76,32 @@ Each returns a chainable `FieldBuilder` with `.label()`, `.required()`, `.visibl
 | `ResourceStoreProvider` | Supply a custom data store factory |
 | `SmartCrudRolesProvider` | Inject RBAC role claims for field-level permissions |
 | `defineFieldContract` | Type-safe field contract for `SchemaCrudPage` |
+
+## Grid export
+
+```tsx
+defineResource('/api/products', { permissions: { canExport: true } });
+```
+
+That renders an **Export** button in the grid's utility toolbar. Pressing it
+exports every row matching the grid's **current filters and sort with
+pagination dropped** — not the page on screen — and saves the file under the
+name the server sent in `Content-Disposition`.
+
+The button only appears when the resource's store implements the optional
+`ResourceStore.export(options): Promise<ResourceExportResult>`. `HydraAdapter`
+does (it requests the `xlsx` format as a blob, which
+`nubitio/admin-bundle`'s `nubit_admin.export.enabled` serves for every
+resource); `RestAdapter` does not, so `canExport: true` against a plain REST
+backend is inert by design rather than rendering a button that 404s.
+
+A failed export surfaces in the grid's own error row (`grid.exportError`) and
+logs the underlying cause to the console. To back a custom backend, implement
+`export()` on your own store:
+
+```ts
+const store: ResourceStore = {
+  load: (options) => /* … */,
+  export: async (options) => ({ blob, filename: 'products.xlsx' }),
+};
+```

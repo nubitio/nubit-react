@@ -254,6 +254,7 @@ export type {
 export { useResourceStoreFactory } from './data/ResourceStore';
 export type { FormDataRecord } from './form/FormDataSnapshot';
 export type {
+  ResourceExportResult,
   ResourceFilterDescriptor,
   ResourceFilterRule,
   ResourceLoadOption,

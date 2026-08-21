@@ -69,6 +69,7 @@ import {
   SelectionActionsMenu,
 } from './gridToolbar';
 import { useGridDataLoader } from './useGridDataLoader';
+import { useGridExport } from './useGridExport';
 import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
 import { useAutoColumnWidths } from './useAutoColumnWidths';
 import { useGridSelection } from './useGridSelection';
@@ -182,6 +183,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     data: options.data,
     suppliedGridSummary: options.gridSummary,
     onContentReady: notifyContentReady,
+  });
+
+  const { isExporting, runExport, canExport, exportError, clearExportError } = useGridExport({
+    source,
+    fields: options.fields,
+    filters,
+    filterOperators,
+    sort,
   });
 
   const notifySelectionChanged = useCallback(
@@ -870,7 +879,20 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const showFab = Boolean(
     isMobile && isFullMode && options.allowAdd && (options.toolbarVisible ?? true),
   );
-  const toolbar = buildToolbar(options, t, onAddClick, !showFab);
+  const toolbar = buildToolbar(options, t, onAddClick, !showFab, {
+    onClick: runExport,
+    canExport,
+    isExporting,
+  });
+  // A failed export reuses the grid's own error row rather than inventing a
+  // second surface; a caller-supplied errorMessage still wins, since it is
+  // about the data the user is looking at.
+  const errorRowMessage = options.errorMessage || (exportError ? t('grid.exportError') : null);
+  const dismissErrorRow = options.errorMessage
+    ? options.onDismissError
+    : exportError
+      ? clearExportError
+      : undefined;
   const selectionActions = useMemo(() => {
     const bulkSelection =
       options.bulkActions?.map((action, index) => ({
@@ -1337,18 +1359,18 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                       {hasRowActions && <td className="nb-datagrid__actions-cell" />}
                     </tr>
                   )}
-                  {options.errorMessage && (
+                  {errorRowMessage && (
                     <tr className="nb-datagrid__error-row">
                       <td colSpan={colSpan}>
                         <div className="nb-datagrid__error-message" role="alert">
                           <i className="ph ph-warning-circle" aria-hidden="true" />
-                          <span>{options.errorMessage}</span>
-                          {options.onDismissError && (
+                          <span>{errorRowMessage}</span>
+                          {dismissErrorRow && (
                             <button
                               type="button"
                               className="nb-datagrid__error-close"
                               aria-label={t('dialog.close')}
-                              onClick={options.onDismissError}
+                              onClick={dismissErrorRow}
                             >
                               <i className="ph ph-x" aria-hidden="true" />
                             </button>

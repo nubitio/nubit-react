@@ -35,9 +35,16 @@ export interface ResourceStoreOptions {
   httpClient?: CoreHttpClient;
 }
 
+export interface ResourceExportResult {
+  blob: Blob;
+  filename: string;
+}
+
 export interface ResourceStore<TRecord extends DataRecord = DataRecord> {
   load(options: ResourceLoadOptions): Promise<ResourceLoadResult<TRecord>>;
   byKey?(key: unknown): Promise<TRecord | null>;
+  /** Exports every row matching `options` (filters/sort, no pagination) as a spreadsheet. */
+  export?(options: ResourceLoadOptions): Promise<ResourceExportResult>;
 }
 
 export type ResourceStoreFactory = (options: ResourceStoreOptions) => ResourceStore;

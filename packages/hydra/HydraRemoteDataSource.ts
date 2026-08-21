@@ -1,6 +1,7 @@
 import { createCoreHttpClient, type CoreHttpClient, type GridData } from '@nubitio/core';
 import type { DataRecord } from '@nubitio/core';
 import type {
+  ResourceExportResult,
   ResourceFilterDescriptor,
   ResourceFilterRule,
   ResourceLoadOption,
@@ -10,6 +11,37 @@ import type {
   ResourceStoreFactory,
   ResourceStoreOptions,
 } from '@nubitio/crud';
+
+const XLSX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+// RFC 6266: `filename*=UTF-8''…` (percent-encoded, takes precedence when both
+// forms are present) and the plain `filename="…"`. Matching a bare `filename`
+// prefix would capture the `*=UTF-8''` form's encoding preamble as the name.
+const CONTENT_DISPOSITION_FILENAME_EXT = /filename\*\s*=\s*[^']*'[^']*'([^;]+)/i;
+const CONTENT_DISPOSITION_FILENAME = /filename\s*=\s*"([^"]+)"|filename\s*=\s*([^;]+)/i;
+
+function parseContentDispositionFilename(headers: Headers, fallback: string): string {
+  const raw = headers.get('content-disposition');
+  if (!raw) return fallback;
+
+  const extended = CONTENT_DISPOSITION_FILENAME_EXT.exec(raw)?.[1];
+  if (extended) {
+    try {
+      return sanitizeFilename(decodeURIComponent(extended.trim())) ?? fallback;
+    } catch {
+      // Malformed percent-encoding — fall through to the plain form.
+    }
+  }
+
+  const match = CONTENT_DISPOSITION_FILENAME.exec(raw);
+  const plain = match?.[1] ?? match?.[2];
+  return (plain && sanitizeFilename(plain.trim())) || fallback;
+}
+
+/** The server names the file; never let that name escape the download directory. */
+function sanitizeFilename(value: string): string | null {
+  const name = value.replace(/[/\\]/g, '_').trim();
+  return name === '' || name === '.' || name === '..' ? null : name;
+}
 
 export type RemoteFilterDescriptor = ResourceFilterDescriptor;
 export type RemoteSortDescriptor = ResourceSortDescriptor;
@@ -292,6 +324,23 @@ export class HydraRemoteDataSource implements ResourceStore {
     }
 
     return this.fetchAll(preparedOptions);
+  }
+
+  async export(loadOptions: ResourceLoadOptions): Promise<ResourceExportResult> {
+    const preparedOptions = this.prepareLoadOptions({ ...loadOptions, skip: undefined, take: undefined });
+    delete preparedOptions.itemsPerPage;
+    delete preparedOptions.page;
+
+    const response = await this.httpClient.get<Blob>(this.config.url, {
+      params: stripMergeOnlyParams(preparedOptions),
+      headers: { Accept: XLSX_MIME_TYPE },
+      responseType: 'blob',
+    });
+
+    return {
+      blob: response.data,
+      filename: parseContentDispositionFilename(response.headers, 'export.xlsx'),
+    };
   }
 
   async byKey(key: unknown): Promise<DataRecord | null> {

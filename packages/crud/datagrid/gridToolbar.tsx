@@ -220,6 +220,7 @@ export function buildToolbar(
   t: (key: keyof CoreTranslationKeys, options?: DataRecord) => string,
   onAddClick: () => void,
   includeAddAction = true,
+  exportAction?: { onClick: () => void; canExport: boolean; isExporting: boolean },
 ): ResourceToolbarItems {
   return {
     primary: [
@@ -237,7 +238,19 @@ export function buildToolbar(
       ...(options.toolbar?.primary ?? []),
     ],
     selection: options.toolbar?.selection,
-    utility: options.toolbar?.utility,
+    utility: [
+      ...(options.allowExport && exportAction?.canExport
+        ? [
+            {
+              text: t('grid.buttonExport'),
+              icon: 'ph-download-simple',
+              onClick: exportAction.onClick,
+              disabled: exportAction.isExporting,
+            },
+          ]
+        : []),
+      ...(options.toolbar?.utility ?? []),
+    ],
     showRefresh: options.toolbar?.showRefresh ?? true,
   };
 }

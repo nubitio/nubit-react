@@ -317,3 +317,88 @@ describe('HydraRemoteDataSource.load', () => {
     expect(capturedParams).not.toHaveProperty('appendData');
   });
 });
+
+// ── export ────────────────────────────────────────────────────────────────────
+
+describe('HydraRemoteDataSource.export', () => {
+  it('requests the xlsx format as a blob and returns it with the server filename', async () => {
+    const blob = new Blob(['fake xlsx bytes']);
+    const httpClient = {
+      get: async () => ({
+        data: blob,
+        headers: new Headers({ 'content-disposition': 'attachment; filename="products-2026-08-20.xlsx"' }),
+      }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.export({});
+
+    expect(result.blob).toBe(blob);
+    expect(result.filename).toBe('products-2026-08-20.xlsx');
+  });
+
+  it('falls back to a generic filename when Content-Disposition is missing', async () => {
+    const httpClient = {
+      get: async () => ({ data: new Blob([]), headers: new Headers() }),
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    const result = await ds.export({});
+
+    expect(result.filename).toBe('export.xlsx');
+  });
+
+  it('requests the blob response type with the xlsx Accept header', async () => {
+    let capturedConfig: { responseType?: string; headers?: Record<string, string> } | undefined;
+    const httpClient = {
+      get: async (_url: string, config?: typeof capturedConfig) => {
+        capturedConfig = config;
+        return { data: new Blob([]), headers: new Headers() };
+      },
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    await ds.export({});
+
+    expect(capturedConfig?.responseType).toBe('blob');
+    expect(capturedConfig?.headers?.Accept).toBe(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+  });
+
+  it('drops pagination so the export covers every filtered row, not one page', async () => {
+    let capturedParams: Record<string, unknown> | undefined;
+    const httpClient = {
+      get: async (_url: string, config?: { params?: Record<string, unknown> }) => {
+        capturedParams = config?.params;
+        return { data: new Blob([]), headers: new Headers() };
+      },
+    } as unknown as CoreHttpClient;
+    const ds = makeSource({ httpClient });
+
+    await ds.export({ skip: 20, take: 10 });
+
+    expect(capturedParams).not.toHaveProperty('page');
+    expect(capturedParams).not.toHaveProperty('itemsPerPage');
+  });
+
+  it.each([
+    ["attachment; filename*=UTF-8''pedidos%20a%C3%B1o.xlsx", 'pedidos año.xlsx'],
+    ['attachment; filename=plain.xlsx', 'plain.xlsx'],
+    ['attachment; filename="quoted; tricky.xlsx"', 'quoted; tricky.xlsx'],
+    // A server-chosen name must not be able to steer the download elsewhere.
+    ['attachment; filename="../../evil.xlsx"', '.._.._evil.xlsx'],
+    ['attachment', 'export.xlsx'],
+  ])('reads the filename out of %j', async (disposition, expected) => {
+    const httpClient = {
+      get: async () => ({
+        data: new Blob([]),
+        headers: new Headers({ 'content-disposition': disposition }),
+      }),
+    } as unknown as CoreHttpClient;
+
+    const result = await makeSource({ httpClient }).export({});
+
+    expect(result.filename).toBe(expected);
+  });
+});

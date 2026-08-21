@@ -49,6 +49,8 @@ export interface CoreTranslationKeys {
   'grid.buttonRefresh': string;
   'grid.buttonActions': string;
   'grid.buttonView': string;
+  'grid.buttonExport': string;
+  'grid.exportError': string;
   'grid.rowsPerPage': string;
   'grid.recordRange': string;
   'grid.noRecordCount': string;

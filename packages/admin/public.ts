@@ -32,6 +32,10 @@ export { parseQuotaError, quotaErrorToastMessage } from './quota/parseQuotaError
 export type { ParsedQuotaError } from './quota/parseQuotaError';
 export { useQuotaUsage } from './quota/useQuotaUsage';
 export type { UseQuotaUsageOptions } from './quota/useQuotaUsage';
+export { useNotifications } from './notifications/useNotifications';
+export type { NotificationItem, UseNotificationsOptions } from './notifications/useNotifications';
+export { NotificationPanel } from './notifications/NotificationPanel';
+export type { NotificationPanelProps } from './notifications/NotificationPanel';
 export type {
   AppProfile,
   SessionFeatureEntitlement,

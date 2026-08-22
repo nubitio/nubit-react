@@ -1,8 +1,20 @@
 import React from 'react';
+import { Badge, type BadgeVariant } from '@nubitio/ui';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { FilterValueDropdown } from '../filterHelpers';
 import { NativeEnumSelect } from '../../../form/LookupControls';
 import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getEnumDisplayValue, KEEP } from '../shared';
+
+const BADGE_VARIANTS = new Set<BadgeVariant>([
+  'primary',
+  'secondary',
+  'success',
+  'danger',
+  'warning',
+  'info',
+  'light',
+  'dark',
+]);
 
 export const enumTypeModule: FieldTypeModule = {
   controlKind: 'select',
@@ -11,6 +23,18 @@ export const enumTypeModule: FieldTypeModule = {
   filterOperators: EQUALITY_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,
   cellText: (field, value) => getEnumDisplayValue(field, value),
+  CellRender: ({ field, value }) => {
+    const label = getEnumDisplayValue(field, value);
+    if (field.presentation !== 'badge') return label;
+
+    const configuredTone = field.toneByValue?.[String(value ?? '')];
+    const variant: BadgeVariant =
+      configuredTone && BADGE_VARIANTS.has(configuredTone as BadgeVariant)
+        ? configuredTone as BadgeVariant
+        : 'secondary';
+
+    return <Badge variant={variant} size="sm" pill>{label}</Badge>;
+  },
   serializeFormValue: () => KEEP,
   serializeDetailValue: () => KEEP,
   ControlRender: ({ field, value, errorClass, disabled, readOnly, setFieldValue }) => (

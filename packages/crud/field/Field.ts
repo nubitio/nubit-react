@@ -100,6 +100,11 @@ export interface Field {
   /** Column display order hint set via `x-crud.order` from Hydra metadata. */
   order?: number;
 
+  /** Optional semantic presentation selected from backend metadata. */
+  presentation?: 'badge';
+  /** Visual tone per enum value when `presentation` is `badge`. */
+  toneByValue?: Record<string, string>;
+
   /**
    * Dev/diagnostics only: how this field was inferred from Hydra (rule id + detail).
    * Set by `mapHydraSchemaToFields`; consumed by `logDevHint` and Nubit DevTools.

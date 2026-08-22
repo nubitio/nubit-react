@@ -162,6 +162,14 @@ function applyCrudHints(field: Field, hints: CrudHints | undefined, fieldName?: 
     field.width = hints.width;
     applied.push(`width=${hints.width}`);
   }
+  if (hints.presentation !== undefined) {
+    field.presentation = hints.presentation;
+    applied.push(`presentation=${hints.presentation}`);
+  }
+  if (hints.toneByValue !== undefined) {
+    field.toneByValue = hints.toneByValue;
+    applied.push('toneByValue');
+  }
 
   return applied;
 }
@@ -356,6 +364,12 @@ export function mapHydraSchemaToFields(
 
     const tag = resolveRangeTag(range, propertyType);
 
+    const enumOptions = fieldSchema.enumOptions;
+    const isScalarEnum =
+      enumOptions &&
+      enumOptions.length > 0 &&
+      (tag === 'text' || tag === 'integer' || tag === 'decimal');
+
     // Rule 3 — display-only (writeable: false) → noneField. A `format:
     // 'currency'` hint still wins so computed money columns (totals) render
     // formatted instead of as raw text; the field stays readonly.
@@ -369,7 +383,7 @@ export function mapHydraSchemaToFields(
     // x-crud.displayField on the related entity, else the name-heuristic)
     // and format the cell with it, so read-only relations are just as
     // readable as editable ones without per-field frontend configuration.
-    if (!writeable) {
+    if (!writeable && !isScalarEnum) {
       const isEntityRef = tag === 'entity' || propertyType === 'Link';
       if (isEntityRef) {
         const resourceClass = range ? range.replace('#', '') : '';
@@ -425,12 +439,7 @@ export function mapHydraSchemaToFields(
     // The backend forwards `openapiContext: ['enum' => [...]]` into the docs;
     // a free-text input for a closed value set is a validation error waiting
     // to happen. Option labels are humanised ('credit_note' → 'Credit Note').
-    const enumOptions = fieldSchema.enumOptions;
-    if (
-      enumOptions &&
-      enumOptions.length > 0 &&
-      (tag === 'text' || tag === 'integer' || tag === 'decimal')
-    ) {
+    if (isScalarEnum) {
       const built = enumField(
         enumOptions.map((value) => ({
           value,
@@ -441,6 +450,7 @@ export function mapHydraSchemaToFields(
         .name(name)
         .label(label)
         .required(required)
+        .readonly(!writeable)
         .build();
       const field: Field = { ...built, filterable };
       stampMappingReason(field, 'rule-3.5 enum', applyCrudHints(field, fieldSchema.crudHints));

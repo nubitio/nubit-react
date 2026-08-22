@@ -55,6 +55,10 @@ export interface CrudHints {
   order?: number;
   /** Column width in pixels or as a CSS string. */
   width?: number;
+  /** Render the enum value using a richer presentation such as a badge. */
+  presentation?: 'badge';
+  /** Visual tone per enum value when `presentation` is `badge`. */
+  toneByValue?: Record<string, string>;
   /**
    * Render hint.
    *

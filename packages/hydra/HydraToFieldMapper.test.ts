@@ -29,6 +29,35 @@ describe('mapHydraSchemaToFields', () => {
     ]);
   });
 
+  it('keeps read-only enum properties as readonly selects so their filter remains a dropdown', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{ name: 'status', range: 'xsd:string', writeable: false, enumOptions: ['draft', 'paid'] }]),
+    );
+
+    const status = fields.find((f) => f.name === 'status');
+    expect(status?.type).toBe('enum');
+    expect(status?.readonly).toBe(true);
+    expect(status?.data).toEqual([
+      { value: 'draft', text: 'Draft' },
+      { value: 'paid', text: 'Paid' },
+    ]);
+  });
+
+  it('forwards generic enum badge presentation hints without domain assumptions', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([{
+        name: 'status',
+        range: 'xsd:string',
+        enumOptions: ['draft', 'paid'],
+        crudHints: { presentation: 'badge', toneByValue: { draft: 'warning', paid: 'success' } },
+      }]),
+    );
+
+    const status = fields.find((f) => f.name === 'status');
+    expect(status?.presentation).toBe('badge');
+    expect(status?.toneByValue).toEqual({ draft: 'warning', paid: 'success' });
+  });
+
   it('keeps plain strings as text fields when no enum is present', () => {
     const fields = mapHydraSchemaToFields(schemaWith([{ name: 'note', range: 'xsd:string' }]));
     expect(fields.find((f) => f.name === 'note')?.type).toBe('text');

@@ -5,6 +5,19 @@ export type { GridData } from './data/GridData';
 // ── Date utilities ────────────────────────────────────────────────────────────
 export { DateUtils, DEFAULT_TIMEZONE } from './date';
 
+// ── Money ─────────────────────────────────────────────────────────────────────
+export {
+  formatMinorUnits,
+  formatMoney,
+  fromMinorUnits,
+  isMoneyValue,
+  parseMoney,
+  parseMoneyInput,
+  sumMoney,
+  toMinorUnits,
+} from './money';
+export type { FormatMoneyOptions, MoneyValue } from './money';
+
 // ── Core config ───────────────────────────────────────────────────────────────
 export {
   CoreConfigProvider,

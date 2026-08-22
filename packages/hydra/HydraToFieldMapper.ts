@@ -2,6 +2,7 @@ import type { Field } from '@nubitio/crud';
 import type { HydraFieldSchema, HydraResourceSchema, CrudHints } from './types';
 import {
   currencyField,
+  moneyField,
   textField,
   numberField,
   switchField,
@@ -400,14 +401,20 @@ export function mapHydraSchemaToFields(
       }
 
       const base =
-        fieldSchema.crudHints?.format === 'currency' ? currencyField().readonly(true) : noneField();
+        fieldSchema.crudHints?.format === 'money'
+          ? moneyField().readonly(true)
+          : fieldSchema.crudHints?.format === 'currency'
+            ? currencyField().readonly(true)
+            : noneField();
       const built = base.name(name).label(label).required(required).build();
       const field: Field = { ...built, filterable };
       stampMappingReason(
         field,
-        fieldSchema.crudHints?.format === 'currency'
-          ? 'rule-3 display-only+currency'
-          : 'rule-3 display-only',
+        fieldSchema.crudHints?.format === 'money'
+          ? 'rule-3 display-only+money'
+          : fieldSchema.crudHints?.format === 'currency'
+            ? 'rule-3 display-only+currency'
+            : 'rule-3 display-only',
         applyCrudHints(field, fieldSchema.crudHints),
       );
       fields.push(field);
@@ -457,6 +464,19 @@ export function mapHydraSchemaToFields(
         `rule-3.55 ${formatHint}`,
         applyCrudHints(field, fieldSchema.crudHints),
       );
+      fields.push(field);
+      continue;
+    }
+
+    // Rule 3.55b — `format: 'money'` hint → moneyField, whatever the declared
+    // range. The backend publishes money as an object, so the range says
+    // "object" and no range-based rule would ever reach the right control.
+    // This runs before the currency rule: a resource that declares both means
+    // money, the newer and exact form.
+    if (fieldSchema.crudHints?.format === 'money') {
+      const built = moneyField().name(name).label(label).required(required).build();
+      const field: Field = { ...built, filterable };
+      stampMappingReason(field, 'rule-3.55b money', applyCrudHints(field, fieldSchema.crudHints));
       fields.push(field);
       continue;
     }

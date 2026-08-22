@@ -329,6 +329,8 @@ export function parseHydraDoc(
       workflow: cls['x-workflow'],
       sequence: cls['x-sequence'],
       embeddedLines: cls['x-embedded-lines'],
+      printable: cls['x-printable'],
+      importable: cls['x-importable'],
       searchMappings: extractSearchMappings(cls),
       supportedOperations: Array.from(
         new Set([

@@ -79,6 +79,14 @@ export interface Field {
   hidden: boolean;
   required: boolean;
   precision: number;
+  /**
+   * MONEY fields only: the currency to assume when the cell is still empty and
+   * the value itself cannot say. Once an amount exists, its own currency wins —
+   * a row is the authority on what money it is denominated in.
+   */
+  currency?: string;
+  /** MONEY fields only: decimal places to accept while typing. Defaults to the value's own scale. */
+  scale?: number;
   accept: string | null | undefined;
   buttons: FieldButton[];
   searchEnabled: boolean;

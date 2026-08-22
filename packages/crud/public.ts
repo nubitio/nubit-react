@@ -68,6 +68,33 @@ export type {
   ResourceGridGroup,
 } from './crud';
 
+// ── Session permissions ───────────────────────────────────────────────────────
+export {
+  SessionPermissionsProvider,
+  useSessionPermissions,
+  useHasPermission,
+} from './crud/SessionPermissionsContext';
+export type { PermissionLimit, SessionPermissions } from './crud/SessionPermissionsContext';
+
+// ── Issued documents ──────────────────────────────────────────────────────────
+export { PrintButton } from './document/PrintButton';
+export type { PrintButtonProps } from './document/PrintButton';
+export { DocumentHistoryPanel } from './document/DocumentHistoryPanel';
+export type { DocumentHistoryPanelProps } from './document/DocumentHistoryPanel';
+export { useIssuedDocument } from './document/useIssuedDocument';
+export type { DocumentState, IssuedDocument } from './document/useIssuedDocument';
+
+// ── Spreadsheet import ────────────────────────────────────────────────────────
+export { ImportPanel } from './import/ImportPanel';
+export type { ImportPanelProps } from './import/ImportPanel';
+export { useSpreadsheetImport } from './import/useSpreadsheetImport';
+export type {
+  ImportError,
+  ImportReport,
+  ImportSession,
+  ImportState,
+} from './import/useSpreadsheetImport';
+
 // ── Field DSL ─────────────────────────────────────────────────────────────────
 export {
   currencyField,
@@ -80,6 +107,7 @@ export {
   identityField,
   fileField,
   imageField,
+  moneyField,
   noneField,
   numberField,
   passwordField,

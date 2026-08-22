@@ -43,6 +43,23 @@ Timezone (and other core settings) are configured once via `CoreConfigProvider` 
 
 - `getCoreTimezone()` and `DateUtils` read from this config (works in React and non-React code).
 - Default is `UTC`. Use `DEFAULT_TIMEZONE` only as a fallback constant if you need one outside the provider.
+- A Nubit backend stores timestamps in UTC and reports the display zone as `timeZone` in `GET /api/me`; pass that to the provider so the client formats the way the server intends.
+
+## Money
+
+Monetary values arrive as `{ amount, currency, scale, minorAmount }` and are handled exactly — never as a JavaScript number.
+
+```ts
+import { parseMoney, formatMoney, sumMoney, parseMoneyInput } from '@nubitio/core';
+
+const total = sumMoney(rows.map((row) => parseMoney(row.total)!)); // exact
+formatMoney(total, { showCurrency: true }); // "€1,234.50" in the active locale
+parseMoneyInput('1.234,56', 'EUR', 2); // accepts the locale's separators
+```
+
+`amount` is the authority, not `minorAmount`: the latter is a JSON number, and past 2^53 minor units a JSON number is already approximate. Everything here parses the decimal string into a `BigInt`, which is exact at any size.
+
+`sumMoney` returns `null` for mixed currencies rather than a total. A footer that adds euros to dollars is worse than an empty one, because it looks right.
 
 ## API Base URL
 

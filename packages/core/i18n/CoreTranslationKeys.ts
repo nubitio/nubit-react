@@ -138,4 +138,35 @@ export interface CoreTranslationKeys {
   'form.imageUploadPrompt': string;
   'form.imageUploadHint': string;
   'crudPage.confirmActionTitle': string;
+
+  // ── Issued documents and spreadsheet import ──────────────────────────────
+  'document.print': string;
+  'document.reissue': string;
+  'document.reissueConfirm': string;
+  'document.download': string;
+  'document.history': string;
+  'document.pending': string;
+  'document.failed': string;
+  'document.superseded': string;
+  'document.empty': string;
+  'document.loading': string;
+  'document.error': string;
+  'import.title': string;
+  'import.chooseFile': string;
+  'import.analyze': string;
+  'import.analyzing': string;
+  'import.confirm': string;
+  'import.applying': string;
+  'import.applied': string;
+  'import.summary': string;
+  'import.nothingApplied': string;
+  'import.blockedByErrors': string;
+  'import.errorsTitle': string;
+  'import.errorLine': string;
+  'import.unmapped': string;
+  'import.numberFormat': string;
+  'import.numberFormatAuto': string;
+  'import.numberFormatDot': string;
+  'import.numberFormatComma': string;
+  'import.failed': string;
 }

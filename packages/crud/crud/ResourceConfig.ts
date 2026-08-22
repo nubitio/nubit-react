@@ -215,6 +215,15 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   /** Fine-grained RBAC permission overrides. May be static or a callable that is
    *  evaluated at render time. */
   permissions?: ResourcePermissions;
+  /**
+   * Permission prefix for this resource, e.g. `invoice` for `invoice.create`.
+   *
+   * When set and the session published permissions, the toolbar reflects what
+   * the backend will actually allow instead of what the HTTP methods suggest.
+   * Only the display follows from this — the backend evaluates the same
+   * permissions itself, so a client that ignores them gets a 403.
+   */
+  permissionPrefix?: string;
   dialogWidth?: number;
   dialogHeight?: number;
   /**

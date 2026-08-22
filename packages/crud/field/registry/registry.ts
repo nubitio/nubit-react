@@ -9,6 +9,7 @@ import { entityTypeModule } from './types/entity';
 import { enumTypeModule } from './types/enum';
 import { fileTypeModule } from './types/file';
 import { htmlTypeModule } from './types/html';
+import { moneyTypeModule } from './types/money';
 import { noneTypeModule } from './types/none';
 import { numberTypeModule } from './types/number';
 import { passwordTypeModule } from './types/password';
@@ -34,6 +35,7 @@ const FIELD_TYPE_MODULES: Record<FieldType, FieldTypeModule> = {
   [FieldType.DATETIME]: datetimeTypeModule,
   [FieldType.NUMBER]: numberTypeModule,
   [FieldType.CURRENCY]: currencyTypeModule,
+  [FieldType.MONEY]: moneyTypeModule,
   [FieldType.SELECT]: selectTypeModule,
   [FieldType.ENUM]: enumTypeModule,
   [FieldType.ENTITY]: entityTypeModule,

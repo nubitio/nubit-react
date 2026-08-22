@@ -131,6 +131,42 @@ export function currencyField<
 }
 
 /**
+ * Builder for MONEY fields — exact amounts carrying their own currency.
+ *
+ * Prefer this over {@link CurrencyFieldBuilder} whenever the backend publishes
+ * `x-crud.format: money`. CURRENCY is a number with two decimals; MONEY never
+ * converts the amount to a JavaScript number at all, which is what keeps a
+ * grid total equal to the total the database holds.
+ *
+ * Usage:
+ *   moneyField().name('total').label('Total').currency('EUR').build()
+ */
+export class MoneyFieldBuilder<
+  TRecord extends DataRecord = DataRecord,
+> extends BaseFieldBuilder<TRecord> {
+  constructor() {
+    super(FieldType.MONEY);
+    this._field.align = 'right';
+  }
+
+  /** Currency assumed while the value is still empty. */
+  currency(code: string): this {
+    this._field.currency = code.toUpperCase();
+    return this;
+  }
+
+  /** Decimal places accepted while typing. Defaults to the value's own scale. */
+  scale(places: number): this {
+    this._field.scale = places;
+    return this;
+  }
+}
+
+export function moneyField<TRecord extends DataRecord = DataRecord>(): MoneyFieldBuilder<TRecord> {
+  return new MoneyFieldBuilder<TRecord>();
+}
+
+/**
  * Factory for generic file upload fields (FILE type).
  *
  * Uploads immediately to apiBaseUrl+'media' and submits the returned Media IRI.

@@ -7,6 +7,7 @@ export enum FieldType {
   DATETIME = 'datetime',
   NUMBER = 'number',
   CURRENCY = 'currency',
+  MONEY = 'money',
   SELECT = 'select',
   ENUM = 'enum',
   ENTITY = 'entity',

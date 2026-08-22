@@ -56,11 +56,16 @@ export interface CrudHints {
   /** Column width in pixels or as a CSS string. */
   width?: number;
   /**
-   * Render hint. 'currency' maps decimals to a money control; 'image'/'file'
-   * map media relations (nubitio/admin-bundle Media or compatible) to instant
-   * upload controls that submit the media IRI.
+   * Render hint.
+   *
+   * 'money' is the exact form: the property is published as
+   * `{ amount, currency, scale }` and never converted to a JavaScript number.
+   * 'currency' is the older decimal-as-string form, kept for resources that
+   * have not moved over. 'image'/'file' map media relations
+   * (nubitio/admin-bundle Media or compatible) to instant upload controls that
+   * submit the media IRI.
    */
-  format?: 'currency' | 'image' | 'file';
+  format?: 'money' | 'currency' | 'image' | 'file';
   /** Include this column in the server-side grid summary footer. */
   summable?: boolean;
   /** Aggregate function for summable columns. @default 'sum' */
@@ -169,6 +174,10 @@ export interface HydraClass {
   'x-crud-layout'?: FormLayout;
   /** Embedded line collections declared on parent document resources. */
   'x-embedded-lines'?: EmbeddedLinesSchema[];
+  /** Document issuing declared by `#[Printable]` (nubitio/admin-bundle). */
+  'x-printable'?: PrintableSchema;
+  /** Spreadsheet import declared by `#[Importable]` (nubitio/admin-bundle). */
+  'x-importable'?: ImportableSchema;
   /**
    * Hydra search template describing server-side filterable query params.
    * Present on collection operations in API Platform JSON-LD responses.
@@ -284,6 +293,45 @@ export interface HydraResourceSchema {
   sequence?: SequenceSchema;
   /** Embedded line collections (nubitio/admin-bundle). */
   embeddedLines?: EmbeddedLinesSchema[];
+  /** The resource can be issued as a document. */
+  printable?: PrintableSchema;
+  /** The resource can be loaded from a spreadsheet. */
+  importable?: ImportableSchema;
+}
+
+/**
+ * What the backend publishes for a printable resource.
+ *
+ * The URLs are absolute templates rather than a base the client assembles: a
+ * client that builds the path itself will eventually build it differently from
+ * the server.
+ */
+export interface PrintableSchema {
+  /** Translation key or literal for the print action. */
+  title: string;
+  paper: string;
+  orientation: 'portrait' | 'landscape';
+  /** False for documents a jurisdiction forbids reissuing. */
+  allowReissue: boolean;
+  numberProperty: string | null;
+  /** POST here to issue, GET for the history. `{id}` is the record's identifier. */
+  issueUrl: string;
+  historyUrl: string;
+}
+
+/** What the backend publishes for an importable resource. */
+export interface ImportableSchema {
+  fields: string[];
+  required: string[];
+  /** Fields identifying an existing row. Empty means a re-run duplicates. */
+  naturalKey: string[];
+  maxRows: number;
+  uploadUrl: string;
+  /**
+   * Always true today, and stated rather than implied: a client must not offer
+   * an "import now" button that skips the review step.
+   */
+  requiresReview: boolean;
 }
 
 // ---------------------------------------------------------------------------

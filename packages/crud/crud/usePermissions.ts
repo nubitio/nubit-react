@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { ResourceConfig, ResourcePermissions } from './ResourceConfig';
+import { useHasPermission } from './SessionPermissionsContext';
 
 export type { ResourcePermissions };
 
@@ -40,8 +41,16 @@ function fromOperations(
  * Resolves RBAC permissions for a resource with the following precedence
  * (highest → lowest):
  *   1. `resource.permissions.canX` — callable or boolean override
- *   2. inferred from `supportedOperations` (hydra:supportedOperation methods)
- *   3. platform defaults            — canAdd/Edit/Delete=true, canExport/BulkDelete=false
+ *   2. the session's granular permissions, when `permissionPrefix` is set and
+ *      the backend published any
+ *   3. inferred from `supportedOperations` (hydra:supportedOperation methods)
+ *   4. platform defaults            — canAdd/Edit/Delete=true, canExport/BulkDelete=false
+ *
+ * The session sits above the HTTP-method inference on purpose: the methods say
+ * what the resource *has*, the session says what this user may *do*, and only
+ * the second one can hide a button that would come back a 403. It stays below
+ * an explicit override so an application can still close something the backend
+ * would allow.
  *
  * Memoized on `resource.id` — stable reference across re-renders.
  */
@@ -52,10 +61,17 @@ export function usePermissions(
   // Stabilize the ops array as a sorted joined string so that a new [] reference
   // on every render (e.g. from a default parameter) does not break memoization.
   const opsKey = supportedOperations.slice().sort().join(',');
+  const hasPermission = useHasPermission();
 
   return useMemo(() => {
     const p = resource.permissions;
     const inferred = fromOperations(supportedOperations);
+    const prefix = resource.permissionPrefix;
+
+    /** Undefined when the resource names no prefix — "no opinion", not "denied". */
+    function granted(action: string): boolean | undefined {
+      return prefix === undefined ? undefined : hasPermission(`${prefix}.${action}`);
+    }
 
     function resolveWithInferred(
       permValue: boolean | (() => boolean) | undefined,
@@ -68,13 +84,13 @@ export function usePermissions(
     }
 
     return {
-      canAdd: resolveWithInferred(p?.canAdd, inferred?.canAdd, true),
-      canEdit: resolveWithInferred(p?.canEdit, inferred?.canEdit, true),
+      canAdd: resolveWithInferred(p?.canAdd, granted('create') ?? inferred?.canAdd, true),
+      canEdit: resolveWithInferred(p?.canEdit, granted('update') ?? inferred?.canEdit, true),
       canView: resolve(p?.canView, false),
-      canDelete: resolveWithInferred(p?.canDelete, inferred?.canDelete, true),
+      canDelete: resolveWithInferred(p?.canDelete, granted('delete') ?? inferred?.canDelete, true),
       canExport: resolve(p?.canExport, false),
       canBulkDelete: resolve(p?.canBulkDelete, false),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource.id, opsKey, resource.permissions]);
+  }, [resource.id, opsKey, resource.permissions, resource.permissionPrefix, hasPermission]);
 }

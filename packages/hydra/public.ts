@@ -25,7 +25,12 @@ export { buildEmbeddedFormDetail, resolveEmbeddedBinding } from './buildEmbedded
 export { HydraSchemaResolver, getSchemaResolver } from './HydraSchemaResolver';
 export type { ResolvedResourceSchema } from './HydraSchemaResolver';
 export { resolveInferredFormDetail } from './resolveInferredFormDetail';
-export type { EmbeddedLinesSchema, ImportableSchema, PrintableSchema } from './types';
+export type {
+  EmbeddedLinesSchema,
+  GridScaleSchema,
+  ImportableSchema,
+  PrintableSchema,
+} from './types';
 
 export { useHydraMetadata, API_DOC_QUERY_KEY } from './useHydraMetadata';
 

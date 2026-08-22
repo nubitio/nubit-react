@@ -131,6 +131,18 @@ A resource declaring `#[Importable]` publishes `x-importable`:
 
 Upload analyses the file and shows what applying _would_ do — rows to insert, rows to update, and every error by spreadsheet line — without writing anything. The apply button stays disabled while any row is invalid, because the server refuses a partial import and a button that looks available but always fails is worse than one that explains itself.
 
+## Large grids
+
+A resource that publishes `x-grid-scale` tells the client how it expects to be read:
+
+```ts
+const { state, observe, goNext, goPrevious } = useCursorPagination();
+```
+
+Cursor pages cannot be addressed by number — each is defined by the last row of the one before it — so the walk follows the links the _server_ produced. That rules out jumping to page 400 and showing "page 12 of 500", and there is no way to fake either without asking the database for exactly the count the cursor was adopted to avoid.
+
+`GridData` carries two extra facts for these resources. `nextPageUrl` is where the next page begins, and `totalIsEstimate` says the total is approximate or unknown — render it as "about N", never as a precise figure somebody might reconcile against. Without it, `member.length` would claim the page is the whole table: a grid reporting "10 rows" for three years of movements.
+
 ## Grid export
 
 ```tsx

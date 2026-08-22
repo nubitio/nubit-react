@@ -178,6 +178,8 @@ export interface HydraClass {
   'x-printable'?: PrintableSchema;
   /** Spreadsheet import declared by `#[Importable]` (nubitio/admin-bundle). */
   'x-importable'?: ImportableSchema;
+  /** How the resource expects to be paginated once it is large. */
+  'x-grid-scale'?: GridScaleSchema;
   /**
    * Hydra search template describing server-side filterable query params.
    * Present on collection operations in API Platform JSON-LD responses.
@@ -297,6 +299,31 @@ export interface HydraResourceSchema {
   printable?: PrintableSchema;
   /** The resource can be loaded from a spreadsheet. */
   importable?: ImportableSchema;
+  /** How the resource expects to be paginated once it is large. */
+  gridScale?: GridScaleSchema;
+}
+
+/**
+ * How a resource expects to be read once it has grown.
+ *
+ * Every grid is small on the day it ships. The ones that stop working are the
+ * ones nobody decided anything about, so the backend states the decision and
+ * the client follows it rather than paginating the way it always has.
+ */
+export interface GridScaleSchema {
+  /**
+   * `cursor` is a promise the client has to keep: advance by following the
+   * server's next link, and do not re-sort. `page` is ordinary offset paging.
+   */
+  mode: 'cursor' | 'page';
+  cursorField: string | null;
+  cursorDirection: 'ASC' | 'DESC';
+  /** False means the total is an estimate or absent; never render it as precise. */
+  exactCount: boolean;
+  /** Rows above which the server queues an export instead of streaming it. */
+  inlineExportLimit: number;
+  /** Fields the server will accept a sort on. Null means any. */
+  sortableFields: string[] | null;
 }
 
 /**

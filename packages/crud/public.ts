@@ -68,6 +68,10 @@ export type {
   ResourceGridGroup,
 } from './crud';
 
+// ── Grid scale ────────────────────────────────────────────────────────────────
+export { useCursorPagination } from './datagrid/useCursorPagination';
+export type { CursorPaginationState } from './datagrid/useCursorPagination';
+
 // ── Session permissions ───────────────────────────────────────────────────────
 export {
   SessionPermissionsProvider,

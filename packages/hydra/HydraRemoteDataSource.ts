@@ -232,17 +232,40 @@ function parseGridSummaryHeader(headers: Headers): Record<string, unknown> | nul
   }
 }
 
+/** The `next` link a cursor-paginated collection publishes in `hydra:view`. */
+function parseNextPageUrl(body: DataRecord): string | null {
+  const view = body['hydra:view'] ?? body['view'];
+  if (!view || typeof view !== 'object') return null;
+
+  const next = (view as DataRecord)['hydra:next'] ?? (view as DataRecord)['next'];
+  return typeof next === 'string' ? next : null;
+}
+
+interface ParsedCollection {
+  data: DataRecord[];
+  totalCount: number;
+  gridSummary: Record<string, unknown> | null;
+  totalIsEstimate: boolean;
+  nextPageUrl: string | null;
+}
+
 function parseCollectionResponse(
   responseData: unknown,
   responseHeaders: Headers,
-): { data: DataRecord[]; totalCount: number; gridSummary: Record<string, unknown> | null } {
+): ParsedCollection {
   const gridSummary = parseGridSummaryHeader(responseHeaders);
+  const estimated = Number(responseHeaders.get('x-estimated-count'));
+  const hasEstimate =
+    Number.isFinite(estimated) && responseHeaders.get('x-estimated-count') !== null;
+
   if (Array.isArray(responseData)) {
     const headerCount = Number(responseHeaders.get('x-total-count'));
     return {
       data: responseData as DataRecord[],
       totalCount: Number.isFinite(headerCount) ? headerCount : responseData.length,
       gridSummary,
+      totalIsEstimate: false,
+      nextPageUrl: null,
     };
   }
 
@@ -250,17 +273,25 @@ function parseCollectionResponse(
     const body = responseData as DataRecord;
     const member = body['hydra:member'] ?? body['member'];
     if (Array.isArray(member)) {
-      const rawTotal = body['hydra:totalItems'] ?? body['totalItems'] ?? member.length;
-      const totalCount = Number(rawTotal);
+      const rawTotal = body['hydra:totalItems'] ?? body['totalItems'];
+      const exact = Number(rawTotal);
+      const hasExact = rawTotal !== undefined && Number.isFinite(exact);
+
+      // Without an exact total, `member.length` would claim the page is the
+      // whole table — the grid would report "10 rows" for three years of
+      // movements. The estimate is used when the server sent one, and the count
+      // is flagged either way so nothing renders it as precise.
       return {
         data: member as DataRecord[],
-        totalCount: Number.isFinite(totalCount) ? totalCount : member.length,
+        totalCount: hasExact ? exact : hasEstimate ? estimated : member.length,
         gridSummary,
+        totalIsEstimate: !hasExact,
+        nextPageUrl: parseNextPageUrl(body),
       };
     }
   }
 
-  return { data: [], totalCount: 0, gridSummary };
+  return { data: [], totalCount: 0, gridSummary, totalIsEstimate: false, nextPageUrl: null };
 }
 
 export class HydraRemoteDataSource implements ResourceStore {
@@ -407,6 +438,10 @@ export class HydraRemoteDataSource implements ResourceStore {
       totalCount,
       summary: null,
       gridSummary: parsed.gridSummary,
+      // Forwarded, not derived: only the response knows whether the total was
+      // exact, and only the server can say where the next page begins.
+      totalIsEstimate: parsed.totalIsEstimate,
+      nextPageUrl: parsed.nextPageUrl,
     };
   }
 

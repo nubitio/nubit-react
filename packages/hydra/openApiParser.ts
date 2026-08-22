@@ -331,6 +331,7 @@ export function parseHydraDoc(
       embeddedLines: cls['x-embedded-lines'],
       printable: cls['x-printable'],
       importable: cls['x-importable'],
+      gridScale: cls['x-grid-scale'],
       searchMappings: extractSearchMappings(cls),
       supportedOperations: Array.from(
         new Set([

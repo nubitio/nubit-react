@@ -2,7 +2,7 @@
 
 // ─── Chip / FilterChip ────────────────────────────────────────────────────────
 // Pill-shaped interactive filter tokens. Use for category filters, tag lists,
-// and multi-select inputs. Press state = .is-active or aria-pressed="true".
+// and multi-select inputs. Selected state = .is-active or aria-checked="true".
 //
 // BEM: .nb-chip  /  .nb-chip__count
 
@@ -38,7 +38,7 @@
     font-size: var(--font-size-md);
   }
 
-  &:hover:not(.is-active):not([aria-pressed='true']):not(:disabled) {
+  &:hover:not(.is-active):not([aria-checked='true']):not(:disabled) {
     background: var(--surface-2);
     border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
   }
@@ -49,10 +49,10 @@
   }
 
   &.is-active,
-  &[aria-pressed='true'] {
+  &[aria-checked='true'] {
     border-color: color-mix(in srgb, var(--accent-color) 28%, transparent);
     background: color-mix(in srgb, var(--accent-color) 12%, transparent);
-    color: var(--accent-color);
+    color: var(--accent-on-subtle);
 
     .nb-chip__count {
       background: color-mix(in srgb, var(--accent-color) 14%, transparent);

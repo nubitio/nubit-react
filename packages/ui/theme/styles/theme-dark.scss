@@ -28,6 +28,9 @@
   --accent-color: #60a5fa;
   --accent-hover: #7ab8fc;
   --accent-pressed: #4b8ef3;
+  // A light accent on a dark tint already clears AA (5.0–5.3:1), so this is
+  // the accent itself; the token exists so components stay theme-agnostic.
+  --accent-on-subtle: var(--accent-color);
   --accent-subtle: color-mix(in srgb, var(--accent-color) 18%, var(--surface-0));
   --success-color: #4cc84c;
   --info-color: var(--accent-color);
@@ -45,9 +48,15 @@
   --base-border-color: var(--border-color);
 
   // ── Text ────────────────────────────────────────────────────────────────────
+  // Ratios against surface-1 (#1f1f1f), the lightest background text sits on;
+  // all clear AA, same contract as the light theme.
+  //   --text-secondary  #c7c7c7  →  9.8:1  (AAA)
+  //   --text-tertiary   #969696  →  5.6:1  (AA)
   --text-primary: var(--base-text-color);
   --text-secondary: #c7c7c7;
   --text-tertiary: #969696;
+  // Non-text marks only — see the light theme for why this is a separate token.
+  --text-decorative: #6e6e6e;
   --text-disabled: #4d4d4d;
   --text-on-accent: var(--on-accent-color);
 

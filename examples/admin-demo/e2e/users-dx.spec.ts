@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { stubJsonPlaceholder } from './fixtures/jsonplaceholder';
 
 test.describe('Users DevExtreme page', () => {
   test('grid loads user rows and hides the DevExtreme load panel', async ({ page }) => {
+    await stubJsonPlaceholder(page);
     await page.goto('/users-dx', { waitUntil: 'networkidle' });
 
     const firstUserRow = page
@@ -17,6 +19,7 @@ test.describe('Users DevExtreme page', () => {
   });
 
   test('delete asks for confirmation before removing a row', async ({ page }) => {
+    await stubJsonPlaceholder(page);
     await page.goto('/users-dx', { waitUntil: 'networkidle' });
 
     await expect(
@@ -40,6 +43,7 @@ test.describe('Users DevExtreme page', () => {
   });
 
   test('master-detail loads posts without a stuck load panel', async ({ page }) => {
+    await stubJsonPlaceholder(page);
     await page.goto('/users-dx', { waitUntil: 'networkidle' });
 
     await expect(

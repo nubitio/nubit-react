@@ -21,11 +21,15 @@ export default defineConfig({
       include: ['packages/**/*.{ts,tsx}'],
       exclude: ['packages/**/*.test.{ts,tsx}', 'packages/**/dist/**', 'packages/**/public.ts'],
       reporter: ['text-summary', 'json-summary'],
+      // Ratcheted to just under the current numbers: the gate exists to stop a
+      // regression, and a threshold left far below what the suite actually
+      // covers permits one silently. Raise these when coverage rises; never
+      // lower them to make a red build green.
       thresholds: {
-        statements: 49,
-        branches: 41,
-        functions: 47,
-        lines: 51,
+        statements: 55,
+        branches: 46,
+        functions: 52,
+        lines: 56,
       },
     },
     alias: {

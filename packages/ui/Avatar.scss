@@ -13,8 +13,13 @@
   justify-content: center;
   border-radius: 50%;
   background: oklch(50% 0.14 calc(var(--avatar-hue, 218) * 1deg));
-  // Ensure text is always readable against the medium-dark background (Fluent: on-accent)
-  color: var(--on-accent-color);
+  // Always white, never --on-accent-color. The background here is a generated
+  // hue, not the accent, so it does not flip with the theme — but the accent's
+  // foreground does: in the dark theme --on-accent-color is near-black (the
+  // dark accent is a light blue), which put #05112a on a mid-dark avatar at
+  // 2.75:1. White clears AA on every hue in both themes (worst case 5.2:1),
+  // which is the property the 48–50% oklch lightness was chosen for.
+  color: #ffffff;
   font-family: var(--font-family-sans);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;

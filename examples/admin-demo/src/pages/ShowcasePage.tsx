@@ -90,8 +90,8 @@ export function ShowcasePage() {
           <section className="showcase__section">
             <h2>Form controls</h2>
             <div className="showcase__stack">
-              <TextField placeholder="Your name" />
-              <SelectField defaultValue="">
+              <TextField placeholder="Your name" aria-label="Your name" />
+              <SelectField defaultValue="" aria-label="Plan">
                 <option value="" disabled>
                   Choose a plan…
                 </option>

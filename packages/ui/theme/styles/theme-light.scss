@@ -29,6 +29,10 @@
   --accent-color: #2463eb;
   --accent-hover: #1d52d4;
   --accent-pressed: #1641b8;
+  // Accent text sitting on an accent-tinted surface (badges, active chips).
+  // --accent-color itself only reaches 4.2:1 on its own 12–15% tint, so the
+  // tinted variants need a darker step to clear AA.
+  --accent-on-subtle: #1d52d4; // 5.3:1 on the badge tint, 5.5:1 on the chip tint
   --accent-subtle: color-mix(in srgb, var(--accent-color) 10%, #fff);
   --success-color: #0e7a0b;
   --info-color: var(--accent-color);
@@ -45,13 +49,20 @@
   --base-border-color: var(--border-color);
 
   // ── Text ────────────────────────────────────────────────────────────────────
-  // Contrast ratios against surface-0 (#f5f5f5):
-  //   --text-primary   #242424  → 14.7:1  (AAA)
-  //   --text-secondary #616161  →  5.9:1  (AA)
-  //   --text-tertiary  #8a8a8a  →  3.3:1  (decoration / placeholder only)
+  // Contrast ratios against surface-0 (#f5f5f5), the darkest background text
+  // sits on. Every text token clears WCAG 2.1 AA (4.5:1) on purpose: a token
+  // that carries a "do not use for text" caveat gets used for text anyway —
+  // #8a8a8a was documented as decoration-only and still reached 56 call sites,
+  // which is what the axe gate caught.
+  //   --text-primary    #242424  → 14.7:1  (AAA)
+  //   --text-secondary  #616161  →  5.7:1  (AA)
+  //   --text-tertiary   #6e6e6e  →  4.7:1  (AA)
   --text-primary: var(--base-text-color);
   --text-secondary: #616161;
-  --text-tertiary: #8a8a8a;
+  --text-tertiary: #6e6e6e;
+  // Non-text marks only — rules, tick lines, decorative glyphs. Never legible
+  // content: at 3.2:1 it fails AA, and the name is the warning.
+  --text-decorative: #8a8a8a;
   --text-disabled: #bdbdbd;
   --text-on-accent: var(--on-accent-color);
 

@@ -30,10 +30,14 @@ export const enumTypeModule: FieldTypeModule = {
     const configuredTone = field.toneByValue?.[String(value ?? '')];
     const variant: BadgeVariant =
       configuredTone && BADGE_VARIANTS.has(configuredTone as BadgeVariant)
-        ? configuredTone as BadgeVariant
+        ? (configuredTone as BadgeVariant)
         : 'secondary';
 
-    return <Badge variant={variant} size="sm" pill>{label}</Badge>;
+    return (
+      <Badge variant={variant} size="sm" pill>
+        {label}
+      </Badge>
+    );
   },
   serializeFormValue: () => KEEP,
   serializeDetailValue: () => KEEP,

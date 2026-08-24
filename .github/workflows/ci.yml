@@ -48,3 +48,37 @@ jobs:
 
       - name: Build example app
         run: pnpm example:build
+
+  # Separate job: it needs a browser download and drives a real build, so it
+  # would roughly double the feedback time of `verify` if it ran inline.
+  e2e:
+    name: E2E + accessibility (WCAG 2.1 AA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm --filter admin-demo exec playwright install --with-deps chromium
+
+      # The suite stubs the demo's upstream API in the browser, so this gate
+      # does not depend on a third-party service staying up.
+      - name: Run E2E and axe gate
+        run: pnpm example:e2e
+
+      - name: Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: examples/admin-demo/test-results/
+          retention-days: 7

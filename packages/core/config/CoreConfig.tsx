@@ -22,7 +22,7 @@ export interface CoreConfig {
 // Module-level defaults — readable by non-React code (DateUtils, serializeFormData, etc.).
 // Updated by CoreConfigProvider on mount/change, or directly via configureCore().
 const _coreConfig: CoreConfig = {
-  locale: 'es',
+  locale: 'en',
   timezone: 'UTC',
   apiBaseUrl: '/api/',
   currency: undefined,

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { ResourceConfig, ResourcePermissions } from './ResourceConfig';
-import { useHasPermission } from './SessionPermissionsContext';
+import { inferPermissionPrefix } from './inferPermissionPrefix';
+import { useHasPermission, useSessionPermissions } from './SessionPermissionsContext';
 
 export type { ResourcePermissions };
 
@@ -62,11 +63,19 @@ export function usePermissions(
   // on every render (e.g. from a default parameter) does not break memoization.
   const opsKey = supportedOperations.slice().sort().join(',');
   const hasPermission = useHasPermission();
+  const { permissions: sessionPermissions } = useSessionPermissions();
 
   return useMemo(() => {
     const p = resource.permissions;
     const inferred = fromOperations(supportedOperations);
-    const prefix = resource.permissionPrefix;
+    // Infer the prefix only when the session published a permission list.
+    // An empty list means the authorization module is off; inventing a prefix
+    // would make `useHasPermission` treat every action as granted and skip
+    // the HTTP-method inference that hid missing POST/PATCH/DELETE.
+    const inferredPrefix = inferPermissionPrefix(resource.apiUrl);
+    const prefix =
+      resource.permissionPrefix ??
+      (sessionPermissions.length > 0 && inferredPrefix !== '' ? inferredPrefix : undefined);
 
     /** Undefined when the resource names no prefix — "no opinion", not "denied". */
     function granted(action: string): boolean | undefined {
@@ -92,5 +101,13 @@ export function usePermissions(
       canBulkDelete: resolve(p?.canBulkDelete, false),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource.id, opsKey, resource.permissions, resource.permissionPrefix, hasPermission]);
+  }, [
+    resource.id,
+    resource.apiUrl,
+    opsKey,
+    resource.permissions,
+    resource.permissionPrefix,
+    hasPermission,
+    sessionPermissions,
+  ]);
 }

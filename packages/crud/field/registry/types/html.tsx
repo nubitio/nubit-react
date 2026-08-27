@@ -7,6 +7,7 @@ import {
   serializeOptionalTextValue,
 } from '../shared';
 import { HtmlEditor } from './HtmlEditor';
+import { sanitizeHtml } from '../sanitizeHtml';
 
 function stripTags(html: unknown): string {
   if (html === null || html === undefined) return '';
@@ -31,13 +32,10 @@ export const htmlTypeModule: FieldTypeModule = {
   cellText: (_field, value) => stripTags(value),
   serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
-  // Grid cell: render stored HTML visually. TipTap's schema limits what can be
-  // stored here, so arbitrary script injection is prevented at write time.
-  // A strict CSP (script-src 'self') is the defence-in-depth layer at read time.
   CellRender: ({ value }) => (
     <div
       className="nb-datagrid__html-cell"
-      dangerouslySetInnerHTML={{ __html: String(value ?? '') }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(String(value ?? '')) }}
     />
   ),
   // Form: TipTap WYSIWYG editor — bold, italic, lists, links, headings.

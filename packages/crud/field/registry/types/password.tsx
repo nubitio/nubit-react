@@ -2,7 +2,6 @@ import type { FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultInputControl } from '../controlHelpers';
 import {
   defaultBuildFilterTerms,
-  getPrimitiveDisplay,
   KEEP,
   set,
   TEXT_OPERATORS,
@@ -17,7 +16,7 @@ export const passwordTypeModule: FieldTypeModule = {
   defaultFilterOperator: 'contains',
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,
-  cellText: (_field, value, ctx) => getPrimitiveDisplay(value, ctx.yesLabel, ctx.noLabel),
+  cellText: (_field, value) => (value == null || value === '' ? '' : '••••'),
   serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
   ControlRender: (props) => renderDefaultInputControl(props, 'password'),

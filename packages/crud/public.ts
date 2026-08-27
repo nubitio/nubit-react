@@ -69,6 +69,7 @@ export type {
 } from './crud';
 
 // ── Grid scale ────────────────────────────────────────────────────────────────
+export { inferPermissionPrefix } from './crud/inferPermissionPrefix';
 export { useCursorPagination } from './datagrid/useCursorPagination';
 export type { CursorPaginationState } from './datagrid/useCursorPagination';
 

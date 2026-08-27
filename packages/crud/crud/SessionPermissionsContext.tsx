@@ -5,7 +5,8 @@ export interface PermissionLimit {
   amount: string;
   currency: string;
   scale: number;
-  minorAmount: number;
+  /** @deprecated Prefer `amount`. JS numbers lose integer precision above 2^53. */
+  minorAmount?: number;
 }
 
 export interface SessionPermissions {

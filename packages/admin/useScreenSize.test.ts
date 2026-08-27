@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /** happy-dom's viewport control, which is not part of the DOM lib types. */
@@ -27,6 +27,9 @@ const LARGE = 1440;
 describe('useScreenSize', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
+    // Unmount first: a hook still mounted when the file ends leaves React work
+    // queued that runs after happy-dom tore the window down.
+    cleanup();
     vi.useRealTimers();
     setViewportWidth(1024);
   });
@@ -81,6 +84,8 @@ describe('useScreenSize', () => {
 });
 
 describe('useScreenSizeClass', () => {
+  afterEach(cleanup);
+
   it.each([
     [XSMALL, 'screen-x-small'],
     [SMALL, 'screen-small'],

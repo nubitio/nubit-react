@@ -3,7 +3,13 @@ import { Badge, type BadgeVariant } from '@nubitio/ui';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { FilterValueDropdown } from '../filterHelpers';
 import { NativeEnumSelect } from '../../../form/LookupControls';
-import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getEnumDisplayValue, KEEP } from '../shared';
+import {
+  defaultBuildFilterTerms,
+  EQUALITY_OPERATORS,
+  getEnumDisplayValue,
+  KEEP,
+  serializeOptionalTextValue,
+} from '../shared';
 
 const BADGE_VARIANTS = new Set<BadgeVariant>([
   'primary',
@@ -30,12 +36,16 @@ export const enumTypeModule: FieldTypeModule = {
     const configuredTone = field.toneByValue?.[String(value ?? '')];
     const variant: BadgeVariant =
       configuredTone && BADGE_VARIANTS.has(configuredTone as BadgeVariant)
-        ? configuredTone as BadgeVariant
+        ? (configuredTone as BadgeVariant)
         : 'secondary';
 
-    return <Badge variant={variant} size="sm" pill>{label}</Badge>;
+    return (
+      <Badge variant={variant} size="sm" pill>
+        {label}
+      </Badge>
+    );
   },
-  serializeFormValue: () => KEEP,
+  serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
   ControlRender: ({ field, value, errorClass, disabled, readOnly, setFieldValue }) => (
     <NativeEnumSelect

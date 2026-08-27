@@ -31,7 +31,9 @@ describe('mapHydraSchemaToFields', () => {
 
   it('keeps read-only enum properties as readonly selects so their filter remains a dropdown', () => {
     const fields = mapHydraSchemaToFields(
-      schemaWith([{ name: 'status', range: 'xsd:string', writeable: false, enumOptions: ['draft', 'paid'] }]),
+      schemaWith([
+        { name: 'status', range: 'xsd:string', writeable: false, enumOptions: ['draft', 'paid'] },
+      ]),
     );
 
     const status = fields.find((f) => f.name === 'status');
@@ -45,12 +47,14 @@ describe('mapHydraSchemaToFields', () => {
 
   it('forwards generic enum badge presentation hints without domain assumptions', () => {
     const fields = mapHydraSchemaToFields(
-      schemaWith([{
-        name: 'status',
-        range: 'xsd:string',
-        enumOptions: ['draft', 'paid'],
-        crudHints: { presentation: 'badge', toneByValue: { draft: 'warning', paid: 'success' } },
-      }]),
+      schemaWith([
+        {
+          name: 'status',
+          range: 'xsd:string',
+          enumOptions: ['draft', 'paid'],
+          crudHints: { presentation: 'badge', toneByValue: { draft: 'warning', paid: 'success' } },
+        },
+      ]),
     );
 
     const status = fields.find((f) => f.name === 'status');

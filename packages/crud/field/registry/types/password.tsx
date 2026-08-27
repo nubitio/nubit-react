@@ -1,6 +1,13 @@
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultInputControl } from '../controlHelpers';
-import { defaultBuildFilterTerms, getPrimitiveDisplay, KEEP, set, TEXT_OPERATORS } from '../shared';
+import {
+  defaultBuildFilterTerms,
+  getPrimitiveDisplay,
+  KEEP,
+  set,
+  TEXT_OPERATORS,
+  serializeOptionalTextValue,
+} from '../shared';
 
 export const passwordTypeModule: FieldTypeModule = {
   controlKind: 'password',
@@ -11,7 +18,7 @@ export const passwordTypeModule: FieldTypeModule = {
   filterOperators: TEXT_OPERATORS,
   buildFilterTerms: defaultBuildFilterTerms,
   cellText: (_field, value, ctx) => getPrimitiveDisplay(value, ctx.yesLabel, ctx.noLabel),
-  serializeFormValue: () => KEEP,
+  serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
   ControlRender: (props) => renderDefaultInputControl(props, 'password'),
 };

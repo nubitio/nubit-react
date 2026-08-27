@@ -2,7 +2,13 @@ import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { FilterValueDropdown } from '../filterHelpers';
 import { NativeEnumSelect } from '../../../form/LookupControls';
-import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getPrimitiveDisplay, KEEP } from '../shared';
+import {
+  defaultBuildFilterTerms,
+  EQUALITY_OPERATORS,
+  getPrimitiveDisplay,
+  KEEP,
+  serializeOptionalTextValue,
+} from '../shared';
 
 export const selectTypeModule: FieldTypeModule = {
   controlKind: 'select',
@@ -13,7 +19,7 @@ export const selectTypeModule: FieldTypeModule = {
   // SELECT cells show the raw value (only ENUM/SWITCH resolve through
   // field.data) — preserved from the original grid dispatch.
   cellText: (_field, value, ctx) => getPrimitiveDisplay(value, ctx.yesLabel, ctx.noLabel),
-  serializeFormValue: () => KEEP,
+  serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
   ControlRender: ({ field, value, errorClass, disabled, readOnly, setFieldValue }) => (
     <NativeEnumSelect

@@ -1,6 +1,11 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import { defaultBuildFilterTerms, KEEP, TEXT_OPERATORS } from '../shared';
+import {
+  defaultBuildFilterTerms,
+  KEEP,
+  TEXT_OPERATORS,
+  serializeOptionalTextValue,
+} from '../shared';
 import { HtmlEditor } from './HtmlEditor';
 
 function stripTags(html: unknown): string {
@@ -24,7 +29,7 @@ export const htmlTypeModule: FieldTypeModule = {
   buildFilterTerms: defaultBuildFilterTerms,
   // Plain text for grid tooltip and filter — strip tags without rendering them.
   cellText: (_field, value) => stripTags(value),
-  serializeFormValue: () => KEEP,
+  serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
   // Grid cell: render stored HTML visually. TipTap's schema limits what can be
   // stored here, so arbitrary script injection is prevented at write time.

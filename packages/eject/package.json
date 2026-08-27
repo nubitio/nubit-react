@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/eject",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "description": "Eject explicit resource definitions from Hydra API docs",
   "license": "MIT",
   "type": "module",

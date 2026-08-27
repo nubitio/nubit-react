@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/core",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "Runtime foundation for Nubit: HTTP, events, i18n, Mercure, feature flags, providers, and date utilities.",
   "license": "MIT",

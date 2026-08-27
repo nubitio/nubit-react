@@ -52,6 +52,7 @@ export type CreateNubitAppConfig = {
     title?: string;
     hint?: string;
     defaultUsername?: string;
+    oidcProviders?: { id: string; label: string }[];
   };
   shell?: Pick<AdminShellProps, 'headerActions' | 'footer'>;
   renderThemeSwitcher?: () => ReactNode;

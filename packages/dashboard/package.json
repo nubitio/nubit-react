@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/dashboard",
-  "version": "0.11.4",
+  "version": "1.0.0",
   "type": "module",
   "description": "Declarative dashboard engine with stat cards, charts, and data tables for Nubit admin apps.",
   "license": "MIT",

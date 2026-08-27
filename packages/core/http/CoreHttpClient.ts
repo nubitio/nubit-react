@@ -145,7 +145,7 @@ export class CoreHttpClient {
   private headers(extraHeaders?: Record<string, string>): Record<string, string> {
     const browserLocale =
       typeof navigator !== 'undefined' ? navigator.language?.split('-')[0] : undefined;
-    const locale = this.config.locale ?? browserLocale ?? 'es';
+    const locale = this.config.locale ?? browserLocale ?? 'en';
 
     return {
       'Accept-Language': locale,

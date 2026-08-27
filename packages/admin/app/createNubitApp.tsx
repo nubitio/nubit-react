@@ -1,21 +1,31 @@
 import React, { useMemo } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CoreConfigProvider, CoreProvider, MercureProvider } from '@nubitio/core';
-import { DevToolsProvider, isDevEnvironment, SmartCrudRolesProvider } from '@nubitio/crud';
+import {
+  DevToolsProvider,
+  isDevEnvironment,
+  SessionPermissionsProvider,
+  SmartCrudRolesProvider,
+} from '@nubitio/crud';
 import { NubitDevToolsPanel } from '../devtools/NubitDevToolsPanel';
 import {
   HydraResourceSchemaProvider,
   HydraResourceStoreProvider,
   SchemaProvider,
 } from '@nubitio/hydra';
-import { ThemeProvider, ThemeSwitcher } from '@nubitio/ui';
+import { Skeleton, ThemeProvider, ThemeSwitcher } from '@nubitio/ui';
 
 import { AdminShell } from '../AdminShell';
+import { AcceptInvitationPage } from '../auth/AcceptInvitationPage';
+import { AccountPage } from '../auth/AccountPage';
+import { ForgotPasswordPage } from '../auth/ForgotPasswordPage';
 import { LoginPage } from '../auth/LoginPage';
+import { ResetPasswordPage } from '../auth/ResetPasswordPage';
 import { SessionProvider, useSession } from '../auth/SessionContext';
 import { ToastHost } from '../runtime/ToastHost';
 import { useAppRuntime } from '../runtime/useAppRuntime';
+import { ErrorBoundary } from './ErrorBoundary';
 import { filterMenuByRoles, resolveAppMenu } from './filterMenuByRoles';
 import type {
   CreateNubitAppConfig,
@@ -30,6 +40,9 @@ function defaultUserMenu({ username, close, logout }: NubitAppUserMenuContext) {
       <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
         {username ?? 'User'}
       </span>
+      <Link to="/account" onClick={close}>
+        Account
+      </Link>
       <button
         type="button"
         onClick={() => {
@@ -80,10 +93,19 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
   const renderThemeSwitcher = config.renderThemeSwitcher ?? (() => <ThemeSwitcher />);
   const renderUserMenu = config.renderUserMenu ?? defaultUserMenu;
   const Wrapper = config.Wrapper ?? React.Fragment;
+  const profile = session.session.status === 'authenticated' ? session.session.profile : undefined;
 
   if (session.session.status === 'loading') {
-    return null;
+    return (
+      <div style={{ padding: 24 }} aria-busy="true" aria-label="Loading session">
+        <Skeleton variant="rect" height={32} width="33%" />
+        <div style={{ height: 16 }} />
+        <Skeleton variant="rect" height={256} />
+      </div>
+    );
   }
+
+  const hasAccountRoute = config.routes.some((route) => route.path === '/account');
 
   const shell = (
     <AdminShell
@@ -99,6 +121,9 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
         {config.routes.map((route) => (
           <Route key={route.path} path={route.path} element={route.element} />
         ))}
+        {!hasAccountRoute && (
+          <Route path="/account" element={<AccountPage apiBaseUrl={apiBaseUrl} />} />
+        )}
       </Routes>
     </AdminShell>
   );
@@ -106,39 +131,53 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
   const devToolsEnabled = config.devTools ?? isDevEnvironment();
 
   const authenticated = (
-    <DevToolsProvider enabled={devToolsEnabled}>
-      <CoreProvider
-        http={{ baseUrl: apiBaseUrl, refreshPath: 'auth/refresh', loginPath: 'auth/login' }}
-        runtime={runtime}
-      >
-        <CoreConfigProvider
-          apiBaseUrl={apiBaseUrl}
-          locale={config.locale ?? 'en'}
-          timezone={config.timezone ?? 'UTC'}
-          currency={config.currency ?? 'USD'}
+    <ErrorBoundary>
+      <DevToolsProvider enabled={devToolsEnabled}>
+        <CoreProvider
+          http={{
+            baseUrl: apiBaseUrl,
+            refreshPath: 'auth/refresh',
+            loginPath: 'auth/login',
+            onUnauthorized: () => {
+              void session.logout();
+            },
+          }}
+          runtime={runtime}
         >
-          <SmartCrudRolesProvider roles={session.roles}>
-            <BrowserRouter>
-              <Wrapper>
-                {config.hydra === false ? (
-                  shell
-                ) : (
-                  <MercureProvider>
-                    <SchemaProvider>
-                      <HydraResourceSchemaProvider>
-                        <HydraResourceStoreProvider>{shell}</HydraResourceStoreProvider>
-                      </HydraResourceSchemaProvider>
-                    </SchemaProvider>
-                  </MercureProvider>
-                )}
-              </Wrapper>
-            </BrowserRouter>
-            <ToastHost toasts={toasts} onDismiss={dismiss} />
-            {devToolsEnabled && <NubitDevToolsPanel />}
-          </SmartCrudRolesProvider>
-        </CoreConfigProvider>
-      </CoreProvider>
-    </DevToolsProvider>
+          <CoreConfigProvider
+            apiBaseUrl={apiBaseUrl}
+            locale={config.locale ?? 'en'}
+            timezone={profile?.timeZone ?? config.timezone ?? 'UTC'}
+            currency={config.currency ?? 'USD'}
+          >
+            <SmartCrudRolesProvider roles={session.roles}>
+              <SessionPermissionsProvider
+                permissions={profile?.permissions}
+                limits={profile?.limits}
+              >
+                <BrowserRouter>
+                  <Wrapper>
+                    {config.hydra === false ? (
+                      shell
+                    ) : (
+                      <MercureProvider>
+                        <SchemaProvider>
+                          <HydraResourceSchemaProvider>
+                            <HydraResourceStoreProvider>{shell}</HydraResourceStoreProvider>
+                          </HydraResourceSchemaProvider>
+                        </SchemaProvider>
+                      </MercureProvider>
+                    )}
+                  </Wrapper>
+                </BrowserRouter>
+                <ToastHost toasts={toasts} onDismiss={dismiss} />
+                {devToolsEnabled && <NubitDevToolsPanel />}
+              </SessionPermissionsProvider>
+            </SmartCrudRolesProvider>
+          </CoreConfigProvider>
+        </CoreProvider>
+      </DevToolsProvider>
+    </ErrorBoundary>
   );
 
   if (session.session.status === 'authenticated') {
@@ -147,13 +186,27 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
 
   return (
     <BrowserRouter>
-      <LoginPage
-        apiBaseUrl={apiBaseUrl}
-        title={config.login?.title ?? config.title}
-        hint={config.login?.hint}
-        defaultUsername={config.login?.defaultUsername}
-        onLoggedIn={() => void session.refresh()}
-      />
+      <Routes>
+        <Route path="/forgot-password" element={<ForgotPasswordPage apiBaseUrl={apiBaseUrl} />} />
+        <Route path="/reset-password" element={<ResetPasswordPage apiBaseUrl={apiBaseUrl} />} />
+        <Route
+          path="/invitations/:token/accept"
+          element={<AcceptInvitationPage apiBaseUrl={apiBaseUrl} />}
+        />
+        <Route
+          path="*"
+          element={
+            <LoginPage
+              apiBaseUrl={apiBaseUrl}
+              title={config.login?.title ?? config.title}
+              hint={config.login?.hint}
+              defaultUsername={config.login?.defaultUsername}
+              oidcProviders={config.login?.oidcProviders}
+              onLoggedIn={() => void session.refresh()}
+            />
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

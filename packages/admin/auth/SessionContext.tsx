@@ -13,6 +13,12 @@ export type SessionFeatureEntitlement = {
   config: Record<string, unknown>;
 };
 
+export type SessionPermissionLimit = {
+  amount: string;
+  currency: string;
+  scale: number;
+};
+
 export type SessionProfile = {
   username: string;
   roles: string[];
@@ -20,6 +26,12 @@ export type SessionProfile = {
   appProfile?: AppProfile;
   tenant?: SessionTenant;
   features?: Record<string, SessionFeatureEntitlement>;
+  /** Effective `resource.action` names when the authorization module is on. */
+  permissions?: string[];
+  /** Permission name → amount cap, as `/api/me` publishes it. */
+  limits?: Record<string, SessionPermissionLimit>;
+  /** IANA zone the UI must render timestamps in. Storage is always UTC. */
+  timeZone?: string;
 };
 
 export type SessionState =

@@ -48,10 +48,19 @@ export type {
   SessionProviderConfig,
   SessionContextValue,
   SessionTenant,
+  SessionPermissionLimit,
 } from './auth/SessionContext';
 
 export { LoginPage } from './auth/LoginPage';
-export type { LoginPageProps } from './auth/LoginPage';
+export type { LoginOidcProvider, LoginPageProps } from './auth/LoginPage';
+export { ForgotPasswordPage } from './auth/ForgotPasswordPage';
+export type { ForgotPasswordPageProps } from './auth/ForgotPasswordPage';
+export { ResetPasswordPage } from './auth/ResetPasswordPage';
+export type { ResetPasswordPageProps } from './auth/ResetPasswordPage';
+export { AcceptInvitationPage } from './auth/AcceptInvitationPage';
+export type { AcceptInvitationPageProps } from './auth/AcceptInvitationPage';
+export { AccountPage } from './auth/AccountPage';
+export type { AccountPageProps } from './auth/AccountPage';
 
 export { RegisterPage } from './auth/RegisterPage';
 export type {

@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/ui",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "description": "Visual primitives and theme system for the Nubit admin stack (dialogs, cards, toolbar, light/dark theme).",
   "license": "MIT",

@@ -63,6 +63,11 @@ git tag v0.2.0 && git push && git push --tags
 
 The [release workflow](.github/workflows/release.yml) validates, publishes every package to npm with provenance, and creates the GitHub Release with auto-generated notes. Requires the `NPM_TOKEN` repository secret.
 
+## Security
+
+Report vulnerabilities privately through the repository's **Security** tab; see
+[`SECURITY.md`](SECURITY.md) for scope, supported versions, and what to expect.
+
 ## License
 
 MIT

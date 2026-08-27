@@ -220,6 +220,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const panelId = `${inputId}-panel`;
   const strings = useUiStrings();
 
   const selectedDate = parseIsoDate(value);
@@ -449,8 +450,15 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
           disabled={disabled}
           readOnly={readOnly}
           aria-label={ariaLabel}
+          // A plain text input is implicitly role="textbox", which ARIA does
+          // not allow aria-expanded on. Combobox is the role that owns "text
+          // field that opens a popup" and is what the APG date-picker pattern
+          // uses, so the expanded state becomes announceable instead of
+          // invalid.
+          role="combobox"
           aria-haspopup="dialog"
           aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
           aria-invalid={invalid || undefined}
           aria-required={required || undefined}
           autoComplete="off"
@@ -488,6 +496,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
         createPortal(
           <div
             ref={panelRef}
+            id={panelId}
             className="nb-date-picker__panel"
             role="dialog"
             aria-label={strings.selectDate}

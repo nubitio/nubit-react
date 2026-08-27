@@ -39,8 +39,11 @@ export const Chip = ({
     <button
       type="button"
       role="checkbox"
+      // A chip is a multi-select filter, so checkbox semantics are the right
+      // ones. `aria-pressed` is a toggle-button attribute and ARIA does not
+      // allow it on role="checkbox" — carrying both made the state ambiguous
+      // to a screen reader and failed the AA gate.
       aria-checked={active}
-      aria-pressed={active}
       disabled={disabled}
       className={`nb-chip${sizeClass}${activeClass}${className ? ` ${className}` : ''}`}
       onClick={onClick}

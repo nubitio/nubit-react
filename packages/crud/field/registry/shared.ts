@@ -153,6 +153,20 @@ export function isEmptyWireValue(value: unknown): boolean {
 }
 
 /**
+ * TEXT-family wire format. A control the user never touched holds `null`, and
+ * sending that to a non-nullable column is rejected outright — a JSON column
+ * answers "must be array, NULL given", a varchar "must be string". Omission
+ * lets server defaults apply, exactly as for numerics below.
+ *
+ * An empty string is deliberately NOT omitted: for these types it is the
+ * cleared state the user chose, and it has to reach the backend for a field to
+ * be emptied at all.
+ */
+export function serializeOptionalTextValue(value: unknown): SerializedFieldValue {
+  return value === null || value === undefined ? OMIT : KEEP;
+}
+
+/**
  * NUMBER/CURRENCY wire format. An untouched/cleared numeric field is OMITTED,
  * not null/0: backends with string-decimal columns reject null ("must be
  * string, NULL given") and Number(null) would silently write 0. Omission lets

@@ -78,3 +78,39 @@ describe('serializeDetailRows — numeric fields', () => {
     expect(rows[1].netAmount).toBe('12.50');
   });
 });
+
+describe('serializeFormFields — text-family fields', () => {
+  it('omits an untouched (null) field instead of sending null', () => {
+    // Regression: a JSON column declared `array` with a `[]` default rejects
+    // null outright ("must be array, NULL given"), so a form where the user
+    // never touched the field could not create a row at all.
+    const fields = [textField().name('specs').label('Specs').required(false).build()];
+    const out = serializeFormFields({ name: 'Plan', specs: null }, fields, { uploadedFiles: [] });
+
+    expect(out).not.toHaveProperty('specs');
+    expect(out['name']).toBe('Plan');
+  });
+
+  it('omits an undefined field', () => {
+    const fields = [textField().name('specs').label('Specs').required(false).build()];
+    const out = serializeFormFields({ name: 'Plan', specs: undefined }, fields, {
+      uploadedFiles: [],
+    });
+
+    expect(out).not.toHaveProperty('specs');
+  });
+
+  it('keeps an empty string — that is the cleared state, not an absent value', () => {
+    const fields = [textField().name('notes').label('Notes').required(false).build()];
+    const out = serializeFormFields({ notes: '' }, fields, { uploadedFiles: [] });
+
+    expect(out['notes']).toBe('');
+  });
+
+  it('keeps ordinary values untouched', () => {
+    const fields = [textField().name('sku').label('Sku').required(false).build()];
+    const out = serializeFormFields({ sku: 'HOST-1' }, fields, { uploadedFiles: [] });
+
+    expect(out['sku']).toBe('HOST-1');
+  });
+});

@@ -6,6 +6,12 @@ name: Release
 #   3. This workflow validates, publishes all packages to npm with provenance,
 #      and creates a GitHub Release with auto-generated notes.
 #
+# Release candidates use the same flow with a prerelease version
+# (set-version.mjs 1.0.0-rc.1, tag v1.0.0-rc.1). They publish under the `rc`
+# dist-tag and are marked as prereleases on GitHub, so `npm install` keeps
+# resolving the last stable release. Consumers opt in with `^1.0.0-rc.1`,
+# which also matches the final 1.0.0 — no second edit when it ships.
+#
 # Requires the NPM_TOKEN repository secret (npm automation token with publish
 # rights on the @nubitio scope).
 
@@ -60,13 +66,30 @@ jobs:
       - name: Validate publish artifacts (publint + attw)
         run: pnpm validate:packages
 
+      # A prerelease must not become what `npm install @nubitio/…` resolves to.
+      # Anything with a hyphen in the version (1.0.0-rc.1) publishes under the
+      # `rc` dist-tag; only a final version takes `latest`.
+      - name: Resolve the dist-tag
+        id: dist
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          case "$VERSION" in
+            *-*) echo "tag=rc" >> "$GITHUB_OUTPUT"; echo "prerelease=true" >> "$GITHUB_OUTPUT" ;;
+            *)   echo "tag=latest" >> "$GITHUB_OUTPUT"; echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
       - name: Publish to npm (lockstep, dependency order)
-        run: pnpm publish -r --access public --no-git-checks
+        run: pnpm publish -r --access public --no-git-checks --tag "${{ steps.dist.outputs.tag }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: 'true'
 
       - name: Create GitHub Release with auto-generated notes
-        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          if [ "${{ steps.dist.outputs.prerelease }}" = "true" ]; then
+            gh release create "$GITHUB_REF_NAME" --generate-notes --prerelease
+          else
+            gh release create "$GITHUB_REF_NAME" --generate-notes
+          fi
         env:
           GH_TOKEN: ${{ github.token }}

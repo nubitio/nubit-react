@@ -33,22 +33,37 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
   const [totpMessage, setTotpMessage] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
 
-  const load = useCallback(async () => {
-    const [totpResponse, sessionResponse] = await Promise.all([
-      fetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include' }),
-      fetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include' }),
-    ]);
-    if (totpResponse.ok) {
-      setTotp((await totpResponse.json()) as TotpStatus);
-    }
-    if (sessionResponse.ok) {
-      const payload = (await sessionResponse.json()) as { sessions?: SessionRow[] };
-      setSessions(payload.sessions ?? []);
-    }
-  }, [apiBaseUrl]);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const [totpResponse, sessionResponse] = await Promise.all([
+        fetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include', signal }),
+        fetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include', signal }),
+      ]);
+      if (signal?.aborted) return;
+      if (totpResponse.ok) {
+        setTotp((await totpResponse.json()) as TotpStatus);
+      }
+      if (sessionResponse.ok) {
+        const payload = (await sessionResponse.json()) as { sessions?: SessionRow[] };
+        setSessions(payload.sessions ?? []);
+      }
+    },
+    [apiBaseUrl],
+  );
 
+  // Abort on unmount so a slow response cannot land on a gone component, and
+  // so leaving the page mid-request does not leave two fetches running.
   useEffect(() => {
-    void load();
+    const controller = new AbortController();
+    // Loading on mount is the point of this effect; the state it sets lands
+    // after an await, not during render. Same escape as DateRangePicker and
+    // SearchableAppDropdown.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load(controller.signal).catch((error: unknown) => {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) throw error;
+    });
+
+    return () => controller.abort();
   }, [load]);
 
   const changePassword = async (event: FormEvent) => {

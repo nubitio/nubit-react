@@ -105,7 +105,11 @@ export function tagsField<TRecord extends DataRecord = DataRecord>(
  * Builder for CURRENCY fields.
  *
  * Defaults applied automatically:
- *   sendAsString(true), align('right')
+ *   sendAsString(true), align('right'), precision(2)
+ *
+ * Use `precision(0)` for a column that stores minor units as an integer
+ * (`price_cents` as a bigint): the value is then sent as "1234", not "1234.00".
+ * For an amount that has to carry its own currency, prefer MONEY.
  *
  * Usage:
  *   new CurrencyFieldBuilder()
@@ -121,6 +125,10 @@ export class CurrencyFieldBuilder<
     super(FieldType.CURRENCY);
     this._field.sendAsString = true;
     this._field.align = 'right';
+    // Stated rather than inherited: the base default is 0, and the serializer
+    // used to paper over that with `|| 2`. A field that means "two decimals"
+    // has to say so, or `precision(0)` for an integer column can never be set.
+    this._field.precision = 2;
   }
 }
 

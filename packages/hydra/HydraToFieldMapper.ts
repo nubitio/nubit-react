@@ -162,6 +162,10 @@ function applyCrudHints(field: Field, hints: CrudHints | undefined, fieldName?: 
     field.width = hints.width;
     applied.push(`width=${hints.width}`);
   }
+  if (hints.precision !== undefined) {
+    field.precision = hints.precision;
+    applied.push(`precision=${hints.precision}`);
+  }
   if (hints.presentation !== undefined) {
     field.presentation = hints.presentation;
     applied.push(`presentation=${hints.presentation}`);

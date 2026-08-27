@@ -114,3 +114,24 @@ describe('serializeFormFields — text-family fields', () => {
     expect(out['sku']).toBe('HOST-1');
   });
 });
+
+describe('serializeFormFields — currency precision', () => {
+  it('sends two decimals by default', () => {
+    const fields = [currencyField().name('total').label('Total').required(false).build()];
+    const out = serializeFormFields({ total: 1234 }, fields, ctx);
+
+    expect(out['total']).toBe('1234.00');
+  });
+
+  it('honours precision 0 for an integer column of minor units', () => {
+    // Regression: `field.precision || 2` turned an explicit 0 back into 2, so a
+    // bigint column storing cents received "1234.00" and rejected the insert
+    // with "invalid input syntax for type bigint".
+    const fields = [
+      currencyField().name('priceCents').label('Price').required(false).precision(0).build(),
+    ];
+    const out = serializeFormFields({ priceCents: 1234 }, fields, ctx);
+
+    expect(out['priceCents']).toBe('1234');
+  });
+});

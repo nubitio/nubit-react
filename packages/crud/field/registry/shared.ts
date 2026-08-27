@@ -174,7 +174,10 @@ export function serializeOptionalTextValue(value: unknown): SerializedFieldValue
  */
 export function serializeNumericValue(field: Field, value: unknown): SerializedFieldValue {
   if (isEmptyWireValue(value)) return OMIT;
-  return set(field.sendAsString ? Number(value).toFixed(field.precision || 2) : Number(value));
+  // `??`, not `||`: precision 0 is meaningful — an integer column of minor
+  // units must serialize as "1234", and `0 || 2` would silently make it
+  // "1234.00", which a bigint column rejects outright.
+  return set(field.sendAsString ? Number(value).toFixed(field.precision ?? 2) : Number(value));
 }
 
 /**

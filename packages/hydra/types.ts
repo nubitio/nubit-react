@@ -55,6 +55,12 @@ export interface CrudHints {
   order?: number;
   /** Column width in pixels or as a CSS string. */
   width?: number;
+  /**
+   * Decimal places used when serializing a numeric/currency field. Set to 0 for
+   * a column that stores minor units as an integer, which would otherwise be
+   * sent as "1234.00" and rejected by an integer column.
+   */
+  precision?: number;
   /** Render the enum value using a richer presentation such as a badge. */
   presentation?: 'badge';
   /** Visual tone per enum value when `presentation` is `badge`. */

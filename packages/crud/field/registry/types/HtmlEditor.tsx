@@ -1,7 +1,16 @@
 import React, { useCallback, useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
+// Namespace imports, not named ones: TipTap is an optional peer, and bundlers
+// that stub a missing optional peer fail the build on unresolved *named*
+// exports. Reading the members off a namespace defers that to runtime, where
+// the lazy chunk is only ever fetched if an HTML field is rendered.
+import * as tiptapReact from '@tiptap/react';
+import * as tiptapStarterKit from '@tiptap/starter-kit';
+import * as tiptapLink from '@tiptap/extension-link';
+
+const useEditor = tiptapReact.useEditor;
+const EditorContent = tiptapReact.EditorContent;
+const StarterKit = tiptapStarterKit.default;
+const Link = tiptapLink.default;
 
 interface HtmlEditorProps {
   id?: string;

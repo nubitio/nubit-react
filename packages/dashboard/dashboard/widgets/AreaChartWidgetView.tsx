@@ -1,13 +1,17 @@
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+// Namespace import, no nombrado: recharts es un peer opcional y los
+// bundlers que stubean un peer ausente fallan al no encontrar los
+// *named exports* en el stub. Leerlos del namespace lo posterga al
+// runtime, donde este chunk solo se pide si el widget se renderiza.
+import * as recharts from 'recharts';
+
+const Area = recharts.Area;
+const AreaChart = recharts.AreaChart;
+const CartesianGrid = recharts.CartesianGrid;
+const Legend = recharts.Legend;
+const ResponsiveContainer = recharts.ResponsiveContainer;
+const Tooltip = recharts.Tooltip;
+const XAxis = recharts.XAxis;
+const YAxis = recharts.YAxis;
 import { StatCard } from '@nubitio/ui';
 import { DEFAULT_CHART_COLORS } from '../chartPalette';
 import { formatDashboardValue } from '../formatValue';

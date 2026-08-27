@@ -130,7 +130,9 @@ export function LoginPage({
               variant="secondary"
               type="button"
               onClick={() => {
-                window.location.assign(joinApiPath(apiBaseUrl, `auth/oidc/${provider.id}/redirect`));
+                window.location.assign(
+                  joinApiPath(apiBaseUrl, `auth/oidc/${provider.id}/redirect`),
+                );
               }}
             >
               {provider.label}

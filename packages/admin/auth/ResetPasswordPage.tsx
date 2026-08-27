@@ -73,7 +73,11 @@ export function ResetPasswordPage({ apiBaseUrl = '/api/' }: ResetPasswordPagePro
                   {error}
                 </p>
               )}
-              <Button variant="primary" type="submit" disabled={busy || token === '' || password.length < 8}>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={busy || token === '' || password.length < 8}
+              >
                 {busy ? 'Saving…' : 'Update password'}
               </Button>
             </>

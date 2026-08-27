@@ -40,6 +40,11 @@ function clean(node: Node): void {
     if (child.nodeType === Node.ELEMENT_NODE) {
       const element = child as HTMLElement;
       if (!ALLOWED_TAGS.has(element.tagName)) {
+        // Clean the subtree BEFORE unwrapping it. Promoted children are
+        // spliced into the parent after this loop took its snapshot, so they
+        // would never be visited again — `<div><img onerror=…></div>` would
+        // survive intact, with the wrapper stripped and the payload promoted.
+        clean(element);
         element.replaceWith(...Array.from(element.childNodes));
         continue;
       }

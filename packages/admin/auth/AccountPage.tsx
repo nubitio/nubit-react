@@ -138,7 +138,10 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
       <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{username}</p>
 
       <Card>
-        <form onSubmit={changePassword} style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 8 }}>
+        <form
+          onSubmit={changePassword}
+          style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 8 }}
+        >
           <h2 style={{ margin: 0, fontSize: '1rem' }}>Password</h2>
           <FormField label="Current password">
             <TextField
@@ -168,7 +171,9 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 8 }}>
           <h2 style={{ margin: 0, fontSize: '1rem' }}>Authenticator</h2>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-            {totp?.enrolled ? 'A second factor is enrolled on this account.' : 'No second factor yet.'}
+            {totp?.enrolled
+              ? 'A second factor is enrolled on this account.'
+              : 'No second factor yet.'}
           </p>
           {totpSecret && (
             <p style={{ margin: 0, wordBreak: 'break-all', fontSize: '0.75rem' }}>{totpSecret}</p>
@@ -204,12 +209,22 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
           {sessions.map((session) => (
             <div
               key={session.id}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+              }}
             >
               <span style={{ fontSize: '0.875rem' }}>
                 {session.lastUsedAt ?? session.createdAt ?? `Session ${session.id}`}
               </span>
-              <Button variant="secondary" size="sm" type="button" onClick={() => void revokeSession(session.id)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() => void revokeSession(session.id)}
+              >
                 Revoke
               </Button>
             </div>

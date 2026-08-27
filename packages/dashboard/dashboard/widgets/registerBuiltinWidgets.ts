@@ -14,11 +14,13 @@ registerWidgetType('donut-chart', DonutChartWidgetView);
 // mantiene la dependencia fuera del entry: una app que no use gráficos de
 // línea o área —  o que dibuje los suyos con otra librería —  no necesita
 // instalar recharts para compilar.
-registerWidgetType('line-chart', lazy(() =>
-  import('./LineChartWidgetView').then((m) => ({ default: m.LineChartWidgetView })),
-));
-registerWidgetType('area-chart', lazy(() =>
-  import('./AreaChartWidgetView').then((m) => ({ default: m.AreaChartWidgetView })),
-));
+registerWidgetType(
+  'line-chart',
+  lazy(() => import('./LineChartWidgetView').then((m) => ({ default: m.LineChartWidgetView }))),
+);
+registerWidgetType(
+  'area-chart',
+  lazy(() => import('./AreaChartWidgetView').then((m) => ({ default: m.AreaChartWidgetView }))),
+);
 registerWidgetType('progress', ProgressWidgetView);
 registerWidgetType('table', TableWidgetView);

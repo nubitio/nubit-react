@@ -23,6 +23,11 @@ export interface RegisterPageProps {
   fields: RegisterField[];
   onRegistered: () => void;
   apiBaseUrl?: string;
+  /**
+   * Relative to `apiBaseUrl`. The bundle does not ship open registration —
+   * invitations (`/api/invitations`) are the signup path. Pass the application's
+   * own endpoint; the default only exists so existing apps keep compiling.
+   */
   registerPath?: string;
   title?: string;
   hint?: string;

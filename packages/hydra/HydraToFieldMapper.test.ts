@@ -62,6 +62,22 @@ describe('mapHydraSchemaToFields', () => {
     expect(status?.toneByValue).toEqual({ draft: 'warning', paid: 'success' });
   });
 
+  it('forwards the currency and scale hints onto money fields', () => {
+    const fields = mapHydraSchemaToFields(
+      schemaWith([
+        {
+          name: 'price',
+          range: 'xsd:string',
+          crudHints: { format: 'money', currency: 'PEN', scale: 2 },
+        },
+      ]),
+    );
+
+    const price = fields.find((f) => f.name === 'price');
+    expect(price?.currency).toBe('PEN');
+    expect(price?.scale).toBe(2);
+  });
+
   it('keeps plain strings as text fields when no enum is present', () => {
     const fields = mapHydraSchemaToFields(schemaWith([{ name: 'note', range: 'xsd:string' }]));
     expect(fields.find((f) => f.name === 'note')?.type).toBe('text');

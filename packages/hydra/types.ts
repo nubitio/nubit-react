@@ -66,6 +66,15 @@ export interface CrudHints {
   /** Visual tone per enum value when `presentation` is `badge`. */
   toneByValue?: Record<string, string>;
   /**
+   * MONEY fields only: the ISO 4217 currency to assume while the amount is
+   * still empty (a fresh create form). A value with its own currency always
+   * wins; without this hint the field falls back to
+   * `configureCore({ currency })` and finally 'EUR'.
+   */
+  currency?: string;
+  /** MONEY fields only: decimal places accepted while typing. Defaults to the value's own scale, then 2. */
+  scale?: number;
+  /**
    * Render hint.
    *
    * 'money' is the exact form: the property is published as

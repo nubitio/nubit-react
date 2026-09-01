@@ -1,4 +1,4 @@
-import { formatMoney, parseMoney, parseMoneyInput } from '@nubitio/core';
+import { formatMoney, getCoreCurrency, parseMoney, parseMoneyInput } from '@nubitio/core';
 import type { MoneyValue } from '@nubitio/core';
 import type { FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultFilterCell } from '../filterHelpers';
@@ -18,9 +18,13 @@ import { defaultBuildFilterTerms, KEEP, NUMERIC_OPERATORS, OMIT } from '../share
  * declared on the field.
  */
 
-/** Where the editor keeps the currency while the user is typing a new amount. */
+/**
+ * Currency the editor assumes while the amount is still empty: the value's own
+ * currency, then an explicit `currency` on the field, then the app-wide default
+ * from `configureCore({ currency })`, and only as a last resort 'EUR'.
+ */
 function currencyFor(field: { currency?: string }, value: unknown): string {
-  return parseMoney(value)?.currency ?? field.currency ?? 'EUR';
+  return parseMoney(value)?.currency ?? field.currency ?? getCoreCurrency() ?? 'EUR';
 }
 
 function scaleFor(field: { scale?: number }, value: unknown): number {

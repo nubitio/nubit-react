@@ -30,7 +30,7 @@ const originalLocale = getCoreLocale();
 beforeEach(() => configureCore({ locale: 'en-US' }));
 afterEach(() => {
   cleanup();
-  configureCore({ locale: originalLocale });
+  configureCore({ locale: originalLocale, currency: undefined });
 });
 
 function field(over: Partial<Field> = {}): Field {
@@ -180,6 +180,21 @@ describe('MONEY control', () => {
 
   it('falls back to the field currency while the value is still empty', () => {
     renderControl({ value: null });
+    expect(screen.getByText('EUR').textContent).toBe('EUR');
+  });
+
+  it('falls back to the app-wide currency when neither the value nor the field names one', () => {
+    configureCore({ currency: 'PEN' });
+    const noCurrency = moneyField().name('total').label('Total').build();
+    renderControl({ value: null, field: noCurrency });
+    expect(screen.getByText('PEN').textContent).toBe('PEN');
+    configureCore({ currency: undefined });
+  });
+
+  it('uses EUR only when nothing — value, field, or app config — names a currency', () => {
+    configureCore({ currency: undefined });
+    const noCurrency = moneyField().name('total').label('Total').build();
+    renderControl({ value: null, field: noCurrency });
     expect(screen.getByText('EUR').textContent).toBe('EUR');
   });
 

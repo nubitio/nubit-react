@@ -263,6 +263,52 @@
   padding-right: 34px;
 }
 
+// ── Money field (amount + currency adornment) ──────────────────────────────────
+
+.nb-form__input-group.nb-money {
+  background: var(--control-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.nb-form__input-group.nb-money:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--focus-ring-color);
+}
+
+.nb-form__input-group.nb-money .nb-form__control {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  padding-right: 8px;
+  text-align: right;
+}
+
+.nb-form__input-group.nb-money .nb-form__control:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.nb-money__currency {
+  align-items: center;
+  background: var(--surface-2, rgba(0, 0, 0, 0.03));
+  border-left: 1px solid var(--border-color);
+  color: var(--text-tertiary);
+  display: flex;
+  font-size: var(--font-size-xs, 12px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
 .nb-form__input-actions {
   align-items: center;
   bottom: 0;

@@ -174,6 +174,14 @@ function applyCrudHints(field: Field, hints: CrudHints | undefined, fieldName?: 
     field.toneByValue = hints.toneByValue;
     applied.push('toneByValue');
   }
+  if (hints.currency !== undefined) {
+    field.currency = hints.currency;
+    applied.push(`currency=${hints.currency}`);
+  }
+  if (hints.scale !== undefined) {
+    field.scale = hints.scale;
+    applied.push(`scale=${hints.scale}`);
+  }
 
   return applied;
 }

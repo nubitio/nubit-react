@@ -1,6 +1,6 @@
 {
   "name": "@nubitio/admin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Admin shell layout components: responsive sidebar, header, and screen size utilities for Nubit apps.",
   "license": "MIT",

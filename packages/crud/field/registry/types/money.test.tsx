@@ -10,6 +10,7 @@
  * Tested through the FieldTypeModule interface, which is the surface the grid,
  * form and serializers actually consume.
  */
+import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { configureCore, getCoreLocale } from '@nubitio/core';
@@ -232,6 +233,56 @@ describe('MONEY control', () => {
     for (const call of setFieldValue.mock.calls) {
       expect(typeof call[1]).not.toBe('number');
     }
+  });
+
+  /**
+   * The form feeds each `setFieldValue` straight back as the next `value`, so
+   * the control re-renders with the parsed object while the user is still
+   * typing. The box must keep showing the digits typed, not the canonical
+   * "149.00" — otherwise the caret jumps past the decimals and the next digit
+   * turns "149" into "1.0049".
+   */
+  function renderLiveControl(initial: unknown) {
+    const setFieldValue = vi.fn();
+    function Harness() {
+      const [current, setCurrent] = useState<unknown>(initial);
+      return (
+        <>
+          {mod.ControlRender({
+            field: field(),
+            value: current,
+            error: undefined,
+            errorClass: '',
+            disabled: undefined,
+            readOnly: false,
+            commonProps: { name: 'total', id: 'total' } as never,
+            setFieldValue: (name, next) => {
+              setFieldValue(name, next);
+              setCurrent(next);
+            },
+            ctx: {} as never,
+          })}
+        </>
+      );
+    }
+    render(<Harness />);
+    return { setFieldValue, input: screen.getByRole('textbox') as HTMLInputElement };
+  }
+
+  it('shows the digits typed, not the canonical amount, while editing', () => {
+    const { setFieldValue, input } = renderLiveControl('');
+
+    for (const keystroke of ['1', '14', '149']) {
+      fireEvent.change(input, { target: { value: keystroke } });
+    }
+
+    expect(input.value).toBe('149');
+    expect(setFieldValue).toHaveBeenLastCalledWith('total', eur('149.00'));
+  });
+
+  it('re-syncs the box when the value changes from outside the input', () => {
+    const { input } = renderLiveControl(eur('10.00'));
+    expect(input.value).toBe('10.00');
   });
 });
 

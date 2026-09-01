@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { formatMoney, getCoreCurrency, parseMoney, parseMoneyInput } from '@nubitio/core';
 import type { MoneyValue } from '@nubitio/core';
-import type { FieldTypeModule } from '../FieldTypeModule';
+import type { FieldControlProps, FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultFilterCell } from '../filterHelpers';
 import { defaultBuildFilterTerms, KEEP, NUMERIC_OPERATORS, OMIT } from '../shared';
 
@@ -29,6 +30,69 @@ function currencyFor(field: { currency?: string }, value: unknown): string {
 
 function scaleFor(field: { scale?: number }, value: unknown): number {
   return parseMoney(value)?.scale ?? field.scale ?? 2;
+}
+
+/**
+ * The amount input keeps a local copy of exactly what the user typed.
+ *
+ * Reading the box's text straight off the parsed `amount` — the previous
+ * behaviour — canonicalises "149" to "149.00" between keystrokes and drops the
+ * caret past the decimals, so the next digit lands as "149.0" → "149.04": an
+ * amount nobody typed. Here the field value is still upgraded to the
+ * `{ amount, currency }` object as soon as the text is a complete amount; only
+ * the on-screen text is left verbatim until the field blurs or the value
+ * changes from outside this input (row switch, form reset, server echo).
+ */
+function MoneyControl({ field, value, commonProps, setFieldValue }: FieldControlProps) {
+  const currency = currencyFor(field as { currency?: string }, value);
+  const scale = scaleFor(field as { scale?: number }, value);
+
+  const money: MoneyValue | null = parseMoney(value);
+  const external = money ? money.amount : typeof value === 'string' ? value : '';
+
+  const [text, setText] = useState(external);
+  // What this input last pushed up. A change we caused leaves `external` equal
+  // to this, so the half-typed text stands; any other change re-syncs.
+  const emitted = useRef(external);
+
+  useEffect(() => {
+    if (external !== emitted.current) {
+      emitted.current = external;
+      setText(external);
+    }
+  }, [external]);
+
+  const commit = (raw: string): void => {
+    const parsed = parseMoneyInput(raw, currency, scale);
+    emitted.current = parsed.ok ? parsed.value.amount : raw;
+    // While the user is mid-keystroke the text is routinely not yet a valid
+    // amount ("12." on the way to "12.50"), so the raw text is kept and only a
+    // complete value is upgraded to the object shape.
+    setFieldValue(field.name, parsed.ok ? parsed.value : raw);
+  };
+
+  return (
+    <div className="nb-form__input-group nb-money">
+      <input
+        {...commonProps}
+        type="text"
+        inputMode="decimal"
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value);
+          commit(event.target.value);
+        }}
+        onBlur={() => {
+          const parsed = parseMoneyInput(text, currency, scale);
+          if (parsed.ok && parsed.value.amount !== text) {
+            emitted.current = parsed.value.amount;
+            setText(parsed.value.amount);
+          }
+        }}
+      />
+      <span className="nb-money__currency">{currency}</span>
+    </div>
+  );
 }
 
 export const moneyTypeModule: FieldTypeModule = {
@@ -73,37 +137,7 @@ export const moneyTypeModule: FieldTypeModule = {
   serializeDetailValue: (field, value) =>
     moneyTypeModule.serializeFormValue!(field, value, undefined as never),
 
-  ControlRender: ({ field, value, commonProps, setFieldValue }) => {
-    const money: MoneyValue | null = parseMoney(value);
-    const text = money ? money.amount : typeof value === 'string' ? value : '';
-
-    return (
-      <div className="nb-form__input-group nb-money">
-        <input
-          {...commonProps}
-          type="text"
-          inputMode="decimal"
-          value={text}
-          onChange={(event) => {
-            const raw = event.target.value;
-            const parsed = parseMoneyInput(
-              raw,
-              currencyFor(field as { currency?: string }, value),
-              scaleFor(field as { scale?: number }, value),
-            );
-
-            // While the user is mid-keystroke the text is routinely not yet a
-            // valid amount ("12." on the way to "12.50"), so the raw text is
-            // kept and only a complete value is upgraded to the object shape.
-            setFieldValue(field.name, parsed.ok ? parsed.value : raw);
-          }}
-        />
-        <span className="nb-money__currency">
-          {currencyFor(field as { currency?: string }, value)}
-        </span>
-      </div>
-    );
-  },
+  ControlRender: (props) => <MoneyControl {...props} />,
 
   FilterCellRender: (cell) => renderDefaultFilterCell(cell, NUMERIC_OPERATORS, 'text'),
 

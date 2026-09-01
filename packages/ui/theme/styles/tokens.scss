@@ -24,7 +24,9 @@
   // ── Typography ──────────────────────────────────────────────────────────────
   --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
-  --font-family-display: 'Syne', var(--font-family-sans);
+  // Single-family system: display = sans with tighter tracking/weight applied
+  // per component. (Was 'Syne'; the redesign is one typeface end to end.)
+  --font-family-display: var(--font-family-sans);
 
   // Scale: 11 → 12 → 13 → 14 → 16 → 20 → 24 → 28 → 32 → 40
   --font-size-xxs: 11px; // timestamps, badge labels, filter operators
@@ -60,11 +62,13 @@
   --space-10: 64px;
 
   // ── Border radius ───────────────────────────────────────────────────────────
-  --radius-xs: 3px; // status badges (rectangular, reads as state indicator)
-  --radius-sm: 4px; // pager buttons, small controls
-  --radius-md: 6px; // buttons, inputs, selects (unified control radius)
-  --radius-lg: 8px; // cards, panels, toolbars, dialogs
-  --radius-xl: 14px; // pill badges, tags, chip filters
+  // Redesign: rounder, modern-SaaS register.
+  --radius-xs: 6px; // small chips, inline tags
+  --radius-sm: 8px; // pager buttons, filter cells, small controls
+  --radius-md: 10px; // buttons, inputs, selects (unified control radius)
+  --radius-lg: 14px; // cards, panels, toolbars
+  --radius-xl: 20px; // dialogs, large panels
+  --radius-pill: 999px; // status pills, chip filters, avatars
 
   // ── Layout / shell dimensions ───────────────────────────────────────────────
   //

@@ -3,7 +3,7 @@ import { formatMoney, getCoreCurrency, parseMoney, parseMoneyInput } from '@nubi
 import type { MoneyValue } from '@nubitio/core';
 import type { FieldControlProps, FieldTypeModule } from '../FieldTypeModule';
 import { renderDefaultFilterCell } from '../filterHelpers';
-import { defaultBuildFilterTerms, KEEP, NUMERIC_OPERATORS, OMIT } from '../shared';
+import { defaultBuildFilterTerms, KEEP, NUMERIC_OPERATORS, OMIT, set } from '../shared';
 
 /**
  * A field holding an exact monetary amount.
@@ -104,6 +104,15 @@ export const moneyTypeModule: FieldTypeModule = {
   buildFilterTerms: defaultBuildFilterTerms,
 
   cellText: (_field, value) => formatMoney(parseMoney(value)),
+
+  /**
+   * The amount arrives as a `{ amount, currency, scale }` object, and the
+   * editor reads it back with `parseMoney`. Without this the generic
+   * normalizer strips every object value from the row, so an edit form opens
+   * with the money fields blank. Anything that is not a Money object is nulled
+   * so the control shows an empty box rather than a stray string or number.
+   */
+  normalizeFormValue: (_field, value) => (parseMoney(value) ? KEEP : set(null)),
 
   /**
    * The grid filters and sorts on minor units, which is what the backend column

@@ -19,10 +19,19 @@ import { moneyField } from '../../FieldBuilders';
 import { getFieldTypeModule } from '../registry';
 import { HydraAdapter } from '../../../adapter/HydraAdapter';
 import type { Field } from '../../Field';
-import type { FieldControlProps, SerializeFieldContext } from '../FieldTypeModule';
+import type {
+  FieldControlProps,
+  NormalizeFieldContext,
+  SerializeFieldContext,
+} from '../FieldTypeModule';
 
 const mod = getFieldTypeModule(FieldType.MONEY);
 const ctx: SerializeFieldContext = { adapter: HydraAdapter };
+const normalizeCtx: NormalizeFieldContext = {
+  adapter: HydraAdapter,
+  prependEntityOption: () => {},
+  getPrependData: () => undefined,
+};
 
 // Every assertion below depends on separator conventions, so the locale is
 // pinned rather than inherited — the suite's default is 'es', where '.' groups
@@ -145,6 +154,23 @@ describe('MONEY serialization', () => {
     expect(mod.serializeDetailValue!(field(), eur('9.99'), HydraAdapter)).toEqual(
       mod.serializeFormValue!(field(), eur('9.99'), ctx),
     );
+  });
+
+  it('keeps the Money object on the form row so an edit form pre-loads it', () => {
+    // The generic normalizer strips object values; without a MONEY normalizer
+    // the amount fields open blank on every edit.
+    expect(mod.normalizeFormValue!(field(), eur('149.00'), normalizeCtx)).toEqual({ kind: 'keep' });
+  });
+
+  it('nulls a non-Money value instead of leaving a stray scalar in the box', () => {
+    expect(mod.normalizeFormValue!(field(), 149, normalizeCtx)).toEqual({
+      kind: 'set',
+      value: null,
+    });
+    expect(mod.normalizeFormValue!(field(), undefined, normalizeCtx)).toEqual({
+      kind: 'set',
+      value: null,
+    });
   });
 });
 

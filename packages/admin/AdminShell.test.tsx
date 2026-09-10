@@ -77,6 +77,13 @@ describe('AdminShell rendering', () => {
     expect(screen.getByText('Dashboard')).toBeDefined();
     expect(screen.getByText('Products')).toBeDefined();
   });
+
+  it('makes the scrollable content region keyboard focusable with an accessible name', () => {
+    render(<Shell />);
+    const main = screen.getByRole('main');
+    expect(main.getAttribute('tabindex')).toBe('0');
+    expect(main.getAttribute('aria-label')).toBe('Test App content');
+  });
 });
 
 // ── menu state on large screen ────────────────────────────────────────────────

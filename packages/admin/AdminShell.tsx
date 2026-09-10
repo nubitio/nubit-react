@@ -150,7 +150,13 @@ export const AdminShell = ({
             onClick={closeMenuFromOverlay}
           />
         )}
-        <main className="nb-admin-shell__content content">{children}</main>
+        <main
+          className="nb-admin-shell__content content"
+          tabIndex={0}
+          aria-label={title ? `${title} content` : 'Main content'}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

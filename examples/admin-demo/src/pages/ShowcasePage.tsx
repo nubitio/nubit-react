@@ -30,6 +30,7 @@ import {
   Timeline,
   TimelineItem,
   Toggle,
+  Tooltip,
 } from '@nubitio/react-admin';
 import './ShowcasePage.css';
 
@@ -119,6 +120,9 @@ export function ShowcasePage() {
                 <Radio value="pro" label="Pro" />
               </RadioGroup>
               <Spinner />
+              <Tooltip content="Keyboard shortcut: ⌘S" delay={0}>
+                <Button variant="secondary">Hover me</Button>
+              </Tooltip>
             </div>
             <Alert tone="info">Inline alert for page-level feedback.</Alert>
             <FileDropzone onFileSelect={() => undefined} />

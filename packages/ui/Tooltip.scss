@@ -1,0 +1,15 @@
+.nb-tooltip {
+  display: inline-flex;
+}
+
+.nb-tooltip__panel {
+  background: var(--text-primary);
+  border-radius: var(--radius-sm);
+  color: var(--surface-1);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  max-width: 16rem;
+  padding: var(--space-1) var(--space-2);
+  pointer-events: none;
+  white-space: normal;
+}

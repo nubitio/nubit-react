@@ -23,6 +23,8 @@ export { Radio, RadioGroup } from './RadioGroup';
 export type { RadioGroupProps, RadioOrientation, RadioProps } from './RadioGroup';
 export { Spinner } from './Spinner';
 export type { SpinnerProps, SpinnerSize } from './Spinner';
+export { Tooltip } from './Tooltip';
+export type { TooltipPlacement, TooltipProps } from './Tooltip';
 export { FormField, SelectField, TextAreaField, TextField } from './FormControls';
 export type {
   FormFieldProps,

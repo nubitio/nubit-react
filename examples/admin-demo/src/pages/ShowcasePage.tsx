@@ -5,6 +5,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Checkbox,
   Chip,
   CollapsibleSection,
   ConfirmDialog,
@@ -16,9 +17,12 @@ import {
   FileDropzone,
   FilterPanel,
   IconButton,
+  Radio,
+  RadioGroup,
   ScopeTabs,
   SelectField,
   Skeleton,
+  Spinner,
   StatCard,
   TextAreaField,
   TextField,
@@ -37,6 +41,8 @@ export function ShowcasePage() {
   const [date, setDate] = useState('');
   const [range, setRange] = useState<[string, string]>(['', '']);
   const [sectionOpen, setSectionOpen] = useState(false);
+  const [checked, setChecked] = useState(true);
+  const [plan, setPlan] = useState('starter');
   const [scope, setScope] = useState<string | null>('all');
   const [category, setCategory] = useState<string | null>(null);
   const [status, setStatus] = useState('open');
@@ -107,6 +113,12 @@ export function ShowcasePage() {
                 <option value="pro">Pro</option>
               </SelectField>
               <TextAreaField placeholder="Notes…" rows={2} />
+              <Checkbox checked={checked} onChange={setChecked} label="Subscribe to updates" />
+              <RadioGroup value={plan} onChange={setPlan} aria-label="Plan" orientation="row">
+                <Radio value="starter" label="Starter" />
+                <Radio value="pro" label="Pro" />
+              </RadioGroup>
+              <Spinner />
             </div>
             <Alert tone="info">Inline alert for page-level feedback.</Alert>
             <FileDropzone onFileSelect={() => undefined} />

@@ -17,6 +17,12 @@ export { Button, IconButton } from './Button';
 export type { ButtonProps, ButtonSize, ButtonVariant, IconButtonProps } from './Button';
 export { Card } from './Card';
 export type { CardProps, CardVariant } from './Card';
+export { Checkbox } from './Checkbox';
+export type { CheckboxProps } from './Checkbox';
+export { Radio, RadioGroup } from './RadioGroup';
+export type { RadioGroupProps, RadioOrientation, RadioProps } from './RadioGroup';
+export { Spinner } from './Spinner';
+export type { SpinnerProps, SpinnerSize } from './Spinner';
 export { FormField, SelectField, TextAreaField, TextField } from './FormControls';
 export type {
   FormFieldProps,

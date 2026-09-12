@@ -57,6 +57,8 @@ export interface UiStrings {
   pages: string;
   previousPage: string;
   nextPage: string;
+  /** Spinner accessible name. */
+  loading: string;
 }
 
 export const EN_UI_STRINGS: UiStrings = {
@@ -86,6 +88,7 @@ export const EN_UI_STRINGS: UiStrings = {
   pages: 'Pages',
   previousPage: 'Previous page',
   nextPage: 'Next page',
+  loading: 'Loading',
 };
 
 export const ES_UI_STRINGS: UiStrings = {
@@ -115,6 +118,7 @@ export const ES_UI_STRINGS: UiStrings = {
   pages: 'Páginas',
   previousPage: 'Página anterior',
   nextPage: 'Página siguiente',
+  loading: 'Cargando',
 };
 
 const UiStringsContext = createContext<UiStrings>(EN_UI_STRINGS);

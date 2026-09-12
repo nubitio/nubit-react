@@ -1,3 +1,5 @@
+@use './foundations/spinner' as *;
+
 // ── Buttons ───────────────────────────────────────────────────────────────────
 // Fluent-inspired action primitives for toolbar and form contexts.
 //
@@ -204,17 +206,5 @@
 // ── Loading spinner ────────────────────────────────────────────────────────────
 
 .nb-button-spinner {
-  animation: app-spinner-rotate 700ms linear infinite;
-  border: 2px solid color-mix(in srgb, currentcolor 25%, transparent);
-  border-radius: 50%;
-  border-top-color: currentcolor;
-  display: inline-block;
-  height: 14px;
-  width: 14px;
-}
-
-@keyframes app-spinner-rotate {
-  to {
-    transform: rotate(360deg);
-  }
+  @include nb-spinner-mark(14px);
 }

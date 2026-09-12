@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Alert, type AlertTone } from '@nubitio/ui';
 import './QuotaUsageBanner.scss';
 
 export interface QuotaUsageBannerProps {
@@ -33,6 +34,7 @@ export function QuotaUsageBanner({
   const atLimit = count >= max;
   const nearLimit = count === max - 1;
   const tone = atLimit ? 'limit' : nearLimit ? 'warn' : 'default';
+  const alertTone: AlertTone = atLimit ? 'danger' : nearLimit ? 'warning' : 'info';
 
   const detail = atLimit
     ? (atLimitMessage ?? `You reached your ${planLabel ?? 'plan'} limit.`)
@@ -47,9 +49,9 @@ export function QuotaUsageBanner({
   ) : null;
 
   return (
-    <div
+    <Alert
+      tone={alertTone}
       className={`nb-quota-banner nb-quota-banner--${tone}${className ? ` ${className}` : ''}`}
-      role="status"
     >
       <div className="nb-quota-banner__copy">
         <strong>
@@ -58,7 +60,7 @@ export function QuotaUsageBanner({
         <span>{detail}</span>
       </div>
       {(atLimit || nearLimit) && upgradeLink}
-    </div>
+    </Alert>
   );
 }
 

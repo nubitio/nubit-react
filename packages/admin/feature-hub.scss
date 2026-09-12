@@ -122,32 +122,7 @@
 // ── Banner ────────────────────────────────────────────────────────────────────
 
 .nb-feature-hub__banner {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
   margin: var(--space-4) var(--page-padding) 0;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-sm);
-  line-height: 1.45;
-  border-radius: var(--radius-lg);
-
-  .ph {
-    flex-shrink: 0;
-    margin-top: 0.1rem;
-    font-size: var(--control-icon-size);
-  }
-
-  &--info {
-    color: var(--status-info-text, #0369a1);
-    background: var(--status-info-bg, #e0f2fe);
-    border: 1px solid var(--status-info-border, #7dd3fc);
-  }
-
-  &--warning {
-    color: var(--status-warning-text, #b45309);
-    background: var(--status-warning-bg, #fef3c7);
-    border: 1px solid var(--status-warning-border, #fcd34d);
-  }
 }
 
 // ── Content ───────────────────────────────────────────────────────────────────

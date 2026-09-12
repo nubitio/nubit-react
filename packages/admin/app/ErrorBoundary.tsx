@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Button } from '@nubitio/ui';
+import { Button, EmptyState, Page } from '@nubitio/ui';
 
 interface Props {
   children: ReactNode;
@@ -29,21 +29,24 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     return (
-      <div role="alert" style={{ padding: 24, maxWidth: 480 }}>
-        <h1 style={{ margin: '0 0 8px', fontSize: '1.25rem' }}>Something went wrong</h1>
-        <p style={{ margin: '0 0 16px', color: 'var(--text-secondary)' }}>
-          Reload the page. If it happens again, the last action is in the browser console.
-        </p>
-        <Button
-          variant="primary"
-          onClick={() => {
-            this.setState({ error: null });
-            window.location.reload();
-          }}
-        >
-          Reload
-        </Button>
-      </div>
+      <Page narrow>
+        <EmptyState
+          variant="danger"
+          title="Something went wrong"
+          description="Reload the page. If it happens again, the last action is in the browser console."
+          action={
+            <Button
+              variant="primary"
+              onClick={() => {
+                this.setState({ error: null });
+                window.location.reload();
+              }}
+            >
+              Reload
+            </Button>
+          }
+        />
+      </Page>
     );
   }
 }

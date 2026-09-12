@@ -5,29 +5,46 @@ import {
   Avatar,
   Badge,
   Button,
+  Card,
   Checkbox,
   Chip,
+  Cluster,
+  Code,
+  Col,
   CollapsibleSection,
   ConfirmDialog,
   DataTable,
+  DescriptionList,
   DatePicker,
   DateRangePicker,
   Drawer,
   EmptyState,
   FileDropzone,
   FilterPanel,
+  FormActions,
+  Grid,
+  HubPanel,
   IconButton,
+  KpiMetricRow,
   Radio,
+  OperationCardGrid,
+  Page,
+  PageHeader,
   RadioGroup,
+  Row,
   ScopeTabs,
+  Section,
+  SegmentedControl,
   SelectField,
   Skeleton,
   Spinner,
+  Stack,
   StatCard,
   Tab,
   TabList,
   TabPanel,
   Tabs,
+  Text,
   TextAreaField,
   TextField,
   ThemeSwitcher,
@@ -50,6 +67,7 @@ export function ShowcasePage() {
   const [checked, setChecked] = useState(true);
   const [plan, setPlan] = useState('starter');
   const [tab, setTab] = useState('overview');
+  const [density, setDensity] = useState('default');
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; tone?: 'success' | 'error' }>
   >([]);
@@ -59,284 +77,363 @@ export function ShowcasePage() {
 
   return (
     <div className="view-wrapper-scroll">
-      <div className="showcase">
-        <header className="showcase__header">
-          <h1>UI Showcase</h1>
-          <p>The @nubitio/ui primitives, styled by the design tokens and the active theme.</p>
-        </header>
+      <Page>
+        <PageHeader
+          title="UI Showcase"
+          subtitle="The @nubitio/ui primitives, styled by the design tokens and the active theme."
+        />
+        <div className="showcase">
+          <div className="showcase__grid">
+            <section className="showcase__section">
+              <h2>Buttons</h2>
+              <div className="showcase__row">
+                <Button variant="primary">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="danger">Danger</Button>
+                <Button variant="primary" disabled>
+                  Disabled
+                </Button>
+                <IconButton icon="ph ph-gear" label="Settings" />
+              </div>
+              <div className="showcase__row">
+                <Button variant="primary" size="sm">
+                  Small
+                </Button>
+                <Button variant="secondary" size="sm">
+                  Small
+                </Button>
+                <Button variant="primary">
+                  <i className="ph ph-plus" /> With icon
+                </Button>
+              </div>
+            </section>
 
-        <div className="showcase__grid">
-          <section className="showcase__section">
-            <h2>Buttons</h2>
-            <div className="showcase__row">
-              <Button variant="primary">Primary</Button>
-              <Button variant="secondary">Secondary</Button>
-              <Button variant="danger">Danger</Button>
-              <Button variant="primary" disabled>
-                Disabled
-              </Button>
-              <IconButton icon="ph ph-gear" label="Settings" />
-            </div>
-            <div className="showcase__row">
-              <Button variant="primary" size="sm">
-                Small
-              </Button>
-              <Button variant="secondary" size="sm">
-                Small
-              </Button>
-              <Button variant="primary">
-                <i className="ph ph-plus" /> With icon
-              </Button>
-            </div>
-          </section>
+            <section className="showcase__section">
+              <h2>Badges, chips &amp; avatars</h2>
+              <div className="showcase__row">
+                <Badge>Default</Badge>
+                <Badge variant="success">Success</Badge>
+                <Badge variant="warning">Warning</Badge>
+                <Badge variant="danger">Danger</Badge>
+              </div>
+              <div className="showcase__row">
+                <Chip label="All" active />
+                <Chip label="Pending" count={3} />
+                <Chip label="Archived" icon="ph ph-archive" />
+              </div>
+              <div className="showcase__row">
+                <Avatar owner="Johan Guerreros" />
+                <Avatar owner="Ada Lovelace" />
+                <Avatar owner="Grace Hopper" />
+                <Toggle checked={toggled} onChange={setToggled} label="Notifications" />
+              </div>
+            </section>
 
-          <section className="showcase__section">
-            <h2>Badges, chips &amp; avatars</h2>
-            <div className="showcase__row">
-              <Badge>Default</Badge>
-              <Badge variant="success">Success</Badge>
-              <Badge variant="warning">Warning</Badge>
-              <Badge variant="danger">Danger</Badge>
-            </div>
-            <div className="showcase__row">
-              <Chip label="All" active />
-              <Chip label="Pending" count={3} />
-              <Chip label="Archived" icon="ph ph-archive" />
-            </div>
-            <div className="showcase__row">
-              <Avatar owner="Johan Guerreros" />
-              <Avatar owner="Ada Lovelace" />
-              <Avatar owner="Grace Hopper" />
-              <Toggle checked={toggled} onChange={setToggled} label="Notifications" />
-            </div>
-          </section>
+            <section className="showcase__section">
+              <h2>Form controls</h2>
+              <div className="showcase__stack">
+                <TextField placeholder="Your name" aria-label="Your name" />
+                <SelectField defaultValue="" aria-label="Plan">
+                  <option value="" disabled>
+                    Choose a plan…
+                  </option>
+                  <option value="starter">Starter</option>
+                  <option value="pro">Pro</option>
+                </SelectField>
+                <TextAreaField placeholder="Notes…" rows={2} />
+                <Checkbox checked={checked} onChange={setChecked} label="Subscribe to updates" />
+                <RadioGroup value={plan} onChange={setPlan} aria-label="Plan" orientation="row">
+                  <Radio value="starter" label="Starter" />
+                  <Radio value="pro" label="Pro" />
+                </RadioGroup>
+                <Spinner />
+                <Tooltip content="Keyboard shortcut: ⌘S" delay={0}>
+                  <Button variant="secondary">Hover me</Button>
+                </Tooltip>
+                <Button
+                  variant="primary"
+                  onClick={() =>
+                    setToasts((current) => [
+                      ...current,
+                      { id: String(Date.now()), message: 'Saved', tone: 'success' },
+                    ])
+                  }
+                >
+                  Show toast
+                </Button>
+              </div>
+              <Alert tone="info">Inline alert for page-level feedback.</Alert>
+              <FileDropzone onFileSelect={() => undefined} />
+            </section>
 
-          <section className="showcase__section">
-            <h2>Form controls</h2>
-            <div className="showcase__stack">
-              <TextField placeholder="Your name" aria-label="Your name" />
-              <SelectField defaultValue="" aria-label="Plan">
-                <option value="" disabled>
-                  Choose a plan…
-                </option>
-                <option value="starter">Starter</option>
-                <option value="pro">Pro</option>
-              </SelectField>
-              <TextAreaField placeholder="Notes…" rows={2} />
-              <Checkbox checked={checked} onChange={setChecked} label="Subscribe to updates" />
-              <RadioGroup value={plan} onChange={setPlan} aria-label="Plan" orientation="row">
-                <Radio value="starter" label="Starter" />
-                <Radio value="pro" label="Pro" />
-              </RadioGroup>
-              <Spinner />
-              <Tooltip content="Keyboard shortcut: ⌘S" delay={0}>
-                <Button variant="secondary">Hover me</Button>
-              </Tooltip>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  setToasts((current) => [
-                    ...current,
-                    { id: String(Date.now()), message: 'Saved', tone: 'success' },
-                  ])
-                }
-              >
-                Show toast
-              </Button>
-            </div>
-            <Alert tone="info">Inline alert for page-level feedback.</Alert>
-            <FileDropzone onFileSelect={() => undefined} />
-          </section>
-
-          <section className="showcase__section showcase__section--wide">
-            <h2>Filters &amp; tables</h2>
-            <Tabs value={tab} onChange={setTab}>
-              <TabList ariaLabel="Showcase tabs">
-                <Tab value="overview">Overview</Tab>
-                <Tab value="details">Details</Tab>
-              </TabList>
-              <TabPanel value="overview">
-                Overview panel — always available even with one tab.
-              </TabPanel>
-              <TabPanel value="details">Details panel.</TabPanel>
-            </Tabs>
-            <ScopeTabs
-              ariaLabel="Warehouse"
-              options={[
-                { key: 'lima', label: 'Lima' },
-                { key: 'cusco', label: 'Cusco' },
-              ]}
-              selectedKey={scope}
-              onChange={setScope}
-              allLabel="All"
-            />
-            <FilterPanel
-              category={{
-                title: 'Category',
-                options: [
-                  { key: 'a', label: 'Alpha' },
-                  { key: 'b', label: 'Beta' },
-                ],
-                selectedKey: category,
-                onSelect: setCategory,
-                ariaLabel: 'Category',
-              }}
-              status={{
-                title: 'Status',
-                options: [
-                  { value: 'open', label: 'Open' },
-                  { value: 'done', label: 'Done' },
-                ],
-                value: status,
-                onChange: setStatus,
-                ariaLabel: 'Status',
-              }}
-            />
-            <DataTable
-              getRowKey={(row) => row.id}
-              columns={[
-                { id: 'name', header: 'Name', accessor: (row) => row.name },
-                { id: 'qty', header: 'Qty', align: 'right', accessor: (row) => row.qty },
-              ]}
-              rows={[
-                { id: '1', name: 'Widget', qty: 12 },
-                { id: '2', name: 'Gadget', qty: 4 },
-              ]}
-            />
-          </section>
-
-          <section className="showcase__section">
-            <h2>Dates</h2>
-            <div className="showcase__stack">
-              <DatePicker value={date} onChange={setDate} />
-              <DateRangePicker
-                startValue={range[0]}
-                endValue={range[1]}
-                onChange={(start, end) => setRange([start, end])}
+            <section className="showcase__section showcase__section--wide">
+              <h2>Filters &amp; tables</h2>
+              <Tabs value={tab} onChange={setTab}>
+                <TabList ariaLabel="Showcase tabs">
+                  <Tab value="overview">Overview</Tab>
+                  <Tab value="details">Details</Tab>
+                </TabList>
+                <TabPanel value="overview">
+                  Overview panel — always available even with one tab.
+                </TabPanel>
+                <TabPanel value="details">Details panel.</TabPanel>
+              </Tabs>
+              <ScopeTabs
+                ariaLabel="Warehouse"
+                options={[
+                  { key: 'lima', label: 'Lima' },
+                  { key: 'cusco', label: 'Cusco' },
+                ]}
+                selectedKey={scope}
+                onChange={setScope}
+                allLabel="All"
               />
-            </div>
-          </section>
-
-          <section className="showcase__section">
-            <h2>Overlays</h2>
-            <div className="showcase__row">
-              <Button variant="secondary" onClick={() => setDialogOpen(true)}>
-                Dialog
-              </Button>
-              <Button variant="secondary" onClick={() => setConfirmOpen(true)}>
-                Confirm
-              </Button>
-              <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
-                Drawer
-              </Button>
-            </div>
-            <CollapsibleSection
-              label="Collapsible section"
-              open={sectionOpen}
-              onToggle={() => setSectionOpen((v) => !v)}
-            >
-              <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                Hidden content lives here — useful for advanced filters or settings.
-              </p>
-            </CollapsibleSection>
-          </section>
-
-          <section className="showcase__section">
-            <h2>Feedback</h2>
-            <Skeleton variant="text" lines={3} />
-            <EmptyState
-              icon="tray"
-              title="Nothing here yet"
-              description="Empty state with icon, title and description."
-            />
-          </section>
-
-          <section className="showcase__section showcase__section--wide">
-            <h2>Timelines</h2>
-            <Timeline variant="stepper" orientation="horizontal" aria-label="Checkout steps">
-              <TimelineItem status="complete" title="Cart" marker={<i className="ph ph-check" />} />
-              <TimelineItem
-                status="complete"
-                title="Shipping"
-                marker={<i className="ph ph-check" />}
+              <FilterPanel
+                category={{
+                  title: 'Category',
+                  options: [
+                    { key: 'a', label: 'Alpha' },
+                    { key: 'b', label: 'Beta' },
+                  ],
+                  selectedKey: category,
+                  onSelect: setCategory,
+                  ariaLabel: 'Category',
+                }}
+                status={{
+                  title: 'Status',
+                  options: [
+                    { value: 'open', label: 'Open' },
+                    { value: 'done', label: 'Done' },
+                  ],
+                  value: status,
+                  onChange: setStatus,
+                  ariaLabel: 'Status',
+                }}
               />
-              <TimelineItem status="current" title="Payment" marker="3" />
-              <TimelineItem status="pending" title="Confirmation" marker="4" />
-            </Timeline>
-            <div className="showcase__row" style={{ alignItems: 'flex-start', gap: 24 }}>
-              <Timeline
-                variant="stepper"
-                title="F001-672"
-                description="Document lifecycle"
-                aria-label="Document lifecycle"
+              <DataTable
+                getRowKey={(row) => row.id}
+                columns={[
+                  { id: 'name', header: 'Name', accessor: (row) => row.name },
+                  { id: 'qty', header: 'Qty', align: 'right', accessor: (row) => row.qty },
+                ]}
+                rows={[
+                  { id: '1', name: 'Widget', qty: 12 },
+                  { id: '2', name: 'Gadget', qty: 4 },
+                ]}
+              />
+            </section>
+
+            <section className="showcase__section">
+              <h2>Dates</h2>
+              <div className="showcase__stack">
+                <DatePicker value={date} onChange={setDate} />
+                <DateRangePicker
+                  startValue={range[0]}
+                  endValue={range[1]}
+                  onChange={(start, end) => setRange([start, end])}
+                />
+              </div>
+            </section>
+
+            <section className="showcase__section">
+              <h2>Overlays</h2>
+              <div className="showcase__row">
+                <Button variant="secondary" onClick={() => setDialogOpen(true)}>
+                  Dialog
+                </Button>
+                <Button variant="secondary" onClick={() => setConfirmOpen(true)}>
+                  Confirm
+                </Button>
+                <Button variant="secondary" onClick={() => setDrawerOpen(true)}>
+                  Drawer
+                </Button>
+              </div>
+              <CollapsibleSection
+                label="Collapsible section"
+                open={sectionOpen}
+                onToggle={() => setSectionOpen((v) => !v)}
               >
-                <TimelineItem status="complete" title="Draft created" />
-                <TimelineItem status="complete" title="Sent to tax authority" />
-                <TimelineItem status="current" title="Awaiting acknowledgement" />
-                <TimelineItem status="error" title="Rejected · code 2017" />
-              </Timeline>
-              <Timeline
-                variant="log"
-                title="ACME Corp"
-                description="Change history"
-                aria-label="Change history"
-              >
+                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                  Hidden content lives here — useful for advanced filters or settings.
+                </p>
+              </CollapsibleSection>
+            </section>
+
+            <section className="showcase__section">
+              <h2>Feedback</h2>
+              <Skeleton variant="text" lines={3} />
+              <EmptyState
+                icon="tray"
+                title="Nothing here yet"
+                description="Empty state with icon, title and description."
+              />
+            </section>
+
+            <section className="showcase__section showcase__section--wide">
+              <h2>Timelines</h2>
+              <Timeline variant="stepper" orientation="horizontal" aria-label="Checkout steps">
                 <TimelineItem
                   status="complete"
-                  tone="info"
-                  title="jane@example.com"
-                  timestamp="6/12/2026, 8:23 AM"
-                  dateTime="2026-06-12T08:23:00"
-                >
-                  <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                    Phone: <s style={{ color: 'var(--error-color)' }}>903 303 704</s> →{' '}
-                    <span style={{ color: 'var(--success-color)' }}>999 888 777</span>
-                  </p>
-                </TimelineItem>
+                  title="Cart"
+                  marker={<i className="ph ph-check" />}
+                />
                 <TimelineItem
                   status="complete"
-                  tone="success"
-                  title="jane@example.com"
-                  timestamp="6/11/2026, 4:02 PM"
-                  dateTime="2026-06-11T16:02:00"
-                >
-                  <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Record created</p>
-                </TimelineItem>
+                  title="Shipping"
+                  marker={<i className="ph ph-check" />}
+                />
+                <TimelineItem status="current" title="Payment" marker="3" />
+                <TimelineItem status="pending" title="Confirmation" marker="4" />
               </Timeline>
-            </div>
-          </section>
+              <div className="showcase__row" style={{ alignItems: 'flex-start', gap: 24 }}>
+                <Timeline
+                  variant="stepper"
+                  title="F001-672"
+                  description="Document lifecycle"
+                  aria-label="Document lifecycle"
+                >
+                  <TimelineItem status="complete" title="Draft created" />
+                  <TimelineItem status="complete" title="Sent to tax authority" />
+                  <TimelineItem status="current" title="Awaiting acknowledgement" />
+                  <TimelineItem status="error" title="Rejected · code 2017" />
+                </Timeline>
+                <Timeline
+                  variant="log"
+                  title="ACME Corp"
+                  description="Change history"
+                  aria-label="Change history"
+                >
+                  <TimelineItem
+                    status="complete"
+                    tone="info"
+                    title="jane@example.com"
+                    timestamp="6/12/2026, 8:23 AM"
+                    dateTime="2026-06-12T08:23:00"
+                  >
+                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                      Phone: <s style={{ color: 'var(--error-color)' }}>903 303 704</s> →{' '}
+                      <span style={{ color: 'var(--success-color)' }}>999 888 777</span>
+                    </p>
+                  </TimelineItem>
+                  <TimelineItem
+                    status="complete"
+                    tone="success"
+                    title="jane@example.com"
+                    timestamp="6/11/2026, 4:02 PM"
+                    dateTime="2026-06-11T16:02:00"
+                  >
+                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Record created</p>
+                  </TimelineItem>
+                </Timeline>
+              </div>
+            </section>
 
-          <section className="showcase__section showcase__section--wide">
-            <h2>Stat cards</h2>
-            <div className="showcase__stats">
-              <StatCard title="Revenue (month)">
-                <div className="showcase__stat-value">$12,480</div>
-                <div className="showcase__stat-trend">▲ 12.4% vs last month</div>
-              </StatCard>
-              <StatCard title="Orders">
-                <div className="showcase__stat-value">356</div>
-                <div className="showcase__stat-trend">▲ 4.1%</div>
-              </StatCard>
-              <StatCard title="Active customers">
-                <div className="showcase__stat-value">1,209</div>
-              </StatCard>
-              <StatCard title="Loading state" isLoading>
-                <div className="showcase__stat-value">—</div>
-              </StatCard>
-            </div>
-          </section>
+            <section className="showcase__section showcase__section--wide">
+              <h2>Stat cards</h2>
+              <div className="showcase__stats">
+                <StatCard title="Revenue (month)">
+                  <div className="showcase__stat-value">$12,480</div>
+                  <div className="showcase__stat-trend">▲ 12.4% vs last month</div>
+                </StatCard>
+                <StatCard title="Orders">
+                  <div className="showcase__stat-value">356</div>
+                  <div className="showcase__stat-trend">▲ 4.1%</div>
+                </StatCard>
+                <StatCard title="Active customers">
+                  <div className="showcase__stat-value">1,209</div>
+                </StatCard>
+                <StatCard title="Loading state" isLoading>
+                  <div className="showcase__stat-value">—</div>
+                </StatCard>
+              </div>
+            </section>
 
-          <section className="showcase__section">
-            <h2>Theme</h2>
-            <div className="showcase__row">
-              <ThemeSwitcher />
-              <span style={{ color: 'var(--text-secondary)' }}>
-                Cycles light / dark / system — every component re-themes from the tokens.
-              </span>
-            </div>
-          </section>
+            <section className="showcase__section showcase__section--wide">
+              <h2>Layout</h2>
+              <Section title="Page sections">
+                <Grid cols={2} minColWidth="16rem">
+                  <Col>
+                    <Card>
+                      <Stack gap={3}>
+                        <Text tone="muted">Description list and inline code</Text>
+                        <DescriptionList
+                          items={[
+                            { term: 'Package', value: <Code>@nubitio/ui</Code> },
+                            { term: 'Entry', value: 'public.ts' },
+                          ]}
+                        />
+                        <Cluster>
+                          <Button variant="secondary" size="sm">
+                            Cancel
+                          </Button>
+                          <Button variant="primary" size="sm">
+                            Save
+                          </Button>
+                        </Cluster>
+                      </Stack>
+                    </Card>
+                  </Col>
+                  <Col>
+                    <HubPanel>
+                      <KpiMetricRow
+                        items={[
+                          { label: 'Open', value: '12' },
+                          { label: 'Done', value: '4', tone: 'success' },
+                        ]}
+                      />
+                      <SegmentedControl
+                        ariaLabel="Density"
+                        value={density}
+                        onChange={setDensity}
+                        options={[
+                          { value: 'default', label: 'Default' },
+                          { value: 'compact', label: 'Compact' },
+                        ]}
+                      />
+                      <OperationCardGrid
+                        operations={[
+                          {
+                            key: 'in',
+                            title: 'Receive',
+                            icon: 'arrow-down',
+                            accent: 'in',
+                            onClick: () => undefined,
+                          },
+                          {
+                            key: 'out',
+                            title: 'Ship',
+                            icon: 'arrow-up',
+                            accent: 'out',
+                            onClick: () => undefined,
+                          },
+                        ]}
+                      />
+                    </HubPanel>
+                  </Col>
+                </Grid>
+                <Row>
+                  <TextField placeholder="Filter…" aria-label="Filter" />
+                  <FormActions>
+                    <Button type="button" variant="primary">
+                      Apply
+                    </Button>
+                  </FormActions>
+                </Row>
+              </Section>
+            </section>
+
+            <section className="showcase__section">
+              <h2>Theme</h2>
+              <div className="showcase__row">
+                <ThemeSwitcher />
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  Cycles light / dark / system — every component re-themes from the tokens.
+                </span>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </Page>
 
       <AppDialog
         title="Demo dialog"

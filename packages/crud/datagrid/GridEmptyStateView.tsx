@@ -10,8 +10,9 @@ export function GridEmptyStateView({
   fallbackTitle: string;
 }) {
   return (
-    <div className="nb-datagrid__empty" aria-live="polite">
+    <div className="nb-datagrid__empty">
       <EmptyState
+        fill
         title={emptyState?.title ?? fallbackTitle}
         description={emptyState?.description}
         icon={emptyState?.icon ?? 'database'}

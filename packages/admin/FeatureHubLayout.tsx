@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Alert } from '@nubitio/ui';
 import './feature-hub.scss';
 
 export interface FeatureHubTab {
@@ -107,16 +108,12 @@ export function FeatureHubLayout({
       </header>
 
       {showBanner && (
-        <div
-          className={`nb-feature-hub__banner nb-feature-hub__banner--${banner.tone ?? 'info'}`}
-          role="status"
+        <Alert
+          tone={banner.tone === 'warning' ? 'warning' : 'info'}
+          className="nb-feature-hub__banner"
         >
-          <i
-            className={normalizeIcon(banner.icon ?? 'ph-info') ?? 'ph ph-info'}
-            aria-hidden="true"
-          />
-          <span>{banner.message}</span>
-        </div>
+          {banner.message}
+        </Alert>
       )}
 
       <div className="nb-feature-hub__content">

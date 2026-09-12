@@ -25,6 +25,8 @@ export { Spinner } from './Spinner';
 export type { SpinnerProps, SpinnerSize } from './Spinner';
 export { Tooltip } from './Tooltip';
 export type { TooltipPlacement, TooltipProps } from './Tooltip';
+export { ToastViewport } from './Toast';
+export type { ToastItem, ToastTone, ToastViewportProps } from './Toast';
 export { FormField, SelectField, TextAreaField, TextField } from './FormControls';
 export type {
   FormFieldProps,

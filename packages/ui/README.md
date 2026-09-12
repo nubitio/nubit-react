@@ -42,6 +42,7 @@ CSS is bundled from each component import via `public.ts` (not a separate `style
 - **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
 - **Navigation** — `ScopeTabs`, `SegmentedControl`
 - **Data display** — `DataTable`, `Pagination`, `RowActions`, `DescriptionList`, `Timeline`, `FilterPanel`, `HubPanel`, `OperationCardGrid`, `Code`, `Text`
+- **Feedback** — `ToastViewport` (presentational; no global store). Admin `ToastHost` remains the app-level queue until a later extract.
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
 - **i18n** — `UiStringsProvider`, `EN_UI_STRINGS`, `ES_UI_STRINGS`
 
@@ -63,7 +64,7 @@ import { ThemeProvider, ThemeSwitcher } from '@nubitio/ui';
 
 ## Localization
 
-Built-in strings (aria-labels, calendar buttons) default to English. Localize them once at the app root with `UiStringsProvider` — a Spanish preset ships with the package:
+Built-in strings (aria-labels, calendar buttons, spinner, toast dismiss) default to English. Localize them once at the app root with `UiStringsProvider` — a Spanish preset ships with the package:
 
 ```tsx
 import { UiStringsProvider, ES_UI_STRINGS } from '@nubitio/ui';

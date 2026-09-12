@@ -42,7 +42,7 @@ CSS is bundled from each component import via `public.ts` (not a separate `style
 - **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
 - **Navigation** — `Tabs` / `TabList` / `Tab` / `TabPanel`, `ScopeTabs`, `SegmentedControl`
 - **Data display** — `DataTable`, `Pagination`, `RowActions`, `DescriptionList`, `Timeline`, `FilterPanel`, `HubPanel`, `OperationCardGrid`, `Code`, `Text`
-- **Feedback** — `ToastViewport` (presentational; no global store). Admin `ToastHost` remains the app-level queue until a later extract.
+- **Feedback** — `ToastViewport` (presentational; no global store). `@nubitio/admin` `ToastHost` is a thin queue adapter over it.
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
 - **i18n** — `UiStringsProvider`, `EN_UI_STRINGS`, `ES_UI_STRINGS`
 

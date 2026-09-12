@@ -37,7 +37,7 @@ CSS is bundled from each component import via `public.ts` (not a separate `style
 ## What's inside
 
 - **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Checkbox`, `Radio` / `RadioGroup`, `Avatar`, `Skeleton`, `Spinner`, `EmptyState`, `StatCard`, `KpiMetricRow`, `Card`, `Alert`, `CollapsibleSection`, `FeatureGate`
-- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`, `SearchableAppDropdown`, `useFloatingPanel`, `useConfirm`
+- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `Tooltip`, `ContextMenu`, `AppDropdown`, `SearchableAppDropdown`, `useFloatingPanel`, `useConfirm`
 - **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `FileDropzone`, `DatePicker`, `DateRangePicker`
 - **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
 - **Navigation** — `ScopeTabs`, `SegmentedControl`

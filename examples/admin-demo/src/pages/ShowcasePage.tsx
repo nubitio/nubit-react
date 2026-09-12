@@ -29,6 +29,7 @@ import {
   ThemeSwitcher,
   Timeline,
   TimelineItem,
+  ToastViewport,
   Toggle,
   Tooltip,
 } from '@nubitio/react-admin';
@@ -44,6 +45,9 @@ export function ShowcasePage() {
   const [sectionOpen, setSectionOpen] = useState(false);
   const [checked, setChecked] = useState(true);
   const [plan, setPlan] = useState('starter');
+  const [toasts, setToasts] = useState<
+    Array<{ id: string; message: string; tone?: 'success' | 'error' }>
+  >([]);
   const [scope, setScope] = useState<string | null>('all');
   const [category, setCategory] = useState<string | null>(null);
   const [status, setStatus] = useState('open');
@@ -123,6 +127,17 @@ export function ShowcasePage() {
               <Tooltip content="Keyboard shortcut: ⌘S" delay={0}>
                 <Button variant="secondary">Hover me</Button>
               </Tooltip>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  setToasts((current) => [
+                    ...current,
+                    { id: String(Date.now()), message: 'Saved', tone: 'success' },
+                  ])
+                }
+              >
+                Show toast
+              </Button>
             </div>
             <Alert tone="info">Inline alert for page-level feedback.</Alert>
             <FileDropzone onFileSelect={() => undefined} />
@@ -344,6 +359,11 @@ export function ShowcasePage() {
         <p style={{ marginTop: 0 }}>Drawers slide in from the side and keep the page visible.</p>
         <Skeleton variant="text" lines={4} />
       </Drawer>
+
+      <ToastViewport
+        toasts={toasts}
+        onDismiss={(id) => setToasts((current) => current.filter((t) => t.id !== id))}
+      />
     </div>
   );
 }

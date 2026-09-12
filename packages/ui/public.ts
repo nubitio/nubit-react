@@ -27,6 +27,8 @@ export { Tooltip } from './Tooltip';
 export type { TooltipPlacement, TooltipProps } from './Tooltip';
 export { ToastViewport } from './Toast';
 export type { ToastItem, ToastTone, ToastViewportProps } from './Toast';
+export { Tab, TabList, TabPanel, Tabs } from './Tabs';
+export type { TabListProps, TabPanelProps, TabProps, TabsProps } from './Tabs';
 export { FormField, SelectField, TextAreaField, TextField } from './FormControls';
 export type {
   FormFieldProps,

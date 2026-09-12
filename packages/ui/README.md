@@ -40,7 +40,7 @@ CSS is bundled from each component import via `public.ts` (not a separate `style
 - **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `Tooltip`, `ContextMenu`, `AppDropdown`, `SearchableAppDropdown`, `useFloatingPanel`, `useConfirm`
 - **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `FileDropzone`, `DatePicker`, `DateRangePicker`
 - **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
-- **Navigation** — `ScopeTabs`, `SegmentedControl`
+- **Navigation** — `Tabs` / `TabList` / `Tab` / `TabPanel`, `ScopeTabs`, `SegmentedControl`
 - **Data display** — `DataTable`, `Pagination`, `RowActions`, `DescriptionList`, `Timeline`, `FilterPanel`, `HubPanel`, `OperationCardGrid`, `Code`, `Text`
 - **Feedback** — `ToastViewport` (presentational; no global store). Admin `ToastHost` remains the app-level queue until a later extract.
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`

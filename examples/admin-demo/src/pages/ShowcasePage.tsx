@@ -24,6 +24,10 @@ import {
   Skeleton,
   Spinner,
   StatCard,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
   TextAreaField,
   TextField,
   ThemeSwitcher,
@@ -45,6 +49,7 @@ export function ShowcasePage() {
   const [sectionOpen, setSectionOpen] = useState(false);
   const [checked, setChecked] = useState(true);
   const [plan, setPlan] = useState('starter');
+  const [tab, setTab] = useState('overview');
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; tone?: 'success' | 'error' }>
   >([]);
@@ -145,6 +150,16 @@ export function ShowcasePage() {
 
           <section className="showcase__section showcase__section--wide">
             <h2>Filters &amp; tables</h2>
+            <Tabs value={tab} onChange={setTab}>
+              <TabList ariaLabel="Showcase tabs">
+                <Tab value="overview">Overview</Tab>
+                <Tab value="details">Details</Tab>
+              </TabList>
+              <TabPanel value="overview">
+                Overview panel — always available even with one tab.
+              </TabPanel>
+              <TabPanel value="details">Details panel.</TabPanel>
+            </Tabs>
             <ScopeTabs
               ariaLabel="Warehouse"
               options={[

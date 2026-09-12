@@ -1,0 +1,18 @@
+// Shared spinner mark used by Button (inline loading) and Spinner.
+
+@mixin nb-spinner-mark($size: 14px) {
+  animation: nb-spinner-rotate 700ms linear infinite;
+  border: 2px solid color-mix(in srgb, currentcolor 25%, transparent);
+  border-radius: 50%;
+  border-top-color: currentcolor;
+  box-sizing: border-box;
+  display: inline-block;
+  height: $size;
+  width: $size;
+}
+
+@keyframes nb-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}

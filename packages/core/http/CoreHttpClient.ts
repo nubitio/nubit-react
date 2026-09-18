@@ -1,5 +1,6 @@
 import type { DataRecord } from '../data/DataRecord';
 import { discoverMercureFromResponse } from '../mercure/mercureDiscovery';
+import { generateCorrelationId } from './correlationId';
 
 export type CoreResponseType = 'json' | 'arraybuffer' | 'blob' | 'text';
 
@@ -15,6 +16,12 @@ export interface CoreHttpResponse<T> {
   data: T;
   headers: Headers;
   status: number;
+  /**
+   * The correlation id sent with this request under `correlationIdHeaderName`,
+   * present only when `enableCorrelationId` is on and the request resolved
+   * against `baseUrl` (see {@link CoreHttpClientConfig.enableCorrelationId}).
+   */
+  correlationId?: string;
 }
 
 export interface CoreHttpErrorData {
@@ -27,7 +34,22 @@ export interface CoreHttpErrorData {
 export interface CoreHttpError extends Error {
   status?: number;
   data?: CoreHttpErrorData;
+  /** The correlation id sent with the request that failed, if enabled. See {@link CoreHttpResponse.correlationId}. */
+  correlationId?: string;
 }
+
+/** Default value of {@link CoreHttpClientConfig.csrfHeaderName}. */
+export const DEFAULT_CSRF_HEADER_NAME = 'X-CSRF-Token';
+
+/** Default value of {@link CoreHttpClientConfig.correlationIdHeaderName}. */
+export const DEFAULT_CORRELATION_ID_HEADER_NAME = 'X-Request-Id';
+
+/**
+ * HTTP methods `getCsrfToken` is consulted for. Matches the conventional
+ * "safe methods don't need CSRF protection" rule (GET/HEAD never mutate
+ * state), so read requests never pay the cost of a token lookup.
+ */
+const CSRF_PROTECTED_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 export interface CoreHttpClientConfig {
   baseUrl?: string;
@@ -70,6 +92,80 @@ export interface CoreHttpClientConfig {
 
   onUnauthorized?: (error: CoreHttpError) => void;
   onError?: (error: CoreHttpError) => void;
+
+  /**
+   * Supplies request headers that can change between calls — most commonly
+   * an `Authorization: Bearer <token>` header for apps that keep the access
+   * token in memory or storage instead of relying solely on the cookie
+   * session. Called before every request, including the built-in refresh
+   * request, so a fresh token is always read rather than captured once at
+   * client construction time.
+   *
+   * Omitting this (or returning an empty object) adds no headers — the
+   * client still works purely on cookies, exactly as before this option
+   * existed.
+   *
+   * Example:
+   *   getAuthHeaders: () => {
+   *     const token = tokenStore.get();
+   *     return token ? { Authorization: `Bearer ${token}` } : {};
+   *   }
+   */
+  getAuthHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
+
+  /**
+   * Supplies a CSRF token to attach to state-changing requests (POST, PUT,
+   * PATCH, DELETE — see `CSRF_PROTECTED_METHODS`). Not called for GET/HEAD.
+   * Return `undefined` to skip the header for a given call (e.g. no token
+   * available yet).
+   *
+   * Example (cookie double-submit pattern):
+   *   getCsrfToken: () => readCookie('CSRF_TOKEN')
+   */
+  getCsrfToken?: (method: string) => string | undefined | Promise<string | undefined>;
+
+  /**
+   * Header name the token from `getCsrfToken` is sent under.
+   * @default "X-CSRF-Token"
+   */
+  csrfHeaderName?: string;
+
+  /**
+   * When true, every request that resolves against `baseUrl` carries a
+   * generated correlation id under `correlationIdHeaderName`. The same id is
+   * reused across a 401 → refresh → retry sequence, and is returned on
+   * `CoreHttpResponse.correlationId` / `CoreHttpError.correlationId` so an
+   * app can surface it in a support/error UI — including when the request
+   * never receives a response at all (network failure, timeout), since the
+   * id is generated client-side before the request is sent.
+   *
+   * Requests to a fully-qualified `http(s)://` URL on a different origin
+   * (see `joinUrl`) never receive the header, regardless of this setting:
+   * correlation ids are for your own backend, and adding a custom header to
+   * a third-party request can turn a "simple" CORS request into a
+   * preflighted one for APIs that don't expect it.
+   *
+   * Disabled by default — opting in is an explicit choice because it adds a
+   * header to every internal request.
+   *
+   * @default false
+   */
+  enableCorrelationId?: boolean;
+
+  /**
+   * Header name the correlation id is sent under. Match this to whatever
+   * your backend reads (Nubit backends read `X-Request-Id` by convention).
+   * @default "X-Request-Id"
+   */
+  correlationIdHeaderName?: string;
+
+  /**
+   * Overrides how the correlation id is generated. Defaults to
+   * {@link generateCorrelationId}. Mainly useful for tests that need a
+   * deterministic id, or apps that want to reuse an id minted earlier (e.g.
+   * for a request that was queued while offline).
+   */
+  getCorrelationId?: () => string;
 }
 
 function joinUrl(baseUrl: string, url: string): string {
@@ -118,8 +214,21 @@ function createHttpError(
   message: string,
   status?: number,
   data?: CoreHttpErrorData,
+  correlationId?: string,
 ): CoreHttpError {
-  return Object.assign(new Error(message), { status, data });
+  return Object.assign(new Error(message), { status, data, correlationId });
+}
+
+/**
+ * A fully-qualified `http(s)://` URL targets a different origin than the
+ * app's own `baseUrl` (or is at least not guaranteed to be the same one —
+ * see `joinUrl`, which passes these through unchanged). Root-relative
+ * (`/path`) and bare relative (`path`) URLs always resolve against this
+ * app's own origin/baseUrl, so they're the only ones eligible for the
+ * correlation-id header.
+ */
+function isExternalUrl(url: string): boolean {
+  return /^https?:\/\//.test(url);
 }
 
 async function readResponseBody<T>(
@@ -142,42 +251,88 @@ export class CoreHttpClient {
 
   constructor(private readonly config: CoreHttpClientConfig = {}) {}
 
-  private headers(extraHeaders?: Record<string, string>): Record<string, string> {
+  /**
+   * Builds the full header set for one request: static locale, then dynamic
+   * auth headers, then CSRF (mutating methods only), then correlation id,
+   * then the caller's own `extraHeaders` — which always win, so a specific
+   * call can still override anything the config-level hooks produced.
+   */
+  private async headers(
+    method: string,
+    extraHeaders?: Record<string, string>,
+    correlationId?: string,
+  ): Promise<Record<string, string>> {
     const browserLocale =
       typeof navigator !== 'undefined' ? navigator.language?.split('-')[0] : undefined;
     const locale = this.config.locale ?? browserLocale ?? 'en';
 
+    const authHeaders = this.config.getAuthHeaders ? await this.config.getAuthHeaders() : undefined;
+
+    let csrfHeader: Record<string, string> | undefined;
+    if (this.config.getCsrfToken && CSRF_PROTECTED_METHODS.has(method)) {
+      const token = await this.config.getCsrfToken(method);
+      if (token) {
+        csrfHeader = { [this.config.csrfHeaderName ?? DEFAULT_CSRF_HEADER_NAME]: token };
+      }
+    }
+
+    const correlationHeader =
+      correlationId !== undefined
+        ? {
+            [this.config.correlationIdHeaderName ?? DEFAULT_CORRELATION_ID_HEADER_NAME]:
+              correlationId,
+          }
+        : undefined;
+
     return {
       'Accept-Language': locale,
+      ...authHeaders,
+      ...csrfHeader,
+      ...correlationHeader,
       ...extraHeaders,
     };
+  }
+
+  /** A fresh correlation id for one logical request, or undefined when disabled/not applicable. */
+  private correlationIdFor(url: string): string | undefined {
+    if (!this.config.enableCorrelationId || isExternalUrl(url)) return undefined;
+    return (this.config.getCorrelationId ?? generateCorrelationId)();
   }
 
   /**
    * Built-in cookie-based refresh (the original behavior).
    * Only used when `refreshFn` is not provided in config.
+   *
+   * Carries the same auth/CSRF headers as an ordinary request — a
+   * CSRF-protected backend protects its refresh endpoint too — and its own
+   * correlation id, minted fresh rather than borrowed from whichever
+   * request(s) triggered it, since one shared refresh can be triggered by
+   * several concurrent requests at once (see the dedup logic below) and
+   * there is no single "right" id to inherit from among them.
    */
   private async performBuiltInRefresh(): Promise<void> {
     const refreshPath = this.config.refreshPath ?? 'auth/refresh';
     const refreshUrl = joinUrl(this.config.baseUrl ?? '/api/', refreshPath);
 
-    this.refreshPromise ??= globalThis
-      .fetch(refreshUrl, {
+    this.refreshPromise ??= (async () => {
+      const correlationId = this.correlationIdFor(refreshPath);
+      const headers = await this.headers('POST', undefined, correlationId);
+      const response = await globalThis.fetch(refreshUrl, {
         method: 'POST',
+        headers,
         credentials: this.config.credentials ?? 'include',
-      })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw createHttpError(
-            'Session refresh failed',
-            response.status,
-            await this.safeErrorData(response),
-          );
-        }
-      })
-      .finally(() => {
-        this.refreshPromise = null;
       });
+      if (!response.ok) {
+        throw createHttpError(
+          'Session refresh failed',
+          response.status,
+          await this.safeErrorData(response),
+          correlationId,
+        );
+      }
+    })().finally(() => {
+      this.refreshPromise = null;
+    });
 
     return this.refreshPromise;
   }
@@ -203,9 +358,17 @@ export class CoreHttpClient {
     body?: unknown,
     config?: CoreRequestConfig,
     retryOnUnauthorized = true,
+    /**
+     * Correlation id carried over from the original attempt when this call
+     * is a 401 → refresh → retry. Undefined on the first attempt, where it's
+     * computed fresh below — keeping one id across the whole logical
+     * request rather than minting a new one per network attempt.
+     */
+    inheritedCorrelationId?: string,
   ): Promise<CoreHttpResponse<T>> {
     const requestUrl = withParams(joinUrl(this.config.baseUrl ?? '/api/', url), config?.params);
-    const headers = this.headers(config?.headers);
+    const correlationId = inheritedCorrelationId ?? this.correlationIdFor(url);
+    const headers = await this.headers(method, config?.headers, correlationId);
 
     if (body !== undefined && body !== null && !(body instanceof FormData)) {
       headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
@@ -234,6 +397,7 @@ export class CoreHttpClient {
         data,
         headers: response.headers,
         status: response.status,
+        correlationId,
       };
     }
 
@@ -242,6 +406,7 @@ export class CoreHttpClient {
       errorData.detail ?? errorData.message ?? 'HTTP request failed',
       response.status,
       errorData,
+      correlationId,
     );
 
     const loginPath = this.config.loginPath ?? 'auth/login';
@@ -253,11 +418,11 @@ export class CoreHttpClient {
     if (response.status === 401 && retryOnUnauthorized && !isAuthEndpoint && shouldAutoRefresh) {
       try {
         await this.performRefresh();
-        return this.request<T>(method, url, body, config, false);
+        return this.request<T>(method, url, body, config, false, correlationId);
       } catch (refreshError) {
         const unauthorizedError =
           refreshError instanceof Error
-            ? (Object.assign(refreshError, { status: 401 }) as CoreHttpError)
+            ? (Object.assign(refreshError, { status: 401, correlationId }) as CoreHttpError)
             : error;
         this.config.onUnauthorized?.(unauthorizedError);
         throw unauthorizedError;

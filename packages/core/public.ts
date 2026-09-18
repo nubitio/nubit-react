@@ -54,7 +54,15 @@ export { CoreProvider } from './provider';
 export type { CoreProviderProps } from './provider';
 
 // ── HTTP ──────────────────────────────────────────────────────────────────────
-export { CoreHttpClient, CoreHttpProvider, createCoreHttpClient, useCoreHttpClient } from './http';
+export {
+  CoreHttpClient,
+  CoreHttpProvider,
+  createCoreHttpClient,
+  DEFAULT_CORRELATION_ID_HEADER_NAME,
+  DEFAULT_CSRF_HEADER_NAME,
+  generateCorrelationId,
+  useCoreHttpClient,
+} from './http';
 export type {
   CoreHttpClientConfig,
   CoreHttpError,

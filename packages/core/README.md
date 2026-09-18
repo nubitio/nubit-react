@@ -111,6 +111,56 @@ const httpConfig = {
 
 You can also provide a full `refreshFn` if you want the client to still participate in refresh, but with your own logic (e.g. refreshing a Bearer token).
 
+### Dynamic headers (Bearer tokens)
+
+Apps that keep an access token in memory or storage — instead of relying solely on the cookie session — use `getAuthHeaders`. It is called before _every_ request (including the built-in refresh request), so a rotated token is picked up without reconstructing the client:
+
+```ts
+const httpClient = createCoreHttpClient({
+  baseUrl: '/api/',
+  getAuthHeaders: () => {
+    const token = tokenStore.get(); // read fresh each call, not captured once
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  },
+});
+```
+
+Omit it (or return `{}`) to keep pure cookie-based behavior.
+
+### CSRF tokens
+
+Backends that protect state-changing requests (POST/PUT/PATCH/DELETE) with a CSRF token — a common `X-CSRF-Token` / cookie double-submit setup — use `getCsrfToken`. It is only consulted for those methods; GET/HEAD never trigger a token lookup.
+
+```ts
+const httpClient = createCoreHttpClient({
+  baseUrl: '/api/',
+  getCsrfToken: () => readCookie('CSRF_TOKEN'),
+  // csrfHeaderName: 'X-CSRF-Token',  (default)
+});
+```
+
+Return `undefined` to skip the header for a given call.
+
+### Correlation ids
+
+Set `enableCorrelationId` to attach a per-request `X-Request-Id` (configurable via `correlationIdHeaderName`) that your backend can log alongside its own traces:
+
+```ts
+const httpClient = createCoreHttpClient({
+  baseUrl: '/api/',
+  enableCorrelationId: true,
+});
+```
+
+- The id is returned on `CoreHttpResponse.correlationId` and `CoreHttpError.correlationId`, so an error UI can show a support reference — including when the request never received a response at all (network failure, timeout), because the id is minted client-side before sending.
+- One 401 → refresh → retry sequence keeps a single id across both attempts.
+- Requests to an absolute `http(s)://` URL are left untouched (no header added), so third-party calls don't gain a custom header that could trigger a CORS preflight.
+- `getCorrelationId` overrides generation (deterministic tests, or reusing an id minted earlier, e.g. for an offline-queued mutation). `generateCorrelationId` is exported for the latter case.
+
+### Header precedence
+
+For any single request, headers are merged in this order, with later entries winning: static locale → `getAuthHeaders` → `getCsrfToken` → correlation id → the call's own `config.headers`. A specific call can therefore override anything the config-level hooks produced.
+
 See `CoreHttpClientConfig` for all options.
 
 ## Key exports

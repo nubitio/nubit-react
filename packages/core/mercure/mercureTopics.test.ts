@@ -37,13 +37,13 @@ describe('buildMercureCollectionTopic', () => {
 
   it('builds a wildcard topic from apiUrl and configured origin', () => {
     expect(buildMercureCollectionTopic('/api/products', 'http://localhost:8000')).toBe(
-      'http://localhost:8000/api/products/{id}',
+      'http://localhost:8000/api/products/*',
     );
   });
 
   it('normalizes apiUrl slashes', () => {
     expect(buildMercureCollectionTopic('api/sales_documents/', 'http://localhost:8000')).toBe(
-      'http://localhost:8000/api/sales_documents/{id}',
+      'http://localhost:8000/api/sales_documents/*',
     );
   });
 });

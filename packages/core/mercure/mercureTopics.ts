@@ -42,8 +42,8 @@ export function resolveMercureTopicOrigin(
 }
 
 /**
- * Wildcard collection topic (RFC 6570 URI Template) for a resource API path.
- * e.g. `/api/products` → `http://localhost:8000/api/products/{id}`
+ * Wildcard collection topic (WHATWG URL Pattern) for a resource API path.
+ * e.g. `/api/products` → `http://localhost:8000/api/products/*`
  */
 export function buildMercureCollectionTopic(
   apiUrl: string,
@@ -66,8 +66,8 @@ export function buildMercureCollectionTopic(
 
   const tenantId = getMercureTenantId();
   if (tenantId !== undefined && tenantId !== null && `${tenantId}` !== '') {
-    return `${origin}/api/tenants/${tenantId}/${normalizedPath.replace(/^api\//, '')}/{id}`;
+    return `${origin}/api/tenants/${tenantId}/${normalizedPath.replace(/^api\//, '')}/*`;
   }
 
-  return `${origin}/${normalizedPath}/{id}`;
+  return `${origin}/${normalizedPath}/*`;
 }

@@ -4,8 +4,9 @@
  * Inspired by the `manager.ts` pattern from `api-platform/admin`, adapted for this project:
  * - Ref-counting per topic: multiple subscribers to the same topic share one EventSource.
  * - Graceful degradation: if hubUrl is null, subscribe() is a no-op.
- * - Topic format: full URI or URI Template (RFC 6570), e.g. `https://host/api/products/{id}`.
- *   The hub receives it as a query param: `?topic=<encoded-topic>`.
+ * - Topic format: a WHATWG URL Pattern, e.g. `https://host/api/products/*`.
+ *   The hub receives it as a query param: `?match_urlpattern=<encoded-pattern>`
+ *   (Mercure.rocks v1+ — the old `?topic=` RFC 6570 URI Template scheme is gone).
  */
 
 interface TopicEntry {
@@ -62,7 +63,7 @@ class MercureManager {
   /**
    * Subscribe to a Mercure topic.
    *
-   * @param topic    Full topic URI or URI Template, e.g. `https://host/api/products/{id}`.
+   * @param topic    A WHATWG URL Pattern, e.g. `https://host/api/products/*`.
    * @param callback Called with the parsed JSON payload on each SSE message.
    *
    * If `hubUrl` is null (hub not configured), this is a no-op (graceful degradation).
@@ -90,9 +91,9 @@ class MercureManager {
       return;
     }
 
-    // Build the EventSource URL: hub + ?topic=<encoded-topic>
+    // Build the EventSource URL: hub + ?match_urlpattern=<encoded-pattern>
     const url = new URL(this.hubUrl);
-    url.searchParams.append('topic', topic);
+    url.searchParams.append('match_urlpattern', topic);
 
     const eventSource = new EventSource(url.toString(), { withCredentials: true });
 

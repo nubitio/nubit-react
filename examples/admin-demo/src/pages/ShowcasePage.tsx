@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   AppDialog,
   Avatar,
   Badge,
@@ -7,11 +8,15 @@ import {
   Chip,
   CollapsibleSection,
   ConfirmDialog,
+  DataTable,
   DatePicker,
   DateRangePicker,
   Drawer,
   EmptyState,
+  FileDropzone,
+  FilterPanel,
   IconButton,
+  ScopeTabs,
   SelectField,
   Skeleton,
   StatCard,
@@ -32,6 +37,9 @@ export function ShowcasePage() {
   const [date, setDate] = useState('');
   const [range, setRange] = useState<[string, string]>(['', '']);
   const [sectionOpen, setSectionOpen] = useState(false);
+  const [scope, setScope] = useState<string | null>('all');
+  const [category, setCategory] = useState<string | null>(null);
+  const [status, setStatus] = useState('open');
 
   return (
     <div className="view-wrapper-scroll">
@@ -100,6 +108,55 @@ export function ShowcasePage() {
               </SelectField>
               <TextAreaField placeholder="Notes…" rows={2} />
             </div>
+            <Alert tone="info">Inline alert for page-level feedback.</Alert>
+            <FileDropzone onFileSelect={() => undefined} />
+          </section>
+
+          <section className="showcase__section showcase__section--wide">
+            <h2>Filters &amp; tables</h2>
+            <ScopeTabs
+              ariaLabel="Warehouse"
+              options={[
+                { key: 'lima', label: 'Lima' },
+                { key: 'cusco', label: 'Cusco' },
+              ]}
+              selectedKey={scope}
+              onChange={setScope}
+              allLabel="All"
+            />
+            <FilterPanel
+              category={{
+                title: 'Category',
+                options: [
+                  { key: 'a', label: 'Alpha' },
+                  { key: 'b', label: 'Beta' },
+                ],
+                selectedKey: category,
+                onSelect: setCategory,
+                ariaLabel: 'Category',
+              }}
+              status={{
+                title: 'Status',
+                options: [
+                  { value: 'open', label: 'Open' },
+                  { value: 'done', label: 'Done' },
+                ],
+                value: status,
+                onChange: setStatus,
+                ariaLabel: 'Status',
+              }}
+            />
+            <DataTable
+              getRowKey={(row) => row.id}
+              columns={[
+                { id: 'name', header: 'Name', accessor: (row) => row.name },
+                { id: 'qty', header: 'Qty', align: 'right', accessor: (row) => row.qty },
+              ]}
+              rows={[
+                { id: '1', name: 'Widget', qty: 12 },
+                { id: '2', name: 'Gadget', qty: 4 },
+              ]}
+            />
           </section>
 
           <section className="showcase__section">
@@ -142,7 +199,7 @@ export function ShowcasePage() {
             <h2>Feedback</h2>
             <Skeleton variant="text" lines={3} />
             <EmptyState
-              icon="ph ph-tray"
+              icon="tray"
               title="Nothing here yet"
               description="Empty state with icon, title and description."
             />

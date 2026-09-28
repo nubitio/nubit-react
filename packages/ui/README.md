@@ -1,6 +1,6 @@
 # @nubitio/ui
 
-Visual primitives and theme system for the Nubit admin stack: buttons, dialogs, drawers, cards, form controls, date pickers, badges, and a light/dark theme with density and accent-color support.
+Visual primitives and theme system for the Nubit admin stack: buttons, dialogs, drawers, cards, form controls, date pickers, badges, layout, data tables, and a light/dark theme with density and accent-color support.
 
 ## Install
 
@@ -32,15 +32,20 @@ export function App() {
 }
 ```
 
+CSS is bundled from each component import via `public.ts` (not a separate `style.scss` aggregator). Import `dist/style.css` once at the app root.
+
 ## What's inside
 
-- **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
-- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`
-- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`
+- **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `KpiMetricRow`, `Card`, `Alert`, `CollapsibleSection`, `FeatureGate`
+- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`, `SearchableAppDropdown`, `useFloatingPanel`, `useConfirm`
+- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `FileDropzone`, `DatePicker`, `DateRangePicker`
+- **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
+- **Navigation** — `ScopeTabs`, `SegmentedControl`
+- **Data display** — `DataTable`, `Pagination`, `RowActions`, `DescriptionList`, `Timeline`, `FilterPanel`, `HubPanel`, `OperationCardGrid`, `Code`, `Text`
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
-- **Layout** — `AppToolbar`
+- **i18n** — `UiStringsProvider`, `EN_UI_STRINGS`, `ES_UI_STRINGS`
 
-All components ship their styles in `dist/style.css`; import it once at the app root. Static design tokens (typography, spacing, radii) are included in `style.css`.
+Static design tokens (typography, spacing, radii) ship in `style.css`.
 
 ## Theming
 

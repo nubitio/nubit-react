@@ -30,15 +30,16 @@ There is no bug bounty.
 
 Only the current minor line receives security fixes.
 
-| Line   | Status                            |
-| ------ | --------------------------------- |
-| 0.11.x | Supported                         |
-| < 0.11 | Not supported — upgrade to 0.11.x |
+| Line  | Status                           |
+| ----- | -------------------------------- |
+| 1.1.x | Supported                        |
+| 1.0.x | Not supported — upgrade to 1.1.x |
+| < 1.0 | Not supported — upgrade to 1.1.x |
 
 All `@nubitio/*` packages release in lockstep, so the line above applies to
-every package in this repository. These packages are pre-1.0: a minor bump may
-contain breaking changes, and older lines do not receive backports. A longer
-support window will be declared with 1.0, not before.
+every package in this repository. From 1.0 they follow semantic versioning
+(see [`VERSIONING.md`](VERSIONING.md)), so moving to the current minor never
+requires a breaking change; older lines do not receive backports.
 
 The backend counterpart,
 [`nubit-symfony`](https://github.com/nubitio/nubit-symfony), versions

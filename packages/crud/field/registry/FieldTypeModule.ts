@@ -22,9 +22,7 @@ export interface CellTextContext {
  * - `keep` leaves whatever the form currently holds untouched.
  */
 export type SerializedFieldValue =
-  | { kind: 'set'; value: unknown }
-  | { kind: 'omit' }
-  | { kind: 'keep' };
+  { kind: 'set'; value: unknown } | { kind: 'omit' } | { kind: 'keep' };
 
 /**
  * Semantic control category of a type's form editor. View backends that do

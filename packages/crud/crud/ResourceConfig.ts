@@ -69,8 +69,7 @@ export interface ResourceToolbarAction {
 }
 
 export type ResourceRowActions<T extends DataRecord = DataRecord> =
-  | ResourceToolbarAction[]
-  | ((row: T) => ResourceToolbarAction[]);
+  ResourceToolbarAction[] | ((row: T) => ResourceToolbarAction[]);
 
 export interface ResourceToolbarItems {
   primary?: ResourceToolbarAction[];
@@ -97,8 +96,7 @@ export interface CrudGridSlotContext<T extends DataRecord = DataRecord> {
 }
 
 export type ResourceToolbar<T extends DataRecord = DataRecord> =
-  | ResourceToolbarItems
-  | ((context: ResourceToolbarContext<T>) => ResourceToolbarItems);
+  ResourceToolbarItems | ((context: ResourceToolbarContext<T>) => ResourceToolbarItems);
 
 export interface ResourceGridDetail {
   url: string;

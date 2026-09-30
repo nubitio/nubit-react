@@ -25,6 +25,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Runtime dependencies only: the published packages ship no dev tooling,
+      # so a dev-only advisory must not block a release. Moderate advisories
+      # remain visible in `pnpm audit` and are handled by Dependabot.
+      - name: Audit runtime dependencies
+        run: pnpm audit --prod --audit-level=high
+
       - name: Lint
         run: pnpm lint:strict
 

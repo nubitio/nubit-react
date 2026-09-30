@@ -76,6 +76,10 @@ describe('HTML field type', () => {
 
     render(<Suspense fallback={null}>{mod.ControlRender(props)}</Suspense>);
     await waitFor(() => expect(screen.getByRole('toolbar')).toBeTruthy());
+    // The toolbar renders before TipTap has built its editor: until the
+    // contenteditable exists every button is a no-op (`editor?.chain()`), and
+    // clicking then made this test fail whenever the suite was under load.
+    await waitFor(() => expect(document.querySelector('.ProseMirror')).toBeTruthy());
 
     // Every button runs a TipTap chain against the live editor; clicking them
     // is what proves the lazy module is a working editor and not just a shell

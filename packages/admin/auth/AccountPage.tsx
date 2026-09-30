@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Button, Card, FormField, TextField } from '@nubitio/ui';
 import { useSession } from './SessionContext';
+import { csrfFetch } from './csrfFetch';
 
 export interface AccountPageProps {
   apiBaseUrl?: string;
@@ -36,8 +37,8 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
   const load = useCallback(
     async (signal?: AbortSignal) => {
       const [totpResponse, sessionResponse] = await Promise.all([
-        fetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include', signal }),
-        fetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include', signal }),
+        csrfFetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include', signal }),
+        csrfFetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include', signal }),
       ]);
       if (signal?.aborted) return;
       if (totpResponse.ok) {
@@ -69,7 +70,7 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
   const changePassword = async (event: FormEvent) => {
     event.preventDefault();
     setPasswordMessage(null);
-    const response = await fetch(joinApiPath(apiBaseUrl, 'auth/change-password'), {
+    const response = await csrfFetch(joinApiPath(apiBaseUrl, 'auth/change-password'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -88,7 +89,7 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
 
   const beginTotp = async () => {
     setTotpMessage(null);
-    const response = await fetch(joinApiPath(apiBaseUrl, 'auth/totp'), {
+    const response = await csrfFetch(joinApiPath(apiBaseUrl, 'auth/totp'), {
       method: 'POST',
       credentials: 'include',
     });
@@ -104,7 +105,7 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
 
   const confirmTotp = async (event: FormEvent) => {
     event.preventDefault();
-    const response = await fetch(joinApiPath(apiBaseUrl, 'auth/totp/confirm'), {
+    const response = await csrfFetch(joinApiPath(apiBaseUrl, 'auth/totp/confirm'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -123,7 +124,7 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
 
   const disableTotp = async (event: FormEvent) => {
     event.preventDefault();
-    const response = await fetch(joinApiPath(apiBaseUrl, 'auth/totp'), {
+    const response = await csrfFetch(joinApiPath(apiBaseUrl, 'auth/totp'), {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -140,7 +141,7 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
   };
 
   const revokeSession = async (id: number) => {
-    await fetch(joinApiPath(apiBaseUrl, `auth/sessions/${id}`), {
+    await csrfFetch(joinApiPath(apiBaseUrl, `auth/sessions/${id}`), {
       method: 'DELETE',
       credentials: 'include',
     });

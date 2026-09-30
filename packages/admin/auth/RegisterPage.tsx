@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, TextField } from '@nubitio/ui';
+import { csrfFetch } from './csrfFetch';
 
 export type RegisterFieldType = 'text' | 'email' | 'password' | 'select';
 
@@ -71,7 +72,7 @@ export function RegisterPage({
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch(joinApiPath(apiBaseUrl, registerPath), {
+      const response = await csrfFetch(joinApiPath(apiBaseUrl, registerPath), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -61,6 +61,8 @@ export {
   DEFAULT_CORRELATION_ID_HEADER_NAME,
   DEFAULT_CSRF_HEADER_NAME,
   generateCorrelationId,
+  readCsrfToken,
+  CSRF_COOKIE_NAME,
   useCoreHttpClient,
 } from './http';
 export type {

@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { csrfFetch } from './csrfFetch';
 
 export type AppProfile = 'internal' | 'saas' | 'hybrid';
 
@@ -72,7 +73,7 @@ export function SessionProvider({
 
   const refresh = useCallback(async () => {
     try {
-      const response = await fetch(joinApiPath(apiBaseUrl, mePath), { credentials: 'include' });
+      const response = await csrfFetch(joinApiPath(apiBaseUrl, mePath), { credentials: 'include' });
       if (!response.ok) {
         setSession({ status: 'anonymous' });
         return;
@@ -93,7 +94,7 @@ export function SessionProvider({
   }, [refresh]);
 
   const logout = useCallback(async () => {
-    await fetch(joinApiPath(apiBaseUrl, logoutPath), {
+    await csrfFetch(joinApiPath(apiBaseUrl, logoutPath), {
       method: 'POST',
       credentials: 'include',
     });

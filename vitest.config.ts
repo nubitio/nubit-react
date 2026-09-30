@@ -26,10 +26,10 @@ export default defineConfig({
       // covers permits one silently. Raise these when coverage rises; never
       // lower them to make a red build green.
       thresholds: {
-        statements: 55,
-        branches: 46,
-        functions: 52,
-        lines: 56,
+        statements: 57,
+        branches: 49,
+        functions: 54,
+        lines: 59,
       },
     },
     alias: {

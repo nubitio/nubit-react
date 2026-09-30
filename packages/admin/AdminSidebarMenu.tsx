@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useUiStrings } from '@nubitio/ui';
 import { useScreenSize } from './useScreenSize';
 
 export interface AdminMenuSubItem {
@@ -47,6 +48,7 @@ export const AdminSidebarMenu = ({
   footer,
 }: AdminSidebarMenuProps) => {
   const [expandedItemKeys, setExpandedItemKeys] = useState<Set<string>>(new Set());
+  const strings = useUiStrings();
   const { isLarge } = useScreenSize();
   const location = useLocation();
 
@@ -120,7 +122,7 @@ export const AdminSidebarMenu = ({
   return (
     <div className={`nb-admin-menu${compactMode ? ' compact' : ''}`} onPointerDown={openMenu}>
       <div className="nb-admin-menu-container theme-dependent">
-        <nav className="nb-admin-menu__nav" aria-label="Main navigation">
+        <nav className="nb-admin-menu__nav" aria-label={strings.mainNavigation}>
           {items.map((item) => {
             const selected = isSelected(item.path);
             const containsSelected = parentContainsSelected(item);

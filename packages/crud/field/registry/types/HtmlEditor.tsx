@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useUiStrings } from '@nubitio/ui';
 // Namespace imports, not named ones: TipTap is an optional peer, and bundlers
 // that stub a missing optional peer fail the build on unresolved *named*
 // exports. Reading the members off a namespace defers that to runtime, where
@@ -61,6 +62,7 @@ export function HtmlEditor({
   hasError,
   onChange,
 }: HtmlEditorProps) {
+  const strings = useUiStrings();
   const editable = !disabled && !readOnly;
 
   const editor = useEditor({
@@ -102,23 +104,23 @@ export function HtmlEditor({
   return (
     <div className={`nb-html-editor${errorClass}${!editable ? ' nb-html-editor--readonly' : ''}`}>
       {editable && (
-        <div className="nb-html-editor__toolbar" role="toolbar" aria-label="Text formatting">
+        <div className="nb-html-editor__toolbar" role="toolbar" aria-label={strings.textFormatting}>
           <ToolbarButton
-            title="Bold (Ctrl+B)"
+            title={strings.bold}
             active={editor?.isActive('bold')}
             onClick={() => editor?.chain().focus().toggleBold().run()}
           >
             <strong>B</strong>
           </ToolbarButton>
           <ToolbarButton
-            title="Italic (Ctrl+I)"
+            title={strings.italic}
             active={editor?.isActive('italic')}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
           >
             <em>I</em>
           </ToolbarButton>
           <ToolbarButton
-            title="Strikethrough"
+            title={strings.strikethrough}
             active={editor?.isActive('strike')}
             onClick={() => editor?.chain().focus().toggleStrike().run()}
           >
@@ -128,14 +130,14 @@ export function HtmlEditor({
           <ToolbarDivider />
 
           <ToolbarButton
-            title="Heading 2"
+            title={strings.heading2}
             active={editor?.isActive('heading', { level: 2 })}
             onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
           >
             H2
           </ToolbarButton>
           <ToolbarButton
-            title="Heading 3"
+            title={strings.heading3}
             active={editor?.isActive('heading', { level: 3 })}
             onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
           >
@@ -145,14 +147,14 @@ export function HtmlEditor({
           <ToolbarDivider />
 
           <ToolbarButton
-            title="Bullet list"
+            title={strings.bulletList}
             active={editor?.isActive('bulletList')}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
           >
             ≡
           </ToolbarButton>
           <ToolbarButton
-            title="Ordered list"
+            title={strings.orderedList}
             active={editor?.isActive('orderedList')}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           >
@@ -162,14 +164,14 @@ export function HtmlEditor({
           <ToolbarDivider />
 
           <ToolbarButton
-            title="Blockquote"
+            title={strings.blockquote}
             active={editor?.isActive('blockquote')}
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
           >
             &ldquo;
           </ToolbarButton>
           <ToolbarButton
-            title={editor?.isActive('link') ? 'Remove link' : 'Add link'}
+            title={editor?.isActive('link') ? strings.removeLink : strings.addLink}
             active={editor?.isActive('link')}
             onClick={handleLinkToggle}
           >
@@ -179,14 +181,14 @@ export function HtmlEditor({
           <ToolbarDivider />
 
           <ToolbarButton
-            title="Undo (Ctrl+Z)"
+            title={strings.undo}
             disabled={!editor?.can().undo()}
             onClick={() => editor?.chain().focus().undo().run()}
           >
             ↩
           </ToolbarButton>
           <ToolbarButton
-            title="Redo (Ctrl+Y)"
+            title={strings.redo}
             disabled={!editor?.can().redo()}
             onClick={() => editor?.chain().focus().redo().run()}
           >

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Badge } from './Badge';
 import { IconButton } from './Button';
+import { useUiStrings } from './UiStrings';
 import './FeatureGate.scss';
 
 export interface FeatureGateProps {
@@ -22,9 +23,11 @@ export function FeatureGate({
   planBadge = 'Pro',
   upgradeMessage,
   upgradeUrl = '/settings',
-  lockTooltip = 'Esta función no está disponible en tu plan actual.',
+  lockTooltip,
 }: FeatureGateProps) {
   void featureKey;
+  const strings = useUiStrings();
+  const tooltip = lockTooltip ?? strings.featureUnavailable;
 
   if (enabled) {
     return <div className="feature-gate">{children}</div>;
@@ -39,12 +42,7 @@ export function FeatureGate({
   }
 
   return (
-    <div
-      className="feature-gate--locked"
-      title={lockTooltip}
-      aria-label={lockTooltip}
-      role="presentation"
-    >
+    <div className="feature-gate--locked" title={tooltip} aria-label={tooltip} role="presentation">
       {children}
     </div>
   );
@@ -61,10 +59,9 @@ function UpgradeGate({
   upgradeUrl: string;
   children: React.ReactNode;
 }) {
+  const strings = useUiStrings();
   const [open, setOpen] = useState(false);
-  const message =
-    upgradeMessage ??
-    `Esta función requiere el plan ${planBadge}. Actualiza tu plan para desbloquearla.`;
+  const message = upgradeMessage ?? strings.featureRequiresPlan.replace('{plan}', planBadge);
 
   return (
     <div
@@ -96,9 +93,9 @@ function UpgradeGate({
       </span>
       {open && (
         <div className="feature-gate__prompt" role="dialog">
-          <IconButton icon="ph ph-x" label="Cerrar" onClick={() => setOpen(false)} />
+          <IconButton icon="ph ph-x" label={strings.close} onClick={() => setOpen(false)} />
           <p>{message}</p>
-          <a href={upgradeUrl}>Ver planes</a>
+          <a href={upgradeUrl}>{strings.viewPlans}</a>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, IconButton, useFloatingPanel } from '@nubitio/ui';
+import { Badge, IconButton, useFloatingPanel, useUiStrings } from '@nubitio/ui';
 
 export interface AdminHeaderAction {
   id: string;
@@ -69,18 +69,19 @@ function UserMenuPopover({
 }: {
   renderUserMenu: (props: { close: () => void }) => React.ReactNode;
 }) {
+  const strings = useUiStrings();
   const { open, toggle, setOpen, containerRef } = useFloatingPanel();
 
   return (
     <div className="nb-admin-header-popover" ref={containerRef}>
       <IconButton
         icon="ph ph-user-circle"
-        label="User menu"
+        label={strings.userMenu}
         aria-expanded={open}
         onClick={toggle}
       />
       {open && (
-        <div className="nb-admin-header-popover__panel" role="dialog" aria-label="User menu">
+        <div className="nb-admin-header-popover__panel" role="dialog" aria-label={strings.userMenu}>
           {renderUserMenu({ close: () => setOpen(false) })}
         </div>
       )}
@@ -99,27 +100,31 @@ export const AdminHeader = ({
   actions = [],
   renderUserMenu,
   renderThemeSwitcher,
-}: AdminHeaderProps) => (
-  <header className={['nb-admin-header-component', className].filter(Boolean).join(' ')}>
-    <div className="nb-admin-header-toolbar" role="toolbar" aria-label="Main toolbar">
-      <div className="nb-admin-header-toolbar__before">
-        {menuToggleEnabled && (
-          <IconButton
-            className="nb-admin-menu-button"
-            icon="ph ph-list"
-            label="Toggle menu"
-            onClick={toggleMenu}
-          />
-        )}
-        {title && <div className="nb-admin-header-title">{title}</div>}
+}: AdminHeaderProps) => {
+  const strings = useUiStrings();
+
+  return (
+    <header className={['nb-admin-header-component', className].filter(Boolean).join(' ')}>
+      <div className="nb-admin-header-toolbar" role="toolbar" aria-label={strings.mainToolbar}>
+        <div className="nb-admin-header-toolbar__before">
+          {menuToggleEnabled && (
+            <IconButton
+              className="nb-admin-menu-button"
+              icon="ph ph-list"
+              label={strings.toggleMenu}
+              onClick={toggleMenu}
+            />
+          )}
+          {title && <div className="nb-admin-header-title">{title}</div>}
+        </div>
+        <div className="nb-admin-header-toolbar__after">
+          {renderThemeSwitcher?.()}
+          {actions.map((action) => (
+            <ActionPopover key={action.id} action={action} />
+          ))}
+          {renderUserMenu && <UserMenuPopover renderUserMenu={renderUserMenu} />}
+        </div>
       </div>
-      <div className="nb-admin-header-toolbar__after">
-        {renderThemeSwitcher?.()}
-        {actions.map((action) => (
-          <ActionPopover key={action.id} action={action} />
-        ))}
-        {renderUserMenu && <UserMenuPopover renderUserMenu={renderUserMenu} />}
-      </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};

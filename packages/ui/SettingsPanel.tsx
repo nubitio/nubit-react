@@ -1,4 +1,5 @@
 import React from 'react';
+import { useUiStrings } from './UiStrings';
 import { useDensity } from './theme/DensityProvider';
 import { useAccentColor } from './theme/useAccentColor';
 import './SettingsPanel.scss';
@@ -8,14 +9,15 @@ export interface SettingsPanelProps {
 }
 
 export const SettingsPanel = ({ onClose: _onClose }: SettingsPanelProps) => {
+  const strings = useUiStrings();
   const { density, toggleDensity } = useDensity();
   const { accent, changeAccent, presets } = useAccentColor();
 
   return (
-    <div className="nb-settings-panel" role="menu" aria-label="Display settings">
+    <div className="nb-settings-panel" role="menu" aria-label={strings.settingsMenu}>
       {/* ── Accent color ─────────────────────────────── */}
-      <p className="nb-settings-panel__heading">Color de acento</p>
-      <div className="nb-settings-panel__swatches" role="group" aria-label="Colores de acento">
+      <p className="nb-settings-panel__heading">{strings.accentColor}</p>
+      <div className="nb-settings-panel__swatches" role="group" aria-label={strings.accentColors}>
         {presets.map((preset) => (
           <button
             key={preset.value}
@@ -33,8 +35,12 @@ export const SettingsPanel = ({ onClose: _onClose }: SettingsPanelProps) => {
       <hr className="nb-settings-panel__divider" />
 
       {/* ── Density ──────────────────────────────────── */}
-      <p className="nb-settings-panel__heading">Densidad</p>
-      <div className="nb-settings-panel__density" role="group" aria-label="Densidad de interfaz">
+      <p className="nb-settings-panel__heading">{strings.density}</p>
+      <div
+        className="nb-settings-panel__density"
+        role="group"
+        aria-label={strings.interfaceDensity}
+      >
         <button
           className="nb-settings-panel__density-btn"
           type="button"
@@ -42,7 +48,7 @@ export const SettingsPanel = ({ onClose: _onClose }: SettingsPanelProps) => {
           onClick={() => density !== 'normal' && toggleDensity()}
         >
           <i className="ph ph-rows" aria-hidden="true" />
-          Normal
+          {strings.densityNormal}
         </button>
         <button
           className="nb-settings-panel__density-btn"
@@ -51,7 +57,7 @@ export const SettingsPanel = ({ onClose: _onClose }: SettingsPanelProps) => {
           onClick={() => density !== 'compact' && toggleDensity()}
         >
           <i className="ph ph-rows-plus-bottom" aria-hidden="true" />
-          Compact
+          {strings.densityCompact}
         </button>
       </div>
     </div>

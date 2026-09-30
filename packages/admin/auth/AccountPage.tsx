@@ -37,8 +37,8 @@ export function AccountPage({ apiBaseUrl = '/api/' }: AccountPageProps) {
   const load = useCallback(
     async (signal?: AbortSignal) => {
       const [totpResponse, sessionResponse] = await Promise.all([
-        csrfFetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include', signal }),
-        csrfFetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include', signal }),
+        fetch(joinApiPath(apiBaseUrl, 'auth/totp'), { credentials: 'include', signal }),
+        fetch(joinApiPath(apiBaseUrl, 'auth/sessions'), { credentials: 'include', signal }),
       ]);
       if (signal?.aborted) return;
       if (totpResponse.ok) {

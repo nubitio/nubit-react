@@ -73,7 +73,7 @@ export function SessionProvider({
 
   const refresh = useCallback(async () => {
     try {
-      const response = await csrfFetch(joinApiPath(apiBaseUrl, mePath), { credentials: 'include' });
+      const response = await fetch(joinApiPath(apiBaseUrl, mePath), { credentials: 'include' });
       if (!response.ok) {
         setSession({ status: 'anonymous' });
         return;

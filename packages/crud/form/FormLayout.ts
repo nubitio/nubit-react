@@ -14,5 +14,4 @@ export interface FormSection {
 }
 
 export type FormLayout =
-  | { type: 'tabs'; tabs: FormTab[] }
-  | { type: 'sections'; sections: FormSection[] };
+  { type: 'tabs'; tabs: FormTab[] } | { type: 'sections'; sections: FormSection[] };

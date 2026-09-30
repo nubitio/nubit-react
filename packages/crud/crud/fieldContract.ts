@@ -90,8 +90,7 @@ export interface SmartCrudManualFieldContract<T extends SmartCrudRecord> {
 }
 
 export type SmartCrudFieldContract<T extends SmartCrudRecord> =
-  | SmartCrudHydraFieldContract<T>
-  | SmartCrudManualFieldContract<T>;
+  SmartCrudHydraFieldContract<T> | SmartCrudManualFieldContract<T>;
 
 export function defineFields<T extends SmartCrudRecord>(
   contract: SmartCrudHydraFieldContract<T>,

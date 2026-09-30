@@ -4,8 +4,7 @@ import type { DataRecord } from '@nubitio/core';
 export type SmartCrudOperation = 'create' | 'edit';
 export type SmartCrudFieldOperation = SmartCrudOperation;
 export type SmartCrudFieldOperationFlag =
-  | boolean
-  | Partial<Record<SmartCrudFieldOperation, boolean>>;
+  boolean | Partial<Record<SmartCrudFieldOperation, boolean>>;
 
 export interface SmartCrudFieldOperationState {
   visible?: boolean;

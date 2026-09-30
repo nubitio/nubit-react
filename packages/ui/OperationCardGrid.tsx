@@ -2,15 +2,7 @@ import type { ReactNode } from 'react';
 import './OperationCardGrid.scss';
 
 export type OperationCardAccent =
-  | 'default'
-  | 'in'
-  | 'out'
-  | 'count'
-  | 'adjust'
-  | 'transfer'
-  | 'info'
-  | 'warning'
-  | 'danger';
+  'default' | 'in' | 'out' | 'count' | 'adjust' | 'transfer' | 'info' | 'warning' | 'danger';
 
 export interface OperationCardItem {
   key: string;

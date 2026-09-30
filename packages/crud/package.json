@@ -72,5 +72,8 @@
     "@tiptap/starter-kit": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "react-router-dom": "^6.30.6"
   }
 }

@@ -2,14 +2,7 @@ import type { ReactNode } from 'react';
 import './Badge.scss';
 
 export type BadgeVariant =
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'danger'
-  | 'warning'
-  | 'info'
-  | 'light'
-  | 'dark';
+  'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
 
 export type BadgeSize = 'sm' | 'md';
 

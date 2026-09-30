@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, FormField, TextField } from '@nubitio/ui';
+import { csrfFetch } from './csrfFetch';
 
 export interface ForgotPasswordPageProps {
   apiBaseUrl?: string;
@@ -19,7 +20,7 @@ export function ForgotPasswordPage({ apiBaseUrl = '/api/' }: ForgotPasswordPageP
     event.preventDefault();
     setBusy(true);
     try {
-      await fetch(joinApiPath(apiBaseUrl, 'auth/password/forgot'), {
+      await csrfFetch(joinApiPath(apiBaseUrl, 'auth/password/forgot'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

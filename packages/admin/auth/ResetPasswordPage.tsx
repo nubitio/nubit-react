@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button, Card, FormField, TextField } from '@nubitio/ui';
+import { csrfFetch } from './csrfFetch';
 
 export interface ResetPasswordPageProps {
   apiBaseUrl?: string;
@@ -23,7 +24,7 @@ export function ResetPasswordPage({ apiBaseUrl = '/api/' }: ResetPasswordPagePro
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch(joinApiPath(apiBaseUrl, 'auth/password/reset'), {
+      const response = await csrfFetch(joinApiPath(apiBaseUrl, 'auth/password/reset'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

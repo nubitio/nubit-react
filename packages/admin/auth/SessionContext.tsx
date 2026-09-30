@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { csrfFetch } from './csrfFetch';
 
 export type AppProfile = 'internal' | 'saas' | 'hybrid';
 
@@ -93,7 +94,7 @@ export function SessionProvider({
   }, [refresh]);
 
   const logout = useCallback(async () => {
-    await fetch(joinApiPath(apiBaseUrl, logoutPath), {
+    await csrfFetch(joinApiPath(apiBaseUrl, logoutPath), {
       method: 'POST',
       credentials: 'include',
     });

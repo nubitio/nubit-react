@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CoreConfigProvider, CoreProvider, MercureProvider } from '@nubitio/core';
+import { CoreConfigProvider, CoreProvider, MercureProvider, readCsrfToken } from '@nubitio/core';
 import {
   DevToolsProvider,
   isDevEnvironment,
@@ -139,6 +139,9 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
             baseUrl: apiBaseUrl,
             refreshPath: 'auth/refresh',
             loginPath: 'auth/login',
+            // The backend requires the double-submit token on cookie-authenticated
+            // mutations; without this every create/update/delete would be a 403.
+            getCsrfToken: () => readCsrfToken(),
             onUnauthorized: () => {
               void session.logout();
             },

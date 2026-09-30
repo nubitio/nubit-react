@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, FormField, TextField } from '@nubitio/ui';
+import { csrfFetch } from './csrfFetch';
 
 export interface AcceptInvitationPageProps {
   apiBaseUrl?: string;
@@ -20,7 +21,7 @@ export function AcceptInvitationPage({ apiBaseUrl = '/api/' }: AcceptInvitationP
 
   useEffect(() => {
     let cancelled = false;
-    void fetch(joinApiPath(apiBaseUrl, `invitations/${token}`), { credentials: 'include' })
+    void csrfFetch(joinApiPath(apiBaseUrl, `invitations/${token}`), { credentials: 'include' })
       .then(async (response) => {
         if (cancelled) return;
         if (!response.ok) {
@@ -43,7 +44,7 @@ export function AcceptInvitationPage({ apiBaseUrl = '/api/' }: AcceptInvitationP
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch(joinApiPath(apiBaseUrl, `invitations/${token}/accept`), {
+      const response = await csrfFetch(joinApiPath(apiBaseUrl, `invitations/${token}/accept`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

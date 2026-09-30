@@ -1,4 +1,13 @@
+import { configure } from '@testing-library/react';
 import { vi } from 'vitest';
+
+// Testing Library's `waitFor`/`findBy*` default to 1s. The lazy TipTap and
+// recharts chunks are transformed on first import, which under coverage
+// instrumentation and a parallel run can pass that — so html.test.tsx and
+// WidgetRenderer.test.tsx failed roughly one run in three with no code change.
+// The ceiling only matters when something is genuinely wrong; passing runs are
+// not slowed down.
+configure({ asyncUtilTimeout: 5000 });
 
 // happy-dom's EventSource opens a real socket. Unit tests exercise subscription
 // behavior through listeners and must never depend on a Mercure process.

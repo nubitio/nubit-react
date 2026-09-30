@@ -14,7 +14,7 @@ import {
   HydraResourceStoreProvider,
   SchemaProvider,
 } from '@nubitio/hydra';
-import { Skeleton, ThemeProvider, ThemeSwitcher } from '@nubitio/ui';
+import { Skeleton, ThemeProvider, ThemeSwitcher, useUiStrings } from '@nubitio/ui';
 
 import { AdminShell } from '../AdminShell';
 import { AcceptInvitationPage } from '../auth/AcceptInvitationPage';
@@ -81,6 +81,7 @@ function resolveShellMenu(config: CreateNubitAppConfig, ctx: NubitAppMenuContext
 
 function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
   const session = useSession();
+  const strings = useUiStrings();
   const { runtime, toasts, dismiss } = useAppRuntime();
   const apiBaseUrl = config.apiBaseUrl ?? '/api/';
   const homePath = config.homePath ?? config.routes[0]?.path ?? '/';
@@ -97,7 +98,7 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
 
   if (session.session.status === 'loading') {
     return (
-      <div style={{ padding: 24 }} aria-busy="true" aria-label="Loading session">
+      <div style={{ padding: 24 }} aria-busy="true" aria-label={strings.loadingSession}>
         <Skeleton variant="rect" height={32} width="33%" />
         <div style={{ height: 16 }} />
         <Skeleton variant="rect" height={256} />

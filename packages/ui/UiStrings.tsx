@@ -57,6 +57,41 @@ export interface UiStrings {
   pages: string;
   previousPage: string;
   nextPage: string;
+  // Admin shell, display settings and the HTML editor toolbar.
+  settingsMenu: string;
+  accentColor: string;
+  accentColors: string;
+  density: string;
+  interfaceDensity: string;
+  densityNormal: string;
+  densityCompact: string;
+  mainNavigation: string;
+  mainMenu: string;
+  closeMenu: string;
+  toggleMenu: string;
+  mainToolbar: string;
+  mainContent: string;
+  userMenu: string;
+  loadingSession: string;
+  textFormatting: string;
+  bold: string;
+  italic: string;
+  strikethrough: string;
+  heading2: string;
+  heading3: string;
+  bulletList: string;
+  orderedList: string;
+  blockquote: string;
+  addLink: string;
+  removeLink: string;
+  undo: string;
+  redo: string;
+  /** FeatureGate: tooltip on a feature the current plan does not include. */
+  featureUnavailable: string;
+  /** FeatureGate upgrade prompt; `{plan}` is replaced with the plan badge. */
+  featureRequiresPlan: string;
+  /** FeatureGate upgrade prompt: link to the plans page. */
+  viewPlans: string;
 }
 
 export const EN_UI_STRINGS: UiStrings = {
@@ -86,6 +121,37 @@ export const EN_UI_STRINGS: UiStrings = {
   pages: 'Pages',
   previousPage: 'Previous page',
   nextPage: 'Next page',
+  settingsMenu: 'Display settings',
+  accentColor: 'Accent color',
+  accentColors: 'Accent colors',
+  density: 'Density',
+  interfaceDensity: 'Interface density',
+  densityNormal: 'Normal',
+  densityCompact: 'Compact',
+  mainNavigation: 'Main navigation',
+  mainMenu: 'Main menu',
+  closeMenu: 'Close menu',
+  toggleMenu: 'Toggle menu',
+  mainToolbar: 'Main toolbar',
+  mainContent: 'Main content',
+  userMenu: 'User menu',
+  loadingSession: 'Loading session',
+  textFormatting: 'Text formatting',
+  bold: 'Bold (Ctrl+B)',
+  italic: 'Italic (Ctrl+I)',
+  strikethrough: 'Strikethrough',
+  heading2: 'Heading 2',
+  heading3: 'Heading 3',
+  bulletList: 'Bullet list',
+  orderedList: 'Ordered list',
+  blockquote: 'Blockquote',
+  addLink: 'Add link',
+  removeLink: 'Remove link',
+  undo: 'Undo (Ctrl+Z)',
+  redo: 'Redo (Ctrl+Y)',
+  featureUnavailable: 'This feature is not available on your current plan.',
+  featureRequiresPlan: 'This feature requires the {plan} plan. Upgrade your plan to unlock it.',
+  viewPlans: 'View plans',
 };
 
 export const ES_UI_STRINGS: UiStrings = {
@@ -115,6 +181,38 @@ export const ES_UI_STRINGS: UiStrings = {
   pages: 'Páginas',
   previousPage: 'Página anterior',
   nextPage: 'Página siguiente',
+  settingsMenu: 'Ajustes de visualización',
+  accentColor: 'Color de acento',
+  accentColors: 'Colores de acento',
+  density: 'Densidad',
+  interfaceDensity: 'Densidad de interfaz',
+  densityNormal: 'Normal',
+  densityCompact: 'Compacta',
+  mainNavigation: 'Navegación principal',
+  mainMenu: 'Menú principal',
+  closeMenu: 'Cerrar menú',
+  toggleMenu: 'Alternar menú',
+  mainToolbar: 'Barra de herramientas principal',
+  mainContent: 'Contenido principal',
+  userMenu: 'Menú de usuario',
+  loadingSession: 'Cargando sesión',
+  textFormatting: 'Formato de texto',
+  bold: 'Negrita (Ctrl+B)',
+  italic: 'Cursiva (Ctrl+I)',
+  strikethrough: 'Tachado',
+  heading2: 'Título 2',
+  heading3: 'Título 3',
+  bulletList: 'Lista con viñetas',
+  orderedList: 'Lista numerada',
+  blockquote: 'Cita',
+  addLink: 'Añadir enlace',
+  removeLink: 'Quitar enlace',
+  undo: 'Deshacer (Ctrl+Z)',
+  redo: 'Rehacer (Ctrl+Y)',
+  featureUnavailable: 'Esta función no está disponible en tu plan actual.',
+  featureRequiresPlan:
+    'Esta función requiere el plan {plan}. Actualiza tu plan para desbloquearla.',
+  viewPlans: 'Ver planes',
 };
 
 const UiStringsContext = createContext<UiStrings>(EN_UI_STRINGS);

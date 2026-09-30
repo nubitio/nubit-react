@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUiStrings } from '@nubitio/ui';
 
 import { AdminHeader, type AdminHeaderAction } from './AdminHeader';
 import {
@@ -40,6 +41,7 @@ export const AdminShell = ({
   children,
 }: AdminShellProps) => {
   const navigate = useNavigate();
+  const strings = useUiStrings();
   const { isXSmall, isLarge } = useScreenSize();
   const [menuStatus, setMenuStatus] = useState<MenuStatus>(null);
 
@@ -133,7 +135,7 @@ export const AdminShell = ({
         renderThemeSwitcher={renderThemeSwitcher}
       />
       <div className={bodyClassName}>
-        <aside className="nb-admin-shell__panel" aria-label="Main menu">
+        <aside className="nb-admin-shell__panel" aria-label={strings.mainMenu}>
           <AdminSidebarMenu
             items={menuItems}
             compactMode={isCompact}
@@ -146,14 +148,14 @@ export const AdminShell = ({
           <button
             className="nb-admin-shell__scrim"
             type="button"
-            aria-label="Close menu"
+            aria-label={strings.closeMenu}
             onClick={closeMenuFromOverlay}
           />
         )}
         <main
           className="nb-admin-shell__content content"
           tabIndex={0}
-          aria-label={title ? `${title} content` : 'Main content'}
+          aria-label={title ? `${title} content` : strings.mainContent}
         >
           {children}
         </main>

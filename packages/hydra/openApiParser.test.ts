@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { toDashCase, toSnakeCase, pluralize, normalizeRange, parseHydraDoc } from './openApiParser';
+import {
+  toDashCase,
+  toSnakeCase,
+  pluralize,
+  normalizeRange,
+  entrypointTargetClass,
+  parseHydraDoc,
+} from './openApiParser';
 import type { HydraApiDoc } from './types';
 
 // ── toDashCase ────────────────────────────────────────────────────────────────
@@ -416,5 +423,77 @@ describe('parseHydraDoc x-crud-layout', () => {
       type: 'sections',
       sections: [{ label: 'Main', fields: ['a', 'b'], collapsible: true }],
     });
+  });
+});
+
+// ── memberAssertion (API Platform 4.4 collection typing) ──────────────────────
+
+describe('entrypoint collections typed by memberAssertion', () => {
+  const collectionProperty = (name: string, className: string, methods: string[]) => ({
+    '@type': 'SupportedProperty',
+    title: name,
+    property: {
+      '@id': `#Entrypoint/${name}`,
+      '@type': 'Link',
+      label: name,
+      range: 'hydra:Collection',
+      memberAssertion: { property: { '@id': 'rdf:type' }, object: { '@id': `#${className}` } },
+      supportedOperation: methods.map((method) => ({ method })),
+    },
+    readable: true,
+    writeable: false,
+    required: false,
+  });
+
+  const doc = {
+    '@context': '/api/contexts/Entrypoint',
+    '@id': '/api',
+    '@type': 'hydra:ApiDocumentation',
+    supportedClass: [
+      {
+        '@id': '#Entrypoint',
+        '@type': 'hydra:Class',
+        title: 'Entrypoint',
+        supportedProperty: [
+          collectionProperty('category', 'Category', ['GET', 'POST']),
+          collectionProperty('priceList', 'PriceList', ['GET']),
+        ],
+        supportedOperation: [],
+      },
+      {
+        '@id': '#Category',
+        '@type': 'hydra:Class',
+        title: 'Category',
+        supportedProperty: [],
+        supportedOperation: [{ method: 'GET' }, { method: 'PATCH' }],
+      },
+      {
+        '@id': '#PriceList',
+        '@type': 'hydra:Class',
+        title: 'PriceList',
+        supportedProperty: [],
+        supportedOperation: [{ method: 'GET' }],
+      },
+    ],
+  } as unknown as HydraApiDoc;
+
+  it('reads the member class instead of hydra:Collection', () => {
+    expect(entrypointTargetClass(doc.supportedClass[0].supportedProperty?.[0].property)).toBe(
+      '#Category',
+    );
+  });
+
+  it('falls back to range when there is no memberAssertion', () => {
+    expect(
+      entrypointTargetClass({ '@id': 'x', '@type': 'Link', label: 'x', range: '#Product' }),
+    ).toBe('#Product');
+  });
+
+  it('keeps each resource its own collection operations', () => {
+    const result = parseHydraDoc(doc);
+    expect(result['Category'].supportedOperations).toEqual(
+      expect.arrayContaining(['GET', 'POST', 'PATCH']),
+    );
+    expect(result['PriceList'].supportedOperations).not.toContain('POST');
   });
 });

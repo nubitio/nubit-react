@@ -24,6 +24,13 @@ export interface HydraProperty {
    * Use normalizeRange() in openApiParser.ts to safely extract a string.
    */
   range?: unknown;
+  /**
+   * Newer API Platform releases (Hydra 2021 `memberAssertion`) type a collection
+   * link with `range: "hydra:Collection"` and name the member class here:
+   * `{ property: { '@id': 'rdf:type' }, object: { '@id': '#Category' } }`.
+   * Use entrypointTargetClass() in openApiParser.ts to read it.
+   */
+  memberAssertion?: unknown;
 }
 
 /**

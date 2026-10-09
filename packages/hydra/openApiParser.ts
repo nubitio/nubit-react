@@ -3,6 +3,7 @@ import type {
   HydraEntrypointHrefs,
   HydraResourceSchema,
   HydraFieldSchema,
+  HydraProperty,
   HydraSupportedProperty,
   HydraSearchMapping,
   OpenApiDoc,
@@ -212,6 +213,28 @@ function extractSearchMappings(cls: HydraApiDoc['supportedClass'][number]): Hydr
  * Accepts both `hydra:method` and `method` field names inside each operation entry
  * to be safe across different API Platform serialisation variants.
  */
+/**
+ * The class an Entrypoint property points at (`#Category` for `/api/categories`).
+ *
+ * Older API Platform emits it as the property `range` (plain or wrapped in
+ * `owl:equivalentClass`). Newer releases emit `range: "hydra:Collection"` for
+ * every collection and name the member class under `memberAssertion.object`;
+ * reading `range` alone there would key every resource as `hydra:Collection`
+ * and drop their collection operations (notably POST).
+ */
+export function entrypointTargetClass(property: HydraProperty | undefined): string | undefined {
+  const memberAssertion = property?.memberAssertion;
+  if (memberAssertion && typeof memberAssertion === 'object') {
+    const object = (memberAssertion as DataRecord)['object'];
+    if (object && typeof object === 'object') {
+      const id = (object as DataRecord)['@id'];
+      if (typeof id === 'string') return id;
+    }
+  }
+
+  return normalizeRange(property?.range);
+}
+
 function extractSupportedOperations(cls: HydraApiDoc['supportedClass'][number]): string[] {
   const operations = cls['supportedOperation'];
   if (!operations || operations.length === 0) return [];
@@ -230,8 +253,7 @@ function extractEntrypointCollectionOperations(doc: HydraApiDoc): Record<string,
   const collectionOperations: Record<string, string[]> = {};
 
   for (const sp of entrypoint.supportedProperty ?? []) {
-    const rawRange = sp.property?.range;
-    const range = normalizeRange(rawRange);
+    const range = entrypointTargetClass(sp.property);
     if (!range) {
       continue;
     }
@@ -272,8 +294,7 @@ export function parseHydraDoc(
   const entrypoint = doc['supportedClass'].find((c) => c['@id'] === '#Entrypoint');
   if (entrypoint) {
     for (const sp of entrypoint.supportedProperty ?? []) {
-      const rawRange = sp.property?.range;
-      const range = normalizeRange(rawRange); // safely handles string | object | null | undefined
+      const range = entrypointTargetClass(sp.property);
       const propId = sp.property?.['@id']; // e.g. "#Entrypoint/branch"
       if (range && propId) {
         const className = range.replace('#', '');

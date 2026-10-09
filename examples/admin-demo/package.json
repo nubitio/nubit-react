@@ -20,7 +20,7 @@
     "@nubitio/ui": "workspace:*",
     "@phosphor-icons/web": "^2.1.2",
     "@tanstack/react-query": "^5.104.0",
-    "devextreme": "^24.2.16",
+    "devextreme": "^26.1.5",
     "devextreme-react": "^24.2.16",
     "i18next": "^23.16.8",
     "react": "^19.3.0",

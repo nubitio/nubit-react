@@ -1,0 +1,129 @@
+.nb-combobox {
+  position: relative;
+
+  &__actions {
+    align-items: center;
+    bottom: 0;
+    display: flex;
+    position: absolute;
+    right: var(--space-1);
+    top: 0;
+  }
+
+  &__action {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    justify-content: center;
+    min-height: var(--control-height-form);
+    min-width: var(--control-height-form);
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
+// Keep the action area reserved when a consumer applies its input styles.
+.nb-combobox .nb-combobox__input {
+  padding-right: calc(var(--control-height-form) * 2);
+}
+
+.nb-combobox-popup {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  max-height: min(20rem, var(--available-height));
+  width: var(--trigger-width);
+  z-index: 9999;
+  overflow-y: auto;
+
+  &__list {
+    margin: 0;
+    padding: var(--space-1);
+  }
+
+  &__empty {
+    color: var(--text-secondary);
+    padding: var(--space-3);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__item {
+    align-items: center;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-2);
+    min-height: var(--control-height-form);
+    padding: var(--space-2);
+
+    &[data-focused] {
+      background: var(--surface-0);
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: -2px;
+    }
+
+    &[data-selected] {
+      color: var(--accent-on-subtle);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    &[data-disabled] {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__indicator {
+    width: 1rem;
+  }
+}
+
+.nb-combobox-tags [role='grid'] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.nb-combobox-tags__tag {
+  align-items: center;
+  background: var(--surface-0);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+}
+
+.nb-combobox-tags__remove {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+}

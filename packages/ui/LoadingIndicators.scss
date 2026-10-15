@@ -1,0 +1,46 @@
+.nb-spinner {
+  animation: nb-spinner-rotate 0.8s linear infinite;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  border-top-color: var(--accent-color);
+  display: inline-block;
+  flex-shrink: 0;
+  height: 1.25rem;
+  vertical-align: middle;
+  width: 1.25rem;
+
+  &--sm {
+    height: 0.875rem;
+    width: 0.875rem;
+  }
+
+  &--lg {
+    height: 2rem;
+    width: 2rem;
+  }
+}
+
+@keyframes nb-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nb-spinner {
+    animation: none;
+  }
+}
+
+.nb-progress-field {
+  color: var(--text-primary);
+  display: grid;
+  font-size: var(--font-size-sm);
+  gap: var(--space-2);
+}
+
+.nb-progress {
+  accent-color: var(--accent-color);
+  height: 0.5rem;
+  width: 100%;
+}

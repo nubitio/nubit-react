@@ -465,7 +465,7 @@ function NativeDetailGrid({
                       >
                         {renderDetailControl(row, rowIndex, field)}
                         {detailErrors[rowIndex]?.[field.name] && (
-                          <span className="nb-form__error">
+                          <span className="nb-form__error" id={`nb-form-${field.name}-error`}>
                             <i className="ph ph-warning-circle" aria-hidden="true" />
                             {detailErrors[rowIndex][field.name]}
                           </span>
@@ -988,7 +988,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
         {control}
         {field.helpText && <span className="nb-form__hint">{field.helpText}</span>}
         {error && (
-          <span className="nb-form__error">
+          <span className="nb-form__error" id={`nb-form-${field.name}-error`}>
             <i className="ph ph-warning-circle" aria-hidden="true" />
             {error}
           </span>

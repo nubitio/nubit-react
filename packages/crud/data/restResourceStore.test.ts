@@ -21,6 +21,16 @@ function stubFetch(
 afterEach(() => vi.unstubAllGlobals());
 
 describe('createRestResourceStore', () => {
+  it('passes cancellation to fetch without serializing the signal into the URL', async () => {
+    const controller = new AbortController();
+    const fetch = vi
+      .fn()
+      .mockResolvedValue({ ok: true, headers: new Headers(), json: async () => [] });
+    vi.stubGlobal('fetch', fetch);
+    const store = createRestResourceStore()({ url: '/api/things', idField: 'id' });
+    await store.load({ signal: controller.signal, searchValue: 'foo' });
+    expect(fetch).toHaveBeenCalledWith('/api/things?q=foo', { signal: controller.signal });
+  });
   it('translates take/skip/sort/search into the default dialect params', async () => {
     const calls = stubFetch(() => ({ body: [] }));
     const store = createRestResourceStore()({ url: '/api/things', idField: 'id' });

@@ -3,6 +3,30 @@ import { getCoreTimezone, type CoreHttpClient, type DataRecord } from '@nubitio/
 import { Field } from '../field/Field';
 import { type ResourceStore, type ResourceStoreFactory } from '../data/ResourceStore';
 import type { FormDataRecord } from './FormDataSnapshot';
+import type { NormalizeFieldContext } from '../field/registry/FieldTypeModule';
+
+/** Register labels and normalize relation keys, including synthesized Hydra IRIs. */
+export function normalizeRelationOption(
+  field: Field,
+  rawValue: unknown,
+  ctx: NormalizeFieldContext,
+): unknown {
+  let value = rawValue;
+  if (typeof rawValue === 'object' && rawValue !== null && !Array.isArray(rawValue)) {
+    const record = { ...(rawValue as FormDataRecord) };
+    if (
+      field.valueField === '_iri' &&
+      typeof record['_iri'] !== 'string' &&
+      typeof record['@id'] !== 'string'
+    ) {
+      const iri = ctx.adapter.synthesizeEntityKey(field, record);
+      if (iri) record['_iri'] = iri;
+    }
+    ctx.prependEntityOption(field, record);
+    value = record;
+  }
+  return ctx.adapter.normalizeEntityValue(value, field);
+}
 
 export function createRemoteSource(
   field: Field,

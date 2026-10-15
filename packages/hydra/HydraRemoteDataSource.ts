@@ -190,6 +190,7 @@ function stripMergeOnlyParams(loadOptions: ResourceLoadOptions): ResourceLoadOpt
   const nextOptions: ResourceLoadOptions = { ...loadOptions };
   delete nextOptions.prependData;
   delete nextOptions.appendData;
+  delete nextOptions.signal;
   return nextOptions;
 }
 
@@ -392,6 +393,7 @@ export class HydraRemoteDataSource implements ResourceStore {
   private async fetchAll(loadOptions: RemoteLoadOptions): Promise<GridData<DataRecord>> {
     const response = await this.httpClient.get<unknown>(this.config.url, {
       params: stripMergeOnlyParams(loadOptions),
+      ...(loadOptions.signal ? { signal: loadOptions.signal } : {}),
     });
     const parsed = parseCollectionResponse(response.data, response.headers);
     let data = parsed.data;

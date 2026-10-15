@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CoreHttpClient } from '@nubitio/core';
@@ -315,6 +315,15 @@ describe('HydraRemoteDataSource.load', () => {
 
     expect(capturedParams).not.toHaveProperty('prependData');
     expect(capturedParams).not.toHaveProperty('appendData');
+  });
+
+  it('forwards cancellation as HTTP configuration rather than a query parameter', async () => {
+    const controller = new AbortController();
+    const get = vi.fn().mockResolvedValue({ data: [], headers: new Headers() });
+    const ds = makeSource({ httpClient: { get } as unknown as CoreHttpClient });
+    await ds.load({ signal: controller.signal, searchValue: 'foo' });
+    expect(get.mock.calls[0][1].signal).toBe(controller.signal);
+    expect(get.mock.calls[0][1].params).not.toHaveProperty('signal');
   });
 });
 

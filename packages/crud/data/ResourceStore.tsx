@@ -13,6 +13,7 @@ export interface ResourceFilterRule {
 export type ResourceLoadOption = Record<string, unknown>;
 
 export type ResourceLoadOptions = DataRecord & {
+  signal?: AbortSignal;
   filter?: ResourceFilterDescriptor;
   sort?: ResourceSortDescriptor[];
   appendData?: DataRecord[];

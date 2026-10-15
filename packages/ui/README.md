@@ -36,7 +36,7 @@ export function App() {
 
 - **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
 - **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`
-- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`
+- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`, `TimePicker`
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
 - **Layout** — `AppToolbar`
 - **Selection and navigation** — `Checkbox` (native, including mixed state), `RadioGroup` (native radios), `Tabs` (controlled, keyboard navigation)
@@ -242,3 +242,32 @@ row menus and mobile filter sheets inside dialog or drawer views. Handle Escape
 on the child panel before it bubbles to the owning dialog.
 
 Interaction reference: [Base UI Dialog](https://base-ui.com/react/components/dialog).
+
+### Dates, ranges and times
+
+```tsx
+<DatePicker id="invoice-date" name="date" ariaLabel="Invoice date"
+  value={date} onChange={setDate} locale="es-PE" min="2026-01-01" />
+<DateRangePicker ariaLabel="Reporting period" startValue={start} endValue={end}
+  onChange={(start, end) => setPeriod([start, end])} />
+<TimePicker ariaLabel="Appointment time" name="time" value={time}
+  onChange={setTime} hourCycle={24} min="08:00" max="18:00" />
+```
+
+React Aria manages calendar navigation, range selection, overlay focus and segmented
+hour/minute editing. Date controls preserve native text inputs, IDs, external labels
+and the `DatePicker` input ref used by CRUD. Dates use `YYYY-MM-DD` values without
+conversion to a timezone. Text entry follows `locale`, accepts pasted ISO dates,
+and commits on Enter or blur; invalid or out-of-bounds edits revert to the current
+value. ArrowDown opens the calendar; Escape dismisses it. Month/year selectors
+allow long-distance navigation. Partial ranges remain supported and completed
+ranges are sorted chronologically.
+
+`TimePicker` is controlled and emits `HH:mm`, or `HH:mm:ss` with
+`granularity="second"`. It represents a wall-clock time, with no date or timezone.
+Display defaults to the locale's hour cycle; `hourCycle={12 | 24}` overrides it.
+Its ref points to the segmented input group, and `name` submits React Aria's ISO
+time value (`HH:mm:ss`). Use `ariaLabel` to name the control. All three support
+`disabled`, `readOnly`, `required` and `invalid`; `TimePicker` exposes built-in
+min/max validation through `aria-invalid`. Components are exported by both
+`@nubitio/ui` and `@nubitio/react-admin`.

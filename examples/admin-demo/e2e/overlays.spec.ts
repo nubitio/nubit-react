@@ -104,16 +104,37 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('calendars and tooltips stay usable inside a modal', async ({ page }) => {
       const dialog = await openPlayground(page);
-      await dialog.getByRole('button', { name: 'Open calendar', exact: true }).first().click();
+      await dialog
+        .getByRole('button', { name: /^Open calendar/ })
+        .first()
+        .click();
       await expect(dialog.locator('.nb-date-picker__panel')).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(dialog.locator('.nb-date-picker__panel')).toBeHidden();
+      await expect(
+        dialog.getByRole('combobox', { name: 'Publication date', exact: true }),
+      ).toBeFocused();
       await expect(dialog).toBeVisible();
-      await dialog.getByRole('button', { name: 'Open calendar', exact: true }).last().click();
+      await dialog
+        .getByRole('button', { name: /^Open calendar/ })
+        .last()
+        .click();
       await expect(dialog.locator('.nb-date-range-picker__panel')).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(dialog.locator('.nb-date-range-picker__panel')).toBeHidden();
+      await expect(
+        dialog.getByRole('textbox', { name: 'Start date Publication window' }),
+      ).toBeFocused();
+      await dialog
+        .getByRole('combobox', { name: 'Publication date', exact: true })
+        .press('ArrowDown');
+      await expect(dialog.locator('.nb-date-picker__panel')).toBeVisible();
+      const title = dialog.getByRole('textbox', { name: 'Working title' });
+      await title.click();
+      await expect(dialog.locator('.nb-date-picker__panel')).toBeHidden();
+      await expect(title).toBeFocused();
       const help = dialog.getByRole('button', { name: 'Report scope' });
+      await page.keyboard.press('Tab');
       await help.focus();
       await expect(dialog.getByRole('tooltip')).toBeVisible();
       await expect(help).toBeFocused();

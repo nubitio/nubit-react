@@ -20,7 +20,7 @@ for (const kind of ['date', 'range'] as const) {
     const input =
       kind === 'date'
         ? screen.getByRole('combobox', { name: 'Date' })
-        : screen.getByRole('textbox', { name: 'Fecha inicio Dates' });
+        : screen.getByRole('textbox', { name: 'Start date Dates' });
     const next = screen.getByRole('button', { name: 'Next control' });
     act(() => {
       input.focus();

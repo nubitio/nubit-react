@@ -439,3 +439,6 @@ export type {
   UiStrings,
   UiStringsProviderProps,
 } from '@nubitio/ui';
+
+export { TimePicker } from '@nubitio/ui';
+export type { TimePickerProps } from '@nubitio/ui';

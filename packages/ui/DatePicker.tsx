@@ -1,9 +1,21 @@
-import { useOverlayContainer } from './OverlayContainer';
-import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { forwardRef, useId } from 'react';
+import {
+  Button,
+  Calendar,
+  DatePicker as AriaDatePicker,
+  Group,
+  I18nProvider,
+  Popover,
+} from 'react-aria-components';
+import { getLocalTimeZone, today } from '@internationalized/date';
+import { CalendarContent, CalendarDialog } from './CalendarContent';
+import { DateTextInput } from './DateTextInput';
+import { calendarDate, dateAllowed, datePlaceholder, getDateLocale } from './dateValues';
+import { useCalendarPopover } from './useCalendarPopover';
 import { useUiStrings } from './UiStrings';
-import { useFloatingPanel } from './useFloatingPanel';
 import './DatePicker.scss';
+
+export { applyDateMask, getFirstDayOfWeek, parseDisplayDate, weekDayLabels } from './dateValues';
 
 export interface DatePickerProps {
   id?: string;
@@ -26,184 +38,12 @@ export interface DatePickerProps {
   onBlur?: React.FocusEventHandler<HTMLElement>;
 }
 
-type CalendarDay = {
-  date: Date;
-  iso: string;
-  inCurrentMonth: boolean;
-  disabled: boolean;
-};
-
-type ViewMode = 'days' | 'months' | 'years';
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
-const cx = (...values: Array<string | false | null | undefined>) =>
-  values.filter(Boolean).join(' ');
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-const getLocale = (override?: string) =>
-  override || document.documentElement.lang || navigator.language || 'en-US';
-
-const pad = (value: number) => String(value).padStart(2, '0');
-
-const toIsoDate = (date: Date) =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-const parseIsoDate = (value?: string | null) => {
-  if (!value || !ISO_DATE_RE.test(value)) return null;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day)
-    return null;
-  return date;
-};
-
-const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-const addMonths = (date: Date, months: number) =>
-  new Date(date.getFullYear(), date.getMonth() + months, 1);
-
-const formatDisplayDate = (value?: string | null, locale?: string) => {
-  const date = parseIsoDate(value);
-  if (!date) return '';
-  return new Intl.DateTimeFormat(getLocale(locale), {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-};
-
-const formatMonthLabel = (date: Date, locale?: string) =>
-  new Intl.DateTimeFormat(getLocale(locale), { month: 'long', year: 'numeric' }).format(date);
-
-/**
- * Locale-aware first day of week.
- * Uses Intl.Locale.weekInfo (Chrome 99+, FF 126+, Safari 17+) with fallback heuristic.
- */
-export const getFirstDayOfWeek = (locale?: string): number => {
-  try {
-    // @ts-expect-error — weekInfo is stage-4, not yet in TS lib
-    const info = new Intl.Locale(getLocale(locale)).weekInfo;
-    if (info && typeof info.firstDay === 'number') return info.firstDay === 7 ? 0 : info.firstDay;
-  } catch {
-    /* ignore */
-  }
-  const country = (getLocale(locale).split('-')[1] ?? '').toUpperCase();
-  const sundayCountries = ['US', 'CA', 'MX', 'CN', 'JP', 'KR', 'SA', 'EG', 'IL', 'BR'];
-  return sundayCountries.includes(country) ? 0 : 1;
-};
-
-const buildCalendarDays = (
-  month: Date,
-  min?: string,
-  max?: string,
-  locale?: string,
-): CalendarDay[] => {
-  const first = startOfMonth(month);
-  const firstDayOfWeek = getFirstDayOfWeek(locale);
-  const offset = (first.getDay() - firstDayOfWeek + 7) % 7;
-  const minDate = parseIsoDate(min);
-  const maxDate = parseIsoDate(max);
-  const start = new Date(first);
-  start.setDate(first.getDate() - offset);
-
-  return Array.from({ length: 42 }, (_, i) => {
-    const date = new Date(start);
-    date.setDate(start.getDate() + i);
-    const iso = toIsoDate(date);
-    return {
-      date,
-      iso,
-      inCurrentMonth: date.getMonth() === month.getMonth(),
-      disabled: Boolean((minDate && date < minDate) || (maxDate && date > maxDate)),
-    };
-  });
-};
-
-const isIsoDateDisabled = (iso: string, min?: string, max?: string) => {
-  const date = parseIsoDate(iso);
-  if (!date) return true;
-  const minDate = parseIsoDate(min);
-  const maxDate = parseIsoDate(max);
-  return Boolean((minDate && date < minDate) || (maxDate && date > maxDate));
-};
-
-export const weekDayLabels = (locale?: string): string[] => {
-  const firstDayOfWeek = getFirstDayOfWeek(locale);
-  const anchor = new Date(2026, 5, 7); // Known Sunday
-  const formatter = new Intl.DateTimeFormat(getLocale(locale), { weekday: 'narrow' });
-  return Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(anchor);
-    date.setDate(anchor.getDate() + ((firstDayOfWeek + i) % 7));
-    return formatter.format(date);
-  });
-};
-
-/** Short month labels (Jan, Feb, …) — capitalized for display. */
-const getMonthLabels = (locale?: string): string[] => {
-  const formatter = new Intl.DateTimeFormat(getLocale(locale), { month: 'short' });
-  return Array.from({ length: 12 }, (_, i) => {
-    const label = formatter.format(new Date(2024, i, 1));
-    return label.charAt(0).toUpperCase() + label.slice(1).replace('.', '');
-  });
-};
-
-/** Year range: 12-year block containing the given year. */
-const getYearRangeStart = (year: number): number => Math.floor(year / 12) * 12;
-
-// ── Text input mask ────────────────────────────────────────────────────────────
-
-/**
- * Applies dd/mm/yyyy mask.
- * Auto-inserts trailing slash when adding the 2nd or 4th digit.
- * Does NOT add trailing slash when the user is deleting.
- */
-export const applyDateMask = (rawValue: string, prevValue: string): string => {
-  const digits = rawValue.replace(/\D/g, '').slice(0, 8);
-  const prevDigits = prevValue.replace(/\D/g, '');
-  const isAdding = digits.length > prevDigits.length;
-
-  if (digits.length === 0) return '';
-
-  let result = digits.slice(0, 2);
-  if (digits.length > 2) result += '/' + digits.slice(2, 4);
-  if (digits.length > 4) result += '/' + digits.slice(4, 8);
-
-  // Auto-trailing slash only when actively typing the 2nd or 4th digit
-  if (isAdding && (digits.length === 2 || digits.length === 4)) {
-    result += '/';
-  }
-
-  return result;
-};
-
-/**
- * Parses dd/mm/yyyy or ISO yyyy-mm-dd to ISO string.
- * Returns null if not a valid date.
- */
-export const parseDisplayDate = (text: string, locale?: string): string | null => {
-  const match = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
-  if (match) {
-    const [, a, b, year] = match;
-    // Locale heuristic: US → mm/dd, rest → dd/mm
-    const country = (getLocale(locale).split('-')[1] ?? '').toUpperCase();
-    const monthFirst = country === 'US';
-    const [dd, mm] = monthFirst ? [b, a] : [a, b];
-    const iso = `${year}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-    return parseIsoDate(iso) ? iso : null;
-  }
-  // Accept pasted ISO format
-  if (ISO_DATE_RE.test(text)) return parseIsoDate(text) ? text : null;
-  return null;
-};
-
-// ── Component ──────────────────────────────────────────────────────────────────
-
 export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function DatePicker(
   {
     id,
     name,
     value,
-    placeholder = 'dd/mm/yyyy',
+    placeholder,
     disabled = false,
     readOnly = false,
     required = false,
@@ -221,519 +61,126 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const panelId = `${inputId}-panel`;
-  const overlayContainer = useOverlayContainer();
+  const { container, groupRef, panelRef, open, setOpen } = useCalendarPopover();
   const strings = useUiStrings();
-
-  const selectedDate = parseIsoDate(value);
-  const resolvedLocale = getLocale(locale);
-  const displayValue = formatDisplayDate(value, resolvedLocale);
-
-  // ── UI state ────────────────────────────────────────────────────────────────
-  const [viewMode, setViewMode] = useState<ViewMode>('days');
-  const [month, setMonth] = useState(() => startOfMonth(selectedDate ?? new Date()));
-  const [yearRangeStart, setYearRangeStart] = useState(() =>
-    getYearRangeStart(new Date().getFullYear()),
-  );
-  const [focusedIso, setFocusedIso] = useState<string | null>(null);
-
-  // ── Text input state ─────────────────────────────────────────────────────
-  const [inputText, setInputText] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-
-  // ── Refs ─────────────────────────────────────────────────────────────────
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const triggerRef = useRef<HTMLDivElement | null>(null);
-
-  // ── Floating panel: open state, positioning, outside-click and Escape ────
-  const {
-    open,
-    setOpen,
-    containerRef: rootRef,
-    panelRef,
-    panelStyle,
-  } = useFloatingPanel<HTMLDivElement, HTMLDivElement>({
-    onClose: () => {
-      setFocusedIso(null);
-      setViewMode('days');
-    },
-    onEscape: (e) => {
-      e.preventDefault();
-      inputRef.current?.focus();
-    },
-    computeStyle: () => {
-      const rect = triggerRef.current?.getBoundingClientRect();
-      if (!rect) return null;
-      const panelWidth = panelRef.current?.offsetWidth ?? 296;
-      const left = Math.min(Math.max(8, rect.left), window.innerWidth - panelWidth - 8);
-      const top = Math.min(rect.bottom + 6, window.innerHeight - 380);
-      return { left, top: Math.max(8, top) };
-    },
-  });
-
-  const days = useMemo(
-    () => buildCalendarDays(month, min, max, resolvedLocale),
-    [max, min, month, resolvedLocale],
-  );
-  const weekdayLabels = useMemo(() => weekDayLabels(resolvedLocale), [resolvedLocale]);
-  const monthLabels = useMemo(() => getMonthLabels(resolvedLocale), [resolvedLocale]);
-  const selectedIso = selectedDate ? toIsoDate(selectedDate) : '';
-
-  // ── Sync controlled value → month view ──────────────────────────────────
-  useEffect(() => {
-    if (selectedDate) setMonth(startOfMonth(selectedDate));
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Initial focus when calendar opens ───────────────────────────────────
-  useEffect(() => {
-    if (!open) return;
-    const initialIso = selectedDate ? toIsoDate(selectedDate) : toIsoDate(new Date());
-    setFocusedIso(initialIso);
-    const timer = window.setTimeout(() => {
-      panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${initialIso}"]`)?.focus();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Commit helpers ───────────────────────────────────────────────────────
-  const commitValue = useCallback(
-    (nextValue: string) => {
-      onChange?.(nextValue);
-      setOpen(false);
-      setIsEditing(false);
-      setInputText('');
-      window.setTimeout(() => inputRef.current?.focus());
-    },
-    [onChange, setOpen],
-  );
-
-  const handleToday = useCallback(() => {
-    const today = toIsoDate(new Date());
-    if (isIsoDateDisabled(today, min, max)) return;
-    setMonth(startOfMonth(parseIsoDate(today)!));
-    commitValue(today);
-  }, [min, max, commitValue]);
-
-  const handleClear = useCallback(
-    (e: React.PointerEvent) => {
-      e.preventDefault();
-      commitValue('');
-    },
-    [commitValue],
-  );
-
-  // ── Text input handlers ──────────────────────────────────────────────────
-  const handleInputFocus = () => {
-    setIsEditing(true);
-    setInputText(displayValue);
-    // Select all on focus so user can immediately retype
-    window.setTimeout(() => {
-      if (document.activeElement === inputRef.current) inputRef.current?.select();
-    }, 0);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (readOnly || disabled) return;
-    setInputText(applyDateMask(e.target.value, inputText));
-  };
-
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Ignore blur if focus moved within the component or to the panel
-    const related = e.relatedTarget as Node | null;
-    if (rootRef.current?.contains(related) || panelRef.current?.contains(related)) return;
-
-    setIsEditing(false);
-    const parsed = parseDisplayDate(inputText, resolvedLocale);
-    if (parsed !== null) {
-      if (parsed !== value) onChange?.(parsed);
-    } else if (inputText === '' && value) {
-      onChange?.('');
-    }
-    // Revert display to last committed value on invalid input
-    setInputText('');
-    onBlur?.(e);
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const parsed = parseDisplayDate(inputText, resolvedLocale);
-      if (parsed !== null) commitValue(parsed);
-      else if (inputText === '') commitValue('');
-    } else if (e.key === 'ArrowDown' || e.key === 'F4') {
-      e.preventDefault();
-      if (!readOnly && !disabled) setOpen(true);
-    } else if (e.key === 'Escape' && open) {
-      setOpen(false);
-    }
-  };
-
-  const handleCalendarPointerDown = (e: React.PointerEvent) => {
-    e.preventDefault(); // keep focus on the input
-    if (readOnly || disabled) return;
-    setOpen(!open);
-  };
-
-  // ── Calendar keyboard navigation ─────────────────────────────────────────
-  const handleDayKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLButtonElement>, iso: string) => {
-      const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' '];
-      if (!navKeys.includes(e.key)) return;
-      e.preventDefault();
-
-      if (e.key === 'Enter' || e.key === ' ') {
-        const day = days.find((d) => d.iso === iso);
-        if (day && !day.disabled) commitValue(iso);
-        return;
-      }
-
-      const delta = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key] ?? 0;
-      const current = parseIsoDate(iso);
-      if (!current) return;
-      const next = new Date(current);
-      next.setDate(current.getDate() + delta);
-      const nextIso = toIsoDate(next);
-
-      if (next.getMonth() !== month.getMonth() || next.getFullYear() !== month.getFullYear()) {
-        setMonth(startOfMonth(next));
-      }
-      setFocusedIso(nextIso);
-      window.setTimeout(() => {
-        panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${nextIso}"]`)?.focus();
-      }, 0);
-    },
-    [days, month, commitValue, panelRef],
-  );
-
-  // ── View: months ─────────────────────────────────────────────────────────
-  const handleMonthSelect = (monthIndex: number) => {
-    setMonth(new Date(month.getFullYear(), monthIndex, 1));
-    setViewMode('days');
-  };
-
-  const handleYearSelect = (year: number) => {
-    setMonth(new Date(year, month.getMonth(), 1));
-    setViewMode('months');
-  };
-
-  // ── Ref forwarding ────────────────────────────────────────────────────────
-  const setInputRef = (node: HTMLInputElement | null) => {
-    inputRef.current = node;
-    if (typeof ref === 'function') ref(node);
-    else if (ref) ref.current = node;
-  };
-
-  // ── Render ────────────────────────────────────────────────────────────────
-  const todayIso = toIsoDate(new Date());
-
+  const resolvedLocale = getDateLocale(locale);
+  const change = (next: string) => onChange?.(next);
+  const todayIso = today(getLocalTimeZone()).toString();
+  const prefix = 'nb-date-picker';
   return (
-    <div ref={rootRef} className={cx('nb-date-picker', className)}>
-      <input type="hidden" name={name} value={value ?? ''} required={required} />
-
-      {/* ── Trigger ── */}
-      <div
-        ref={triggerRef}
-        className={cx(
-          'nb-date-picker__trigger',
-          invalid && 'nb-date-picker__trigger--invalid',
-          readOnly && 'nb-date-picker__trigger--readonly',
-          open && 'nb-date-picker__trigger--open',
-          disabled && 'nb-date-picker__trigger--disabled',
-        )}
+    <I18nProvider locale={resolvedLocale}>
+      <AriaDatePicker
+        aria-label={ariaLabel ?? strings.selectDate}
+        value={calendarDate(value)}
+        onChange={(date) => change(date?.toString() ?? '')}
+        minValue={calendarDate(min) ?? undefined}
+        maxValue={calendarDate(max) ?? undefined}
+        isDisabled={disabled}
+        isReadOnly={readOnly}
+        isRequired={required}
+        isInvalid={invalid}
+        validationBehavior="aria"
+        isOpen={open}
+        onOpenChange={setOpen}
+        className={[prefix, className].filter(Boolean).join(' ')}
       >
-        <input
-          ref={setInputRef}
-          id={inputId}
-          type="text"
-          inputMode="numeric"
-          className={cx(
-            'nb-date-picker__input',
-            !isEditing && !displayValue && 'nb-date-picker__input--placeholder',
-          )}
-          value={isEditing ? inputText : displayValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          readOnly={readOnly}
-          aria-label={ariaLabel}
-          // A plain text input is implicitly role="textbox", which ARIA does
-          // not allow aria-expanded on. Combobox is the role that owns "text
-          // field that opens a popup" and is what the APG date-picker pattern
-          // uses, so the expanded state becomes announceable instead of
-          // invalid.
-          role="combobox"
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          aria-controls={open ? panelId : undefined}
-          aria-invalid={invalid || undefined}
-          aria-required={required || undefined}
-          autoComplete="off"
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-        />
-        <span className="nb-date-picker__icons">
-          {clearable && displayValue && !disabled && !readOnly && (
-            <span
-              role="button"
-              tabIndex={-1}
-              className="nb-date-picker__clear"
+        <input type="hidden" name={name} value={value ?? ''} disabled={disabled} />
+        <Group
+          ref={groupRef}
+          className={[
+            `${prefix}__trigger`,
+            disabled && `${prefix}__trigger--disabled`,
+            readOnly && `${prefix}__trigger--readonly`,
+            invalid && `${prefix}__trigger--invalid`,
+            open && `${prefix}__trigger--open`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <DateTextInput
+            ref={ref}
+            id={inputId}
+            value={value}
+            locale={resolvedLocale}
+            min={min}
+            max={max}
+            placeholder={placeholder ?? datePlaceholder(resolvedLocale)}
+            disabled={disabled}
+            readOnly={readOnly}
+            required={required}
+            aria-label={ariaLabel ?? (id ? undefined : strings.selectDate)}
+            aria-invalid={invalid || undefined}
+            role="combobox"
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            aria-controls={open ? `${inputId}-panel` : undefined}
+            className={`${prefix}__input`}
+            onChange={change}
+            onOpen={() => setOpen(true)}
+            onBlur={onBlur}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' && open) {
+                event.stopPropagation();
+                setOpen(false);
+              }
+            }}
+          />
+          {clearable && value && !disabled && !readOnly && (
+            <Button
+              slot={null}
+              className={`${prefix}__clear`}
               aria-label={strings.clearDate}
-              onPointerDown={handleClear}
+              onPress={() => change('')}
             >
-              <i className="ph ph-x" aria-hidden="true" />
-            </span>
+              ×
+            </Button>
           )}
-          <span
-            role="button"
-            tabIndex={-1}
-            className="nb-date-picker__calendar-btn"
+          <Button
+            className={`${prefix}__calendar-btn`}
             aria-label={strings.openCalendar}
-            onPointerDown={handleCalendarPointerDown}
+            onPress={() => groupRef.current?.querySelector('input')?.focus()}
+            isDisabled={disabled || readOnly}
           >
-            <i className="ph ph-calendar-blank" aria-hidden="true" />
-          </span>
-        </span>
-      </div>
-
-      {/* ── Panel ── */}
-      {open &&
-        createPortal(
-          <div
-            ref={panelRef}
-            id={panelId}
-            className="nb-date-picker__panel"
-            role="dialog"
-            aria-label={strings.selectDate}
-            style={panelStyle}
-          >
-            {/* Days view */}
-            {viewMode === 'days' && (
-              <>
-                <div className="nb-date-picker__header">
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.previousMonth}
-                    onClick={() => setMonth((m) => addMonths(m, -1))}
-                  >
-                    <i className="ph ph-caret-left" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    className="nb-date-picker__month nb-date-picker__month--clickable"
-                    aria-label={strings.selectMonthAndYear}
-                    onClick={() => setViewMode('months')}
-                  >
-                    {formatMonthLabel(month, resolvedLocale)}
-                    <i
-                      className="ph ph-caret-down nb-date-picker__month-caret"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.nextMonth}
-                    onClick={() => setMonth((m) => addMonths(m, 1))}
-                  >
-                    <i className="ph ph-caret-right" aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="nb-date-picker__weekdays" aria-hidden="true">
-                  {weekdayLabels.map((label, i) => (
-                    <span key={`${label}-${i}`}>{label}</span>
-                  ))}
-                </div>
-                <div
-                  className="nb-date-picker__days"
-                  role="grid"
-                  aria-label={formatMonthLabel(month, resolvedLocale)}
-                >
-                  {days.map((day) => (
-                    <button
-                      key={day.iso}
-                      data-iso={day.iso}
-                      type="button"
-                      className={cx(
-                        'nb-date-picker__day',
-                        !day.inCurrentMonth && 'nb-date-picker__day--muted',
-                        day.iso === selectedIso && 'nb-date-picker__day--selected',
-                        day.iso === todayIso && 'nb-date-picker__day--today',
-                      )}
-                      disabled={day.disabled}
-                      role="gridcell"
-                      aria-selected={day.iso === selectedIso}
-                      tabIndex={day.iso === (focusedIso ?? selectedIso ?? todayIso) ? 0 : -1}
-                      onClick={() => commitValue(day.iso)}
-                      onKeyDown={(e) => handleDayKeyDown(e, day.iso)}
-                    >
-                      {day.date.getDate()}
-                    </button>
-                  ))}
-                </div>
-                <div className="nb-date-picker__footer">
-                  <button
-                    type="button"
-                    className="nb-date-picker__text-button"
-                    onClick={() => commitValue('')}
-                  >
-                    {strings.clear}
-                  </button>
-                  <button
-                    type="button"
-                    className="nb-date-picker__text-button"
-                    onClick={handleToday}
-                  >
-                    {strings.today}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Months view */}
-            {viewMode === 'months' && (
-              <>
-                <div className="nb-date-picker__header">
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.previousYear}
-                    onClick={() => setMonth((m) => new Date(m.getFullYear() - 1, m.getMonth(), 1))}
-                  >
-                    <i className="ph ph-caret-left" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    className="nb-date-picker__month nb-date-picker__month--clickable"
-                    aria-label={strings.selectYear}
-                    onClick={() => {
-                      setYearRangeStart(getYearRangeStart(month.getFullYear()));
-                      setViewMode('years');
-                    }}
-                  >
-                    {month.getFullYear()}
-                    <i
-                      className="ph ph-caret-down nb-date-picker__month-caret"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.nextYear}
-                    onClick={() => setMonth((m) => new Date(m.getFullYear() + 1, m.getMonth(), 1))}
-                  >
-                    <i className="ph ph-caret-right" aria-hidden="true" />
-                  </button>
-                </div>
-                <div
-                  className="nb-date-picker__months-grid"
-                  role="grid"
-                  aria-label={`${month.getFullYear()}`}
-                >
-                  {monthLabels.map((label, i) => {
-                    const isSelected = selectedDate
-                      ? selectedDate.getMonth() === i &&
-                        selectedDate.getFullYear() === month.getFullYear()
-                      : false;
-                    const isCurrent =
-                      new Date().getMonth() === i &&
-                      new Date().getFullYear() === month.getFullYear();
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        className={cx(
-                          'nb-date-picker__month-cell',
-                          isSelected && 'nb-date-picker__month-cell--selected',
-                          isCurrent && 'nb-date-picker__month-cell--current',
-                        )}
-                        role="gridcell"
-                        aria-selected={isSelected}
-                        onClick={() => handleMonthSelect(i)}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="nb-date-picker__footer">
-                  <button
-                    type="button"
-                    className="nb-date-picker__text-button"
-                    onClick={() => setViewMode('days')}
-                  >
-                    <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Years view */}
-            {viewMode === 'years' && (
-              <>
-                <div className="nb-date-picker__header">
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.previousYears}
-                    onClick={() => setYearRangeStart((y) => y - 12)}
-                  >
-                    <i className="ph ph-caret-left" aria-hidden="true" />
-                  </button>
-                  <div className="nb-date-picker__month">
-                    {yearRangeStart}–{yearRangeStart + 11}
-                  </div>
-                  <button
-                    type="button"
-                    className="nb-date-picker__nav"
-                    aria-label={strings.nextYears}
-                    onClick={() => setYearRangeStart((y) => y + 12)}
-                  >
-                    <i className="ph ph-caret-right" aria-hidden="true" />
-                  </button>
-                </div>
-                <div
-                  className="nb-date-picker__years-grid"
-                  role="grid"
-                  aria-label={`${yearRangeStart}–${yearRangeStart + 11}`}
-                >
-                  {Array.from({ length: 12 }, (_, i) => yearRangeStart + i).map((year) => {
-                    const isSelected = selectedDate ? selectedDate.getFullYear() === year : false;
-                    const isCurrent = new Date().getFullYear() === year;
-                    return (
-                      <button
-                        key={year}
-                        type="button"
-                        className={cx(
-                          'nb-date-picker__year-cell',
-                          isSelected && 'nb-date-picker__year-cell--selected',
-                          isCurrent && 'nb-date-picker__year-cell--current',
-                        )}
-                        role="gridcell"
-                        aria-selected={isSelected}
-                        onClick={() => handleYearSelect(year)}
-                      >
-                        {year}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="nb-date-picker__footer">
-                  <button
-                    type="button"
-                    className="nb-date-picker__text-button"
-                    onClick={() => setViewMode('months')}
-                  >
-                    <i className="ph ph-arrow-left" aria-hidden="true" /> {strings.back}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>,
-          overlayContainer ?? document.body,
-        )}
-    </div>
+            <i aria-hidden="true" className="ph ph-calendar-blank" />
+          </Button>
+        </Group>
+        <Popover
+          isNonModal={Boolean(container)}
+          ref={panelRef}
+          UNSTABLE_portalContainer={container ?? undefined}
+          className={`${prefix}__panel`}
+          offset={4}
+        >
+          <CalendarDialog id={`${inputId}-panel`} ariaLabel={strings.selectDate}>
+            <Calendar>
+              <CalendarContent />
+            </Calendar>
+            <div className={`${prefix}__footer`}>
+              <Button
+                slot={null}
+                className={`${prefix}__text-button`}
+                onPress={() => {
+                  change('');
+                  setOpen(false);
+                }}
+              >
+                {strings.clear}
+              </Button>
+              <Button
+                slot={null}
+                className={`${prefix}__text-button`}
+                isDisabled={!dateAllowed(todayIso, min, max)}
+                onPress={() => {
+                  change(todayIso);
+                  setOpen(false);
+                }}
+              >
+                {strings.today}
+              </Button>
+            </div>
+          </CalendarDialog>
+        </Popover>
+      </AriaDatePicker>
+    </I18nProvider>
   );
 });

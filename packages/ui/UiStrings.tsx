@@ -27,6 +27,9 @@ export interface UiStrings {
   selectDate: string;
   /** DateRangePicker: label for the range text inputs. */
   selectDateRange: string;
+  startDate: string;
+  endDate: string;
+  selectTime: string;
   previousMonth: string;
   nextMonth: string;
   previousYear: string;
@@ -114,6 +117,9 @@ export const EN_UI_STRINGS: UiStrings = {
   openCalendar: 'Open calendar',
   selectDate: 'Select date',
   selectDateRange: 'Select date range',
+  startDate: 'Start date',
+  endDate: 'End date',
+  selectTime: 'Select time',
   previousMonth: 'Previous month',
   nextMonth: 'Next month',
   previousYear: 'Previous year',
@@ -184,6 +190,9 @@ export const ES_UI_STRINGS: UiStrings = {
   openCalendar: 'Abrir calendario',
   selectDate: 'Seleccionar fecha',
   selectDateRange: 'Seleccionar rango de fechas',
+  startDate: 'Fecha inicio',
+  endDate: 'Fecha fin',
+  selectTime: 'Seleccionar hora',
   previousMonth: 'Mes anterior',
   nextMonth: 'Mes siguiente',
   previousYear: 'Año anterior',

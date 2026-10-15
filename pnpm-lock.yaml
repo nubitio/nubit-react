@@ -376,6 +376,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@internationalized/date':
+        specifier: ^3.12.4
+        version: 3.12.4
       react:
         specifier: ^18.2.0 || ^19.0.0
         version: 19.3.0

@@ -17,6 +17,7 @@ import {
   ConfirmDialog,
   DatePicker,
   DateRangePicker,
+  TimePicker,
   Drawer,
   EmptyState,
   IconButton,
@@ -79,6 +80,7 @@ export function ShowcasePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [toggled, setToggled] = useState(true);
   const [date, setDate] = useState('');
+  const [time, setTime] = useState('09:30');
   const [range, setRange] = useState<[string, string]>(['', '']);
   const [sectionOpen, setSectionOpen] = useState(false);
   const [updates, setUpdates] = useState(true);
@@ -240,10 +242,18 @@ export function ShowcasePage() {
           </section>
 
           <section className="showcase__section">
-            <h2>Dates</h2>
+            <h2>Dates and times</h2>
             <div className="showcase__stack">
-              <DatePicker value={date} onChange={setDate} />
+              <DatePicker ariaLabel="Appointment date" value={date} onChange={setDate} />
+              <TimePicker
+                ariaLabel="Appointment time"
+                value={time}
+                onChange={setTime}
+                hourCycle={24}
+                name="appointmentTime"
+              />
               <DateRangePicker
+                ariaLabel="Reporting period"
                 startValue={range[0]}
                 endValue={range[1]}
                 onChange={(start, end) => setRange([start, end])}

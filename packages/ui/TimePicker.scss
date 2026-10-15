@@ -1,0 +1,45 @@
+.nb-time-picker {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+
+  &[data-focus-within] {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--focus-ring-color);
+  }
+  &[data-invalid] {
+    border-color: var(--error-color);
+  }
+  &[data-disabled],
+  &[data-readonly] {
+    opacity: 0.72;
+  }
+}
+
+.nb-time-picker__input {
+  align-items: center;
+  display: flex;
+  min-height: calc(var(--control-height, 30px) - 2 * var(--space-1) - 2px);
+}
+
+.nb-time-picker__segment {
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  padding: 0 2px;
+
+  &[data-placeholder] {
+    color: var(--text-secondary);
+  }
+  &[data-focused] {
+    background: var(--accent-color);
+    color: var(--on-accent-color);
+  }
+  &[data-type='literal'] {
+    padding: 0;
+  }
+}

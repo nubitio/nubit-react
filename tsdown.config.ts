@@ -14,6 +14,7 @@ const NUBIT_PACKAGES = [
 // package.json only has devDependencies, so tsdown cannot infer these itself.
 const RUNTIME_EXTERNAL = [
   '@base-ui/react',
+  '@internationalized/date',
   'react-aria-components',
   'react',
   'react-dom',

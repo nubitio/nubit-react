@@ -175,3 +175,6 @@ export { Tooltip, TooltipProvider } from './Tooltip';
 export type { TooltipProps, TooltipProviderProps } from './Tooltip';
 
 export { useOverlayContainer } from './OverlayContainer';
+
+export { TimePicker } from './TimePicker';
+export type { TimePickerProps } from './TimePicker';

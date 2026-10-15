@@ -37,7 +37,7 @@ importers:
         version: 3.31.3
       '@tsdown/css':
         specifier: ^0.22.14
-        version: 0.22.14(postcss@8.5.28)(sass@1.105.1)(tsdown@0.22.14)
+        version: 0.22.14(postcss@8.5.29)(sass@1.105.1)(tsdown@0.22.14)
       '@types/node':
         specifier: ^22.20.4
         version: 22.20.4
@@ -126,11 +126,11 @@ importers:
         specifier: ^5.104.0
         version: 5.104.0(react@19.3.0)
       devextreme:
-        specifier: ^24.2.16
-        version: 24.2.16
+        specifier: ^26.1.5
+        version: 26.1.5
       devextreme-react:
         specifier: ^24.2.16
-        version: 24.2.16(devextreme@24.2.16)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 24.2.16(devextreme@26.1.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       i18next:
         specifier: ^23.16.8
         version: 23.16.8
@@ -482,6 +482,10 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
+  '@babel/runtime@7.29.10':
+    resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/runtime@7.29.7':
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
@@ -536,14 +540,8 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@devexpress/utils@1.4.8':
-    resolution: {integrity: sha512-XVqyeYjqWjbcAUOxaUc6f93MATuVyFE2eec10Qm7X3/QLkKPBh2cJt5OOw4bkW4fC8SG8NZwjVITt08Tr+CXpQ==}
-
   '@devexpress/utils@2.1.3':
     resolution: {integrity: sha512-K2FD460jltib7C7eoYDg3pbquL1sNEiO0JvkxMPBUfT94GQdk1FB+eVaalflt7YvQGSb+WHBI3wholZA6g4umA==}
-
-  '@devextreme/runtime@3.0.13':
-    resolution: {integrity: sha512-//24I6vo5a+XG/Ul3+vOGqU4M22IWyldpECxLY8iyGJWA5fiNaYzAedrMV2Ixo5oRj8DawiHTZKy5iKKF9ks5g==}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -824,8 +822,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@napi-rs/wasm-runtime@1.2.4':
-    resolution: {integrity: sha512-AJxoUD2/15ESHbvpcyjU274nsAPLuOtPHCk0vKJM5pj//Fg/B1FXNWjPnXTT9PymCYYiHo4zPj0ZomXBKhoy7g==}
+  '@napi-rs/wasm-runtime@1.2.5':
+    resolution: {integrity: sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
     peerDependencies:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
@@ -2163,23 +2161,14 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  devexpress-diagram@2.2.24:
-    resolution: {integrity: sha512-PD3mW50OFS44PnqUq2ywJHYDeNFWCIPhXCeLHkzg2BEdDufGGpW73Ux5z3F9NtW91sP0qNE1f1PrsR+3CIN0jA==}
-
   devexpress-diagram@2.2.31:
     resolution: {integrity: sha512-SqMv6+Ak1RmUDhrzdKGguswAWxNfnT9re+fJuOP6igU1TVcAUZvwe13SuVsG/W9IUV3oKYCU9UvdNTwAFiGcdw==}
-
-  devexpress-gantt@4.1.62:
-    resolution: {integrity: sha512-8ULKoAyStlFnATNkkYFZWB7eQHrxJPallq04+HHiu9fn1TIRz0SgYlQdZuXoOmEhcRhaNwk5d+38sJ6OMC0HnQ==}
 
   devexpress-gantt@4.1.70:
     resolution: {integrity: sha512-YWiWpwT0HtqHGPmMXDWTXpKRz0BVA/Iyr+qa3VyfWXa5DeaZBTLIuMSJ1eU5ZJ2YbUjBYdnffUerAydX6PCUeA==}
 
   devextreme-quill@1.7.10:
     resolution: {integrity: sha512-AsbMuYAON87Xk77bY4wjjtniONrgQe/WV7LSFxdU58z+bBn0gCkH3hZOJorSwfotThcwRLb150oTJ2ABJcO6DQ==}
-
-  devextreme-quill@1.7.7:
-    resolution: {integrity: sha512-tRAdHOxGGTb5TSX2o4v7nTsXe567tdyipbehF28h2OH6pJNNLzCjWw5JAd2UHMbh6VG0bg+3xshsn9DJwX4P0Q==}
 
   devextreme-react@24.2.16:
     resolution: {integrity: sha512-M8lytwcrqSga08CLUFqh8m9jWGZAgN95HXNr2KThp2Bi+lumBzwGNe5EsUzqxEfNaB2JoPlXHUNruqiY6pGPTw==}
@@ -2194,10 +2183,6 @@ packages:
       devextreme: 26.1.5
       react: ^16.2.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.2.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  devextreme@24.2.16:
-    resolution: {integrity: sha512-pOtCM/iOI2E/0oI9NHVP7NxEAwAh7Pe+h3DuY2Oq8YJMj67LfY3dJjINanVReQl9Zc3LPeYhy4LsG+SlZrQxCA==}
-    hasBin: true
 
   devextreme@26.1.5:
     resolution: {integrity: sha512-khC10FRqQjt2DjLGHB1XgmAe5/CLPXUrsUrKrP+KJRvOSV0AVEnibwwUSmwQIr2hBM8WfoJcxY/17SY8YrN3nA==}
@@ -2565,29 +2550,14 @@ packages:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
 
-  inferno-create-element@7.4.11:
-    resolution: {integrity: sha512-kE6XIx2hPAd5qpDli2iGjNXgubvuyxdLvoiW71WnSzIIxA+Uxa/s8lY8m03VyHHVypFV3n329ZY5dFvKc7UQMg==}
-
   inferno-create-element@8.2.3:
     resolution: {integrity: sha512-YEwX4OiFlgeTutvE16uCGxkaSVwZ1DklpAPX8okjVsGaLIWQrM8QIQFxn3mTLWSu70Uea+afQfKL5wE4hxn39Q==}
-
-  inferno-hydrate@7.4.11:
-    resolution: {integrity: sha512-hF9Ke4GHAkj8GQrMXBZPfsUqhq6WjkoDCAfXhPBuF1Wiceqyy8KerOOXEnuocHky77fuEXq0AzVnQcC064Bkfw==}
 
   inferno-hydrate@8.2.3:
     resolution: {integrity: sha512-AyCiswnjYg7D9veJdjiQg06Npp0/iXKhwOm2hjoY3cjadT3fIdz2XtDElLB7imU4icuJ3xOmXA8FgIfnSJfHrQ==}
 
-  inferno-shared@7.4.11:
-    resolution: {integrity: sha512-pN725bDSTxkQmRS3e/3H02/xAqgHl+xgddCMjPm8M0etRdRcVCisi3NGPhzSbDDmiftrxhY31exs7+dwsngcDA==}
-
-  inferno-vnode-flags@7.4.11:
-    resolution: {integrity: sha512-L7lslEQCq3IfwgT/b9zhuMf8fv6KXCNXXHZevk/WYxnqJsOWGDcKpJn0zkzXfvmj0otbB149iLUQVBq3oe2sfA==}
-
   inferno-vnode-flags@8.2.3:
     resolution: {integrity: sha512-dfC0MIwFv9PCbZCUsuk9ISejFS3fKJODC0rZ/LjxxzE+OrCk+PMwPLsUnGU6O9/jbBnPACVz1BkACDf5LWgU5Q==}
-
-  inferno@7.4.11:
-    resolution: {integrity: sha512-N+cs33ESWI8fdToCd98yMRYl7jkLnCkJskxov3FKKlaKOvk3PRlAttbhmUaYdWXlRvt2WeXi+J4MbzNj3V6G0w==}
 
   inferno@8.2.3:
     resolution: {integrity: sha512-LMeRlCe+RlXw8kHCLyOWRk2PsZ3Fo4jkESyAR1g4FfPT48N78i11YhTVXW2ukCx5MFjv+qrfa73JzJWU9sg4CQ==}
@@ -2935,6 +2905,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.20:
+    resolution: {integrity: sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -3085,6 +3060,10 @@ packages:
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.29:
+    resolution: {integrity: sha512-49cGhUbXj8Qenv0iTMxA1cFBzxXoctpC9Ujd77t1WcbJIr6nF/eI7g/8MgxrYldFRuAXvja7xQRwavoW7kgrxQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -3418,6 +3397,10 @@ packages:
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+    engines: {node: '>=0.10.0'}
+
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
   stackback@0.0.2:
@@ -3975,6 +3958,8 @@ snapshots:
       '@babel/core': 7.29.7
       '@babel/helper-plugin-utils': 7.29.7
 
+  '@babel/runtime@7.29.10': {}
+
   '@babel/runtime@7.29.7': {}
 
   '@babel/template@7.29.7':
@@ -4014,7 +3999,7 @@ snapshots:
 
   '@base-ui/utils@0.5.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.29.10
       '@floating-ui/utils': 0.2.12
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
@@ -4030,19 +4015,9 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@devexpress/utils@1.4.8':
-    dependencies:
-      tslib: 2.3.1
-
   '@devexpress/utils@2.1.3':
     dependencies:
       tslib: 2.3.1
-
-  '@devextreme/runtime@3.0.13':
-    dependencies:
-      inferno: 7.4.11
-      inferno-create-element: 7.4.11
-      inferno-hydrate: 7.4.11
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -4259,7 +4234,7 @@ snapshots:
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
-  '@napi-rs/wasm-runtime@1.2.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+  '@napi-rs/wasm-runtime@1.2.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
@@ -4440,7 +4415,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.2.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.2.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@rolldown/binding-win32-arm64-msvc@1.0.3':
@@ -4749,14 +4724,14 @@ snapshots:
       '@tiptap/extensions': 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
       '@tiptap/pm': 3.31.3
 
-  '@tsdown/css@0.22.14(postcss@8.5.28)(sass@1.105.1)(tsdown@0.22.14)':
+  '@tsdown/css@0.22.14(postcss@8.5.29)(sass@1.105.1)(tsdown@0.22.14)':
     dependencies:
       lightningcss: 1.33.0
-      postcss-load-config: 6.0.1(postcss@8.5.28)
+      postcss-load-config: 6.0.1(postcss@8.5.29)
       rolldown: 1.2.11
       tsdown: 0.22.14(@arethetypeswrong/core@0.18.5)(@tsdown/css@0.22.14)(publint@0.3.24)(typescript@5.9.3)
     optionalDependencies:
-      postcss: 8.5.28
+      postcss: 8.5.29
       sass: 1.105.1
     transitivePeerDependencies:
       - jiti
@@ -5392,20 +5367,10 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  devexpress-diagram@2.2.24:
-    dependencies:
-      '@devexpress/utils': 1.4.8
-      es6-object-assign: 1.1.0
-
   devexpress-diagram@2.2.31:
     dependencies:
       '@devexpress/utils': 2.1.3
       es6-object-assign: 1.1.0
-
-  devexpress-gantt@4.1.62:
-    dependencies:
-      '@devexpress/utils': 1.4.8
-      tslib: 2.3.1
 
   devexpress-gantt@4.1.70:
     dependencies:
@@ -5421,18 +5386,9 @@ snapshots:
       parchment: 2.0.1
       quill-delta: 5.1.0
 
-  devextreme-quill@1.7.7:
+  devextreme-react@24.2.16(devextreme@26.1.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      core-js: 3.50.0
-      eventemitter3: 4.0.7
-      lodash.clonedeep: 4.5.0
-      lodash.merge: 4.6.2
-      parchment: 2.0.1
-      quill-delta: 5.1.0
-
-  devextreme-react@24.2.16(devextreme@24.2.16)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
-    dependencies:
-      devextreme: 24.2.16
+      devextreme: 26.1.5
       prop-types: 15.8.1
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
@@ -5444,22 +5400,9 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  devextreme@24.2.16:
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@devextreme/runtime': 3.0.13
-      devexpress-diagram: 2.2.24
-      devexpress-gantt: 4.1.62
-      devextreme-quill: 1.7.7
-      inferno: 7.4.11
-      inferno-create-element: 7.4.11
-      inferno-hydrate: 7.4.11
-      jszip: 3.10.2
-      rrule: 2.8.1
-
   devextreme@26.1.5:
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.29.10
       '@preact/signals-core': 1.14.4
       devexpress-diagram: 2.2.31
       devexpress-gantt: 4.1.70
@@ -5939,33 +5882,15 @@ snapshots:
 
   imurmurhash@0.1.4: {}
 
-  inferno-create-element@7.4.11:
-    dependencies:
-      inferno: 7.4.11
-
   inferno-create-element@8.2.3:
     dependencies:
       inferno: 8.2.3
-
-  inferno-hydrate@7.4.11:
-    dependencies:
-      inferno: 7.4.11
 
   inferno-hydrate@8.2.3:
     dependencies:
       inferno: 8.2.3
 
-  inferno-shared@7.4.11: {}
-
-  inferno-vnode-flags@7.4.11: {}
-
   inferno-vnode-flags@8.2.3: {}
-
-  inferno@7.4.11:
-    dependencies:
-      inferno-shared: 7.4.11
-      inferno-vnode-flags: 7.4.11
-      opencollective-postinstall: 2.0.3
 
   inferno@8.2.3:
     dependencies:
@@ -6292,6 +6217,8 @@ snapshots:
 
   nanoid@3.3.19: {}
 
+  nanoid@3.3.20: {}
+
   natural-compare@1.4.0: {}
 
   node-addon-api@7.1.1:
@@ -6417,17 +6344,23 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postcss-load-config@6.0.1(postcss@8.5.28):
+  postcss-load-config@6.0.1(postcss@8.5.29):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
-      postcss: 8.5.28
+      postcss: 8.5.29
 
   postcss@8.5.28:
     dependencies:
       nanoid: 3.3.19
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postcss@8.5.29:
+    dependencies:
+      nanoid: 3.3.20
+      picocolors: 1.1.1
+      source-map-js: 1.2.2
 
   prelude-ls@1.2.1: {}
 
@@ -6901,6 +6834,8 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+  source-map-js@1.2.2: {}
+
   stackback@0.0.2: {}
 
   std-env@4.3.0: {}
@@ -7028,7 +6963,7 @@ snapshots:
       verkit: 0.3.2
     optionalDependencies:
       '@arethetypeswrong/core': 0.18.5
-      '@tsdown/css': 0.22.14(postcss@8.5.28)(sass@1.105.1)(tsdown@0.22.14)
+      '@tsdown/css': 0.22.14(postcss@8.5.29)(sass@1.105.1)(tsdown@0.22.14)
       publint: 0.3.24
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -7163,7 +7098,7 @@ snapshots:
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.28
+      postcss: 8.5.29
       rolldown: 1.0.3
       tinyglobby: 0.2.17
     optionalDependencies:

@@ -32,6 +32,7 @@ import {
 } from '@nubitio/react-admin';
 import type { ComboboxLoader } from '@nubitio/react-admin';
 import './ShowcasePage.css';
+import { OverlayExamples } from './OverlayExamples';
 
 const countryOptions = [
   { value: 'pe', label: 'Peru' },
@@ -96,6 +97,7 @@ export function ShowcasePage() {
         </header>
 
         <div className="showcase__grid">
+          <OverlayExamples />
           <section className="showcase__section">
             <h2>Multiple selection and remote search</h2>
             <MultiSelect

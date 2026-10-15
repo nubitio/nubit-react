@@ -1,23 +1,7 @@
-import React from 'react';
+import React, { isValidElement, useRef, useState } from 'react';
+import { Popover as BasePopover } from '@base-ui/react/popover';
+import { useOverlayContainer } from './OverlayContainer';
 import './Popover.scss';
-import { useFloatingPanel } from './useFloatingPanel';
-
-// ---------------------------------------------------------------------------
-// Popover — floating panel anchored to a trigger element.
-//
-// Composes `useFloatingPanel` with DOM structure and SCSS positioning.
-// The panel is positioned absolutely below-right of the trigger by default;
-// use `align` to flip to below-left.
-//
-// Usage:
-//   <Popover
-//     trigger={({ open }) => (
-//       <IconButton icon="ph ph-bell" label="Notificaciones" aria-expanded={open} />
-//     )}
-//     panel={({ close }) => <NotificationPanel onHiding={close} ... />}
-//     ariaLabel="Notificaciones"
-//   />
-// ---------------------------------------------------------------------------
 
 export type PopoverAlign = 'start' | 'end';
 
@@ -44,22 +28,57 @@ export interface PopoverProps {
 }
 
 export const Popover = ({ trigger, panel, align = 'end', ariaLabel, className }: PopoverProps) => {
-  const { open, setOpen, toggle, containerRef } = useFloatingPanel();
-
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [restoreFocus, setRestoreFocus] = useState(true);
+  const changeOpen = (next: boolean) => {
+    setRestoreFocus(true);
+    setOpen(next);
+  };
+  const container = useOverlayContainer();
+  // Both the legacy callback and Base UI resolve the same next state.
+  const triggerNode = trigger({ open, toggle: () => changeOpen(!open) });
   return (
-    <div
-      ref={containerRef}
-      className={['nb-popover', `nb-popover--${align}`, open && 'nb-popover--open', className]
-        .filter(Boolean)
-        .join(' ')}
+    <BasePopover.Root
+      open={open}
+      onOpenChange={(next, details) => {
+        setRestoreFocus(details.reason !== 'outside-press' && details.reason !== 'focus-out');
+        setOpen(next);
+      }}
+      onOpenChangeComplete={(next) => {
+        if (!next && restoreFocus) triggerRef.current?.focus({ preventScroll: true });
+      }}
     >
-      {trigger({ open, toggle })}
-
-      {open && (
-        <div className="nb-popover__panel" role="dialog" aria-label={ariaLabel}>
-          {panel({ close: () => setOpen(false) })}
-        </div>
-      )}
-    </div>
+      <div
+        className={['nb-popover', `nb-popover--${align}`, open && 'nb-popover--open', className]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <BasePopover.Trigger
+          ref={triggerRef}
+          render={
+            isValidElement(triggerNode) ? triggerNode : <button type="button">{triggerNode}</button>
+          }
+        />
+        <BasePopover.Portal container={container ?? undefined}>
+          <BasePopover.Positioner align={align} sideOffset={8} className="nb-popover-positioner">
+            <BasePopover.Popup
+              finalFocus={triggerRef}
+              onKeyDownCapture={(event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  changeOpen(false);
+                }
+              }}
+              className="nb-popover__panel"
+              aria-label={ariaLabel}
+            >
+              {panel({ close: () => changeOpen(false) })}
+            </BasePopover.Popup>
+          </BasePopover.Positioner>
+        </BasePopover.Portal>
+      </div>
+    </BasePopover.Root>
   );
 };

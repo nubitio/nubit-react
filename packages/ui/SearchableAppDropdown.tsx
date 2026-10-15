@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useCallback } from 'react';
 import { AppDropdown, type AppDropdownOption, type AppDropdownProps } from './AppDropdown';
-import './SearchableAppDropdown.scss';
+import { Combobox, type ComboboxOption } from './Combobox';
+import type { ComboboxLoader } from './useComboboxOptions';
 
 export interface SearchableAppDropdownProps extends Omit<AppDropdownProps, 'options'> {
   options?: AppDropdownOption[];
@@ -16,22 +16,21 @@ export interface SearchableAppDropdownProps extends Omit<AppDropdownProps, 'opti
   selectedOption?: AppDropdownOption | null;
 }
 
-function normalizeSearch(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-function filterOptions(options: AppDropdownOption[], query: string): AppDropdownOption[] {
-  const needle = normalizeSearch(query);
-  if (!needle) return options;
-
-  return options.filter((option) => {
-    const haystack = [option.label, option.selectedLabel, option.value]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return haystack.includes(needle);
-  });
-}
+const toOption = (option: AppDropdownOption): ComboboxOption => ({
+  value: option.value,
+  label: option.selectedLabel ?? option.label,
+  disabled: option.disabled,
+  content: (
+    <span className="nb-dropdown__option-content">
+      {option.iconText && (
+        <span className="nb-dropdown__option-icon" aria-hidden="true">
+          {option.iconText}
+        </span>
+      )}
+      {option.label}
+    </span>
+  ),
+});
 
 export function SearchableAppDropdown({
   options = [],
@@ -41,129 +40,64 @@ export function SearchableAppDropdown({
   minSearchLength = 2,
   emptySearchLabel = 'Sin resultados',
   loadingLabel = 'Buscando…',
-  selectedOption = null,
+  selectedOption,
   value,
   onChange,
   placeholder,
   disabled,
+  label,
+  showFieldLabel,
+  variant,
+  icon: _icon,
+  menuMinWidth: _menuMinWidth,
+  menuHeader: _header,
+  menuFooter: _footer,
   ...rest
 }: SearchableAppDropdownProps) {
-  const searchInputId = useId();
-  const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [remoteOptions, setRemoteOptions] = useState<AppDropdownOption[]>([]);
-  const [loading, setLoading] = useState(false);
-  const requestIdRef = useRef(0);
-
-  const staticSelected = useMemo(
-    () => options.find((option) => option.value === value) ?? selectedOption ?? null,
-    [options, selectedOption, value],
-  );
-
-  const resolvedOptions = useMemo(() => {
-    const merged = new Map<string, AppDropdownOption>();
-    for (const option of [...options, ...remoteOptions]) {
-      if (option.value) merged.set(option.value, option);
-    }
-    if (staticSelected?.value) {
-      merged.set(staticSelected.value, staticSelected);
-    }
-
-    const base = Array.from(merged.values()).filter((option) => option.value !== '');
-    if (!searchable) return base;
-    if (onSearch) return base;
-    return filterOptions(base, searchQuery);
-  }, [onSearch, options, remoteOptions, searchable, searchQuery, staticSelected]);
-
-  const runSearch = useCallback(
-    async (query: string) => {
-      if (!onSearch) return;
-      const trimmed = query.trim();
-      if (trimmed.length < minSearchLength) {
-        setRemoteOptions([]);
-        setLoading(false);
-        return;
-      }
-
-      const requestId = ++requestIdRef.current;
-      setLoading(true);
-      try {
-        const results = await onSearch(trimmed);
-        if (requestId !== requestIdRef.current) return;
-        setRemoteOptions(results.filter((option) => option.value !== ''));
-      } catch {
-        if (requestId !== requestIdRef.current) return;
-        setRemoteOptions([]);
-      } finally {
-        if (requestId === requestIdRef.current) {
-          setLoading(false);
-        }
-      }
+  const loadOptions = useCallback<ComboboxLoader>(
+    async (query, { signal }) => {
+      const results = await onSearch!(query.trim());
+      if (signal.aborted) throw new DOMException('Search cancelled', 'AbortError');
+      return { options: results.map(toOption) };
     },
-    [minSearchLength, onSearch],
+    [onSearch],
   );
-
-  useEffect(() => {
-    if (!open || !onSearch) return;
-    const timer = window.setTimeout(() => {
-      void runSearch(searchQuery);
-    }, 250);
-    return () => window.clearTimeout(timer);
-  }, [open, onSearch, runSearch, searchQuery]);
-
-  useEffect(() => {
-    if (open) return;
-    // Search results are ephemeral state scoped to one menu opening.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchQuery('');
-    setRemoteOptions([]);
-    setLoading(false);
-  }, [open]);
-
-  const menuHeader = searchable ? (
-    <div className="nb-searchable-dropdown__search">
-      <i className="ph ph-magnifying-glass" aria-hidden="true" />
-      <input
-        id={searchInputId}
-        type="search"
-        value={searchQuery}
-        onChange={(event) => setSearchQuery(event.target.value)}
-        placeholder={searchPlaceholder}
-        autoComplete="off"
-        onKeyDown={(event) => event.stopPropagation()}
+  if (!searchable)
+    return (
+      <AppDropdown
+        {...rest}
+        options={options}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        label={label}
+        showFieldLabel={showFieldLabel}
+        variant={variant}
+        icon={_icon}
+        menuMinWidth={_menuMinWidth}
+        menuHeader={_header}
+        menuFooter={_footer}
       />
-    </div>
-  ) : null;
-
-  const menuFooter: ReactNode = (() => {
-    if (!searchable || !onSearch) return null;
-    if (loading) {
-      return <div className="nb-searchable-dropdown__status">{loadingLabel}</div>;
-    }
-    if (searchQuery.trim().length < minSearchLength) {
-      return (
-        <div className="nb-searchable-dropdown__status">
-          Escribe al menos {minSearchLength} caracteres
-        </div>
-      );
-    }
-    if (resolvedOptions.length === 0) {
-      return <div className="nb-searchable-dropdown__status">{emptySearchLabel}</div>;
-    }
-    return null;
-  })();
-
+    );
+  const seeds =
+    selectedOption && !options.some((option) => option.value === selectedOption.value)
+      ? [...options, selectedOption]
+      : options;
   return (
-    <AppDropdown
+    <Combobox
       {...rest}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
+      label={showFieldLabel === false ? undefined : label}
+      aria-label={showFieldLabel === false && typeof label === 'string' ? label : undefined}
+      placeholder={placeholder ?? searchPlaceholder}
+      options={seeds.map(toOption)}
+      value={value || null}
+      onChange={(next) => onChange(next ?? '')}
       disabled={disabled}
-      options={[{ value: '', label: placeholder ?? 'Seleccionar…' }, ...resolvedOptions]}
-      menuHeader={menuHeader}
-      menuFooter={menuFooter}
-      onOpenChange={setOpen}
+      loadOptions={onSearch ? loadOptions : undefined}
+      minSearchLength={minSearchLength}
+      emptyMessage={emptySearchLabel}
+      loadingMessage={loadingLabel}
     />
   );
 }

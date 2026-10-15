@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { AppDialog } from './AppDialog';
 import { useUiStrings } from './UiStrings';
 import { Button } from './Button';
@@ -25,6 +26,7 @@ export function ConfirmDialog({
   variant = 'warning',
 }: ConfirmDialogProps) {
   const strings = useUiStrings();
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const resolvedConfirmLabel = confirmLabel ?? strings.confirm;
   const resolvedCancelLabel = cancelLabel ?? strings.cancel;
 
@@ -35,9 +37,10 @@ export function ConfirmDialog({
       onClose={onCancel}
       maxWidth={420}
       role="alertdialog"
+      initialFocus={cancelRef}
       footer={
         <>
-          <Button variant="secondary" onClick={onCancel} autoFocus>
+          <Button variant="secondary" onClick={onCancel} ref={cancelRef}>
             {resolvedCancelLabel}
           </Button>
           <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>

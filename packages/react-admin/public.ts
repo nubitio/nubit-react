@@ -188,6 +188,8 @@ export type { MercureProviderProps } from '@nubitio/core';
 export {
   AppDialog,
   AppDropdown,
+  SearchableAppDropdown,
+  useOverlayContainer,
   ConfirmDialog,
   AppToolbar,
   Card,
@@ -200,6 +202,7 @@ export type {
   AppDialogProps,
   AppDropdownOption,
   AppDropdownProps,
+  SearchableAppDropdownProps,
   AppDropdownVariant,
   ConfirmDialogProps,
   AppToolbarProps,

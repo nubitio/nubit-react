@@ -12,8 +12,10 @@
   align-items: center;
 
   &__panel {
-    position: absolute;
-    top: calc(100% + var(--space-2));
+    position: relative;
+    max-width: calc(100vw - 16px);
+    max-height: var(--available-height);
+    overflow: auto;
     z-index: var(--z-shell-popover, var(--z-popover));
     background: var(--surface-1);
     border: 1px solid var(--border-color);
@@ -43,4 +45,8 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+.nb-popover-positioner {
+  z-index: var(--z-shell-popover, var(--z-popover));
 }

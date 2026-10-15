@@ -173,3 +173,5 @@ export type { ComboboxProps, ComboboxOption, MultiSelectProps } from './Combobox
 export type { ComboboxLoader, ComboboxPage } from './useComboboxOptions';
 export { Tooltip, TooltipProvider } from './Tooltip';
 export type { TooltipProps, TooltipProviderProps } from './Tooltip';
+
+export { useOverlayContainer } from './OverlayContainer';

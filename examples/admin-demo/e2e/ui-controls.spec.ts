@@ -83,15 +83,23 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('textbox', { name: 'Name', exact: true }).fill('Relation test');
       const owner = dialog.getByRole('combobox', { name: 'Owner', exact: true });
+      await owner.click();
       await owner.fill('Zero');
+      await expect(page.getByRole('option', { name: 'Zero owner', exact: true })).toBeVisible();
       await owner.press('ArrowDown');
       await owner.press('Enter');
+      await expect(owner).toHaveValue('Zero owner');
       const labels = dialog.getByRole('combobox', { name: 'Labels', exact: true });
+      // click waits for scrolling and the dialog's entry animation before typing.
+      // fill alone can focus an off-screen input and open its popup while the
+      // resulting scroll event is still pending (which dismisses React Aria popovers).
+      await labels.click();
       await labels.fill('Office');
       await expect(page.getByRole('option', { name: 'Office' })).toBeVisible();
       await labels.press('Escape');
       await expect(dialog).toBeVisible();
       await labels.fill('Office');
+      await expect(page.getByRole('option', { name: 'Office' })).toBeVisible();
       await labels.press('ArrowDown');
       await labels.press('Enter');
       if (await page.getByRole('listbox').isVisible()) await labels.press('Escape');

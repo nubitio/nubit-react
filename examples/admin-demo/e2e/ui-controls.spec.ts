@@ -5,6 +5,32 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`${colorScheme} UI controls`, () => {
     test.use({ colorScheme });
 
+    test('mobile selection cards and popups fit the available width', async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 800 });
+      await page.goto('/showcase', { waitUntil: 'networkidle' });
+      const grid = await page.locator('.showcase__grid').boundingBox();
+      expect(grid).not.toBeNull();
+      for (const card of await page.locator('.showcase__section').all()) {
+        const box = await card.boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.x).toBeGreaterThanOrEqual(grid!.x);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(grid!.x + grid!.width + 1);
+      }
+
+      const countries = page.getByRole('combobox', { name: 'Countries', exact: true });
+      await countries.fill('Ch');
+      await expect(page.getByRole('option', { name: 'Chile' })).toBeVisible();
+      const popup = await page.locator('.nb-combobox-popup').boundingBox();
+      expect(popup).not.toBeNull();
+      expect(popup!.x).toBeGreaterThanOrEqual(0);
+      expect(popup!.x + popup!.width).toBeLessThanOrEqual(360);
+      await page.screenshot({ path: test.info().outputPath(`mobile-${colorScheme}.png`) });
+      await countries.press('ArrowDown');
+      await countries.press('Enter');
+      await countries.press('Escape');
+      await expect(page.getByRole('button', { name: /^Remove Chile/ })).toBeVisible();
+    });
+
     test('multiple selection and paged search retain their chosen labels', async ({ page }) => {
       await page.goto('/showcase', { waitUntil: 'networkidle' });
       const countries = page.getByRole('combobox', { name: 'Countries', exact: true });

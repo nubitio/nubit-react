@@ -1,3 +1,4 @@
+import { useOverlayContainer } from './OverlayContainer';
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
 import { cloneElement, useId, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
@@ -26,6 +27,7 @@ export function Tooltip({
   disabled,
   className,
 }: TooltipProps) {
+  const overlayContainer = useOverlayContainer();
   const id = useId();
   const [open, setOpen] = useState(false);
   const existingDescription = (children.props as { 'aria-describedby'?: string })[
@@ -35,14 +37,20 @@ export function Tooltip({
     [existingDescription, open && !disabled ? id : undefined].filter(Boolean).join(' ') ||
     undefined;
   return (
-    <BaseTooltip.Root disabled={disabled} onOpenChange={setOpen}>
+    <BaseTooltip.Root open={open} disabled={disabled} onOpenChange={setOpen}>
       <BaseTooltip.Trigger
         render={cloneElement(children as ReactElement<{ 'aria-describedby'?: string }>, {
           'aria-describedby': description,
         })}
+        onKeyDownCapture={(event) => {
+          if (open && event.key === 'Escape') {
+            event.stopPropagation();
+            setOpen(false);
+          }
+        }}
         delay={delay}
       />
-      <BaseTooltip.Portal>
+      <BaseTooltip.Portal container={overlayContainer ?? undefined}>
         <BaseTooltip.Positioner side={side} sideOffset={8} className="nb-tooltip-positioner">
           <BaseTooltip.Popup
             id={id}

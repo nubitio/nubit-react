@@ -206,3 +206,39 @@ Partial overrides work too (`strings={{ close: 'Schließen' }}`); missing keys f
 ## License
 
 MIT
+
+## Accessible overlays
+
+`AppDialog` and `Drawer` share Base UI's modal behavior: focus stays within the
+active modal, background interaction and document scrolling are blocked, and
+closing returns focus to the control that opened it. Drawers now have modal
+semantics, matching their scrim and focus boundary. `keepMounted` preserves form
+state while hiding the closed dialog from keyboard and assistive technology.
+`AppDialog.initialFocus` accepts an element ref; `ConfirmDialog` uses it to focus
+Cancel without stealing the focus-return target.
+
+`ContextMenu` delegates arrow navigation, disabled items, typeahead and focus
+return to Base UI Menu. `AppDropdown` delegates selection to Base UI Select;
+its form, toolbar and compact variants and option values remain available.
+`Popover` uses Base UI positioning, dismissal and focus return. Custom menu and
+popover triggers should forward their DOM ref and button props, as Nubit Button
+and IconButton do.
+
+`SearchableAppDropdown` is a compatibility adapter around Combobox. Search is
+entered directly in the control. Its `onSearch`, selected option, minimum search
+length, open callback and loading/empty messages remain supported; Combobox
+provides debounce, stale-response protection and retry. Non-searchable mode uses
+AppDropdown. Native CRUD enum fields also use Combobox and preserve the original
+option value types.
+
+Nested controls portal within their owning modal, so calendars, combobox lists,
+tooltips, menus, popovers and child modals stay inside its focus boundary. Escape
+closes the active layer first. The showcase's **Nested overlays** example exercises
+this combination, including a drawer and confirmation nested inside a dialog.
+
+For a custom portalled control, use `useOverlayContainer()` as the portal target
+and fall back to `document.body` outside a modal. This is also used by native grid
+row menus and mobile filter sheets inside dialog or drawer views. Handle Escape
+on the child panel before it bubbles to the owning dialog.
+
+Interaction reference: [Base UI Dialog](https://base-ui.com/react/components/dialog).

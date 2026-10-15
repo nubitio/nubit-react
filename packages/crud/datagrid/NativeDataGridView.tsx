@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { AppDropdown, Button, ConfirmDialog, IconButton } from '@nubitio/ui';
+import { AppDropdown, Button, ConfirmDialog, IconButton, useOverlayContainer } from '@nubitio/ui';
 import { useResourceStoreFactory } from '../data/ResourceStore';
 import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
@@ -78,6 +78,7 @@ import { buildNativeRowActions } from './nativeRowActions';
 
 export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((options, ref) => {
   const { t } = useCoreTranslation();
+  const overlayContainer = useOverlayContainer();
   const httpClient = useCoreHttpClient();
   const resourceStoreFactory = useResourceStoreFactory();
   const toolbarPermissions = useSmartCrudRoles();
@@ -1873,6 +1874,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   <div
                     className="nb-datagrid__row-actions-popover nb-datagrid__row-actions-popover--sheet"
                     role="menu"
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape') {
+                        event.stopPropagation();
+                        closeRowMenu();
+                      }
+                    }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {renderRowMenuContent()}
@@ -1882,6 +1889,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 <div
                   className="nb-datagrid__row-actions-popover"
                   role="menu"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.stopPropagation();
+                      closeRowMenu();
+                    }
+                  }}
                   style={{
                     position: 'fixed',
                     // Anchor the right edge of the menu to the right edge of the ⋮ button.
@@ -1904,7 +1917,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   {renderRowMenuContent()}
                 </div>
               ),
-              document.body,
+              overlayContainer ?? document.body,
             )}
           {isMobile &&
             filterSheetOpen &&
@@ -1914,6 +1927,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('grid.filters')}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    event.stopPropagation();
+                    setFilterSheetOpen(false);
+                  }
+                }}
               >
                 <button
                   type="button"
@@ -1985,7 +2004,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   </div>
                 </div>
               </div>,
-              document.body,
+              overlayContainer ?? document.body,
             )}
         </div>
       </div>

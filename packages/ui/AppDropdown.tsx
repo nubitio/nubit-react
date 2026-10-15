@@ -1,7 +1,6 @@
-import { createPortal } from 'react-dom';
-import { useId } from 'react';
-import type { ReactNode } from 'react';
-import { computeAnchoredStyle, useFloatingPanel } from './useFloatingPanel';
+import { Select } from '@base-ui/react/select';
+import { useId, useState, type ReactNode } from 'react';
+import { useOverlayContainer } from './OverlayContainer';
 import './AppDropdown.scss';
 
 export interface AppDropdownOption {
@@ -35,17 +34,6 @@ export interface AppDropdownProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-function cx(...values: Array<string | false | null | undefined>) {
-  return values.filter(Boolean).join(' ');
-}
-
-function normalizeIcon(icon?: string): string | undefined {
-  if (!icon) return undefined;
-  if (icon.startsWith('ph ')) return icon;
-  if (icon.startsWith('ph-')) return `ph ${icon}`;
-  return `ph ph-${icon}`;
-}
-
 export function AppDropdown({
   id: idProp,
   label,
@@ -67,132 +55,122 @@ export function AppDropdown({
 }: AppDropdownProps) {
   const generatedId = useId();
   const id = idProp ?? generatedId;
-  const {
-    open,
-    setOpen: setMenuOpen,
-    openPanel: openMenu,
-    containerRef,
-    panelRef: menuRef,
-    panelStyle: menuStyle,
-  } = useFloatingPanel<HTMLDivElement, HTMLDivElement>({
-    onOpenChange,
-    dismissEvent: 'mousedown',
-    closeOnViewportExit: true,
-    computeStyle: (container) => {
-      const trigger = container?.querySelector<HTMLElement>('.nb-dropdown__trigger') ?? container;
-      return computeAnchoredStyle(trigger, {
-        matchAnchorWidth: true,
-        minWidth: menuMinWidth ?? 72,
-      });
-    },
-  });
+  const container = useOverlayContainer();
+  const [open, setOpen] = useState(false);
   const selected = options.find((option) => option.value === value);
-
-  const control = (
-    <div
-      ref={containerRef}
-      className={cx(
-        'nb-dropdown',
-        `nb-dropdown--${variant}`,
-        open && 'nb-dropdown--open',
-        disabled && 'nb-dropdown--disabled',
-        className,
-      )}
-      role="group"
-      aria-labelledby={label ? `${id}-label` : undefined}
+  const labelled = !!label && (showFieldLabel || variant === 'toolbar');
+  const message = error ?? helpText;
+  const iconClass = icon?.startsWith('ph ')
+    ? icon
+    : icon?.startsWith('ph-')
+      ? `ph ${icon}`
+      : `ph ph-${icon}`;
+  return (
+    <Select.Root
+      value={value}
+      onValueChange={(next) => {
+        if (next !== null) onChange(next);
+      }}
+      disabled={disabled}
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        onOpenChange?.(next);
+      }}
+      modal={false}
     >
-      {variant === 'toolbar' && label && (
-        <span className="nb-dropdown__toolbar-label" id={`${id}-label`}>
-          {icon && <i className={normalizeIcon(icon)} aria-hidden="true" />}
-          <span>{label}</span>
-        </span>
-      )}
-      <button
-        type="button"
-        className="nb-dropdown__trigger"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-labelledby={label ? `${id}-label ${id}-value` : `${id}-value`}
-        disabled={disabled}
-        onClick={() => (open ? setMenuOpen(false) : openMenu())}
-      >
-        <span className="nb-dropdown__value" id={`${id}-value`}>
-          {selected?.selectedLabel ?? selected?.label ?? placeholder}
-        </span>
-        <i className="ph ph-caret-down nb-dropdown__caret" aria-hidden="true" />
-      </button>
-      {open &&
-        !disabled &&
-        createPortal(
-          <div
-            ref={menuRef}
-            className={cx('nb-dropdown__menu', `nb-dropdown__menu--${variant}`)}
-            style={menuStyle}
+      <div className={showFieldLabel && variant !== 'toolbar' ? 'nb-form-field' : undefined}>
+        {showFieldLabel && variant !== 'toolbar' && label && (
+          <label className="nb-form-field__label" id={`${id}-label`} htmlFor={id}>
+            {label}
+          </label>
+        )}
+        <div
+          className={[
+            'nb-dropdown',
+            `nb-dropdown--${variant}`,
+            open && 'nb-dropdown--open',
+            disabled && 'nb-dropdown--disabled',
+            className,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {variant === 'toolbar' && label && (
+            <span className="nb-dropdown__toolbar-label" id={`${id}-label`}>
+              {icon && <i className={iconClass} aria-hidden="true" />}
+              <span>{label}</span>
+            </span>
+          )}
+          <Select.Trigger
+            id={id}
+            className="nb-dropdown__trigger"
+            aria-labelledby={labelled ? `${id}-label ${id}-value` : `${id}-value`}
+            aria-describedby={message ? `${id}-message` : undefined}
+            aria-invalid={!!error || undefined}
           >
-            {menuHeader}
-            <ul
-              role="listbox"
-              aria-labelledby={label ? `${id}-label` : undefined}
-              className="nb-dropdown__menu-list"
+            <span className="nb-dropdown__value" id={`${id}-value`}>
+              {selected?.selectedLabel ?? selected?.label ?? placeholder}
+            </span>
+            <i className="ph ph-caret-down nb-dropdown__caret" aria-hidden="true" />
+          </Select.Trigger>
+          <Select.Portal container={container ?? undefined}>
+            <Select.Positioner
+              align="start"
+              sideOffset={4}
+              alignItemWithTrigger={false}
+              className="nb-dropdown-positioner"
+              style={{ minWidth: menuMinWidth }}
             >
-              {options.map((option) => {
-                const isActive = option.value === value;
-                return (
-                  <li key={option.value} role="presentation">
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
+              <Select.Popup
+                onKeyDownCapture={(event) => {
+                  if (event.key === 'Escape') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setOpen(false);
+                    onOpenChange?.(false);
+                  }
+                }}
+                className={`nb-dropdown__menu nb-dropdown__menu--${variant}`}
+              >
+                {menuHeader}
+                <Select.List className="nb-dropdown__menu-list">
+                  {options.map((option) => (
+                    <Select.Item
+                      key={option.value}
+                      value={option.value}
+                      label={option.label}
                       disabled={option.disabled}
-                      className={cx(
-                        'nb-dropdown__option',
-                        isActive && 'nb-dropdown__option--active',
-                      )}
-                      onClick={() => {
-                        if (option.disabled) return;
-                        onChange(option.value);
-                        setMenuOpen(false);
-                      }}
+                      className={({ selected }) =>
+                        `nb-dropdown__option${selected ? ' nb-dropdown__option--active' : ''}`
+                      }
                     >
-                      <span className="nb-dropdown__option-content">
+                      <Select.ItemText className="nb-dropdown__option-content">
                         {option.iconText && (
                           <span className="nb-dropdown__option-icon" aria-hidden="true">
                             {option.iconText}
                           </span>
                         )}
                         <span>{option.label}</span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            {menuFooter}
-          </div>,
-          document.body,
+                      </Select.ItemText>
+                    </Select.Item>
+                  ))}
+                </Select.List>
+                {menuFooter}
+              </Select.Popup>
+            </Select.Positioner>
+          </Select.Portal>
+        </div>
+        {message && (
+          <span
+            id={`${id}-message`}
+            className={error ? 'nb-form-field__error' : 'nb-form-field__help'}
+            role={error ? 'alert' : undefined}
+          >
+            {message}
+          </span>
         )}
-    </div>
-  );
-
-  if (!showFieldLabel || variant === 'toolbar') {
-    return control;
-  }
-
-  return (
-    <label className={cx('nb-form-field', !!error && 'nb-form-field--error')} htmlFor={id}>
-      {label && (
-        <span className="nb-form-field__label" id={`${id}-label`}>
-          {label}
-        </span>
-      )}
-      {control}
-      {error ? (
-        <span className="nb-form-field__error" role="alert">
-          {error}
-        </span>
-      ) : helpText ? (
-        <span className="nb-form-field__help">{helpText}</span>
-      ) : null}
-    </label>
+      </div>
+    </Select.Root>
   );
 }

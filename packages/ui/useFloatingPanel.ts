@@ -181,16 +181,19 @@ export function useFloatingPanel<
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      // Dismiss the focused calendar before a parent modal sees this Escape.
+      e.preventDefault();
+      e.stopPropagation();
       setOpen(false);
       optionsRef.current.onEscape?.(e);
     };
 
     document.addEventListener(dismissEvent, handleOutside);
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown, true);
     return () => {
       document.removeEventListener(dismissEvent, handleOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [dismissEvent, open, setOpen]);
 

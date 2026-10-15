@@ -1,3 +1,4 @@
+import { useOverlayContainer } from './OverlayContainer';
 import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useUiStrings } from './UiStrings';
@@ -221,6 +222,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const panelId = `${inputId}-panel`;
+  const overlayContainer = useOverlayContainer();
   const strings = useUiStrings();
 
   const selectedDate = parseIsoDate(value);
@@ -287,9 +289,10 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     if (!open) return;
     const initialIso = selectedDate ? toIsoDate(selectedDate) : toIsoDate(new Date());
     setFocusedIso(initialIso);
-    window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       panelRef.current?.querySelector<HTMLButtonElement>(`[data-iso="${initialIso}"]`)?.focus();
     }, 0);
+    return () => window.clearTimeout(timer);
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Commit helpers ───────────────────────────────────────────────────────
@@ -324,7 +327,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
     setIsEditing(true);
     setInputText(displayValue);
     // Select all on focus so user can immediately retype
-    window.setTimeout(() => inputRef.current?.select(), 0);
+    window.setTimeout(() => {
+      if (document.activeElement === inputRef.current) inputRef.current?.select();
+    }, 0);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -727,7 +732,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
               </>
             )}
           </div>,
-          document.body,
+          overlayContainer ?? document.body,
         )}
     </div>
   );

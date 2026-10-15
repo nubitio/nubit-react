@@ -1,3 +1,4 @@
+import { useOverlayContainer } from './OverlayContainer';
 /**
  * DateRangePicker — enterprise date range selector.
  *
@@ -146,6 +147,7 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const startId = useId();
   const endId = useId();
+  const overlayContainer = useOverlayContainer();
   const strings = useUiStrings();
 
   // ── Derived display values ────────────────────────────────────────────────
@@ -264,13 +266,17 @@ export function DateRangePicker({
   const handleStartFocus = () => {
     setEditingField('start');
     setStartText(startDisplay);
-    window.setTimeout(() => startInputRef.current?.select(), 0);
+    window.setTimeout(() => {
+      if (document.activeElement === startInputRef.current) startInputRef.current?.select();
+    }, 0);
   };
 
   const handleEndFocus = () => {
     setEditingField('end');
     setEndText(endDisplay);
-    window.setTimeout(() => endInputRef.current?.select(), 0);
+    window.setTimeout(() => {
+      if (document.activeElement === endInputRef.current) endInputRef.current?.select();
+    }, 0);
   };
 
   const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -585,7 +591,7 @@ export function DateRangePicker({
               )}
             </div>
           </div>,
-          document.body,
+          overlayContainer ?? document.body,
         )}
     </div>
   );

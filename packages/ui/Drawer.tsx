@@ -1,5 +1,5 @@
-import React, { useEffect, useId, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useId } from 'react';
+import { ModalSurface } from './ModalSurface';
 import { IconButton } from './Button';
 import { useUiStrings } from './UiStrings';
 import './Drawer.scss';
@@ -60,87 +60,41 @@ export const Drawer: React.FC<DrawerProps> = ({
   const resolvedCloseLabel = closeLabel ?? strings.close;
   const resolvedScrimLabel = scrimLabel ?? strings.closePanel;
   const titleId = useId();
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const lastFocusRef = useRef<HTMLElement | null>(null);
-
-  // Focus management
-  useEffect(() => {
-    if (!isOpen) return;
-    lastFocusRef.current = document.activeElement as HTMLElement | null;
-    const timer = window.setTimeout(() => {
-      const focusable = panelRef.current?.querySelector<HTMLElement>(
-        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
-      );
-      focusable?.focus();
-    });
-    return () => {
-      clearTimeout(timer);
-      lastFocusRef.current?.focus?.();
-    };
-  }, [isOpen]);
-
-  // Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
-
-  return createPortal(
-    <div
-      className={['nb-drawer-root', isOpen && 'nb-drawer-root--open', `nb-drawer-root--${side}`]
+  return (
+    <ModalSurface
+      open={isOpen}
+      onClose={onClose}
+      rootClassName={['nb-drawer-root', isOpen && 'nb-drawer-root--open', `nb-drawer-root--${side}`]
         .filter(Boolean)
         .join(' ')}
-      aria-hidden={!isOpen}
-      style={{ pointerEvents: isOpen ? undefined : 'none' }}
+      className={['nb-drawer', className].filter(Boolean).join(' ')}
+      scrimClassName={`nb-drawer__scrim nb-drawer__scrim--${scrim}`}
+      scrimLabel={resolvedScrimLabel}
+      labelledBy={title ? titleId : undefined}
+      ariaLabel={!title ? ariaLabel : undefined}
+      style={{ width: formatWidth(width) }}
+      keepMounted
     >
-      {/* Scrim */}
-      <button
-        className={`nb-drawer__scrim nb-drawer__scrim--${scrim}`}
-        type="button"
-        aria-label={resolvedScrimLabel}
-        tabIndex={-1}
-        onClick={onClose}
-      />
+      {/* Header */}
+      {title !== undefined && (
+        <header className="nb-drawer__header">
+          <h2 className="nb-drawer__title" id={titleId}>
+            {title}
+          </h2>
+          <IconButton
+            className="nb-drawer__close"
+            icon="ph ph-x"
+            label={resolvedCloseLabel}
+            onClick={onClose}
+          />
+        </header>
+      )}
 
-      {/* Panel */}
-      <aside
-        ref={panelRef}
-        className={['nb-drawer', className].filter(Boolean).join(' ')}
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby={title ? titleId : undefined}
-        aria-label={!title ? ariaLabel : undefined}
-        style={{ width: formatWidth(width) }}
-      >
-        {/* Header */}
-        {title !== undefined && (
-          <header className="nb-drawer__header">
-            <h2 className="nb-drawer__title" id={titleId}>
-              {title}
-            </h2>
-            <IconButton
-              className="nb-drawer__close"
-              icon="ph ph-x"
-              label={resolvedCloseLabel}
-              onClick={onClose}
-            />
-          </header>
-        )}
+      {/* Body */}
+      <div className="nb-drawer__body">{children}</div>
 
-        {/* Body */}
-        <div className="nb-drawer__body">{children}</div>
-
-        {/* Footer */}
-        {footer && <footer className="nb-drawer__footer">{footer}</footer>}
-      </aside>
-    </div>,
-    document.body,
+      {/* Footer */}
+      {footer && <footer className="nb-drawer__footer">{footer}</footer>}
+    </ModalSurface>
   );
 };

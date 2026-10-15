@@ -108,3 +108,18 @@ html[data-density='compact'] .nb-context-menu {
     transform: translateY(0) scale(1);
   }
 }
+
+.nb-context-menu-positioner {
+  z-index: var(--z-shell-dropdown, 1600);
+}
+
+.nb-context-menu__dropdown {
+  max-height: var(--available-height);
+  overflow-y: auto;
+}
+
+.nb-context-menu__item[data-highlighted] {
+  background: color-mix(in srgb, var(--accent-color) 14%, var(--surface-elevated));
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: -2px;
+}

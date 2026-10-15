@@ -1,5 +1,5 @@
-import React, { useEffect, useId, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useId } from 'react';
+import { ModalSurface } from './ModalSurface';
 import { IconButton } from './Button';
 import { useUiStrings } from './UiStrings';
 
@@ -25,6 +25,8 @@ export interface AppDialogProps {
   closeOnEscape?: boolean;
   restoreFocus?: boolean;
   keepMounted?: boolean;
+  /** Optional focus target when opening; defaults to the first focusable control. */
+  initialFocus?: React.RefObject<HTMLElement | null>;
   rootClassName?: string;
   className?: string;
   headerClassName?: string;
@@ -60,6 +62,7 @@ export const AppDialog = ({
   closeOnEscape = true,
   restoreFocus = true,
   keepMounted = false,
+  initialFocus,
   rootClassName,
   className,
   headerClassName,
@@ -73,100 +76,44 @@ export const AppDialog = ({
   const resolvedScrimLabel = scrimLabel ?? strings.closeDialog;
   const isVisible = visible ?? open ?? false;
   const titleId = useId();
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const lastFocusedElementRef = useRef<HTMLElement | null>(null);
-  const restoreFocusRef = useRef(restoreFocus);
-
-  useEffect(() => {
-    restoreFocusRef.current = restoreFocus;
-  }, [restoreFocus]);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    lastFocusedElementRef.current = document.activeElement as HTMLElement | null;
-    window.setTimeout(() => {
-      const focusable = dialogRef.current?.querySelector<HTMLElement>(
-        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
-      );
-      focusable?.focus();
-    });
-
-    return () => {
-      if (restoreFocusRef.current) {
-        lastFocusedElementRef.current?.focus?.();
-      }
-    };
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!isVisible || !closeOnEscape) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [closeOnEscape, onClose, isVisible]);
-
-  if (!isVisible && !keepMounted) return null;
-
-  return createPortal(
-    <div
-      className={joinClassNames('nb-dialog-root', rootClassName)}
-      aria-hidden={!isVisible}
+  return (
+    <ModalSurface
+      open={isVisible}
+      onClose={onClose}
+      rootClassName={joinClassNames('nb-dialog-root', rootClassName)}
+      className={joinClassNames('nb-dialog', fullScreen && 'nb-dialog--fullscreen', className)}
+      scrimClassName="nb-dialog__scrim"
+      scrimLabel={resolvedScrimLabel}
+      labelledBy={titleId}
+      role={role}
+      closeOnEscape={closeOnEscape}
+      closeOnOutsideClick={closeOnOutsideClick}
+      restoreFocus={restoreFocus}
+      keepMounted={keepMounted}
+      initialFocus={initialFocus}
       style={{
-        pointerEvents: isVisible ? undefined : 'none',
-        visibility: isVisible ? undefined : 'hidden',
+        width: formatSize(width),
+        maxWidth: formatSize(maxWidth),
+        height: formatSize(height),
       }}
     >
-      <button
-        className="nb-dialog__scrim"
-        type="button"
-        aria-label={resolvedScrimLabel}
-        onClick={closeOnOutsideClick ? onClose : undefined}
-      />
-      <div
-        className={joinClassNames('nb-dialog', fullScreen && 'nb-dialog--fullscreen', className)}
-        role={role}
-        aria-modal="true"
-        aria-labelledby={titleId}
-        ref={dialogRef}
-        onKeyDownCapture={(event) => {
-          if (!closeOnEscape && event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-        }}
-        style={{
-          width: formatSize(width),
-          maxWidth: formatSize(maxWidth),
-          height: formatSize(height),
-        }}
-      >
-        <div className={joinClassNames('nb-dialog__header', headerClassName)}>
-          <h2 className={joinClassNames('nb-dialog__title', titleClassName)} id={titleId}>
-            {title}
-          </h2>
-          {showCloseButton && (
-            <IconButton
-              className="nb-dialog__close"
-              icon="ph ph-x"
-              label={resolvedCloseLabel}
-              onClick={onClose}
-            />
-          )}
-        </div>
-        <div className={joinClassNames('nb-dialog__body', bodyClassName)}>{children}</div>
-        {footer && (
-          <div className={joinClassNames('nb-dialog__footer', footerClassName)}>{footer}</div>
+      <div className={joinClassNames('nb-dialog__header', headerClassName)}>
+        <h2 className={joinClassNames('nb-dialog__title', titleClassName)} id={titleId}>
+          {title}
+        </h2>
+        {showCloseButton && (
+          <IconButton
+            className="nb-dialog__close"
+            icon="ph ph-x"
+            label={resolvedCloseLabel}
+            onClick={onClose}
+          />
         )}
       </div>
-    </div>,
-    document.body,
+      <div className={joinClassNames('nb-dialog__body', bodyClassName)}>{children}</div>
+      {footer && (
+        <div className={joinClassNames('nb-dialog__footer', footerClassName)}>{footer}</div>
+      )}
+    </ModalSurface>
   );
 };

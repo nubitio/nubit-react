@@ -1,7 +1,7 @@
-import React, { type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import React, { isValidElement, useRef, type ReactNode } from 'react';
+import { Menu } from '@base-ui/react/menu';
 import { IconButton } from './Button';
-import { computeAnchoredStyle, useFloatingPanel } from './useFloatingPanel';
+import { useOverlayContainer } from './OverlayContainer';
 import './ContextMenu.scss';
 
 export interface ContextMenuItem {
@@ -28,21 +28,6 @@ export interface ContextMenuProps {
   className?: string;
 }
 
-const MENU_MIN_WIDTH = 190;
-
-/**
- * Three-dot overflow context menu.
- * Replaces the legacy `shared/ui/library/card-menu/CardMenu` component.
- *
- * Features over CardMenu:
- * - `danger` variant items
- * - `separator` support
- * - `icon` per item
- * - Custom trigger slot
- * - Left/right alignment
- * - Click-outside + Escape to close
- * - Portalled dropdown (avoids clip inside scrollable tables)
- */
 export const ContextMenu = ({
   items,
   visible = true,
@@ -51,77 +36,59 @@ export const ContextMenu = ({
   align = 'right',
   className = '',
 }: ContextMenuProps) => {
-  const {
-    open,
-    setOpen,
-    toggle,
-    containerRef,
-    panelRef: menuRef,
-    panelStyle: menuStyle,
-  } = useFloatingPanel<HTMLDivElement, HTMLUListElement>({
-    dismissEvent: 'mousedown',
-    closeOnViewportExit: true,
-    computeStyle: (container) =>
-      computeAnchoredStyle(container, {
-        align: align === 'right' ? 'end' : 'start',
-        minWidth: MENU_MIN_WIDTH,
-        flipThreshold: 200,
-        zIndex: 1600,
-      }),
-  });
-
+  const container = useOverlayContainer();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
   if (!visible) return null;
-
-  const dropdown = open ? (
-    <ul
-      ref={menuRef}
-      className="nb-context-menu__dropdown nb-context-menu__dropdown--portaled"
-      role="menu"
-      style={menuStyle}
-    >
-      {items.map((item, idx) => (
-        <React.Fragment key={idx}>
-          {item.separator && (
-            <li role="none" aria-hidden="true">
-              <div className="nb-context-menu__separator" />
-            </li>
-          )}
-          <li role="none">
-            <button
-              type="button"
-              role="menuitem"
-              disabled={item.disabled}
-              aria-disabled={item.disabled}
-              className={`nb-context-menu__item${item.danger ? ' nb-context-menu__item--danger' : ''}`}
-              onClick={() => {
-                setOpen(false);
-                item.onClick?.();
-              }}
-            >
-              {item.icon && <i className={item.icon} aria-hidden="true" />}
-              {item.label}
-            </button>
-          </li>
-        </React.Fragment>
-      ))}
-    </ul>
-  ) : null;
-
   return (
-    <div ref={containerRef} className={`nb-context-menu${className ? ` ${className}` : ''}`}>
-      {trigger ? (
-        <span onClick={toggle}>{trigger}</span>
-      ) : (
-        <IconButton
-          icon="ph ph-dots-three"
-          label={triggerLabel}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={toggle}
+    <Menu.Root
+      modal={false}
+      onOpenChange={(open, details) => {
+        restoreFocus.current =
+          !open && (details.reason === 'item-press' || details.reason === 'escape-key');
+      }}
+      onOpenChangeComplete={(open) => {
+        if (!open && restoreFocus.current) triggerRef.current?.focus({ preventScroll: true });
+      }}
+    >
+      <div className={`nb-context-menu${className ? ` ${className}` : ''}`}>
+        <Menu.Trigger
+          ref={triggerRef}
+          render={
+            isValidElement(trigger) ? (
+              trigger
+            ) : (
+              <IconButton icon="ph ph-dots-three" label={triggerLabel}>
+                {trigger}
+              </IconButton>
+            )
+          }
         />
-      )}
-
-      {dropdown && createPortal(dropdown, document.body)}
-    </div>
+        <Menu.Portal container={container ?? undefined}>
+          <Menu.Positioner
+            align={align === 'right' ? 'end' : 'start'}
+            sideOffset={4}
+            className="nb-context-menu-positioner"
+          >
+            <Menu.Popup finalFocus={triggerRef} className="nb-context-menu__dropdown">
+              {items.map((item, index) => (
+                <React.Fragment key={index}>
+                  {item.separator && <Menu.Separator className="nb-context-menu__separator" />}
+                  <Menu.Item
+                    disabled={item.disabled}
+                    label={item.label}
+                    className={`nb-context-menu__item${item.danger ? ' nb-context-menu__item--danger' : ''}`}
+                    onClick={item.onClick}
+                  >
+                    {item.icon && <i className={item.icon} aria-hidden="true" />}
+                    {item.label}
+                  </Menu.Item>
+                </React.Fragment>
+              ))}
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </div>
+    </Menu.Root>
   );
 };

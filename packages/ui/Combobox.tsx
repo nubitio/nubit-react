@@ -1,3 +1,4 @@
+import { useOverlayContainer } from './OverlayContainer';
 import {
   Button as AriaButton,
   ComboBox as AriaCombobox,
@@ -51,6 +52,7 @@ export interface ComboboxProps extends Omit<
   minSearchLength?: number;
   loadingMessage?: ReactNode;
   searchErrorMessage?: ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export interface MultiSelectProps extends Omit<ComboboxProps, 'value' | 'onChange'> {
@@ -117,12 +119,14 @@ function SelectionCombobox({
   minSearchLength = 0,
   loadingMessage,
   searchErrorMessage,
+  onOpenChange,
   multiple,
   inputRef,
   selectedLabel,
   removeLabel,
   ...inputProps
 }: SelectionProps) {
+  const overlayContainer = useOverlayContainer();
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const strings = useUiStrings();
@@ -164,6 +168,7 @@ function SelectionCombobox({
       onInputChange={setQuery}
       onOpenChange={(nextOpen, trigger) => {
         setOpen(nextOpen);
+        onOpenChange?.(nextOpen);
         if (!nextOpen || trigger !== 'input') setQuery('');
       }}
       name={name}
@@ -243,6 +248,7 @@ function SelectionCombobox({
         </ComboBoxValue>
       )}
       <Popover
+        UNSTABLE_portalContainer={overlayContainer ?? undefined}
         className="nb-combobox-popup"
         offset={4}
         isNonModal

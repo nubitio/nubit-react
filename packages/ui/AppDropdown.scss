@@ -205,3 +205,24 @@
     width: 100%;
   }
 }
+
+.nb-dropdown-positioner {
+  z-index: var(--z-shell-dropdown, 1600);
+  width: var(--anchor-width);
+  max-width: calc(100vw - 16px);
+}
+
+.nb-dropdown__menu {
+  max-height: min(280px, var(--available-height));
+}
+
+.nb-dropdown__option[data-highlighted] {
+  background: var(--control-bg-hover);
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: -2px;
+}
+
+.nb-dropdown__option[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

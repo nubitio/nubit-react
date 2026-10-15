@@ -66,17 +66,23 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
   } = dialect;
 
   return ({ url, byKeyUrl, httpClient }) => {
-    async function request<T>(target: string): Promise<{ data: T; headers: Headers } | null> {
+    async function request<T>(
+      target: string,
+      signal?: AbortSignal,
+    ): Promise<{ data: T; headers: Headers } | null> {
       if (httpClient) {
         try {
-          const response = await httpClient.get<T>(target);
+          const response = signal
+            ? await httpClient.get<T>(target, { signal })
+            : await httpClient.get<T>(target);
           return { data: response.data, headers: response.headers };
-        } catch {
+        } catch (error) {
+          if (signal?.aborted) throw error;
           return null;
         }
       }
 
-      const response = await fetch(target);
+      const response = signal ? await fetch(target, { signal }) : await fetch(target);
       if (!response.ok) {
         if (response.status === 404) return null;
         throw new Error(`GET ${target} → ${response.status}`);
@@ -115,7 +121,7 @@ export function createRestResourceStore(dialect: RestQueryDialect = {}): Resourc
         const result = await request<
           | DataRecord[]
           | { items?: DataRecord[]; data?: DataRecord[]; total?: number; totalCount?: number }
-        >(appendQuery(url, params));
+        >(appendQuery(url, params), options.signal);
         if (result === null) return { data: [], totalCount: 0, summary: null, gridSummary: null };
 
         const body = result.data;

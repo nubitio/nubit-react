@@ -1,6 +1,7 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import { fieldKeyValue, fieldTextValue } from '../../../form/fieldOptionSource';
+import { normalizeRelationOption } from '../../../form/fieldOptionSource';
+import { NativeEntitySelect } from '../../../form/LookupControls';
 import {
   defaultBuildFilterTerms,
   getEntityDisplayValue,
@@ -33,38 +34,25 @@ export const tagsTypeModule: FieldTypeModule = {
   // available even if the item isn't on the first page of loaded options.
   normalizeFormValue: (field, rawValue, ctx) => {
     if (!Array.isArray(rawValue)) return set([]);
-    const resolved = rawValue.map((item) => {
-      if (typeof item === 'object' && item !== null) {
-        ctx.prependEntityOption(field, item as Record<string, unknown>);
-      }
-      return ctx.adapter.normalizeEntityValue(item, field);
-    });
+    const resolved = rawValue.map((item) => normalizeRelationOption(field, item, ctx));
     return set(resolved.filter((item) => item !== null && item !== undefined));
   },
-  ControlRender: ({ field, value, commonProps, setFieldValue, ctx }) => {
-    const items = ctx.remoteOptions[field.name] ?? field.data ?? [];
-    return (
-      <select
-        {...commonProps}
-        multiple
-        value={Array.isArray(value) ? value.map(String) : []}
-        onChange={(event) => {
-          const nextValue = Array.from(event.currentTarget.selectedOptions).map(
-            (option) => option.value,
-          );
-          setFieldValue(field.name, nextValue);
-        }}
-      >
-        {items.map((item) => {
-          const itemValue = fieldKeyValue(field, item);
-          const itemText = fieldTextValue(field, item);
-          return (
-            <option key={String(itemValue)} value={String(itemValue ?? '')}>
-              {itemText}
-            </option>
-          );
-        })}
-      </select>
-    );
-  },
+  ControlRender: ({ field, value, error, errorClass, disabled, readOnly, setFieldValue, ctx }) => (
+    <NativeEntitySelect
+      className={`nb-form__control${errorClass}`}
+      field={field}
+      id={`nb-form-${field.name}`}
+      httpClient={ctx.httpClient}
+      options={ctx.remoteOptions[field.name] ?? field.data ?? []}
+      prependData={ctx.getPrependData(field.name)}
+      value={value}
+      multiple
+      disabled={disabled}
+      readOnly={readOnly}
+      required={field.required}
+      invalid={!!error}
+      describedBy={error ? `nb-form-${field.name}-error` : undefined}
+      onChange={(next) => setFieldValue(field.name, next)}
+    />
+  ),
 };

@@ -7,6 +7,8 @@ import {
   dateField,
   defineResource,
   enumField,
+  entityField,
+  tagsField,
   identityField,
   numberField,
   textField,
@@ -68,6 +70,22 @@ const sales = defineResource('/sales', {
       .label('Status')
       .build(),
     checkboxField().name('active').label('Active').build(),
+    entityField('', 'id', 'name')
+      .name('owner')
+      .label('Owner')
+      .data([
+        { id: 0, name: 'Zero owner' },
+        { id: 2, name: 'Second owner' },
+      ])
+      .build(),
+    tagsField('', 'id', 'name')
+      .name('labels')
+      .label('Labels')
+      .data([
+        { id: 1, name: 'Hardware' },
+        { id: 2, name: 'Office' },
+      ])
+      .build(),
   ],
 });
 

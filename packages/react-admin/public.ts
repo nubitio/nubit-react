@@ -99,6 +99,7 @@ export {
   dateField,
   datetimeField,
   entityField,
+  tagsField,
   enumField,
   selectField,
   checkboxField,
@@ -131,6 +132,33 @@ export { DataGridView, DATA_GRID_EVENTS } from '@nubitio/crud';
 export { DialogView } from '@nubitio/crud';
 
 // ── Event bus ─────────────────────────────────────────────────────────────────
+export {
+  Checkbox,
+  RadioGroup,
+  Tabs,
+  Spinner,
+  Progress,
+  Combobox,
+  MultiSelect,
+  Tooltip,
+  TooltipProvider,
+} from '@nubitio/ui';
+export type {
+  CheckboxProps,
+  RadioGroupProps,
+  RadioGroupOption,
+  TabsProps,
+  TabsItem,
+  SpinnerProps,
+  ProgressProps,
+  ComboboxProps,
+  ComboboxOption,
+  MultiSelectProps,
+  ComboboxLoader,
+  ComboboxPage,
+  TooltipProps,
+  TooltipProviderProps,
+} from '@nubitio/ui';
 export { dispatch, useEvents } from '@nubitio/core';
 export { createCrudEvents } from '@nubitio/crud';
 export type { EventSubscription } from '@nubitio/core';

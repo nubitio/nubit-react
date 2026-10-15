@@ -13,6 +13,8 @@ const NUBIT_PACKAGES = [
 // Every runtime dependency/peer of any package must stay external — the root
 // package.json only has devDependencies, so tsdown cannot infer these itself.
 const RUNTIME_EXTERNAL = [
+  '@base-ui/react',
+  'react-aria-components',
   'react',
   'react-dom',
   'react-router-dom',

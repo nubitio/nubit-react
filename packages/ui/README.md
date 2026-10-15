@@ -39,6 +39,139 @@ export function App() {
 - **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
 - **Layout** — `AppToolbar`
+- **Selection and navigation** — `Checkbox` (native, including mixed state), `RadioGroup` (native radios), `Tabs` (controlled, keyboard navigation)
+- **Loading** — `Spinner`, `Progress` (native determinate or indeterminate progress)
+
+### Selection, tabs and loading
+
+```tsx
+<Checkbox label="Receive updates" checked={updates} onChange={(event) => setUpdates(event.target.checked)} />
+<RadioGroup label="Channel" name="channel" value={channel} onChange={setChannel}
+  options={[{ value: 'email', label: 'Email' }, { value: 'sms', label: 'SMS' }]} />
+<Tabs aria-label="Account sections" value={tab} onChange={setTab} keepMounted
+  items={[{ value: 'general', label: 'General', content: <AccountForm /> },
+          { value: 'activity', label: 'Activity', content: <Activity /> }]} />
+<Spinner label="Loading account" />
+<Progress label="Upload" value={40} />
+```
+
+`Checkbox` accepts native input props and forwards its input ref. Its `onChange`
+receives the native React change event. Use `indeterminate` for partial selection;
+it does not change the submitted checked value. Supply a label or `aria-label`.
+
+`RadioGroup` uses a fieldset and legend, shares a native radio name, and supports
+disabled options and horizontal/vertical layout. Supply `label` or `aria-label`.
+
+`Tabs` supports arrow keys, Home/End, disabled tabs and horizontal/vertical
+orientation. The default `activationMode="automatic"` selects on arrow navigation;
+`manual` selects with Enter/Space or click. Set `keepMounted` to preserve inactive
+panel state. Values must be unique and `value` should identify an enabled item.
+
+`Spinner` is decorative without a label; labelled spinners expose a status role.
+`Progress` defaults to `max={100}`; omit `value` for indeterminate progress.
+Supply a visible label or `aria-label`. Localize labels in the application.
+All five components are also exported by `@nubitio/react-admin`.
+
+### Combobox and tooltip
+
+```tsx
+<Combobox label="Country" name="country" value={country} onChange={setCountry}
+  options={[{ value: 'pe', label: 'Peru' }, { value: 'cl', label: 'Chile' }]}
+  helpText="Type to filter countries" />
+<Tooltip content="Download the report">
+  <Button>Export</Button>
+</Tooltip>
+```
+
+Combobox uses Apache-2.0-licensed React Aria Components; Tooltip uses MIT-licensed
+Base UI. Both provide interaction and positioning, with Nubit CSS tokens for
+presentation. Applications do not need to install these libraries separately. `TooltipProvider` is optional and shares hover delays across
+nearby tooltips. Both libraries are runtime dependencies and stay external in published Nubit
+bundles.
+
+`Combobox` is a controlled, single-select control: `value` is an option ID or `null`,
+and `onChange` receives that ID or `null` when cleared. IDs must be unique. The
+input filters the supplied options locally by label; free text is not a selected
+value. It supports disabled options, required/read-only/disabled states, native
+form submission through `name`, and forwards its input ref. Use `label` or
+`aria-label` for its accessible name. `error` and `helpText` are linked to the
+input; errors also set `aria-invalid`. Action and empty-result strings come from
+`UiStringsProvider`, with `openLabel`, `clearLabel` and `emptyMessage` overrides.
+
+`MultiSelect` uses the same options and loading API. Its `value`/`onChange` use
+arrays of string IDs, rendered as keyboard-accessible removable chips. Read-only
+and disabled selections cannot be removed. `name` submits one native form entry
+per selected ID (`new FormData(form).getAll(name)`). `selectedLabel` and
+`removeLabel(option)` customize chip accessibility strings.
+
+```tsx
+<MultiSelect
+  label="Countries"
+  name="countries"
+  value={countries}
+  onChange={setCountries}
+  options={countryOptions}
+/>
+```
+
+### Remote search and pagination
+
+Pass a stable `loadOptions` callback to either component. It receives the trimmed
+query and `{ signal, cursor }` and returns `{ options, nextCursor? }`. `cursor` is
+absent for the first page; return `null` or omit `nextCursor` to stop pagination.
+An empty query loads the default first page. Search is debounced (250 ms by
+default), aborts when the query/session changes, and ignores obsolete responses
+even when a loader ignores its signal. Failures are shown with a retry action.
+
+```tsx
+const loadPeople: ComboboxLoader = async (query, { signal, cursor }) => {
+  const params = new URLSearchParams({ q: query, cursor: String(cursor ?? '') });
+  const response = await fetch(`/api/people/options?${params}`, { signal });
+  if (!response.ok) throw new Error('Could not load people');
+  return response.json(); // { options: [{ value, label }], nextCursor? }
+};
+
+<Combobox
+  label="Person"
+  value={person}
+  onChange={setPerson}
+  options={selectedPersonOptions}
+  loadOptions={loadPeople}
+/>;
+```
+
+Seed `options` with selected records, including those outside the current page.
+Selected labels are retained across searches; chosen options remain pinned in
+the remote list. Server results are not filtered again on the client. Pages
+are appended and deduplicated by ID; scrolling near the bottom, PageDown or the
+Load more action requests the next page. `minSearchLength` defaults to 0;
+`debounceMs` adjusts the delay. `loadingMessage` and `searchErrorMessage` override
+the localized search statuses.
+
+### CRUD relation integration
+
+Native CRUD forms use `Combobox` for single `ENTITY` relations and `MultiSelect`
+for `TAGS` and `ENTITY.multiple` relations. No new backend hints are required.
+Existing value/text fields, filters, `byKeyUrl`, prepend records, rich
+`itemFormatter` options and `onSelect` callbacks remain supported. A selection
+missing from the loaded page is resolved through the resource store's `byKey`.
+Numeric IDs (including zero) retain their original types, and Hydra relations
+retain their IRIs when serialized.
+
+Relation search uses the existing resource store with 50-row pages and
+`searchEnabled`/`searchExpr`. Grid filters and inline detail cells continue to
+edit a single relation. REST and Hydra stores forward cancellation signals to
+HTTP requests; custom stores receive `ResourceLoadOptions.signal` and can honor
+it as well. Selection labels are pinned in the UI rather than prepended to
+server pages, so selected rows do not distort pagination offsets.
+
+`Tooltip` accepts a single native focusable element or a component that forwards
+its DOM ref and injected props; Nubit `Button` and `IconButton` support this.
+It opens on hover or keyboard focus and dismisses on Escape. The popup adds a
+supplementary description while preserving an existing `aria-describedby`.
+Keep trigger labels meaningful and essential instructions visible; tooltips
+are supplementary, non-interactive content and are not a touch-device help flow.
+Use `side`, `delay` and `disabled` to customize behavior.
 
 All components ship their styles in `dist/style.css`; import it once at the app root. Static design tokens (typography, spacing, radii) are included in `style.css`.
 

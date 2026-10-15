@@ -4,6 +4,14 @@ import {
   Avatar,
   Badge,
   Button,
+  Checkbox,
+  RadioGroup,
+  Tabs,
+  Spinner,
+  Progress,
+  Combobox,
+  MultiSelect,
+  Tooltip,
   Chip,
   CollapsibleSection,
   ConfirmDialog,
@@ -22,7 +30,47 @@ import {
   TimelineItem,
   Toggle,
 } from '@nubitio/react-admin';
+import type { ComboboxLoader } from '@nubitio/react-admin';
 import './ShowcasePage.css';
+
+const countryOptions = [
+  { value: 'pe', label: 'Peru' },
+  { value: 'cl', label: 'Chile' },
+  { value: 'co', label: 'Colombia' },
+];
+const contacts = [
+  { value: 'ada', label: 'Ada Lovelace' },
+  { value: 'grace', label: 'Grace Hopper' },
+  { value: 'linus', label: 'Linus Torvalds' },
+  { value: 'margaret', label: 'Margaret Hamilton' },
+];
+
+/** In-memory async provider keeps the showcase usable without a demo server. */
+const loadContacts: ComboboxLoader = async (query, { signal, cursor }) => {
+  await new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException('Cancelled', 'AbortError'));
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', abort);
+      resolve();
+    }, 120);
+    function abort() {
+      clearTimeout(timer);
+      reject(new DOMException('Cancelled', 'AbortError'));
+    }
+    signal.addEventListener('abort', abort, { once: true });
+  });
+  const matching = contacts.filter((item) =>
+    item.label.toLowerCase().includes(query.toLowerCase()),
+  );
+  const offset = Number(cursor ?? 0);
+  return {
+    options: matching.slice(offset, offset + 2),
+    nextCursor: offset + 2 < matching.length ? offset + 2 : null,
+  };
+};
 
 export function ShowcasePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -32,6 +80,12 @@ export function ShowcasePage() {
   const [date, setDate] = useState('');
   const [range, setRange] = useState<[string, string]>(['', '']);
   const [sectionOpen, setSectionOpen] = useState(false);
+  const [updates, setUpdates] = useState(true);
+  const [channel, setChannel] = useState('email');
+  const [activeTab, setActiveTab] = useState('general');
+  const [country, setCountry] = useState<string | null>('pe');
+  const [countries, setCountries] = useState(['pe']);
+  const [contact, setContact] = useState<string | null>(null);
 
   return (
     <div className="view-wrapper-scroll">
@@ -42,6 +96,87 @@ export function ShowcasePage() {
         </header>
 
         <div className="showcase__grid">
+          <section className="showcase__section">
+            <h2>Multiple selection and remote search</h2>
+            <MultiSelect
+              label="Countries"
+              name="countries"
+              options={countryOptions}
+              value={countries}
+              onChange={setCountries}
+            />
+            <Combobox
+              label="Contact"
+              options={[]}
+              value={contact}
+              onChange={setContact}
+              loadOptions={loadContacts}
+            />
+          </section>
+          <section className="showcase__section">
+            <h2>Searchable selection and tooltips</h2>
+            <Combobox
+              label="Country"
+              name="country"
+              value={country}
+              onChange={setCountry}
+              helpText="Type to filter countries; use arrow keys to choose."
+              options={[
+                { value: 'pe', label: 'Peru' },
+                { value: 'cl', label: 'Chile' },
+                { value: 'co', label: 'Colombia' },
+                { value: 'ar', label: 'Argentina', disabled: true },
+              ]}
+            />
+            <Tooltip content="Download a copy of your report" delay={0}>
+              <Button>Report help</Button>
+            </Tooltip>
+          </section>
+          <section className="showcase__section">
+            <h2>Selection controls</h2>
+            <Checkbox
+              label="Receive updates"
+              checked={updates}
+              onChange={(event) => setUpdates(event.target.checked)}
+            />
+            <Checkbox label="Partially selected" indeterminate />
+            <Checkbox label="Disabled selection" disabled />
+            <RadioGroup
+              label="Contact channel"
+              value={channel}
+              onChange={setChannel}
+              options={[
+                { value: 'email', label: 'Email' },
+                { value: 'sms', label: 'SMS' },
+                { value: 'phone', label: 'Phone (unavailable)', disabled: true },
+              ]}
+            />
+          </section>
+          <section className="showcase__section">
+            <h2>Tabs and loading states</h2>
+            <Tabs
+              aria-label="Account sections"
+              value={activeTab}
+              onChange={setActiveTab}
+              keepMounted
+              items={[
+                {
+                  value: 'general',
+                  label: 'General',
+                  content: <TextField aria-label="Account name" defaultValue="Nubit" />,
+                },
+                { value: 'activity', label: 'Activity', content: 'Recent account activity' },
+                { value: 'billing', label: 'Billing', content: null, disabled: true },
+              ]}
+            />
+            <div className="showcase__row">
+              <Spinner size="sm" />
+              <Spinner label="Loading preview" />
+              <Spinner size="lg" />
+            </div>
+            <Progress label="Upload progress" value={65} />
+            <Progress label="Preparing report" />
+          </section>
           <section className="showcase__section">
             <h2>Buttons</h2>
             <div className="showcase__row">

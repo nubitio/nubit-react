@@ -1,8 +1,7 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import type { FormDataRecord } from '../../../form/FormDataSnapshot';
+import { normalizeRelationOption } from '../../../form/fieldOptionSource';
 import { NativeEntitySelect } from '../../../form/LookupControls';
-import { renderDefaultInputControl } from '../controlHelpers';
 import {
   defaultBuildFilterTerms,
   EQUALITY_OPERATORS,
@@ -14,28 +13,21 @@ import {
 
 export const entityTypeModule: FieldTypeModule = {
   controlKind: 'select',
-  // Multi-valued entities render the full-row plain input; single refs fit half.
+  // Single references fit half a row; multiple references use the chip editor.
   formWidth: (field) => (field.multiple ? 'auto' : 'compact'),
   // Editor value is the scalar entity key. Object values first register as a
   // dropdown option (so the selection displays even off the loaded page) and,
   // for Hydra, may need their `_iri` synthesized when `@id` is absent.
   normalizeFormValue: (field, rawValue, ctx) => {
-    if (typeof rawValue === 'object' && rawValue !== null) {
-      const entityValue = { ...(rawValue as FormDataRecord) };
-      if (field.valueField === '_iri') {
-        const synthesized = ctx.adapter.synthesizeEntityKey(field, entityValue);
-        if (
-          synthesized &&
-          typeof entityValue['_iri'] !== 'string' &&
-          typeof entityValue['@id'] !== 'string'
-        ) {
-          entityValue['_iri'] = synthesized;
-        }
-      }
-      ctx.prependEntityOption(field, entityValue);
+    if (field.multiple) {
+      if (!Array.isArray(rawValue)) return set([]);
+      return set(
+        rawValue
+          .map((item) => normalizeRelationOption(field, item, ctx))
+          .filter((item) => item !== null && item !== undefined),
+      );
     }
-
-    const normalized = ctx.adapter.normalizeEntityValue(rawValue, field);
+    const normalized = normalizeRelationOption(field, rawValue, ctx);
     if (normalized !== null && normalized !== undefined) return set(normalized);
     return set(ctx.getPrependData(field)?.[0] ?? field.loadOptions[0]?.prependData?.[0] ?? null);
   },
@@ -50,14 +42,14 @@ export const entityTypeModule: FieldTypeModule = {
     return serialized === undefined ? OMIT : set(serialized);
   },
   ControlRender: (props) => {
-    const { field, value, errorClass, disabled, readOnly, setFieldValue, ctx } = props;
-    // Multi-valued entities fall through to the plain input (legacy behaviour).
-    if (field.multiple) return renderDefaultInputControl(props);
+    const { field, value, error, errorClass, disabled, readOnly, setFieldValue, ctx } = props;
     const items = ctx.remoteOptions[field.name] ?? field.data ?? [];
     return (
       <NativeEntitySelect
         className={`nb-form__control${errorClass}`}
         disabled={disabled}
+        invalid={!!error}
+        describedBy={error ? `nb-form-${field.name}-error` : undefined}
         field={field}
         httpClient={ctx.httpClient}
         id={`nb-form-${field.name}`}
@@ -80,7 +72,8 @@ export const entityTypeModule: FieldTypeModule = {
       httpClient={httpClient}
       options={remoteOptions}
       value={value}
-      onChange={(nextVal) => onSelectChange(nextVal ? String(nextVal) : '')}
+      multiple={false}
+      onChange={(nextVal) => onSelectChange(nextVal == null ? '' : String(nextVal))}
     />
   ),
   DetailCellRender: ({
@@ -96,10 +89,12 @@ export const entityTypeModule: FieldTypeModule = {
     <NativeEntitySelect
       className={`nb-form__control${errorClass}`}
       disabled={!allowUpdating || field.disabled}
+      readOnly={field.readonly}
       field={field}
       httpClient={httpClient}
       options={remoteOptions[field.name] ?? field.data ?? []}
       prependData={getPrependData(field.name)}
+      multiple={false}
       value={value}
       onChange={(nextValue) => onChange(nextValue)}
     />

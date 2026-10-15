@@ -71,9 +71,8 @@ export function entityField<TRecord extends DataRecord = DataRecord>(
  * same way (`serializeEntityFormValue`), the only difference is the control
  * renders a multi-select and the value is an array. Defaults `multiple(true)`
  * since that's what the ENTITY field type's `multiple` flag is defined
- * against (see `entityTypeModule` — an ENTITY field with `multiple: true`
- * falls back to a plain input; TAGS is the control that actually implements
- * multi-select).
+ * against (both TAGS and ENTITY fields with `multiple: true` use the shared searchable
+ * multi-select relation editor).
  *
  * Usage:
  *   tagsField('/api/existencias', '_iri', 'peso')

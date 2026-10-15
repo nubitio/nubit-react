@@ -37,6 +37,17 @@ export interface UiStrings {
   selectYear: string;
   /** Date pickers: footer button that clears the value. */
   clear: string;
+  /** Combobox popup trigger and empty results. */
+  openOptions: string;
+  noOptions: string;
+  searching: string;
+  searchFailed: string;
+  enterSearch: string;
+  loadingMore: string;
+  loadMore: string;
+  retrySearch: string;
+  selectedOptions: string;
+  removeOption: string;
   /** Date pickers: footer button that jumps to today. */
   today: string;
   /** Generic cancel action. */
@@ -110,6 +121,16 @@ export const EN_UI_STRINGS: UiStrings = {
   selectMonthAndYear: 'Select month and year',
   selectYear: 'Select year',
   clear: 'Clear',
+  openOptions: 'Open options',
+  noOptions: 'No options found',
+  searching: 'Searching…',
+  searchFailed: 'Could not load options',
+  enterSearch: 'Type to search',
+  loadingMore: 'Loading more…',
+  loadMore: 'Load more',
+  retrySearch: 'Retry search',
+  selectedOptions: 'Selected options',
+  removeOption: 'Remove',
   today: 'Today',
   cancel: 'Cancel',
   confirm: 'Confirm',
@@ -170,6 +191,16 @@ export const ES_UI_STRINGS: UiStrings = {
   selectMonthAndYear: 'Seleccionar mes y año',
   selectYear: 'Seleccionar año',
   clear: 'Limpiar',
+  openOptions: 'Abrir opciones',
+  noOptions: 'No se encontraron opciones',
+  searching: 'Buscando…',
+  searchFailed: 'No se pudieron cargar las opciones',
+  enterSearch: 'Escribe para buscar',
+  loadingMore: 'Cargando más…',
+  loadMore: 'Cargar más',
+  retrySearch: 'Reintentar búsqueda',
+  selectedOptions: 'Opciones seleccionadas',
+  removeOption: 'Quitar',
   today: 'Hoy',
   cancel: 'Cancelar',
   confirm: 'Confirmar',

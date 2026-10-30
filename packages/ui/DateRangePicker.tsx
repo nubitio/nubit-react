@@ -21,6 +21,7 @@ export interface DateRangePickerProps {
   endValue?: string | null;
   placeholder?: string;
   disabled?: boolean;
+  clearable?: boolean;
   readOnly?: boolean;
   required?: boolean;
   invalid?: boolean;
@@ -38,6 +39,7 @@ export function DateRangePicker({
   endValue,
   placeholder,
   disabled = false,
+  clearable = true,
   readOnly = false,
   required = false,
   invalid = false,
@@ -121,7 +123,7 @@ export function DateRangePicker({
             value={endValue}
             onChange={(next) => change(startValue ?? '', next)}
           />
-          {(startValue || endValue) && !disabled && !readOnly && (
+          {clearable && (startValue || endValue) && !disabled && !readOnly && (
             <Button
               slot={null}
               className={`${prefix}__clear`}

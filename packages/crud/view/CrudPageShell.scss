@@ -29,6 +29,15 @@
   width: 100%;
 }
 
+.nb-crud-page-route-state {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: auto;
+}
+
 // ── Header ───────────────────────────────────────────────────────────────────
 // Matches the admin shell header height so the page feels native, not modal.
 
@@ -48,6 +57,27 @@
 
 .nb-crud-page-shell__back {
   flex: 0 0 auto;
+}
+
+.nb-crud-page-shell__heading {
+  flex: 1;
+  min-width: 0;
+}
+.nb-crud-page-shell__subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: var(--space-1) 0 0;
+}
+
+html[data-visual-style='nubit'] .nb-crud-page-shell:has(.nb-form--columns) {
+  .nb-crud-page-shell__header {
+    background: var(--surface-0);
+    border: 0;
+    padding: var(--space-5) var(--page-padding) 0;
+  }
+  .nb-crud-page-shell__title {
+    font-size: var(--font-size-2xl);
+  }
 }
 
 .nb-crud-page-shell__title {
@@ -103,12 +133,40 @@
   border-top: 1px solid var(--border-subtle);
   bottom: 0;
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   flex-shrink: 0;
   gap: var(--space-2);
   justify-content: flex-end;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4) max(var(--space-3), env(safe-area-inset-bottom, 0px));
   position: sticky;
   z-index: 1;
+}
+
+.nb-crud-page-shell__footer-content {
+  color: var(--text-secondary);
+  flex: 1 1 12rem;
+  font-size: var(--font-size-sm);
+  min-width: 0;
+}
+
+.nb-crud-page-shell__body:has(.nb-form--columns) {
+  background: var(--surface-0);
+  padding: var(--space-6) var(--page-padding);
+}
+
+@media (max-width: 575.98px) {
+  .nb-crud-page-shell__body:has(.nb-form--columns) {
+    padding: var(--space-4);
+  }
+
+  .nb-crud-page-shell__footer-content {
+    flex-basis: 100%;
+  }
+
+  .nb-crud-page-shell__footer > .nb-button {
+    flex: 1;
+  }
 }
 
 .nb-crud-page-shell__footer .nb-button {

@@ -114,8 +114,14 @@
 }
 
 .nb-dropdown__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
   flex: 0 0 auto;
-  font-size: 12px;
+  font-size: 16px;
   opacity: 0.7;
 }
 
@@ -147,7 +153,10 @@
   border-radius: var(--radius-md);
   color: var(--text-primary);
   cursor: pointer;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   font: inherit;
   font-size: var(--font-size-sm);
   padding: var(--space-2) var(--space-3);
@@ -225,4 +234,10 @@
 .nb-dropdown__option[data-disabled] {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.nb-dropdown__selected {
+  color: var(--accent-color);
+  display: inline-flex;
+  flex-shrink: 0;
 }

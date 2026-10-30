@@ -36,6 +36,7 @@ export const selectTypeModule: FieldTypeModule = {
   FilterCellRender: ({ field, value, t, onSelectChange }) => (
     <FilterValueDropdown
       id={`nb-datagrid-filter-${field.name}`}
+      ariaLabel={t('grid.filterColumn', { column: field.label })}
       value={value}
       className="nb-datagrid__filter-select"
       placeholder={t('grid.allFilter')}

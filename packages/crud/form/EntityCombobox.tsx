@@ -38,6 +38,7 @@ export function NativeEntitySelect({
   multiple = field.multiple,
   invalid,
   describedBy,
+  placeholder,
 }: {
   className: string;
   disabled?: boolean;
@@ -53,6 +54,7 @@ export function NativeEntitySelect({
   multiple?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  placeholder?: string;
 }) {
   const { t } = useCoreTranslation();
   const factory = useResourceStoreFactory();
@@ -178,6 +180,7 @@ export function NativeEntitySelect({
   };
   const props = {
     id,
+    placeholder,
     name: field.name,
     options: optionRecords,
     inputClassName: className,

@@ -28,6 +28,14 @@ export interface AdminShellProps {
   renderUserMenu?: (props: { close: () => void }) => React.ReactNode;
   renderThemeSwitcher?: () => React.ReactNode;
   footer?: React.ReactNode;
+  /** Workspace places the sidebar alongside the header on large screens. */
+  variant?: 'default' | 'workspace';
+  brand?: React.ReactNode;
+  headerContent?: React.ReactNode;
+  /** Application owns context selection (e.g. company/branch); the shell only hosts it. */
+  sidebarContext?: React.ReactNode;
+  /** Rendered below content on extra-small screens, without covering the scroll area. */
+  bottomNavigation?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -38,6 +46,11 @@ export const AdminShell = ({
   renderUserMenu,
   renderThemeSwitcher,
   footer,
+  variant = 'default',
+  brand,
+  headerContent,
+  sidebarContext,
+  bottomNavigation,
   children,
 }: AdminShellProps) => {
   const navigate = useNavigate();
@@ -124,13 +137,23 @@ export const AdminShell = ({
     .join(' ');
 
   return (
-    <div className="nb-admin-shell">
+    <div
+      className={[
+        'nb-admin-shell',
+        variant === 'workspace' && 'nb-admin-shell--workspace',
+        variant === 'workspace' && isLarge && 'is-workspace-desktop',
+        variant === 'workspace' && isLarge && isCompact && 'is-workspace-compact',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <AdminHeader
         className="nb-admin-layout-header"
         menuToggleEnabled
         toggleMenu={toggleMenu}
         title={title}
         actions={headerActions}
+        content={headerContent}
         renderUserMenu={renderUserMenu}
         renderThemeSwitcher={renderThemeSwitcher}
       />
@@ -142,6 +165,8 @@ export const AdminShell = ({
             selectedItemChanged={onNavigationChanged}
             openMenu={temporaryOpenMenu}
             footer={footer}
+            brand={brand}
+            context={sidebarContext}
           />
         </aside>
         {!isLarge && isMenuOpen && (
@@ -160,6 +185,9 @@ export const AdminShell = ({
           {children}
         </main>
       </div>
+      {isXSmall && bottomNavigation && (
+        <div className="nb-admin-shell__bottom-navigation">{bottomNavigation}</div>
+      )}
     </div>
   );
 };

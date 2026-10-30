@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
+    "@fontsource/lexend": "^5.3.0",
     "@fontsource/syne": "^5.3.0",
     "@nubitio/devextreme": "workspace:*",
+    "@nubitio/core": "workspace:*",
     "@nubitio/react-admin": "workspace:*",
     "@nubitio/ui": "workspace:*",
     "@phosphor-icons/web": "^2.1.2",

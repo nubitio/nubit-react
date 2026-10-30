@@ -107,9 +107,15 @@ importers:
       '@fontsource/inter':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/lexend':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/syne':
         specifier: ^5.3.0
         version: 5.3.0
+      '@nubitio/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@nubitio/devextreme':
         specifier: workspace:*
         version: link:../../packages/devextreme
@@ -765,6 +771,9 @@ packages:
 
   '@fontsource/inter@5.3.0':
     resolution: {integrity: sha512-RofMylZmjlJEfELXeNHFWBRcSs75rGU/6bV2S2jfnvv/3rPXPGe0LgUJTklcHZ9lM4OZmAVFhcJPnACfb91A3g==}
+
+  '@fontsource/lexend@5.3.0':
+    resolution: {integrity: sha512-4igbsooynC6xwfagkAW6eo9JMrw8ALFGkWn1YChYmYchufMJSPgWihD+cy5ruX5YX/gDk/gllcl1Oj7q6KUZmw==}
 
   '@fontsource/syne@5.3.0':
     resolution: {integrity: sha512-kRWNVsrdYw+08I4EM1SYPe2JovdTzUI0kMVALVRsKmjRdkrVoun1qddSlDAglz5J9LbgUpJSkWmw6BYnmKdGuw==}
@@ -4202,6 +4211,8 @@ snapshots:
   '@floating-ui/utils@0.2.12': {}
 
   '@fontsource/inter@5.3.0': {}
+
+  '@fontsource/lexend@5.3.0': {}
 
   '@fontsource/syne@5.3.0': {}
 

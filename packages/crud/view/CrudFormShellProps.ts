@@ -18,6 +18,7 @@ export interface CrudFormShellProps {
 
   /** Localised title (already mapped from mode by the orchestrator). */
   title: string;
+  subtitle?: string;
 
   /** Called when the user dismisses the shell (Escape, scrim, back nav). */
   onClose: () => void;
@@ -30,6 +31,9 @@ export interface CrudFormShellProps {
 
   /** Override the default save button label. */
   saveLabel?: string;
+  /** Supplementary content rendered in the page-shell footer. */
+  footerContent?: React.ReactNode;
+  busy?: boolean;
 
   /** Dialog-only sizing. Drawer/Page shells ignore these. */
   width?: number;

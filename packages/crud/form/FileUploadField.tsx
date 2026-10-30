@@ -200,6 +200,7 @@ export function FileUploadField({
       inputId={`nb-form-${field.name}`}
       inputLabel={field.label}
       labels={{
+        empty: t(imageMode ? 'form.imageUploadEmpty' : 'form.fileUploadEmpty'),
         dropPrompt: t('form.fileUploadDrop'),
         prompt: t('form.fileUploadPrompt'),
         imagePrompt: t('form.imageUploadPrompt'),

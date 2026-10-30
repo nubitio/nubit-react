@@ -54,6 +54,7 @@ export function getFilterOperatorIcon(value: string): string {
 /** The "all values" dropdown used by option-backed filter cells. */
 export function FilterValueDropdown({
   id,
+  ariaLabel,
   value,
   options,
   placeholder,
@@ -61,6 +62,7 @@ export function FilterValueDropdown({
   onChange,
 }: {
   id: string;
+  ariaLabel?: string;
   value: string;
   options: Array<{ value: string; label: string }>;
   placeholder: string;
@@ -70,6 +72,7 @@ export function FilterValueDropdown({
   return (
     <AppDropdown
       id={id}
+      ariaLabel={ariaLabel}
       value={value}
       options={[{ value: '', label: placeholder }, ...options]}
       onChange={onChange}
@@ -105,6 +108,7 @@ export function OperatorFilterCell({
       {operators.length > 1 ? (
         <AppDropdown
           id={`nb-datagrid-filter-op-${field.name}`}
+          ariaLabel={`${t('grid.filterColumn', { column: field.label })}: ${getFilterOperatorLabel(operator, t)}`}
           value={operator}
           options={[
             ...operators.map((op) => ({
@@ -164,6 +168,7 @@ export function renderDefaultFilterCell(
         type={inputType}
         className="nb-datagrid__filter-input"
         value={cell.value}
+        placeholder={cell.field.label}
         aria-label={cell.t('grid.filterColumn', { column: cell.field.label })}
         onChange={(e) => cell.onInputChange(e.target.value)}
       />

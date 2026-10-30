@@ -15,6 +15,7 @@ export type AppDropdownVariant = 'form' | 'toolbar' | 'compact';
 
 export interface AppDropdownProps {
   id?: string;
+  ariaLabel?: string;
   label?: ReactNode;
   icon?: string;
   value: string;
@@ -36,6 +37,7 @@ export interface AppDropdownProps {
 
 export function AppDropdown({
   id: idProp,
+  ariaLabel,
   label,
   icon,
   value,
@@ -105,7 +107,18 @@ export function AppDropdown({
           <Select.Trigger
             id={id}
             className="nb-dropdown__trigger"
-            aria-labelledby={labelled ? `${id}-label ${id}-value` : `${id}-value`}
+            onKeyDownCapture={(event) => {
+              if (open && event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                setOpen(false);
+                onOpenChange?.(false);
+              }
+            }}
+            aria-label={ariaLabel}
+            aria-labelledby={
+              ariaLabel ? undefined : labelled ? `${id}-label ${id}-value` : `${id}-value`
+            }
             aria-describedby={message ? `${id}-message` : undefined}
             aria-invalid={!!error || undefined}
           >
@@ -153,6 +166,9 @@ export function AppDropdown({
                         )}
                         <span>{option.label}</span>
                       </Select.ItemText>
+                      <Select.ItemIndicator className="nb-dropdown__selected" aria-hidden="true">
+                        <i className="ph ph-check" />
+                      </Select.ItemIndicator>
                     </Select.Item>
                   ))}
                 </Select.List>

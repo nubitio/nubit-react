@@ -15,7 +15,7 @@
  */
 import React, { createRef } from 'react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, waitFor, act, cleanup } from '@testing-library/react';
+import { render, waitFor, act, cleanup, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import i18next from 'i18next';
@@ -162,6 +162,94 @@ afterEach(() => {
 });
 
 describe('CRUD engine ↔ RestAdapter wiring', () => {
+  it('hydrates a page-mode deep link before editing and does not reload on field changes', async () => {
+    const formRef = createRef<FormHandle>();
+    http.get.mockResolvedValue(okResponse({ id: 7, name: 'Loaded product' }));
+    renderPage('/7', formRef, http, loadSpy, { ...resource, viewMode: 'page' });
+    await waitFor(() => expect(formRef.current?.getFieldValue('name')).toBe('Loaded product'));
+    expect(http.get).toHaveBeenCalledWith(
+      `${API_URL}/7`,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+    act(() => formRef.current!.setFieldValue('name', 'Changed locally'));
+    await waitFor(() => expect(formRef.current?.getFieldValue('name')).toBe('Changed locally'));
+    expect(http.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not open an empty editable page when record loading fails', async () => {
+    const formRef = createRef<FormHandle>();
+    http.get.mockRejectedValue({ status: 403 });
+    renderPage('/7', formRef, http, loadSpy, { ...resource, viewMode: 'page' });
+    await screen.findByText('Access denied');
+    expect(formRef.current).toBeNull();
+    expect(document.querySelector('.nb-crud-page-shell')).toBeNull();
+    expect(http.patch).not.toHaveBeenCalled();
+  });
+
+  it('keeps a locked page-mode record read-only after loading', async () => {
+    const formRef = createRef<FormHandle>();
+    http.get.mockResolvedValue(okResponse({ id: 7, name: 'Issued product' }));
+    renderPage('/7', formRef, http, loadSpy, {
+      ...resource,
+      viewMode: 'page',
+      permissions: { canEdit: true, canView: true, canEditRow: () => false },
+    });
+    await waitFor(() => expect(formRef.current?.getFieldValue('name')).toBe('Issued product'));
+    expect((document.querySelector('input[name="name"]') as HTMLInputElement).readOnly).toBe(true);
+    expect(document.querySelector('.nb-dialog-save-button')).toBeNull();
+  });
+
+  it('aborts fallback HTTP loading and ignores completion after unmount', async () => {
+    let complete!: (value: unknown) => void;
+    http.get.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+    );
+    const formRef = createRef<FormHandle>();
+    const result = renderPage('/7', formRef, http, loadSpy, { ...resource, viewMode: 'page' });
+    await waitFor(() => expect(http.get).toHaveBeenCalled());
+    const signal = http.get.mock.calls[0][1].signal as AbortSignal;
+    result.unmount();
+    expect(signal.aborted).toBe(true);
+    await act(async () => {
+      complete(okResponse({ id: 7, name: 'Late response' }));
+    });
+    expect(formRef.current).toBeNull();
+  });
+
+  it('blocks a create deep link when creation is denied', async () => {
+    const formRef = createRef<FormHandle>();
+    renderPage('/new', formRef, http, loadSpy, {
+      ...resource,
+      viewMode: 'page',
+      permissions: { canAdd: false, canView: true },
+    });
+    await screen.findByText('Access denied');
+    expect(document.querySelector('.nb-crud-page-shell')).toBeNull();
+    expect(http.post).not.toHaveBeenCalled();
+  });
+
+  it('retries a failed record link without exposing an empty editable form', async () => {
+    http.get
+      .mockRejectedValueOnce({ status: 500 })
+      .mockResolvedValueOnce(okResponse({ id: 7, name: 'Recovered record' }));
+    const formRef = createRef<FormHandle>();
+    renderPage('/7', formRef, http, loadSpy, { ...resource, viewMode: 'page' });
+    await screen.findByText("Couldn't load data");
+    expect(document.querySelector('.nb-crud-page-shell')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(formRef.current?.getFieldValue('name')).toBe('Recovered record'));
+  });
+
+  it('shows a missing-record state when the store returns no record', async () => {
+    http.get.mockResolvedValueOnce(okResponse(null));
+    renderPage('/7', createRef<FormHandle>(), http, loadSpy, { ...resource, viewMode: 'page' });
+    await screen.findByText('Record not found');
+    expect(document.querySelector('.nb-crud-page-shell')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+  });
   it('loads grid data through the injected ResourceStore factory', async () => {
     renderPage('/', createRef<FormHandle>(), http, loadSpy);
     await waitFor(() => expect(loadSpy).toHaveBeenCalled());

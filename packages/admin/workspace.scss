@@ -1,0 +1,194 @@
+// Additive shell surfaces. Business-specific controls are supplied through slots.
+.nb-admin-header-content {
+  flex: 0 1 320px;
+  min-width: 0;
+
+  > * {
+    max-width: 100%;
+  }
+}
+
+.nb-admin-menu__brand {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  min-height: var(--admin-header-height, 64px);
+  padding: var(--space-3) var(--space-6);
+}
+
+.nb-admin-menu__context {
+  flex: 0 0 auto;
+  padding: var(--space-3);
+}
+
+.nb-admin-shell--workspace {
+  .nb-admin-menu-container {
+    padding-bottom: 0;
+  }
+
+  .nb-admin-footer {
+    flex: 0 0 auto;
+    position: static;
+  }
+
+  .nb-admin-shell__content {
+    min-width: 0;
+  }
+}
+
+.nb-admin-shell.is-workspace-desktop {
+  display: grid;
+  grid-template-columns: var(--admin-sidebar-width, 248px) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+
+  > .nb-admin-layout-header {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  > .nb-admin-shell__body {
+    display: contents;
+
+    > .nb-admin-shell__panel {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      height: auto;
+      width: 100%;
+    }
+
+    > .nb-admin-shell__content {
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
+
+  &.is-workspace-compact {
+    grid-template-columns: var(--side-panel-min-width) minmax(0, 1fr);
+  }
+}
+
+.nb-admin-shell__bottom-navigation {
+  background: var(--surface-1);
+  flex: 0 0 auto;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: var(--z-shell-panel);
+}
+
+.nb-admin-bottom-nav {
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  padding: var(--space-2);
+
+  &__item {
+    align-items: center;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--space-1);
+    justify-content: center;
+    min-height: 64px;
+    min-width: 0;
+    padding: var(--space-2) var(--space-1);
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+
+    &[aria-current='page'] {
+      background: var(--accent-subtle);
+      color: var(--accent-on-subtle);
+    }
+
+    &:hover {
+      background: var(--surface-2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: -2px;
+    }
+  }
+
+  &__icon {
+    font-size: 24px;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    overflow-wrap: anywhere;
+  }
+
+  &__badge {
+    background: var(--accent-color);
+    border-radius: var(--radius-pill);
+    color: var(--on-accent-color);
+    font-size: var(--font-size-xxs);
+    padding: 0 var(--space-1);
+    position: absolute;
+    right: var(--space-1);
+    top: 0;
+  }
+}
+
+html[data-visual-style='nubit'] {
+  .nb-admin-header-toolbar {
+    gap: var(--space-4);
+    min-height: calc(var(--admin-header-height) - 1px);
+    padding-right: var(--space-7);
+  }
+
+  .nb-admin-header-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .nb-admin-menu__nav {
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .nb-admin-menu__section {
+    border: 0;
+  }
+
+  .nb-admin-menu__item {
+    border-left: 0;
+    border-radius: var(--radius-sm);
+    min-height: 40px;
+
+    &.is-selected {
+      background: var(--accent-subtle);
+      color: var(--accent-on-subtle);
+    }
+  }
+
+  .nb-admin-menu__item--parent {
+    color: var(--text-secondary);
+  }
+
+  .nb-admin-menu.compact .nb-admin-menu__nav {
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .nb-admin-header-toolbar:has(.nb-admin-header-content) {
+    .nb-admin-header-title {
+      display: none;
+    }
+    .nb-admin-header-toolbar__before {
+      flex: 0 0 auto;
+    }
+  }
+
+  .nb-admin-header-content {
+    flex: 1 1 0;
+  }
+
+  html[data-visual-style='nubit'] .nb-admin-header-toolbar {
+    gap: var(--space-1);
+    padding-right: var(--space-2);
+  }
+}

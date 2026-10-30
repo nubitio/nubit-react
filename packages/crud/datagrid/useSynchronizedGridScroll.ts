@@ -14,6 +14,7 @@ interface GridScrollDependencies {
   colWidths: Record<string, number>;
   containerWidth: number;
   summaryFieldCount: number;
+  presentationKey?: boolean;
 }
 
 /** Keeps split table sections and the single visible horizontal scrollbar aligned. */
@@ -22,8 +23,14 @@ export function useSynchronizedGridScroll(
   dependencies: GridScrollDependencies,
 ): void {
   const { theadRef, tbodyRef, tfootRef, hScrollRef, syncRef } = refs;
-  const { rowsLength, visibleFieldCount, colWidths, containerWidth, summaryFieldCount } =
-    dependencies;
+  const {
+    rowsLength,
+    visibleFieldCount,
+    colWidths,
+    containerWidth,
+    summaryFieldCount,
+    presentationKey,
+  } = dependencies;
 
   useLayoutEffect(() => {
     const tbody = tbodyRef.current;
@@ -90,5 +97,6 @@ export function useSynchronizedGridScroll(
     tfootRef,
     theadRef,
     visibleFieldCount,
+    presentationKey,
   ]);
 }

@@ -47,6 +47,7 @@ export const datetimeTypeModule: FieldTypeModule = {
       <OperatorFilterCell cell={cell} operators={DATE_OPERATORS} isBetween={isBetween}>
         {isBetween ? (
           <DateRangePicker
+            clearable={false}
             className="nb-datagrid__filter-range"
             locale={getCoreLocale()}
             startValue={betweenStart}

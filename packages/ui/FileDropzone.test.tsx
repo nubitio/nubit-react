@@ -6,6 +6,36 @@ import { FileDropzone } from './FileDropzone';
 afterEach(cleanup);
 
 describe('FileDropzone', () => {
+  it('shows a passive empty state in read-only mode without an upload input', () => {
+    const { container } = render(
+      <FileDropzone
+        image
+        readOnly
+        inputLabel="Photo"
+        labels={{ empty: 'Sin imagen' }}
+        onFileSelect={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Sin imagen')).toBeDefined();
+    expect(container.querySelector('input[type="file"]')).toBeNull();
+    expect(container.querySelector('.nb-file-dropzone__hint')).toBeNull();
+  });
+
+  it('keeps file links available without replace or remove actions in read-only mode', () => {
+    render(
+      <FileDropzone
+        readOnly
+        value={{ fileName: 'certificate.pfx', fileUrl: '/media/certificate.pfx' }}
+        onFileSelect={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('link', { name: 'Open' }).getAttribute('href')).toBe(
+      '/media/certificate.pfx',
+    );
+    expect(screen.queryByRole('button', { name: 'Replace' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Remove' })).toBeNull();
+  });
   it('renders the empty file prompt', () => {
     render(
       <FileDropzone

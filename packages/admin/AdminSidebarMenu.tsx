@@ -27,6 +27,8 @@ export interface AdminSidebarMenuProps {
   selectedItemChanged: (e: AdminSidebarMenuSelectEvent) => void;
   openMenu?: (e: React.PointerEvent) => void;
   footer?: React.ReactNode;
+  brand?: React.ReactNode;
+  context?: React.ReactNode;
 }
 
 const normalizeRoute = (path?: string) => {
@@ -46,6 +48,8 @@ export const AdminSidebarMenu = ({
   selectedItemChanged,
   openMenu,
   footer,
+  brand,
+  context,
 }: AdminSidebarMenuProps) => {
   const [expandedItemKeys, setExpandedItemKeys] = useState<Set<string>>(new Set());
   const strings = useUiStrings();
@@ -121,6 +125,7 @@ export const AdminSidebarMenu = ({
 
   return (
     <div className={`nb-admin-menu${compactMode ? ' compact' : ''}`} onPointerDown={openMenu}>
+      {brand && !compactMode && <div className="nb-admin-menu__brand">{brand}</div>}
       <div className="nb-admin-menu-container theme-dependent">
         <nav className="nb-admin-menu__nav" aria-label={strings.mainNavigation}>
           {items.map((item) => {
@@ -183,6 +188,7 @@ export const AdminSidebarMenu = ({
           })}
         </nav>
       </div>
+      {context && !compactMode && <div className="nb-admin-menu__context">{context}</div>}
       {footer && <footer className="nb-admin-footer">{footer}</footer>}
     </div>
   );

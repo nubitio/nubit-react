@@ -2,6 +2,7 @@
 // Static design tokens ship inside dist/style.css; theme-dependent color
 // tokens load at runtime via ThemeProvider (dist/themes/nb-theme-*.css).
 import './theme/styles/tokens.scss';
+import './theme/styles/nubit.scss';
 import './foundations/base.scss';
 import './foundations/scrollbars.scss';
 
@@ -178,3 +179,6 @@ export { useOverlayContainer } from './OverlayContainer';
 
 export { TimePicker } from './TimePicker';
 export type { TimePickerProps } from './TimePicker';
+
+export { DetailLayout } from './DetailLayout';
+export type { DetailLayoutProps } from './DetailLayout';

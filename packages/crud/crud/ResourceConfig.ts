@@ -14,6 +14,7 @@ import type { SmartCrudFieldContract } from './fieldContract';
 import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { CrudDrawerSize } from '../view/drawerSizes';
 import type { DetailSummaryOptions, SummaryItem } from '../summary';
+import type { CardViewConfig } from '../datagrid/CardView';
 
 /**
  * URL-based deep-linking and filter sync configuration for SmartCrudPage.
@@ -164,6 +165,8 @@ export interface ResourceEmptyState {
   /** Phosphor icon name without the "ph-" prefix. */
   icon?: string;
   variant?: 'default' | 'danger' | 'warning' | 'success';
+  /** First-use content, rendered only after a successful, unfiltered empty load. */
+  render?: (context: { onAdd?: () => void; refresh: () => void }) => ReactNode;
 }
 
 export interface ResourceConfig<T extends DataRecord = DataRecord> {
@@ -207,6 +210,15 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   filter?: FilterRule[];
   mode?: 'normal' | 'minimal';
   paging?: boolean;
+  cardView?: CardViewConfig;
+  gridAppearance?: 'panel' | 'page';
+  quickFilterFields?: string[];
+  /** Fields shown in a compact filter toolbar; mobile uses the filter sheet. */
+  /** Hide the column filter row when a resource uses the shared filter toolbar. */
+  filterRow?: boolean;
+  filterToolbarFields?: string[];
+  /** Shortcuts applied to the same filter state as the row and sheet. */
+  filterPresets?: { key: string; label: string; field: string; operator: string; value: string }[];
   /** Enables adapter-provided header filter dropdowns. Disabled by default; filter row remains the default. */
   headerFilter?: boolean;
   stateStoring?: boolean;
@@ -265,6 +277,13 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   inlineRowActions?: boolean;
   /** Optional layout descriptor for the dialog form: tabs or collapsible sections. */
   formLayout?: FormLayout;
+  /** Form titles/save label for all shells; subtitle/footer content for page forms. */
+  formPage?: {
+    footerContent?: ReactNode;
+    saveLabel?: string;
+    titles?: Partial<Record<'add' | 'edit' | 'view', string>>;
+    subtitle?: string;
+  };
   /** Named column visibility presets. When defined, a preset selector is shown in the toolbar. */
   columnPresets?: ColumnPreset[];
   /** Labels and styling for grouped grid column header bands. */

@@ -93,3 +93,13 @@
     }
   }
 }
+
+// Panels remain distinct surfaces on mobile; only auth cards go full bleed.
+.screen-x-small .nb-card--panel .nb-card__content {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  flex-grow: 0;
+  height: auto;
+  padding: var(--space-4) var(--space-5);
+}

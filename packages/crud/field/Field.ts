@@ -11,19 +11,30 @@ export interface LoadOption {
   [key: string]: unknown;
 }
 
+export interface FieldButtonFeedback {
+  message: string;
+  tone: 'success' | 'warning' | 'danger' | 'info';
+}
+
 export interface FieldButton {
   name?: string;
   location?: string;
   options?: {
     icon?: string;
+    /** Optional visible action text; icon-only remains the default. */
+    text?: string;
+    ariaLabel?: string;
+    loadingText?: string;
     stylingMode?: string;
     onClick?: (
       event: unknown,
       form: {
         getFieldValue: (name: string) => unknown;
         setFieldValue: (name: string, value: unknown) => void;
+        /** False after the field value, form session or active action changes. */
+        isCurrent: () => boolean;
       },
-    ) => void;
+    ) => void | FieldButtonFeedback | Promise<void | FieldButtonFeedback>;
   };
 }
 

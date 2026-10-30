@@ -268,6 +268,7 @@ export {
   FeatureHubLayout,
   AdminShell,
   AdminHeader,
+  AdminBottomNavigation,
   AdminSidebarMenu,
   useScreenSize,
   useScreenSizeClass,
@@ -301,6 +302,8 @@ export type {
   AdminMenuItem,
   AdminHeaderAction,
   AdminHeaderProps,
+  AdminBottomNavigationItem,
+  AdminBottomNavigationProps,
   AdminSidebarMenuProps,
   AdminMenuSubItem,
   AdminSidebarMenuSelectEvent,
@@ -442,3 +445,4 @@ export type {
 
 export { TimePicker } from '@nubitio/ui';
 export type { TimePickerProps } from '@nubitio/ui';
+export type { CardViewConfig, CardViewContext } from '@nubitio/crud';

@@ -45,6 +45,7 @@ export interface FileDropzoneValue {
 }
 
 export interface FileDropzoneLabels {
+  empty?: string;
   prompt?: string;
   imagePrompt?: string;
   dropPrompt?: string;
@@ -133,11 +134,12 @@ export function FileDropzone({
             isDragActive && 'nb-file-dropzone__zone--active',
             hasContent && 'nb-file-dropzone__zone--filled',
             uploading && 'nb-file-dropzone__zone--uploading',
-            !isInteractive && 'nb-file-dropzone__zone--disabled',
+            disabled && 'nb-file-dropzone__zone--disabled',
+            readOnly && 'nb-file-dropzone__zone--readonly',
           ),
         })}
       >
-        <input {...getInputProps({ id: inputId, 'aria-label': inputLabel })} />
+        {!readOnly && <input {...getInputProps({ id: inputId, 'aria-label': inputLabel })} />}
 
         {hasContent ? (
           <>
@@ -210,8 +212,10 @@ export function FileDropzone({
             <span className="nb-file-dropzone__icon" aria-hidden="true">
               <i className={`ph ${placeholderIcon}`} />
             </span>
-            <span className="nb-file-dropzone__title">{placeholderTitle}</span>
-            <span className="nb-file-dropzone__hint">{placeholderHint}</span>
+            <span className="nb-file-dropzone__title">
+              {readOnly ? (labels?.empty ?? (image ? 'No image' : 'No file')) : placeholderTitle}
+            </span>
+            {!readOnly && <span className="nb-file-dropzone__hint">{placeholderHint}</span>}
           </div>
         )}
       </div>

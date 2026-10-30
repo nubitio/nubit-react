@@ -1,0 +1,19 @@
+.catalog-demo-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--text-primary);
+
+  > span {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+  }
+}
+
+.catalog-demo-summary {
+  background: var(--accent-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--accent-on-subtle);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+}

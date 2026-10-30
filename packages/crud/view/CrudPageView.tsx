@@ -14,6 +14,8 @@ export interface CrudPageViewOptions {
   onClose?: () => void;
   onCancel?: () => void;
   onSave?: () => void;
+  saveLabel?: string;
+  footerContent?: React.ReactNode;
 }
 
 export interface CrudPageViewEvents {
@@ -97,6 +99,9 @@ export const CrudPageView = forwardRef<CrudPageViewEvents, CrudPageViewOptions>(
       onClose={handleClose}
       onCancel={onCancelClick}
       onSave={onSaveClick}
+      saveLabel={options.saveLabel}
+      footerContent={options.footerContent}
+      busy={isProcessing}
     >
       {options.children}
       {isProcessing && (

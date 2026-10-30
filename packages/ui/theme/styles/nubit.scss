@@ -1,0 +1,174 @@
+// Nubit Labs Figma / Docs · Tokens semánticos (11:341).
+// Opt-in, higher specificity than asynchronously loaded theme files.
+// Applications load Lexend themselves; the library never fetches remote fonts.
+$light: (
+  bg-canvas: #f8f9fb,
+  bg-surface: #fff,
+  bg-surface-raised: #fff,
+  bg-subtle: #f1f2f6,
+  bg-inverse: #0b1530,
+  bg-brand: #0a6cff,
+  bg-brand-hover: #0046c7,
+  bg-brand-subtle: #eff6ff,
+  bg-accent: #00d2ff,
+  bg-success-subtle: #e8fdee,
+  bg-warning-subtle: #fff6e3,
+  bg-danger-subtle: #fff3f1,
+  bg-danger: #c92228,
+  bg-danger-hover: #a21a1e,
+  text-primary: #0b1f4f,
+  text-secondary: #525b6c,
+  text-disabled: #9ea5b2,
+  text-on-brand: #fff,
+  text-on-accent: #0b1f4f,
+  text-brand: #0046c7,
+  text-success: #006b37,
+  text-warning: #7a4900,
+  text-danger: #a21a1e,
+  text-inverse: #fff,
+  border-default: #e2e5eb,
+  border-strong: #ced3dc,
+  border-focus: #0a6cff,
+  border-input: #747c8b,
+  border-danger: #c92228,
+  icon-primary: #0b1f4f,
+  icon-secondary: #525b6c,
+  icon-brand: #0a6cff,
+);
+
+$dark: (
+  bg-canvas: #0a0b0d,
+  bg-surface: #131519,
+  bg-surface-raised: #1b1e23,
+  bg-subtle: #1b1e23,
+  bg-inverse: #f8f9fb,
+  bg-brand-subtle: #0b1f4f,
+  bg-success-subtle: #002510,
+  bg-warning-subtle: #3d2200,
+  bg-danger-subtle: #3a0707,
+  text-primary: #f8f9fb,
+  text-secondary: #ced3dc,
+  text-disabled: #525b6c,
+  text-brand: #8bbbff,
+  text-success: #6ad895,
+  text-warning: #ffbc50,
+  text-danger: #ff9f95,
+  text-inverse: #0a0b0d,
+  border-default: #262a31,
+  border-strong: #343943,
+  border-focus: #3d95ff,
+  border-danger: #fe6c64,
+  icon-primary: #f8f9fb,
+  icon-secondary: #ced3dc,
+  icon-brand: #3d95ff,
+);
+
+html[data-visual-style='nubit'] {
+  @each $space in (0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64) {
+    --nb-space-#{$space}: #{$space}px;
+  }
+
+  --nb-radius-sm: 8px;
+  --nb-radius-md: 12px;
+  --nb-radius-lg: 16px;
+  --nb-radius-full: 9999px;
+
+  @each $name, $value in $light {
+    --nb-color-#{$name}: #{$value};
+  }
+
+  // Bridge the Figma vocabulary to existing public component tokens.
+  --font-family-sans: 'Lexend', system-ui, sans-serif;
+  --font-family-display: var(--font-family-sans);
+  --toggle-thumb-color: var(--nb-color-text-on-brand);
+  --font-size-sm: 14px;
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --admin-sidebar-width: 248px;
+  --admin-header-height: 64px;
+  --base-bg: var(--nb-color-bg-surface);
+  --base-bg-darken-4: var(--nb-color-bg-canvas);
+  --base-bg-darken-5: var(--nb-color-bg-subtle);
+  --base-text-color: var(--nb-color-text-primary);
+  --base-text-color-alpha: var(--nb-color-text-secondary);
+  --background-gray-color: var(--nb-color-bg-subtle);
+  --accent-color: var(--nb-color-bg-brand);
+  --accent-hover: var(--nb-color-bg-brand-hover);
+  --accent-pressed: var(--nb-color-bg-brand-hover);
+  --accent-subtle: var(--nb-color-bg-brand-subtle);
+  --accent-on-subtle: var(--nb-color-text-brand);
+  --on-accent-color: var(--nb-color-text-on-brand);
+  --text-primary: var(--nb-color-text-primary);
+  --text-secondary: var(--nb-color-text-secondary);
+  --text-tertiary: var(--nb-color-text-secondary);
+  --text-disabled: var(--nb-color-text-disabled);
+  --text-on-accent: var(--nb-color-text-on-brand);
+  --surface-0: var(--nb-color-bg-canvas);
+  --surface-1: var(--nb-color-bg-surface);
+  --surface-2: var(--nb-color-bg-subtle);
+  --surface-3: var(--nb-color-bg-brand-subtle);
+  --surface-canvas: var(--surface-0);
+  --surface-card: var(--surface-1);
+  --surface-elevated: var(--nb-color-bg-surface-raised);
+  --surface-subtle: var(--surface-2);
+  --surface-selected: var(--surface-3);
+  --side-panel-background: var(--surface-1);
+  --card-background: var(--surface-1);
+  --border-color: var(--nb-color-border-default);
+  --border-subtle: var(--nb-color-border-default);
+  --base-border-color: var(--border-color);
+  --control-bg: var(--surface-1);
+  --control-bg-hover: var(--surface-2);
+  --control-border: var(--nb-color-border-input);
+  --grid-header-bg: var(--surface-2);
+  --grid-filter-bg: var(--surface-1);
+  --grid-row-hover-bg: var(--surface-2);
+  --grid-row-selected-bg: var(--surface-selected);
+  --grid-row-selected-border: var(--nb-color-border-focus);
+  --grid-row-alt-bg: var(--surface-1);
+  --success-color: var(--nb-color-text-success);
+  --warning-color: var(--nb-color-text-warning);
+  --dark-warning-color: var(--nb-color-text-warning);
+  --error-color: var(--nb-color-bg-danger);
+  --on-error-color: var(--nb-color-text-on-brand);
+  --info-color: var(--nb-color-text-brand);
+  --status-success-bg: var(--nb-color-bg-success-subtle);
+  --status-success-text: var(--nb-color-text-success);
+  --status-success-border: var(--nb-color-bg-success-subtle);
+  --status-warning-bg: var(--nb-color-bg-warning-subtle);
+  --status-warning-text: var(--nb-color-text-warning);
+  --status-warning-border: var(--nb-color-bg-warning-subtle);
+  --status-danger-bg: var(--nb-color-bg-danger-subtle);
+  --status-danger-text: var(--nb-color-text-danger);
+  --status-danger-border: var(--nb-color-bg-danger-subtle);
+  --status-info-bg: var(--nb-color-bg-brand-subtle);
+  --status-info-text: var(--nb-color-text-brand);
+  --status-info-border: var(--nb-color-bg-brand-subtle);
+  --focus-ring-color: var(--nb-color-border-focus);
+  --overlay-bg: rgb(11 21 48 / 42%);
+  --overlay-bg-subtle: rgb(11 21 48 / 16%);
+
+  &[data-theme='dark'] {
+    --surface-3: var(--nb-color-bg-surface-raised);
+    --surface-selected: var(--nb-color-bg-brand-subtle);
+    --overlay-bg: rgb(10 11 13 / 60%);
+    --overlay-bg-subtle: rgb(10 11 13 / 16%);
+    @each $name, $value in $dark {
+      --nb-color-#{$name}: #{$value};
+    }
+  }
+
+  // Explicit density choices still win. The normal preset matches Figma.
+  &:not([data-density='compact']):not([data-density='comfortable']) {
+    --control-height: 40px;
+    --control-height-form: 44px;
+    --toolbar-height: 48px;
+    --row-height: 48px;
+    --grid-header-height: 44px;
+    --grid-filter-height: 40px;
+    --page-padding: 32px;
+  }
+}

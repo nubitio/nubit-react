@@ -59,7 +59,9 @@
   max-height: calc(100dvh - var(--space-7));
   max-width: calc(100vw - var(--space-7));
   min-width: 300px;
-  overflow: hidden;
+  // Nested popovers are portalled into the dialog for focus containment.
+  // The body owns scrolling; the outer surface must not clip their hit areas.
+  overflow: visible;
   position: relative;
   z-index: 2;
 }
@@ -94,7 +96,7 @@
   z-index: 1;
 }
 
-.nb-dialog__title {
+.nb-dialog .nb-dialog__title {
   color: var(--text-primary);
   flex: 1;
   font-size: var(--font-size-md);

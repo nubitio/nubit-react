@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { AdminMenuItem, AdminShellProps } from '../AdminShell';
 import type { AdminMenuSubItem } from '../AdminSidebarMenu';
 import type { AppProfile, SessionState } from '../auth/SessionContext';
+import type { ThemeProviderProps } from '@nubitio/ui';
 
 export type NubitAppRoute = {
   path: string;
@@ -41,6 +42,7 @@ export type CreateNubitAppConfig = {
   currency?: string;
   /** Base URL for generated theme CSS files. Default `/themes/`. */
   themeBasePath?: string;
+  visualStyle?: ThemeProviderProps['visualStyle'];
   menu: NubitAppMenuItem[] | ((ctx: NubitAppMenuContext) => NubitAppMenuItem[]);
   routes: NubitAppRoute[];
   /**
@@ -54,7 +56,16 @@ export type CreateNubitAppConfig = {
     defaultUsername?: string;
     oidcProviders?: { id: string; label: string }[];
   };
-  shell?: Pick<AdminShellProps, 'headerActions' | 'footer'>;
+  shell?: Pick<
+    AdminShellProps,
+    | 'headerActions'
+    | 'footer'
+    | 'variant'
+    | 'brand'
+    | 'headerContent'
+    | 'sidebarContext'
+    | 'bottomNavigation'
+  >;
   renderThemeSwitcher?: () => ReactNode;
   renderUserMenu?: (ctx: NubitAppUserMenuContext) => ReactNode;
   /** Wraps authenticated shell content (inside Hydra providers). */

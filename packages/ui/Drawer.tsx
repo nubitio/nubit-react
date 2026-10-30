@@ -9,6 +9,8 @@ export type DrawerSide = 'right' | 'left';
 export interface DrawerProps {
   /** Controls visibility. The drawer mounts/unmounts with this flag. */
   isOpen: boolean;
+  /** Prevent dismissal while an operation is pending. */
+  busy?: boolean;
   /** Called on Escape, scrim click, or the built-in close button. */
   onClose: () => void;
   /** Optional title rendered in the header. */
@@ -44,6 +46,7 @@ const formatWidth = (value?: number | string) => {
 
 export const Drawer: React.FC<DrawerProps> = ({
   isOpen,
+  busy = false,
   onClose,
   title,
   width,
@@ -64,6 +67,8 @@ export const Drawer: React.FC<DrawerProps> = ({
     <ModalSurface
       open={isOpen}
       onClose={onClose}
+      closeOnEscape={!busy}
+      closeOnOutsideClick={!busy}
       rootClassName={['nb-drawer-root', isOpen && 'nb-drawer-root--open', `nb-drawer-root--${side}`]
         .filter(Boolean)
         .join(' ')}
@@ -86,6 +91,7 @@ export const Drawer: React.FC<DrawerProps> = ({
             icon="ph ph-x"
             label={resolvedCloseLabel}
             onClick={onClose}
+            disabled={busy}
           />
         </header>
       )}

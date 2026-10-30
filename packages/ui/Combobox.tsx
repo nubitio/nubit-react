@@ -211,7 +211,9 @@ function SelectionCombobox({
             />
           )}
           <AriaButton className="nb-combobox__action" aria-label={openLabel ?? strings.openOptions}>
-            <span aria-hidden="true">⌄</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </AriaButton>
         </div>
       </div>
@@ -237,7 +239,9 @@ function SelectionCombobox({
                         className="nb-combobox-tags__remove"
                         aria-label={removeLabel?.(option) ?? strings.removeOption}
                       >
-                        <span aria-hidden="true">×</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path d="m6 6 12 12M18 6 6 18" />
+                        </svg>
                       </AriaButton>
                     )}
                   </Tag>
@@ -339,14 +343,16 @@ function ComboboxClear({
     <AriaButton
       slot={null}
       isDisabled={disabled}
-      className="nb-combobox__action"
+      className="nb-combobox__action nb-combobox__clear"
       aria-label={label}
       onPress={() => {
         state.setValue(multiple ? [] : null);
         state.setInputValue('');
       }}
     >
-      <span aria-hidden="true">×</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </svg>
     </AriaButton>
   );
 }

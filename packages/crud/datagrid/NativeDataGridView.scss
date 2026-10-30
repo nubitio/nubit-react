@@ -31,6 +31,7 @@
 .nb-datagrid {
   --nb-datagrid-header-height: var(--grid-header-height, 34px);
 
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -625,18 +626,11 @@
 }
 
 .nb-datagrid__filter-row {
-  .nb-form__lookup {
-    width: 100%;
+  .nb-combobox {
+    --nb-combobox-action-size: 24px;
 
-    .nb-datagrid__filter-select {
-      padding-right: var(--control-height, 30px);
-      transition: padding-right var(--transition-fast);
-    }
-
-    &.has-value .nb-datagrid__filter-select {
-      padding-right: calc(
-        var(--control-height, 30px) + var(--control-icon-size, 20px) + var(--space-1)
-      );
+    .nb-combobox__input {
+      padding-right: calc(var(--nb-combobox-action-size) * var(--nb-combobox-action-count) + 10px);
     }
   }
 }
@@ -644,6 +638,8 @@
 .nb-datagrid__filter-wrap {
   align-items: center;
   display: flex;
+  min-width: 0;
+  width: 100%;
   position: relative;
 }
 
@@ -671,9 +667,9 @@
   font: inherit;
   font-size: var(--font-size-xs);
   height: var(--grid-filter-height, 32px);
-  min-width: 60px;
+  min-width: 0;
   outline: none;
-  padding: 4px 22px 4px 6px;
+  padding: 4px 30px 4px 6px;
   width: 100%;
 
   &:focus {
@@ -694,7 +690,7 @@
     font-size: var(--font-size-xs);
     height: var(--grid-filter-height, 32px);
     min-height: var(--grid-filter-height, 32px);
-    padding: 4px 22px 4px 6px;
+    padding: 4px 30px 4px 6px;
 
     &:hover:not(:disabled) {
       background: transparent;
@@ -726,7 +722,7 @@
     font-size: var(--font-size-xs);
     height: var(--grid-filter-height, 32px);
     min-height: var(--grid-filter-height, 32px);
-    padding: 4px 22px 4px 42px;
+    padding: 4px 30px 4px 42px;
 
     &:hover:not(.nb-date-range-picker__trigger--disabled) {
       background: transparent;
@@ -760,9 +756,9 @@
   }
 }
 
-// Use .nb-datagrid__filter-wrap as parent to raise specificity (0-2-0) above
-// .nb-dropdown's position:relative (0-1-0) regardless of CSS bundle order.
-.nb-datagrid__filter-wrap > .nb-datagrid__filter-operator {
+// AppDropdown includes a field wrapper: use a descendant selector so the
+// operator stays positioned inside the filter cell rather than consuming width.
+.nb-datagrid__filter-wrap .nb-datagrid__filter-operator {
   left: 5px;
   position: absolute;
   top: 50%;
@@ -778,13 +774,21 @@
     box-shadow: none;
     color: var(--accent-color);
     font-size: 10px;
-    height: 18px;
+    height: 26px;
     line-height: 1;
-    min-height: 18px;
+    min-height: 26px;
     min-width: 30px;
     padding: 0 3px;
     text-align: center;
     width: 30px;
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--focus-ring-color);
+      outline-offset: 1px;
+    }
   }
 
   &.nb-dropdown .nb-dropdown__caret {
@@ -792,15 +796,19 @@
   }
 }
 
-.nb-datagrid__filter-operator + .nb-datagrid__filter-input {
+.nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator) > .nb-datagrid__filter-input {
   padding-left: 42px;
 }
 
-.nb-datagrid__filter-operator + .nb-datagrid__filter-date .nb-date-picker__trigger {
+.nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator)
+  > .nb-datagrid__filter-date
+  .nb-date-picker__trigger {
   padding-left: 42px;
 }
 
-.nb-datagrid__filter-operator + .nb-datagrid__filter-range .nb-date-range-picker__trigger {
+.nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator)
+  > .nb-datagrid__filter-range
+  .nb-date-range-picker__trigger {
   padding-left: 42px;
 }
 
@@ -820,7 +828,7 @@
   }
 }
 
-.nb-datagrid__filter-operator + .nb-datagrid__filter-between-inputs {
+.nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator) > .nb-datagrid__filter-between-inputs {
   padding-left: 42px;
 }
 
@@ -887,8 +895,8 @@
   color: var(--text-tertiary);
   cursor: pointer;
   display: inline-flex;
-  font-size: 10px;
-  height: 16px;
+  font-size: 14px;
+  height: 24px;
   justify-content: center;
   padding: 0;
   position: absolute;
@@ -899,7 +907,13 @@
     background var(--transition-fast),
     color var(--transition-fast);
   visibility: hidden;
-  width: 16px;
+  width: 24px;
+  line-height: 1;
+
+  i {
+    display: block;
+    line-height: 1;
+  }
 
   &.is-active {
     visibility: visible;
@@ -1207,6 +1221,15 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   color: var(--text-tertiary);
   padding: var(--space-5);
   text-align: center;
+}
+
+.nb-datagrid__empty--custom {
+  display: block;
+  overflow: auto;
+  pointer-events: auto;
+  .nb-empty-state {
+    padding-block: var(--space-10);
+  }
 }
 
 // ── Skeleton loading rows ──────────────────────────────────────────────────────
@@ -1565,6 +1588,161 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   min-width: 0;
 }
 
+.nb-datagrid__card-open {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+}
+
+.nb-datagrid__card-copy {
+  display: block;
+}
+
+.nb-datagrid__card--media {
+  position: relative;
+
+  .nb-datagrid__card-body {
+    padding: 0;
+  }
+  .nb-datagrid__card-copy {
+    padding: var(--space-4);
+  }
+  .nb-datagrid__card-side {
+    position: absolute;
+    right: var(--space-2);
+    top: var(--space-2);
+  }
+  .nb-datagrid__card-side > .nb-icon-button {
+    background: var(--surface-1);
+  }
+  .nb-datagrid__card-check {
+    position: absolute;
+    left: var(--space-2);
+    top: var(--space-2);
+    z-index: 1;
+  }
+  .nb-datagrid__card-open:focus-visible {
+    outline-offset: -3px;
+  }
+}
+
+.nb-datagrid__card-media {
+  align-items: center;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  display: flex;
+  height: 140px;
+  justify-content: center;
+  overflow: hidden;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.nb-datagrid__filter-bar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+
+  .nb-datagrid__quick-search {
+    flex: 1 1 280px;
+    min-width: 0;
+  }
+}
+
+.nb-datagrid__quick-filters {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-1);
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.nb-datagrid--page {
+  .nb-datagrid__toolbar {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .nb-datagrid__heading {
+    flex: 1 1 200px;
+    min-width: 0;
+
+    h1 {
+      font-size: var(--font-size-2xl);
+      line-height: var(--line-height-tight);
+      margin: 0;
+    }
+    p {
+      color: var(--text-secondary);
+      font-size: var(--font-size-xs);
+      margin: var(--space-1) 0 0;
+    }
+  }
+
+  .nb-datagrid__toolbar-spacer {
+    display: none;
+  }
+  &.nb-datagrid--cards .nb-datagrid__cards {
+    padding: 0;
+  }
+  .nb-datagrid__table-wrap {
+    box-shadow: none;
+  }
+  .nb-datagrid__filter-bar .nb-datagrid__quick-search {
+    flex: 0 1 300px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .nb-datagrid--page .nb-datagrid__heading {
+    flex-basis: 100%;
+  }
+  .nb-datagrid--page .nb-datagrid__filter-bar .nb-datagrid__quick-search {
+    flex-basis: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .nb-datagrid--cards .nb-datagrid__cards {
+    display: grid;
+    grid-auto-rows: max-content;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    align-content: start;
+    gap: var(--space-6);
+    padding: var(--space-4);
+  }
+
+  .nb-datagrid--cards .nb-datagrid__table-wrap {
+    background: transparent;
+    border: 0;
+  }
+}
+
 .nb-datagrid__card-title {
   color: var(--text-primary);
   font-size: var(--font-size-sm);
@@ -1920,7 +2098,7 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   font-size: 22px;
   height: 52px;
   justify-content: center;
-  position: fixed;
+  position: absolute;
   right: var(--space-4);
   width: 52px;
   z-index: var(--z-sticky, 30);
@@ -2258,5 +2436,73 @@ $inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
       background: var(--surface-2);
       color: var(--text-primary);
     }
+  }
+}
+
+.nb-datagrid__filter-tools {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.nb-datagrid__filter-shortcuts,
+.nb-datagrid__active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.nb-datagrid__filter-editors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.nb-datagrid__filter-editor {
+  min-width: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  .nb-datagrid__sheet-label {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+}
+
+@media (max-width: 767px) {
+  .nb-datagrid-filter-dialog-root {
+    align-items: flex-end;
+  }
+  .nb-datagrid-filter-dialog.nb-dialog {
+    border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+    max-width: 100%;
+    width: 100% !important;
+    max-height: 85dvh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+.nb-datagrid__filter-editor .nb-dropdown--compact {
+  display: flex;
+  width: 100%;
+  .nb-dropdown__trigger {
+    width: 100%;
+  }
+}
+
+.nb-datagrid__card-group {
+  grid-column: 1 / -1;
+  list-style: none;
+  padding: var(--space-2) 0;
+  // A class selector (0,2,0) outranks app-level heading resets such as `.app h2`.
+  .nb-datagrid__card-group-title {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 }

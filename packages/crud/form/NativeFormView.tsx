@@ -532,7 +532,25 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
 
   const [remoteOptions, setRemoteOptions] = useState<Record<string, DataRecord[]>>({});
   const [activeTab, setActiveTab] = useState(0);
+  const [actionSession, setActionSession] = useState(0);
   const appliedOperationRef = useRef<string | null>(null);
+
+  const formElement = useRef<HTMLDivElement>(null);
+  const [focusRequest, setFocusRequest] = useState<{ name: string } | null>(null);
+  useLayoutEffect(() => {
+    if (!focusRequest) return;
+    const control = Array.from(
+      formElement.current?.querySelectorAll<HTMLElement>('[id]') ?? [],
+    ).find((element) => element.id === `nb-form-${focusRequest.name}`);
+    if (!control) return;
+    let section = control.closest('details');
+    while (section) {
+      section.open = true;
+      section = section.parentElement?.closest('details') ?? null;
+    }
+    control.focus();
+    control.scrollIntoView?.({ block: 'nearest' });
+  }, [focusRequest]);
 
   const fields = options.fields;
   const detailPropertyName = options.detailPropertyName ?? 'items';
@@ -545,6 +563,39 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     () => buildFormLayoutModel(fields, options.formLayout, t('form.groupOther')),
     [fields, options.formLayout, t],
   );
+  const focusError = useCallback(
+    (fieldErrors: Record<string, string>) => {
+      const name = Object.keys(fieldErrors).find((name) =>
+        fields.some(
+          (field) =>
+            field.name === name &&
+            !field.isIdentity &&
+            field.visibleOnForm !== false &&
+            !field.hidden &&
+            !fieldState[name]?.hidden &&
+            !field.disabled &&
+            !fieldState[name]?.disabled,
+        ),
+      );
+      if (!name) return false;
+      if (formLayoutModel.type === 'tabs') {
+        const groups = [
+          ...formLayoutModel.tabs,
+          ...(formLayoutModel.overflow ? [formLayoutModel.overflow] : []),
+        ];
+        const index = groups.findIndex((group) =>
+          group.fields.some((field) => field.name === name),
+        );
+        if (index >= 0) setActiveTab(index);
+      }
+      setFocusRequest({ name });
+      return true;
+    },
+    [fields, fieldState, formLayoutModel],
+  );
+
+  const focusErrorRef = useRef(focusError);
+  focusErrorRef.current = focusError;
   const optionFields = useMemo(
     () => [...fields, ...(options.detailFields ?? [])],
     [fields, options.detailFields],
@@ -635,9 +686,10 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       if (error) nextErrors[field.name] = error;
     });
     setErrors(nextErrors);
+    focusError(nextErrors);
     setDetailErrors({});
     return Object.keys(nextErrors).length === 0;
-  }, [accessors, fieldState, options.fields, setDetailErrors, setErrors, t]);
+  }, [accessors, fieldState, focusError, options.fields, setDetailErrors, setErrors, t]);
 
   const validate = useFormValidation({
     accessors: {
@@ -650,6 +702,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     detailNoDataText: options.requiredDetail ? t('form.detailRequired') : t('form.detailEmpty'),
     requiredDetail: options.requiredDetail,
     validationErrorText: t('form.validationError'),
+    notifyFormErrors: false,
   });
 
   const { handleSave, handleDelete } = useFormSubmit(
@@ -817,10 +870,17 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
         // exception synthesized by useFormSubmit as a single unassigned message) carry the
         // only description of what went wrong; show it verbatim instead of the generic
         // "some field is invalid" copy, which would otherwise be actively misleading.
-        notify(
-          mapped.unassigned.length > 0 ? mapped.unassigned.join(' ') : t('form.validationError'),
-          'error',
-        );
+        const focused = focusErrorRef.current(mapped.fieldErrors);
+        if (
+          !focused ||
+          mapped.unassigned.length > 0 ||
+          Object.keys(mapped.detailErrors).length > 0
+        ) {
+          notify(
+            mapped.unassigned.length > 0 ? mapped.unassigned.join(' ') : t('form.validationError'),
+            'error',
+          );
+        }
         setErrors((current) => {
           return { ...current, ...mapped.fieldErrors };
         });
@@ -830,11 +890,17 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
 
     if (options.events?.ADD)
       subs.push(
-        on(options.events.ADD, (payload: EventRowPayload | undefined) => applyAddPayload(payload)),
+        on(options.events.ADD, (payload: EventRowPayload | undefined) => {
+          setActionSession((session) => session + 1);
+          applyAddPayload(payload);
+        }),
       );
     if (options.events?.EDIT) {
       subs.push(
-        on(options.events.EDIT, (payload: { row: FormDataRecord }) => applyEditPayload(payload)),
+        on(options.events.EDIT, (payload: { row: FormDataRecord }) => {
+          setActionSession((session) => session + 1);
+          applyEditPayload(payload);
+        }),
       );
     }
     if (options.events?.DELETE)
@@ -928,6 +994,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
   );
 
   const controlContext: FormControlContext = {
+    actionScopeKey: `${actionSession}:${options.operation ?? 'idle'}:${options.operationVersion ?? 0}`,
     httpClient,
     t,
     remoteOptions,
@@ -942,7 +1009,7 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     const state = fieldState[field.name] ?? {};
     if (field.isIdentity || !field.visibleOnForm || field.hidden || state.hidden) return null;
     const value = formData[field.name];
-    const readOnly = state.readonly ?? field.readonly ?? options.editable === false;
+    const readOnly = options.editable === false || (state.readonly ?? field.readonly ?? false);
     const disabled = state.disabled ?? field.disabled;
     const error = errors[field.name];
     const errorClass = error ? ' is-error' : '';
@@ -955,6 +1022,14 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
       onClick: field.onClick,
       readOnly,
       required: field.required,
+      'aria-invalid': Boolean(error) || undefined,
+      'aria-describedby':
+        [
+          field.helpText ? `nb-form-${field.name}-hint` : undefined,
+          error ? `nb-form-${field.name}-error` : undefined,
+        ]
+          .filter(Boolean)
+          .join(' ') || undefined,
     };
 
     const typeModule = getFieldTypeModule(field.type);
@@ -986,7 +1061,11 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
           </label>
         )}
         {control}
-        {field.helpText && <span className="nb-form__hint">{field.helpText}</span>}
+        {field.helpText && (
+          <span className="nb-form__hint" id={`nb-form-${field.name}-hint`}>
+            {field.helpText}
+          </span>
+        )}
         {error && (
           <span className="nb-form__error" id={`nb-form-${field.name}-error`}>
             <i className="ph ph-warning-circle" aria-hidden="true" />
@@ -997,19 +1076,25 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     );
   };
 
-  const renderFields = (visibleFields: Field[], layoutContext?: Partial<FieldColSpanContext>) => {
+  const renderFields = (
+    visibleFields: Field[],
+    layoutContext?: Partial<FieldColSpanContext>,
+    singleColumn = false,
+  ) => {
     const spans = resolveFieldsColSpans(visibleFields, {
       ...baseColSpanContext,
       ...layoutContext,
     });
     return (
       <div className="nb-form__grid">
-        {visibleFields.map((field) => renderField(field, spans.get(field.name) ?? 12))}
+        {visibleFields.map((field) =>
+          renderField(field, singleColumn ? 12 : (spans.get(field.name) ?? 12)),
+        )}
       </div>
     );
   };
 
-  const renderGroup = (group: FormLayoutGroup) => {
+  const renderGroup = (group: FormLayoutGroup, singleColumn = false) => {
     if (group.collapsible) {
       return (
         <details
@@ -1022,7 +1107,15 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
             <i className="ph ph-caret-down nb-form__section-caret" aria-hidden="true" />
           </summary>
           <div className="nb-form__section-body">
-            {renderFields(group.fields, { avoidOrphanFields: group.avoidOrphanFields })}
+            {group.description && (
+              <p className="nb-form__section-description">{group.description}</p>
+            )}
+            {renderFields(
+              group.fields,
+              { avoidOrphanFields: group.avoidOrphanFields },
+              singleColumn,
+            )}
+            {group.renderAfter?.(formData)}
           </div>
         </details>
       );
@@ -1030,7 +1123,9 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     return (
       <section key={group.label} className="nb-form__section">
         <h3 className="nb-form__section-title">{group.label}</h3>
-        {renderFields(group.fields, { avoidOrphanFields: group.avoidOrphanFields })}
+        {group.description && <p className="nb-form__section-description">{group.description}</p>}
+        {renderFields(group.fields, { avoidOrphanFields: group.avoidOrphanFields }, singleColumn)}
+        {group.renderAfter?.(formData)}
       </section>
     );
   };
@@ -1081,9 +1176,22 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     if (layout.type === 'sections') {
       return (
         <>
-          {layout.sections.map(renderGroup)}
+          {layout.sections.map((group) => renderGroup(group))}
           {layout.overflow && renderGroup(layout.overflow)}
         </>
+      );
+    }
+    if (layout.type === 'columns') {
+      return (
+        <div className="nb-form__columns">
+          <div className="nb-form__column">
+            {layout.main.map((group) => renderGroup(group))}
+            {layout.overflow && renderGroup(layout.overflow)}
+          </div>
+          <div className="nb-form__column nb-form__column--aside">
+            {layout.aside.map((group) => renderGroup(group, true))}
+          </div>
+        </div>
       );
     }
     return renderFields(layout.fields);
@@ -1115,13 +1223,14 @@ export const NativeFormView = forwardRef<FormHandle, FormViewOptions>((options, 
     options.detailFields ? 'nb-form--with-detail' : '',
     isDetailOnly ? 'nb-form--detail-only' : '',
     `nb-form--${presentationMode}`,
+    formLayoutModel.type === 'columns' ? 'nb-form--columns' : '',
     options.className ?? '',
   ]
     .filter(Boolean)
     .join(' ');
 
   return (
-    <div className={formClassName}>
+    <div ref={formElement} className={formClassName}>
       {options.detailFields ? (
         <div className="nb-form__master-detail">
           {hasMasterFields && (

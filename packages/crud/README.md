@@ -50,6 +50,89 @@ export function ProductsPage() {
 
 ## Key exports
 
+### Manual entity lookup validation
+
+`EntityDropdown` accepts `id`, `required`, `invalid` and `describedBy`. Use `label`
+for the accessible name and `describedBy` to connect an inline validation message
+on hand-written forms. These pass through to the shared native combobox.
+
+### Native catalog and full-page form layouts
+
+The native grid can switch desktop presentation without creating a second data
+source. Filters, sorting, selection, permissions, row actions and pagination
+remain owned by the same grid. Mobile keeps its existing card presentation:
+
+```tsx
+defineResource('/api/products', {
+  gridAppearance: 'page', // opt-in unframed toolbar and page heading
+  quickFilterFields: ['category'], // enum/entity shortcuts into the same server query
+  cardView: {
+    defaultView: 'cards', // default: 'table'
+    renderMedia: ({ row }) => <ProductImage product={row} />,
+    renderContent: ({ row }) => <ProductCardContent product={row} />,
+  },
+  viewMode: 'page',
+  formLayout: {
+    type: 'columns',
+    main: [
+      { label: 'General', description: 'Catalog information', fields: ['name', 'sku'] },
+      {
+        label: 'Pricing',
+        fields: ['price', 'cost'],
+        renderAfter: (data) => <PriceSummary data={data} />,
+      },
+    ],
+    aside: [{ label: 'Availability', fields: ['photo', 'active'] }],
+  },
+  formPage: {
+    titles: { add: 'New product', edit: 'Edit product', view: 'View product' },
+    subtitle: 'Catalog · Product details',
+    saveLabel: 'Save product',
+    footerContent: <SaveStatus />,
+  },
+});
+```
+
+`renderContent` returns **non-interactive content**: the engine supplies the
+accessible open button, selection controls and permission-aware actions. Inline
+row/cell/batch editing disables the desktop cards toggle. Omitting `renderContent`
+uses the existing field/card-role rendering. These presentation options target
+the native renderer, not the DevExtreme adapter.
+
+`renderMedia` accompanies `renderContent` with a 140px edge-to-edge media area;
+actions and selection controls remain separate accessible controls. Quick chips
+show the first five loaded enum/entity choices plus an active choice beyond
+that set. The filter sheet/table lookup retains access to the full collection.
+Selecting a chip applies equality, resets pagination and preserves other filters.
+
+Column sections stack below 900px of **form container width**, including inside
+drawers; sidebar controls use a single column. Missing fields go into an overflow
+section; duplicate assignments mount only once. `renderAfter` receives read-only
+current form data and must not perform side effects. It can display summaries,
+but pricing/tax/stock rules remain in the application and backend.
+
+Page mode already has a persistent footer. `formPage` extends that footer rather
+than adding a second save flow; saving disables its built-in actions. Wire both
+list and record routes with `crudRoute()` and `routing.routeParam` when using
+`SchemaCrudPage`. Page-mode record links load the full record before exposing an
+editable form (using the resource store's `byKey`, or the HTTP item endpoint).
+
+`emptyState.render({ onAdd, refresh })` supplies first-use content for a successful
+unfiltered empty load. `onAdd` is absent when creation is unavailable or disabled;
+applications must gate any additional actions with their own permissions. Filtered
+empty collections offer a filter reset, failed loads offer retry, and forbidden
+loads show access denied. These states never render first-use content.
+
+Page-mode create links honor `canAdd`. Record links show a persistent error or
+missing-record state when loading fails; permitted read-only records use `canView`
+and have no save action. Supply `permissions.canView` explicitly for consultation.
+
+Demo: `/catalog?visualStyle=nubit`. It uses an in-memory data source for local
+create/edit/delete; changes disappear after a reload. It does not claim to save
+drafts or implement ERP calculations.
+Append `catalogState=empty`, `error`, `forbidden` or `readonly` to exercise those
+states in the local demo. These switches are demo-only and do not affect apps.
+
 ### Engine
 
 | Export           | Description                                                          |
@@ -171,3 +254,21 @@ const store: ResourceStore = {
   export: async (options) => ({ blob, filename: 'products.xlsx' }),
 };
 ```
+
+A compact filter toolbar can replace the filter row while retaining the same
+server query, card state, pagination reset and mobile dialog:
+
+```tsx
+<DataGridView
+  // ...existing grid props
+  filterRow={false}
+  filterToolbarFields={['issuedDate', 'paymentState']}
+  filterPresets={[
+    { key: 'due', label: 'Por cobrar', field: 'paymentState', operator: '=', value: 'due' },
+  ]}
+/>
+```
+
+Presets change only their named field. The toolbar also shows active filters,
+individual removal and clear-all. Choose fields backed by the application's
+actual query contract; business-specific computed filters belong to the app.

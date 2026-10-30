@@ -47,7 +47,7 @@ export const enumTypeModule: FieldTypeModule = {
   },
   serializeFormValue: (_field, value) => serializeOptionalTextValue(value),
   serializeDetailValue: () => KEEP,
-  ControlRender: ({ field, value, errorClass, disabled, readOnly, setFieldValue }) => (
+  ControlRender: ({ field, value, errorClass, disabled, readOnly, setFieldValue, commonProps }) => (
     <NativeEnumSelect
       className={`nb-form__control${errorClass}`}
       disabled={disabled}
@@ -55,6 +55,8 @@ export const enumTypeModule: FieldTypeModule = {
       id={`nb-form-${field.name}`}
       readOnly={readOnly}
       required={field.required}
+      invalid={commonProps['aria-invalid']}
+      describedBy={commonProps['aria-describedby']}
       value={value}
       onChange={(nextValue) => setFieldValue(field.name, nextValue)}
     />
@@ -62,6 +64,7 @@ export const enumTypeModule: FieldTypeModule = {
   FilterCellRender: ({ field, value, t, onSelectChange }) => (
     <FilterValueDropdown
       id={`nb-datagrid-filter-${field.name}`}
+      ariaLabel={t('grid.filterColumn', { column: field.label })}
       value={value}
       className="nb-datagrid__filter-select"
       placeholder={t('grid.allFilter')}

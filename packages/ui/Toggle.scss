@@ -50,7 +50,7 @@
       width: 0.95rem;
       height: 0.95rem;
       border-radius: 50%;
-      background: var(--surface-elevated);
+      background: var(--toggle-thumb-color, var(--surface-elevated));
       box-shadow: var(--shadow-sm);
       transition:
         left var(--transition-fast),

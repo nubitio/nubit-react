@@ -25,7 +25,9 @@
     box-shadow var(--transition-base);
   width: 100%;
 
-  &:hover:not(.nb-file-dropzone__zone--disabled):not(.nb-file-dropzone__zone--filled) {
+  &:hover:not(.nb-file-dropzone__zone--disabled):not(.nb-file-dropzone__zone--readonly):not(
+      .nb-file-dropzone__zone--filled
+    ) {
     background: color-mix(in srgb, var(--accent-color) 4%, var(--surface-1));
     border-color: var(--accent-color);
   }
@@ -48,6 +50,11 @@
   &--disabled {
     cursor: not-allowed;
     opacity: 0.72;
+  }
+
+  &--readonly {
+    cursor: default;
+    border-style: solid;
   }
 
   &:focus-visible {

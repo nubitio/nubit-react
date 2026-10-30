@@ -37,6 +37,11 @@ export interface CoreTranslationKeys {
   'form.loading': string;
   'form.groupOther': string;
   'grid.noRecords': string;
+  'grid.noMatchingRecords': string;
+  'grid.noMatchingRecordsDescription': string;
+  'grid.retry': string;
+  'grid.recordNotFoundTitle': string;
+  'grid.recordNotFoundDescription': string;
   'grid.accessDeniedTitle': string;
   'grid.accessDeniedDescription': string;
   'grid.loadErrorTitle': string;
@@ -74,6 +79,7 @@ export interface CoreTranslationKeys {
   'grid.filterTo': string;
   'grid.sortColumn': string;
   'grid.filters': string;
+  'grid.activeFilters': string;
   'grid.sortBy': string;
   'grid.sortNone': string;
   'grid.sortAscending': string;
@@ -83,6 +89,9 @@ export interface CoreTranslationKeys {
   'grid.searchPlaceholder': string;
   'grid.showMore': string;
   'grid.showLess': string;
+  'grid.presentation': string;
+  'grid.tableView': string;
+  'grid.cardsView': string;
   'grid.filterOperator.contains': string;
   'grid.filterOperator.notcontains': string;
   'grid.filterOperator.startswith': string;
@@ -112,6 +121,7 @@ export interface CoreTranslationKeys {
   'validation.defaultError': string;
   'form.searchButton': string;
   'form.actionButton': string;
+  'form.actionError': string;
   'form.detailTitle': string;
   'form.lookupClear': string;
   'form.lookupOpen': string;
@@ -137,6 +147,8 @@ export interface CoreTranslationKeys {
   'form.fileUploadInvalidResponse': string;
   'form.imageUploadPrompt': string;
   'form.imageUploadHint': string;
+  'form.imageUploadEmpty': string;
+  'form.fileUploadEmpty': string;
   'crudPage.confirmActionTitle': string;
 
   // ── Issued documents and spreadsheet import ──────────────────────────────

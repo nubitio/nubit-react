@@ -12,6 +12,7 @@ interface AutoColumnWidthsOptions {
   remoteOptions: Record<string, DataRecord[]>;
   yesLabel: string;
   noLabel: string;
+  presentationKey?: boolean;
 }
 
 function sameWidths(left: Record<string, number>, right: Record<string, number>): boolean {
@@ -29,6 +30,7 @@ export function useAutoColumnWidths({
   remoteOptions,
   yesLabel,
   noLabel,
+  presentationKey,
 }: AutoColumnWidthsOptions): Record<string, number> {
   const [widths, setWidths] = useState<Record<string, number>>({});
 
@@ -57,7 +59,7 @@ export function useAutoColumnWidths({
           getCellText(field, row, remoteOptions[field.name], yesLabel, noLabel),
       }),
     );
-  }, [fields, noLabel, remoteOptions, rows, tbodyRef, theadRef, yesLabel]);
+  }, [fields, noLabel, remoteOptions, rows, tbodyRef, theadRef, yesLabel, presentationKey]);
 
   return widths;
 }

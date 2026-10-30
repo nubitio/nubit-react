@@ -116,6 +116,25 @@ describe('validateFieldContract — hydra', () => {
     expect(issues.some((issue) => issue.includes("unknown key 'lable'"))).toBe(true);
   });
 
+  it('accepts supported card, column, badge and money options in overrides', () => {
+    const contract = hydra([
+      {
+        kind: 'override',
+        key: 'name',
+        patch: {
+          cardRole: 'title',
+          columnGroup: ['Catalog'],
+          presentation: 'badge',
+          toneByValue: { active: 'success' },
+          currency: 'PEN',
+          scale: 2,
+          mappingReason: 'explicit',
+        },
+      },
+    ]);
+    expect(validateFieldContract(contract)).toBe(contract);
+  });
+
   it('surfaces contradictory operation semantics from inside a patch', () => {
     const issues = issuesFrom(() =>
       validateFieldContract(

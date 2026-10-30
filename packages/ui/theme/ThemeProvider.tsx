@@ -22,6 +22,8 @@ export interface ThemeProviderProps {
   storageKey?: string;
   themePrefix?: string;
   basePath?: string;
+  /** Opt-in Figma visual foundation; existing applications keep their current theme. */
+  visualStyle?: 'default' | 'nubit';
   children: React.ReactNode;
 }
 
@@ -89,6 +91,7 @@ export const ThemeProvider = ({
   storageKey = 'nb-theme',
   themePrefix = 'nb-theme-',
   basePath = '/themes/',
+  visualStyle = 'default',
   children,
 }: ThemeProviderProps) => {
   const getPersistedMode = (): ThemeMode => {
@@ -100,6 +103,16 @@ export const ThemeProvider = ({
   const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme);
   const [isLoaded, setIsLoaded] = useState(false);
   const theme = useMemo(() => resolveTheme(mode, systemTheme), [mode, systemTheme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.getAttribute('data-visual-style');
+    root.setAttribute('data-visual-style', visualStyle);
+    return () => {
+      if (previous === null) root.removeAttribute('data-visual-style');
+      else root.setAttribute('data-visual-style', previous);
+    };
+  }, [visualStyle]);
 
   useEffect(() => {
     applyThemeAttributes(theme, themePrefix);

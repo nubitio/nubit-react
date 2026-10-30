@@ -13,6 +13,11 @@ export { AdminShell } from './AdminShell';
 export type { AdminShellProps, AdminMenuItem, AdminHeaderAction } from './AdminShell';
 
 export { AdminHeader } from './AdminHeader';
+export { AdminBottomNavigation } from './AdminBottomNavigation';
+export type {
+  AdminBottomNavigationItem,
+  AdminBottomNavigationProps,
+} from './AdminBottomNavigation';
 export type { AdminHeaderProps } from './AdminHeader';
 
 export { AdminSidebarMenu } from './AdminSidebarMenu';

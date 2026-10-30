@@ -73,6 +73,7 @@ export const CollapsibleSection = ({
       <div className="nb-collapsible__header">
         <button
           type="button"
+          id={`${bodyId}-trigger`}
           className="nb-collapsible__trigger"
           aria-expanded={open}
           aria-controls={bodyId}
@@ -89,7 +90,7 @@ export const CollapsibleSection = ({
         id={bodyId}
         className={['nb-collapsible__body', bodyClassName].filter(Boolean).join(' ')}
         role="region"
-        aria-labelledby={undefined}
+        aria-labelledby={`${bodyId}-trigger`}
         hidden={!open}
       >
         {children}

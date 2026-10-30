@@ -17,6 +17,8 @@ export interface AdminHeaderProps {
   toggleMenu?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   actions?: AdminHeaderAction[];
+  /** Search, command trigger or other application-owned header content. */
+  content?: React.ReactNode;
   renderUserMenu?: (props: { close: () => void }) => React.ReactNode;
   renderThemeSwitcher?: () => React.ReactNode;
 }
@@ -98,6 +100,7 @@ export const AdminHeader = ({
   toggleMenu,
   className,
   actions = [],
+  content,
   renderUserMenu,
   renderThemeSwitcher,
 }: AdminHeaderProps) => {
@@ -117,6 +120,7 @@ export const AdminHeader = ({
           )}
           {title && <div className="nb-admin-header-title">{title}</div>}
         </div>
+        {content && <div className="nb-admin-header-content">{content}</div>}
         <div className="nb-admin-header-toolbar__after">
           {renderThemeSwitcher?.()}
           {actions.map((action) => (

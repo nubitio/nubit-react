@@ -72,6 +72,37 @@ function SwitchButton() {
 // ── initial state ─────────────────────────────────────────────────────────────
 
 describe('ThemeProvider initial state', () => {
+  it('opts into the Nubit style and restores the previous attribute on unmount', () => {
+    stubMatchMedia(false);
+    document.documentElement.setAttribute('data-visual-style', 'host');
+    const { rerender, unmount } = render(
+      <TestThemeProvider visualStyle="nubit">
+        <CurrentMode />
+      </TestThemeProvider>,
+    );
+    expect(document.documentElement.dataset.visualStyle).toBe('nubit');
+    rerender(
+      <TestThemeProvider visualStyle="default">
+        <CurrentMode />
+      </TestThemeProvider>,
+    );
+    expect(document.documentElement.dataset.visualStyle).toBe('default');
+    unmount();
+    expect(document.documentElement.dataset.visualStyle).toBe('host');
+    document.documentElement.removeAttribute('data-visual-style');
+  });
+
+  it('does not enable the Nubit preset by default', () => {
+    stubMatchMedia(false);
+    const { unmount } = render(
+      <TestThemeProvider>
+        <CurrentMode />
+      </TestThemeProvider>,
+    );
+    expect(document.documentElement.dataset.visualStyle).toBe('default');
+    unmount();
+    expect(document.documentElement.hasAttribute('data-visual-style')).toBe(false);
+  });
   it('defaults to auto mode when no localStorage key', () => {
     stubMatchMedia(false);
     render(

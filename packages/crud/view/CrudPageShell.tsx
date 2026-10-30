@@ -16,33 +16,46 @@ export const CrudPageShell: React.FC<CrudFormShellProps> = ({
   isOpen,
   mode,
   title,
+  subtitle,
   onClose,
   onCancel,
   onSave,
   saveLabel,
+  footerContent,
+  busy = false,
   children,
 }) => {
   const { t } = useCoreTranslation();
   if (!isOpen) return null;
 
   return (
-    <section className="nb-crud-page-shell" aria-label={title}>
+    <section className="nb-crud-page-shell" aria-label={title} aria-busy={busy}>
       <header className="nb-crud-page-shell__header">
         <IconButton
           className="nb-crud-page-shell__back"
           icon="ph ph-arrow-left"
           label={t('dialog.buttonCancel')}
           onClick={onClose}
+          disabled={busy}
         />
-        <h1 className="nb-crud-page-shell__title">{title}</h1>
+        <div className="nb-crud-page-shell__heading">
+          <h1 className="nb-crud-page-shell__title">{title}</h1>
+          {subtitle && <p className="nb-crud-page-shell__subtitle">{subtitle}</p>}
+        </div>
       </header>
       <div className="nb-crud-page-shell__body">{children}</div>
       <footer className="nb-crud-page-shell__footer">
-        <Button variant="secondary" onClick={onCancel}>
+        {footerContent && <div className="nb-crud-page-shell__footer-content">{footerContent}</div>}
+        <Button variant="secondary" onClick={onCancel} disabled={busy}>
           {t('dialog.buttonCancel')}
         </Button>
         {mode !== 'view' && (
-          <Button variant="primary" className="nb-dialog-save-button" onClick={onSave}>
+          <Button
+            variant="primary"
+            className="nb-dialog-save-button"
+            onClick={onSave}
+            disabled={busy}
+          >
             <span>{saveLabel ?? t('dialog.buttonSave')}</span>
           </Button>
         )}

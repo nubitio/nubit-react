@@ -8,4 +8,6 @@ export interface UseFormValidationOptions {
   detailNoDataText: string;
   requiredDetail?: boolean;
   validationErrorText: string;
+  /** Suppress a duplicate toast when the renderer focuses inline field errors. */
+  notifyFormErrors?: boolean;
 }

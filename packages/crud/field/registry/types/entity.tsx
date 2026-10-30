@@ -42,14 +42,15 @@ export const entityTypeModule: FieldTypeModule = {
     return serialized === undefined ? OMIT : set(serialized);
   },
   ControlRender: (props) => {
-    const { field, value, error, errorClass, disabled, readOnly, setFieldValue, ctx } = props;
+    const { field, value, error, errorClass, disabled, readOnly, setFieldValue, ctx, commonProps } =
+      props;
     const items = ctx.remoteOptions[field.name] ?? field.data ?? [];
     return (
       <NativeEntitySelect
         className={`nb-form__control${errorClass}`}
         disabled={disabled}
         invalid={!!error}
-        describedBy={error ? `nb-form-${field.name}-error` : undefined}
+        describedBy={commonProps['aria-describedby']}
         field={field}
         httpClient={ctx.httpClient}
         id={`nb-form-${field.name}`}
@@ -65,9 +66,10 @@ export const entityTypeModule: FieldTypeModule = {
       />
     );
   },
-  FilterCellRender: ({ field, value, remoteOptions, httpClient, onSelectChange }) => (
+  FilterCellRender: ({ field, value, remoteOptions, httpClient, onSelectChange, t }) => (
     <NativeEntitySelect
       className="nb-datagrid__filter-select"
+      placeholder={t('grid.allFilter')}
       field={field}
       httpClient={httpClient}
       options={remoteOptions}

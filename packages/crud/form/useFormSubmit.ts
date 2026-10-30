@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { serializeFormFields, serializeDetailRows } from './serializeFormData';
 import type { UseFormSubmitAccessors } from './FormSubmitAccessors';
 import type { UseFormSubmitOptions } from './FormSubmitOptions';
@@ -37,6 +38,7 @@ export const useFormSubmit = (
   const { t } = useCoreTranslation();
   const { notify } = useCoreRuntime();
 
+  const saving = useRef(false);
   const adapter = options.adapter ?? HydraAdapter;
   const getIdField = () => options.fields.find((f) => f.isIdentity)?.name ?? '';
   const getDetailIdField = () => options.detailFields?.find((f) => f.isIdentity)?.name ?? '';
@@ -78,12 +80,8 @@ export const useFormSubmit = (
 
   /** Handle the SAVE event: validate → serialize → POST or PATCH */
   const handleSave = (): void => {
-    if (!validateFn()) return;
-
+    if (saving.current || !validateFn()) return;
     const { LOADING: loadingEvent, SUCCESS: successEvent } = options.events ?? {};
-    if (loadingEvent) emit(loadingEvent, true);
-    options.onLoadingChange?.(true);
-
     const rawData = accessors.getFormData();
     const formData = serializeFields(rawData);
     appendDetailRows(formData);
@@ -95,7 +93,12 @@ export const useFormSubmit = (
       payload = buildMultipartFormData(formData);
     }
 
+    saving.current = true;
+    if (loadingEvent) emit(loadingEvent, true);
+    options.onLoadingChange?.(true);
+
     const finalize = () => {
+      saving.current = false;
       if (loadingEvent) emit(loadingEvent, false);
       options.onLoadingChange?.(false);
     };

@@ -13,6 +13,7 @@ export const CrudDialogShell: React.FC<CrudFormShellProps> = ({
   onClose,
   onCancel,
   onSave,
+  saveLabel,
   width,
   height,
   events,
@@ -27,6 +28,7 @@ export const CrudDialogShell: React.FC<CrudFormShellProps> = ({
     onClose={onClose}
     onCancel={onCancel}
     onSave={onSave}
+    positiveText={saveLabel}
     saveVisible={mode !== 'view'}
   >
     {children}

@@ -5,7 +5,9 @@ import { CrudFormShell } from '../view/CrudFormShell';
 import { useCrudViews } from '../view/CrudViewContext';
 import { resolveViewMode } from '../view/viewMode';
 import { useCrudPage } from './useCrudPage';
-import { useCoreTranslation, useEvents } from '@nubitio/core';
+import { useCoreTranslation, useEvents, useCoreHttpClient } from '@nubitio/core';
+import { useResourceStoreFactory } from '../data/ResourceStore';
+import { HydraAdapter } from '../adapter/HydraAdapter';
 import type { ResourceConfig, ResourceRowActions, ResourceToolbarAction } from './ResourceConfig';
 import type { BulkAction } from './BulkAction';
 import type { Field } from '../field/Field';
@@ -14,7 +16,7 @@ import { createAuditFieldLabelResolver } from './AuditTrail';
 import { DialogStoreProvider } from './DialogStoreProvider';
 import { useCrudDialogStore } from './useCrudDialogStore';
 import type { DialogMode } from './dialogStore';
-import { ConfirmDialog } from '@nubitio/ui';
+import { Button, ConfirmDialog, EmptyState } from '@nubitio/ui';
 import { resolveCrudResource } from './resolveCrudResource';
 import type { FormDataRecord } from '../form/FormDataSnapshot';
 import type { FormHandle } from '../form/FormHandle';
@@ -179,6 +181,12 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     selectionState,
   } = useCrudPage(resolvedInputResource, externalFormRef);
   const { DataGridView, FormView } = useCrudViews();
+  const httpClient = useCoreHttpClient();
+  const storeFactory = useResourceStoreFactory();
+  const [formBusy, setFormBusy] = useState(false);
+  const [routeError, setRouteError] = useState<{ status?: number } | null>(null);
+  const [routeAttempt, setRouteAttempt] = useState(0);
+  const identityFieldName = fields.find((field) => field.isIdentity)?.name ?? 'id';
   const datagridFields = useMemo(
     () => fields.filter((field) => field.isIdentity || field.visible !== false),
     [fields],
@@ -195,6 +203,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   // predicates, not booleans, so they bypass the boolean resolution above.
   const rawPermissions =
     typeof resolvedResource.permissions === 'function' ? undefined : resolvedResource.permissions;
+  const canEditRecord = rawPermissions?.canEditRow;
   const routeAwareGridFields = useMemo(
     () =>
       datagridFields.map((field) => {
@@ -366,23 +375,101 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     }
   }, [viewMode.mode, navigate, listUrl, resetDialogOperation]);
 
-  const routingActionsRef = React.useRef({ openAddDialog, openEditDialog, resetDialogOperation });
-  routingActionsRef.current = { openAddDialog, openEditDialog, resetDialogOperation }; // eslint-disable-line react-hooks/refs
+  const routingActionsRef = React.useRef({
+    openAddDialog,
+    openEditDialog,
+    openViewDialog,
+    resetDialogOperation,
+  });
+  React.useLayoutEffect(() => {
+    routingActionsRef.current = {
+      openAddDialog,
+      openEditDialog,
+      openViewDialog,
+      resetDialogOperation,
+    };
+  }, [openAddDialog, openEditDialog, openViewDialog, resetDialogOperation]);
 
   // Deep-link: open the appropriate dialog on mount when routing props are provided.
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- route changes reset the remote state
+    setRouteError(null);
     if (initialRecordId != null) {
-      routingActionsRef.current.openEditDialog({ id: initialRecordId });
-      return;
+      if (viewMode.mode !== 'page') {
+        routingActionsRef.current.openEditDialog({ id: initialRecordId });
+        return;
+      }
+      let active = true;
+      const controller = new AbortController();
+      const source = storeFactory({
+        url: resolvedResource.apiUrl,
+        idField: identityFieldName,
+        httpClient,
+      });
+      setFormBusy(true);
+      routingActionsRef.current.resetDialogOperation();
+      const loadRecord = async () => {
+        try {
+          const row = source.byKey
+            ? await source.byKey(initialRecordId)
+            : (
+                await httpClient.get<DataRecord>(
+                  (resolvedResource.adapter ?? HydraAdapter).buildItemUrl(
+                    resolvedResource.apiUrl,
+                    initialRecordId,
+                  ),
+                  { signal: controller.signal },
+                )
+              ).data;
+          if (!row) throw Object.assign(new Error('Record not found'), { status: 404 });
+          if (!active) return;
+          if (permissions.canEdit && (canEditRecord?.(row) ?? true)) {
+            routingActionsRef.current.openEditDialog(row);
+          } else if (permissions.canView) {
+            routingActionsRef.current.openViewDialog(row);
+          } else {
+            throw Object.assign(new Error('Record access denied'), { status: 403 });
+          }
+        } catch (error) {
+          if (active) setRouteError({ status: (error as { status?: number } | null)?.status });
+        } finally {
+          if (active) setFormBusy(false);
+        }
+      };
+      void loadRecord();
+      return () => {
+        active = false;
+        controller.abort();
+      };
     }
 
+    setFormBusy(false);
     if (initialIsNew) {
+      if (viewMode.mode === 'page' && !permissions.canAdd) {
+        routingActionsRef.current.resetDialogOperation();
+        setRouteError({ status: 403 });
+        return;
+      }
       routingActionsRef.current.openAddDialog(null);
       return;
     }
 
     routingActionsRef.current.resetDialogOperation();
-  }, [initialIsNew, initialRecordId]);
+  }, [
+    initialIsNew,
+    initialRecordId,
+    viewMode.mode,
+    resolvedResource.apiUrl,
+    resolvedResource.adapter,
+    identityFieldName,
+    httpClient,
+    storeFactory,
+    permissions.canEdit,
+    permissions.canView,
+    canEditRecord,
+    permissions.canAdd,
+    routeAttempt,
+  ]);
 
   // Subscribe to detail-grid row mutation events and call onDetailRowsChanged when defined.
   // The callback receives `formRef` so it can imperatively update header-form fields
@@ -583,12 +670,56 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   return (
     <div
       id="wrapper"
+      aria-busy={formBusy}
       className={
-        [viewMode.mode === 'page' && dialogIsOpen && 'wrapper--with-page']
+        [
+          viewMode.mode === 'page' &&
+            (dialogIsOpen || routeError || (formBusy && initialRecordId != null)) &&
+            'wrapper--with-page',
+        ]
           .filter(Boolean)
           .join(' ') || undefined
       }
     >
+      {formBusy && !dialogIsOpen && <div role="status">{t('grid.loading')}</div>}
+      {routeError && (
+        <section className="nb-crud-page-route-state">
+          <EmptyState
+            size="lg"
+            title={t(
+              routeError.status === 403
+                ? 'grid.accessDeniedTitle'
+                : routeError.status === 404
+                  ? 'grid.recordNotFoundTitle'
+                  : 'grid.loadErrorTitle',
+            )}
+            description={t(
+              routeError.status === 403
+                ? 'grid.accessDeniedDescription'
+                : routeError.status === 404
+                  ? 'grid.recordNotFoundDescription'
+                  : 'grid.loadErrorDescription',
+            )}
+            icon={routeError.status === 403 ? 'lock' : 'warning-circle'}
+            variant="danger"
+            action={
+              <>
+                <Button variant="secondary" onClick={requestClose}>
+                  {t('grid.back')}
+                </Button>
+                {routeError.status !== 403 && routeError.status !== 404 && (
+                  <Button
+                    variant="primary"
+                    onClick={() => setRouteAttempt((attempt) => attempt + 1)}
+                  >
+                    {t('grid.retry')}
+                  </Button>
+                )}
+              </>
+            }
+          />
+        </section>
+      )}
       <DataGridView
         ref={gridRef}
         id={resolvedResource.id}
@@ -634,6 +765,12 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         onFilterChange={onFiltersChange}
         adapter={resolvedResource.adapter}
         emptyState={resolvedResource.emptyState}
+        cardView={resolvedResource.cardView}
+        appearance={resolvedResource.gridAppearance}
+        quickFilterFields={resolvedResource.quickFilterFields}
+        filterRow={resolvedResource.filterRow}
+        filterToolbarFields={resolvedResource.filterToolbarFields}
+        filterPresets={resolvedResource.filterPresets}
       />
       {!hasInlineReplacementForDialog && (
         <CrudFormShell
@@ -641,12 +778,16 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
           events={events}
           width={resolvedResource.dialogWidth}
           height={resolvedResource.dialogHeight}
-          title={dialogTitle}
+          title={resolvedResource.formPage?.titles?.[dialogMode] ?? dialogTitle}
+          subtitle={resolvedResource.formPage?.subtitle}
           isOpen={dialogIsOpen}
           mode={dialogMode}
           onClose={requestClose}
           onCancel={requestClose}
           onSave={() => formRef.current?.save()}
+          busy={formBusy}
+          saveLabel={resolvedResource.formPage?.saveLabel}
+          footerContent={resolvedResource.formPage?.footerContent}
         >
           <FormView
             ref={formRef}
@@ -669,6 +810,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
               refreshGrid();
             }}
             onSaveError={resolvedResource.onSaveError}
+            onLoadingChange={setFormBusy}
             onDeleteSuccess={(response) => {
               resolvedResource.onDeleteSuccess?.(response as T);
               refreshGrid();

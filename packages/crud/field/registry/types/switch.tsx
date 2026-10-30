@@ -18,10 +18,13 @@ export const switchTypeModule: FieldTypeModule = {
   serializeFormValue: () => KEEP,
   serializeDetailValue: () => KEEP,
   rendersOwnLabel: true,
-  ControlRender: ({ field, value, disabled, readOnly, setFieldValue }) => (
+  ControlRender: ({ field, value, disabled, readOnly, setFieldValue, commonProps }) => (
     <label className="nb-form__switch">
       <input
         type="checkbox"
+        id={commonProps.id}
+        aria-invalid={commonProps['aria-invalid']}
+        aria-describedby={commonProps['aria-describedby']}
         checked={Boolean(value)}
         disabled={disabled || readOnly}
         onChange={(event) => setFieldValue(field.name, event.target.checked)}
@@ -32,6 +35,7 @@ export const switchTypeModule: FieldTypeModule = {
   FilterCellRender: ({ field, value, t, onSelectChange }) => (
     <FilterValueDropdown
       id={`nb-datagrid-filter-${field.name}`}
+      ariaLabel={t('grid.filterColumn', { column: field.label })}
       value={value}
       className="nb-datagrid__filter-select"
       placeholder={t('grid.allFilter')}

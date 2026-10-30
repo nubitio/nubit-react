@@ -151,6 +151,44 @@ describe('AdminShell menu state — small screen', () => {
 describe('AdminShell slots', () => {
   beforeEach(setLargeScreen);
 
+  it('supports workspace layout and application-owned slots without changing the default', () => {
+    const { rerender } = render(
+      <MemoryRouter>
+        <AdminShell
+          variant="workspace"
+          title="Sales"
+          menuItems={items}
+          brand={<span>Brand</span>}
+          headerContent={<input aria-label="Search workspace" />}
+          sidebarContext={<button type="button">Select branch</button>}
+          bottomNavigation={<nav aria-label="Mobile destinations" />}
+        >
+          content
+        </AdminShell>
+      </MemoryRouter>,
+    );
+    expect(document.querySelector('.is-workspace-desktop')).not.toBeNull();
+    expect(screen.getByText('Brand')).toBeDefined();
+    expect(screen.getByRole('textbox', { name: 'Search workspace' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Select branch' })).toBeDefined();
+    expect(screen.queryByRole('navigation', { name: 'Mobile destinations' })).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('Toggle menu'));
+    expect(document.querySelector('.is-workspace-compact')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Select branch' })).toBeNull();
+
+    setSmallScreen();
+    rerender(
+      <MemoryRouter>
+        <AdminShell menuItems={items} bottomNavigation={<nav aria-label="Mobile destinations" />}>
+          content
+        </AdminShell>
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('navigation', { name: 'Mobile destinations' })).toBeDefined();
+    expect(document.querySelector('.is-workspace-desktop')).toBeNull();
+  });
+
   it('renders footer slot', () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

@@ -45,6 +45,40 @@ export function App() {
 
 ## Exports
 
+### Nubit workspace layout (opt-in)
+
+The existing layout remains the default. `variant="workspace"` places the sidebar
+alongside the header on large screens and retains the overlay menu on smaller
+screens. Application-specific search and company/branch selection stay outside
+the library:
+
+```tsx
+<AdminShell
+  variant="workspace"
+  title="Sales"
+  menuItems={menu}
+  brand={<CompanyLogo />}
+  headerContent={<WorkspaceSearch />}
+  sidebarContext={<CompanyBranchPicker />}
+  bottomNavigation={<AdminBottomNavigation items={mobileDestinations} />}
+>
+  {children}
+</AdminShell>
+```
+
+`brand` and `sidebarContext` are hidden in compact mode. The bottom-navigation
+slot renders only on extra-small screens, reserves its own space (including the
+device safe area), and does not cover the main content. `AdminBottomNavigation`
+uses router links and marks the longest matching destination with `aria-current`.
+Pass only authorized destinations. Its `label` prop names the navigation landmark.
+
+All slots and `variant` are also available through `createNubitApp({ shell: … })`.
+Set `visualStyle: 'nubit'` to opt into the Figma token foundation when using the
+app factory; see the UI package README for font setup.
+
+Preview in the demo: `/dashboard?visualStyle=nubit`. Search navigates between demo
+pages; the context label is illustrative, not an ERP company selector.
+
 - `AdminShell` — full layout: sidebar + header + content area
 - `AdminHeader` — standalone header with action slots
 - `AdminSidebarMenu` — standalone sidebar menu

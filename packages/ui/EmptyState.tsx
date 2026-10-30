@@ -7,6 +7,8 @@ export type EmptyStateSize = 'sm' | 'md' | 'lg';
 export interface EmptyStateProps {
   /** Phosphor icon name without the "ph-" prefix, e.g. "warning" or "folder-open". */
   icon?: string;
+  /** Optional local illustration; replaces the default decorative icon. */
+  illustration?: ReactNode;
   /** Semantic variant — controls the icon and accent color. */
   variant?: EmptyStateVariant;
   /** Title text — required. */
@@ -31,6 +33,7 @@ const DEFAULT_ICONS: Record<EmptyStateVariant, string> = {
 
 export const EmptyState = ({
   icon,
+  illustration,
   variant = 'default',
   title,
   description,
@@ -54,7 +57,7 @@ export const EmptyState = ({
   return (
     <div className={classes} role="status" aria-live="polite">
       <div className="nb-empty-state__icon-wrap">
-        <i className={`ph ph-${iconName}`} aria-hidden="true" />
+        {illustration ?? <i className={`ph ph-${iconName}`} aria-hidden="true" />}
       </div>
       <p className="nb-empty-state__title">{title}</p>
       {description && <p className="nb-empty-state__description">{description}</p>}

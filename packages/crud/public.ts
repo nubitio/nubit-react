@@ -137,7 +137,7 @@ export type {
   FieldTypeModule,
 } from './field/registry/FieldTypeModule';
 export { BETWEEN_VALUE_SEPARATOR } from './field/registry/shared';
-export type { Field, FieldDef, LoadOption } from './field/Field';
+export type { Field, FieldDef, FieldButton, FieldButtonFeedback, LoadOption } from './field/Field';
 export type {
   FormatterFn,
   FormOnChangeFn,
@@ -302,3 +302,4 @@ export type {
 // ── Base data types (convenience re-exports from @nubitio/core) ─────────────────
 export type { DataRecord } from '@nubitio/core';
 export type { GridData } from '@nubitio/core';
+export type { CardViewConfig, CardViewContext } from './datagrid/CardView';

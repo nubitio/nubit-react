@@ -93,6 +93,44 @@ describe('resolveViewMode', () => {
 });
 
 describe('CrudFormShell dispatch', () => {
+  it('keeps page footer content visible and blocks actions while saving', () => {
+    const { rerender } = render(
+      <CrudFormShell
+        viewMode={resolveViewMode('page')}
+        isOpen
+        mode="add"
+        title="Product"
+        onClose={noop}
+        onCancel={noop}
+        onSave={noop}
+        busy
+        saveLabel="Save product"
+        footerContent={<span>Local draft</span>}
+      >
+        <span>Fields</span>
+      </CrudFormShell>,
+    );
+    expect(screen.getByText('Local draft')).toBeTruthy();
+    expect(
+      (screen.getByRole('button', { name: 'Save product' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(document.querySelector('.nb-crud-page-shell')?.getAttribute('aria-busy')).toBe('true');
+    rerender(
+      <CrudFormShell
+        viewMode={resolveViewMode('page')}
+        isOpen
+        mode="view"
+        title="Product"
+        onClose={noop}
+        onCancel={noop}
+        onSave={noop}
+        saveLabel="Save product"
+      >
+        <span>Fields</span>
+      </CrudFormShell>,
+    );
+    expect(screen.queryByRole('button', { name: 'Save product' })).toBeNull();
+  });
   it('renders dialog shell for viewMode: dialog', () => {
     render(
       <CrudFormShell

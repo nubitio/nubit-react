@@ -18,6 +18,74 @@
   padding: 20px 24px;
 }
 
+.nb-form--columns {
+  container-type: inline-size;
+  padding: 0;
+}
+
+.nb-form__columns,
+.nb-form__column {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+  align-content: start;
+}
+
+.nb-form__columns {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nb-form__column .nb-form__section,
+.nb-form__column .nb-form__section:first-child {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  border-radius: var(--nb-radius-md, var(--radius-lg));
+  margin: 0;
+  padding: var(--space-6);
+}
+
+.nb-form__section-description {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-5);
+}
+
+.nb-form__column .nb-form__section-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+html[data-visual-style='nubit'] .nb-form {
+  .nb-form__field {
+    gap: var(--space-2);
+  }
+
+  .nb-form__label {
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 0;
+  }
+
+  .nb-form__control {
+    padding-inline: var(--space-3);
+  }
+}
+
+@container (min-width: 900px) {
+  .nb-form__columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--nb-form-sidebar-width, 360px));
+  }
+}
+
+@container (max-width: 599px) {
+  .nb-form__columns .nb-form__field {
+    grid-column: span 12;
+  }
+}
+
 .nb-form:has(> .nb-form__tabs),
 .nb-form--with-detail {
   padding: 0;
@@ -181,7 +249,7 @@
 }
 
 .nb-form__label--required::after {
-  color: var(--error-color);
+  color: var(--status-danger-text, var(--error-color));
   content: ' *';
 }
 
@@ -189,7 +257,7 @@
 
 .nb-form__control {
   background: var(--control-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--control-border, var(--border-color));
   border-radius: var(--radius-md);
   box-sizing: border-box;
   color: var(--text-primary);
@@ -510,7 +578,7 @@
     width: 40px;
 
     &::after {
-      background: var(--surface-elevated);
+      background: var(--toggle-thumb-color, var(--surface-elevated));
       border-radius: 50%;
       box-shadow: var(--shadow-sm);
       content: '';
@@ -572,7 +640,7 @@
 
 .nb-form__error {
   align-items: center;
-  color: var(--error-color);
+  color: var(--status-danger-text, var(--error-color));
   display: flex;
   font-size: var(--font-size-xs);
   gap: var(--space-1);
@@ -1199,4 +1267,66 @@
 .nb-form__field .nb-date-picker__trigger.nb-date-picker__trigger--open,
 .nb-form__field .nb-date-picker__trigger:focus-within {
   min-height: var(--control-height-form, 34px);
+}
+
+// Labeled field actions sit next to the control rather than covering its value.
+.nb-form__input-group--labeled {
+  gap: var(--space-2);
+  .nb-form__control {
+    min-width: 0;
+    padding-right: var(--space-3);
+  }
+  .nb-form__input-actions {
+    position: static;
+    flex: 0 0 auto;
+  }
+  .nb-form__input-button {
+    border: 1px solid var(--control-border, var(--border-color));
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+    white-space: nowrap;
+    width: auto;
+  }
+}
+
+html[data-visual-style='nubit'] .nb-crud-drawer {
+  .nb-drawer__header {
+    padding: var(--space-4) var(--space-6);
+  }
+  .nb-drawer__title {
+    font-size: 20px;
+  }
+  .nb-drawer__body {
+    padding: var(--space-6);
+  }
+  .nb-form {
+    padding: 0;
+    gap: var(--space-6);
+  }
+  .nb-form__section {
+    padding: 0;
+    border: 0;
+  }
+  .nb-form__section-title {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+}
+
+.nb-form__action-feedback {
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: var(--space-3) var(--space-4);
+}
+@each $tone in (success, warning, danger, info) {
+  .nb-form__action-feedback--#{$tone} {
+    background: var(--status-#{$tone}-bg);
+    color: var(--status-#{$tone}-text);
+  }
 }

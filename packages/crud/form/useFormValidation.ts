@@ -11,6 +11,7 @@ export function useFormValidation({
   detailNoDataText,
   requiredDetail,
   validationErrorText,
+  notifyFormErrors = true,
 }: UseFormValidationOptions): () => boolean {
   const { notify } = useCoreRuntime();
 
@@ -31,7 +32,7 @@ export function useFormValidation({
       detailRowsValid = validateDetailRows(accessors.getDetailRows(), detailFields);
     }
 
-    if (!formValid || !gridValid || !detailRowsValid) {
+    if ((!formValid && notifyFormErrors) || !gridValid || !detailRowsValid) {
       notify(
         detailRequiredMissing && formValid ? detailNoDataText : validationErrorText,
         detailRequiredMissing && formValid ? 'warning' : 'error',

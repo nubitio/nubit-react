@@ -16,6 +16,8 @@ export interface PageHeaderBadge {
 export interface PageHeaderProps {
   title: string;
   subtitle?: string;
+  /** Status badges or other record metadata between title and subtitle. */
+  metadata?: ReactNode;
   breadcrumb?: PageHeaderBreadcrumb;
   /** Custom breadcrumb node (e.g. react-router Link). Takes precedence over breadcrumb. */
   breadcrumbSlot?: ReactNode;
@@ -27,6 +29,7 @@ export interface PageHeaderProps {
 export function PageHeader({
   title,
   subtitle,
+  metadata,
   breadcrumb,
   breadcrumbSlot,
   badge,
@@ -47,6 +50,7 @@ export function PageHeader({
       <div className="nb-page-header__main">
         {breadcrumbNode}
         <h1 className="nb-page-header__title">{title}</h1>
+        {metadata && <div className="nb-page-header__metadata">{metadata}</div>}
         {subtitle && <p className="nb-page-header__subtitle">{subtitle}</p>}
       </div>
       {(badge || actions) && (

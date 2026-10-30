@@ -17,6 +17,8 @@ export const CrudDrawerShell: React.FC<CrudFormShellProps> = ({
   onClose,
   onCancel,
   onSave,
+  saveLabel,
+  busy = false,
   drawerWidth = DEFAULT_DRAWER_WIDTH,
   drawerSide = 'right',
   children,
@@ -25,8 +27,12 @@ export const CrudDrawerShell: React.FC<CrudFormShellProps> = ({
 
   return (
     <Drawer
+      className="nb-crud-drawer"
       isOpen={isOpen}
-      onClose={onClose}
+      busy={busy}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
       title={title}
       width={drawerWidth}
       side={drawerSide}
@@ -34,12 +40,17 @@ export const CrudDrawerShell: React.FC<CrudFormShellProps> = ({
       closeLabel={t('dialog.close')}
       footer={
         <>
-          <Button variant="secondary" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel} disabled={busy}>
             {t('dialog.buttonCancel')}
           </Button>
           {mode !== 'view' && (
-            <Button variant="primary" className="nb-dialog-save-button" onClick={onSave}>
-              {t('dialog.buttonSave')}
+            <Button
+              variant="primary"
+              className="nb-dialog-save-button"
+              onClick={onSave}
+              loading={busy}
+            >
+              {saveLabel ?? t('dialog.buttonSave')}
             </Button>
           )}
         </>

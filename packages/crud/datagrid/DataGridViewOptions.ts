@@ -11,6 +11,7 @@ import type {
   ResourceToolbarItems,
 } from '../crud/ResourceConfig';
 import type { ColumnGroupDef } from './ColumnGroup';
+import type { CardViewConfig } from './CardView';
 
 export interface DataGridSelectionChangedEvent {
   selectedRowsData?: DataRecord[];
@@ -102,4 +103,14 @@ export interface DataGridViewOptions {
   adapter?: BackendAdapter;
   /** Alternate row background (zebra stripes). Defaults to false. */
   zebraRows?: boolean;
+  /** Native grid only. Desktop table/cards toggle; mobile remains a card list. Not for inline edit modes. */
+  cardView?: CardViewConfig;
+  /** Page heading and unframed toolbar; panel remains the default. */
+  appearance?: 'panel' | 'page';
+  /** Enum/entity fields exposed as quick chips, sharing the table's filters. */
+  quickFilterFields?: string[];
+  /** Fields shown in a compact filter toolbar; mobile uses the filter sheet. */
+  filterToolbarFields?: string[];
+  /** Shortcuts applied to the same filter state as the row and sheet. */
+  filterPresets?: { key: string; label: string; field: string; operator: string; value: string }[];
 }

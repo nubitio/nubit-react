@@ -81,10 +81,14 @@ export interface FieldControlCommonProps {
   onClick: ((e: unknown) => void) | undefined;
   readOnly: boolean;
   required: boolean;
+  'aria-invalid'?: boolean;
+  'aria-describedby'?: string;
 }
 
 /** Form-level services a control may need, supplied once by the form view. */
 export interface FormControlContext {
+  /** Changes when a form is opened/reset; async field actions use it to discard old results. */
+  actionScopeKey?: string | number;
   httpClient: CoreHttpClient;
   t: FieldTranslator;
   /** Remotely loaded options per field name (ENTITY/TAGS). */

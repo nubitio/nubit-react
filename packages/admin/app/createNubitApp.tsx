@@ -112,8 +112,7 @@ function NubitAuthenticatedApp({ config }: { config: CreateNubitAppConfig }) {
     <AdminShell
       title={config.title}
       menuItems={menuItems}
-      headerActions={config.shell?.headerActions}
-      footer={config.shell?.footer}
+      {...config.shell}
       renderThemeSwitcher={renderThemeSwitcher}
       renderUserMenu={({ close }) => renderUserMenu({ ...menuContext, close })}
     >
@@ -226,7 +225,7 @@ export function createNubitApp(config: CreateNubitAppConfig): NubitApp {
   function App() {
     return (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider basePath={config.themeBasePath}>
+        <ThemeProvider basePath={config.themeBasePath} visualStyle={config.visualStyle}>
           <SessionProvider apiBaseUrl={apiBaseUrl}>
             <NubitAuthenticatedApp config={config} />
           </SessionProvider>

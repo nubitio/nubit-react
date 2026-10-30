@@ -7,6 +7,8 @@ export { NativeEntitySelect } from './EntityCombobox';
 export function NativeEnumSelect({
   className,
   disabled,
+  invalid,
+  describedBy,
   field,
   id,
   onChange,
@@ -16,6 +18,8 @@ export function NativeEnumSelect({
 }: {
   className: string;
   disabled?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
   field: Field;
   id?: string;
   onChange: (value: unknown) => void;
@@ -28,6 +32,8 @@ export function NativeEnumSelect({
   return (
     <Combobox
       id={id}
+      invalid={invalid}
+      aria-describedby={describedBy}
       aria-label={field.label}
       inputClassName={className}
       disabled={disabled}

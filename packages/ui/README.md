@@ -34,6 +34,24 @@ export function App() {
 
 ## What's inside
 
+### Nubit Labs visual foundation
+
+`<ThemeProvider visualStyle="nubit">` opts into the Nubit Labs Figma foundation
+(semantic tokens, Lexend, rounded surfaces and normal-density controls). Existing
+applications retain their current appearance unless they opt in. Light/dark
+switching still uses `ThemeProvider`; the preset is included in `style.css` and
+overrides asynchronously loaded theme values. Explicit compact/comfortable
+density tokens and persisted user accent overrides remain supported.
+
+Install `@fontsource/lexend` in the consuming app and import its
+`latin-400.css`, `latin-500.css`, `latin-600.css` and `latin-700.css` files once.
+The library does not download fonts at runtime.
+
+Figma `--nb-color-*`, `--nb-space-*` and `--nb-radius-*` variables are exposed
+alongside the existing `--surface-*`, `--text-*`, etc. component vocabulary;
+consumers do not need to rewrite existing components. Source design:
+`m124loXKRsHFvZcrYkoTbk`, semantic-token frame `11:341`.
+
 - **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
 - **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`
 - **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`, `TimePicker`
@@ -271,3 +289,21 @@ time value (`HH:mm:ss`). Use `ariaLabel` to name the control. All three support
 `disabled`, `readOnly`, `required` and `invalid`; `TimePicker` exposes built-in
 min/max validation through `aria-invalid`. Components are exported by both
 `@nubitio/ui` and `@nubitio/react-admin`.
+
+Record detail pages can compose existing surfaces with `DetailLayout`:
+
+```tsx
+<Page>
+  <PageHeader title="Record" metadata={<Badge>Active</Badge>} actions={<Button>Action</Button>} />
+  <DetailLayout asideLabel="Related information" aside={<Card variant="panel">...</Card>}>
+    <Card variant="panel">
+      <Section variant="panel" title="Details">
+        ...
+      </Section>
+    </Card>
+  </DetailLayout>
+</Page>
+```
+
+The main/aside columns stack on narrower screens. The panel Section uses a
+sentence-case title, while its default label variant retains compact headings.

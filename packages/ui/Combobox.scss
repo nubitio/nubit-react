@@ -1,10 +1,17 @@
 .nb-combobox {
+  --nb-combobox-action-size: calc(var(--control-height-form) - 8px);
+  --nb-combobox-action-count: 1;
   position: relative;
+
+  &:has(.nb-combobox__clear) {
+    --nb-combobox-action-count: 2;
+  }
 
   &__actions {
     align-items: center;
     bottom: 0;
     display: flex;
+    gap: 2px;
     position: absolute;
     right: var(--space-1);
     top: 0;
@@ -20,8 +27,28 @@
     display: inline-flex;
     font: inherit;
     justify-content: center;
-    min-height: var(--control-height-form);
-    min-width: var(--control-height-form);
+    flex: 0 0 var(--nb-combobox-action-size);
+    height: var(--nb-combobox-action-size);
+    width: var(--nb-combobox-action-size);
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    line-height: 1;
+
+    svg {
+      display: block;
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--control-bg-hover);
+    }
 
     &:focus-visible {
       outline: 2px solid var(--focus-ring-color);
@@ -37,7 +64,7 @@
 
 // Keep the action area reserved when a consumer applies its input styles.
 .nb-combobox .nb-combobox__input {
-  padding-right: calc(var(--control-height-form) * 2);
+  padding-right: calc(var(--nb-combobox-action-size) * var(--nb-combobox-action-count) + 10px);
 }
 
 .nb-combobox-popup {

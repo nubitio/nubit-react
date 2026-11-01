@@ -144,4 +144,61 @@ describe('Combobox', () => {
     expect(screen.queryByRole('listbox')).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  describe('opening', () => {
+    it('opens the list when the input is clicked and selects an option', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<Combobox label="Country" options={options} value={null} onChange={onChange} />);
+      expect(screen.queryByRole('listbox')).toBeNull();
+      await user.click(screen.getByRole('combobox'));
+      expect(await screen.findByRole('listbox')).toBeTruthy();
+      await user.click(screen.getByRole('option', { name: /Chile/ }));
+      expect(onChange).toHaveBeenCalledWith('cl');
+    });
+
+    it('does not open on keyboard focus alone', async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Country" options={options} value={null} onChange={vi.fn()} />);
+      await user.tab();
+      expect(document.activeElement).toBe(screen.getByRole('combobox'));
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('does not open on click when disabled', async () => {
+      const user = userEvent.setup();
+      render(
+        <Combobox label="Country" options={options} value={null} onChange={vi.fn()} disabled />,
+      );
+      await user.click(screen.getByRole('combobox'));
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('does not open on click when read-only', async () => {
+      const user = userEvent.setup();
+      render(
+        <Combobox label="Country" options={options} value={null} onChange={vi.fn()} readOnly />,
+      );
+      await user.click(screen.getByRole('combobox'));
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('opens on click for remote-loaded options too', async () => {
+      const user = userEvent.setup();
+      const loadOptions = vi.fn().mockResolvedValue({ options, hasMore: false });
+      render(
+        <Combobox
+          label="Country"
+          options={[]}
+          value={null}
+          onChange={vi.fn()}
+          loadOptions={loadOptions}
+        />,
+      );
+      await user.click(screen.getByRole('combobox'));
+      expect(await screen.findByRole('listbox')).toBeTruthy();
+      expect(await screen.findByRole('option', { name: /Peru/ })).toBeTruthy();
+      expect(loadOptions).toHaveBeenCalled();
+    });
+  });
 });

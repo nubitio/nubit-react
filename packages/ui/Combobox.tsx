@@ -14,6 +14,7 @@ import {
   TagList,
 } from 'react-aria-components';
 import { forwardRef, useContext, useId, useState } from 'react';
+import type * as React from 'react';
 import type { ForwardedRef, InputHTMLAttributes, ReactNode } from 'react';
 import { useUiStrings } from './UiStrings';
 import { useComboboxOptions } from './useComboboxOptions';
@@ -184,8 +185,9 @@ function SelectionCombobox({
     >
       {label && <Label className="nb-form-field__label">{label}</Label>}
       <div className="nb-combobox">
-        <Input
+        <ComboboxInput
           {...inputProps}
+          openOnClick={!disabled && !readOnly}
           ref={inputRef}
           id={inputId}
           className={`nb-input nb-combobox__input${invalid || error ? ' nb-input--invalid' : ''}${inputClassName ? ` ${inputClassName}` : ''}`}
@@ -324,6 +326,34 @@ function SelectionCombobox({
     </AriaCombobox>
   );
 }
+
+type ComboboxInputProps = React.ComponentProps<typeof Input> & {
+  /** False for disabled/read-only fields, which must never open. */
+  openOnClick: boolean;
+};
+
+/**
+ * Editable combobox input that also opens its list on click. React Aria opens
+ * on typing or ArrowDown by default; users expect a click on a dropdown-style
+ * field to show the options. Keyboard behaviour is unchanged (no open on focus).
+ */
+const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(function ComboboxInput(
+  { onClick, openOnClick, ...props },
+  ref,
+) {
+  const state = useContext(ComboBoxStateContext);
+  return (
+    <Input
+      {...props}
+      ref={ref}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!openOnClick || event.defaultPrevented || !state || state.isOpen) return;
+        state.open(null, 'manual');
+      }}
+    />
+  );
+});
 
 function ComboboxClear({
   label,

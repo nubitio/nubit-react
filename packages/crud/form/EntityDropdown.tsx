@@ -1,5 +1,5 @@
 import './LookupControls.scss';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useCoreHttpClient, type DataRecord } from '@nubitio/core';
 import { entityField } from '../field/FieldBuilders';
@@ -47,6 +47,18 @@ export function EntityDropdown({
 }: EntityDropdownProps) {
   const httpClient = useCoreHttpClient();
 
+  // The field is the identity of the remote source, loader and loaded records
+  // downstream. Callers commonly pass fresh-but-equal `searchExpr`/`filters` arrays
+  // and inline formatters on every render; keying by value keeps the field stable so
+  // an in-flight search is not cancelled and loaded records are not discarded.
+  const searchExprKey = searchExpr?.join('\u0000');
+  const filtersKey = JSON.stringify(filters);
+  const hasFormatter = itemFormatter !== undefined;
+  const formatterRef = useRef(itemFormatter);
+  // eslint-disable-next-line react-hooks/refs -- keep the latest formatter without changing field identity
+  formatterRef.current = itemFormatter;
+  const formatItem = useCallback((item: unknown) => formatterRef.current?.(item), []);
+
   const field = useMemo(() => {
     const builder = entityField(url, valueField, textField)
       .label(label || placeholder || 'Seleccionar')
@@ -54,17 +66,22 @@ export function EntityDropdown({
       .searchEnabled(searchEnabled);
 
     if (searchExpr) builder.searchExpr(searchExpr);
-    if (itemFormatter) builder.itemFormatter(itemFormatter);
+    // formatItem reads the latest formatter lazily, when an option is rendered.
+    // eslint-disable-next-line react-hooks/refs
+    if (hasFormatter) builder.itemFormatter(formatItem);
     if (filters.length > 0) builder.filters(filters);
 
     return builder.build();
+    // searchExpr and filters are tracked through their value keys on purpose.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    filters,
-    itemFormatter,
+    filtersKey,
+    formatItem,
+    hasFormatter,
     label,
     placeholder,
     searchEnabled,
-    searchExpr,
+    searchExprKey,
     textField,
     url,
     valueField,

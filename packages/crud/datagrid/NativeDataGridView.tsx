@@ -846,6 +846,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       field.filterable &&
       (visibleFields.includes(field) || options.filterToolbarFields?.includes(field.name)),
   );
+  // The listed fields lead the filter sheet, in the order given.
   const toolbarFilterFields = (options.filterToolbarFields ?? [])
     .map((name) => filterableFields.find((field) => field.name === name))
     .filter((field): field is Field => !!field);
@@ -1125,16 +1126,6 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   </Button>
                 )}
               </div>
-              {!isMobile && !filterSheetOpen && (
-                <div className="nb-datagrid__filter-editors">
-                  {toolbarFilterFields.map((field) => (
-                    <div key={field.name} className="nb-datagrid__filter-editor">
-                      <span className="nb-datagrid__sheet-label">{field.label}</span>
-                      {renderFilterCell(field, 'toolbar')}
-                    </div>
-                  ))}
-                </div>
-              )}
               {activeFilterCount > 0 && (
                 <div
                   className="nb-datagrid__active-filters"

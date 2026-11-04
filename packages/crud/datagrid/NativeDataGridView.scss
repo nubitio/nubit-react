@@ -2454,24 +2454,6 @@ $inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
   align-items: center;
 }
 
-.nb-datagrid__filter-editors {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-3);
-}
-
-.nb-datagrid__filter-editor {
-  min-width: 0;
-  padding: var(--space-2);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--surface-1);
-  .nb-datagrid__sheet-label {
-    display: block;
-    margin-bottom: var(--space-1);
-  }
-}
-
 @media (max-width: 767px) {
   .nb-datagrid-filter-dialog-root {
     align-items: flex-end;
@@ -2482,14 +2464,6 @@ $inline-edit-dirty-bg: color-mix(in srgb, #4caf50 30%, var(--surface-1, #fff));
     width: 100% !important;
     max-height: 85dvh;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-}
-
-.nb-datagrid__filter-editor .nb-dropdown--compact {
-  display: flex;
-  width: 100%;
-  .nb-dropdown__trigger {
-    width: 100%;
   }
 }
 

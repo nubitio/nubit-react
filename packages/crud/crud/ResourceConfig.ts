@@ -213,9 +213,9 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   cardView?: CardViewConfig;
   gridAppearance?: 'panel' | 'page';
   quickFilterFields?: string[];
-  /** Fields shown in a compact filter toolbar; mobile uses the filter sheet. */
-  /** Hide the column filter row when a resource uses the shared filter toolbar. */
+  /** Show the inline column filter row in the grid header. */
   filterRow?: boolean;
+  /** See `DataGridViewOptions.filterToolbarFields`: shortcut bar plus sheet-only fields. */
   filterToolbarFields?: string[];
   /** Shortcuts applied to the same filter state as the row and sheet. */
   filterPresets?: { key: string; label: string; field: string; operator: string; value: string }[];

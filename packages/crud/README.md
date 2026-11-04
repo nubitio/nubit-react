@@ -255,13 +255,14 @@ const store: ResourceStore = {
 };
 ```
 
-A compact filter toolbar can replace the filter row while retaining the same
-server query, card state, pagination reset and mobile dialog:
+Column filters live in the header row (`filterRow`). A shortcut bar with preset chips and a
+"Filters" button (which opens the sheet used on mobile) shares the same server query, card state
+and pagination reset:
 
 ```tsx
 <DataGridView
   // ...existing grid props
-  filterRow={false}
+  filterRow
   filterToolbarFields={['issuedDate', 'paymentState']}
   filterPresets={[
     { key: 'due', label: 'Por cobrar', field: 'paymentState', operator: '=', value: 'due' },

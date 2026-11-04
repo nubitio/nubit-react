@@ -146,7 +146,8 @@ export function OperatorFilterCell({
           variant="compact"
           showFieldLabel={false}
           menuMinWidth={220}
-          className="nb-datagrid__filter-operator"
+          triggerIcon="ph-funnel-simple"
+          className={`nb-datagrid__filter-operator${value ? ' is-filtering' : ''}`}
         />
       ) : (
         <i className="ph ph-magnifying-glass nb-datagrid__filter-icon" aria-hidden="true" />

@@ -214,6 +214,16 @@ describe('grid filter row per field type', () => {
     expect(container.querySelector('#nb-datagrid-filter-row-op-qty-value')).not.toBeNull();
   });
 
+  it('shows the operator as a funnel icon while keeping the operator in its accessible name', async () => {
+    const { container } = renderPage('/', createRef<FormHandle>(), http, loadSpy);
+    await waitFor(() => expect(container.textContent).toContain('Laptop'));
+
+    const trigger = container.querySelector('#nb-datagrid-filter-row-op-qty');
+    expect(trigger?.querySelector('.ph-funnel-simple')).not.toBeNull();
+    expect(trigger?.getAttribute('aria-label')).toMatch(/:/);
+    expect(trigger?.getAttribute('title')).toBe(trigger?.getAttribute('aria-label'));
+  });
+
   it('keeps element ids unique across the filter row and the other filter surfaces', async () => {
     const { container } = renderPage('/', createRef<FormHandle>(), http, loadSpy);
     await waitFor(() => expect(container.textContent).toContain('Laptop'));

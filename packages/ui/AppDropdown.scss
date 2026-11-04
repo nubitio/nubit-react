@@ -241,3 +241,14 @@
   display: inline-flex;
   flex-shrink: 0;
 }
+
+// Screen-reader-only text (used when a dropdown trigger shows just an icon).
+.nb-dropdown__value.nb-sr-only {
+  border: 0;
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

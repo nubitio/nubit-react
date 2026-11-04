@@ -87,6 +87,11 @@
   align-items: center;
   background: var(--surface-1);
   border-bottom: 1px solid var(--border-subtle);
+  // The panel keeps `overflow: visible` for portalled popovers, so it cannot clip its children:
+  // the header must round its own top corners (panel radius minus the 1px border) or its
+  // square background shows past the panel's rounded outline.
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
   display: flex;
   flex: 0 0 auto;
   gap: var(--space-2);

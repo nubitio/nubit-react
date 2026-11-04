@@ -723,7 +723,7 @@
     font-size: var(--font-size-xs);
     height: var(--grid-filter-height, 32px);
     min-height: var(--grid-filter-height, 32px);
-    padding: 4px 30px 4px 42px;
+    padding: 4px 30px 4px 34px;
 
     &:hover:not(.nb-date-range-picker__trigger--disabled) {
       background: transparent;
@@ -759,32 +759,37 @@
 
 // AppDropdown includes a field wrapper: use a descendant selector so the
 // operator stays positioned inside the filter cell rather than consuming width.
+// The trigger is a quiet funnel icon; the chosen operator stays in its label/tooltip, and
+// the icon takes the accent colour while the column is being filtered.
 .nb-datagrid__filter-wrap .nb-datagrid__filter-operator {
-  left: 5px;
+  left: 4px;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
+  width: 24px;
   z-index: 2;
 
   &.nb-dropdown .nb-dropdown__trigger {
+    align-items: center;
     appearance: none;
-    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent-color) 20%, transparent);
-    border-radius: 999px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
     box-shadow: none;
-    color: var(--accent-color);
-    font-size: 10px;
-    height: 26px;
+    color: var(--text-tertiary);
+    display: inline-flex;
+    font-size: var(--font-size-md);
+    height: 24px;
+    justify-content: center;
     line-height: 1;
-    min-height: 26px;
-    min-width: 30px;
-    padding: 0 3px;
-    text-align: center;
-    width: 30px;
+    min-height: 24px;
+    min-width: 24px;
+    padding: 0;
+    width: 24px;
 
     &:hover {
-      background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+      background: var(--surface-2);
+      color: var(--text-secondary);
     }
     &:focus-visible {
       outline: 2px solid var(--focus-ring-color);
@@ -792,32 +797,48 @@
     }
   }
 
+  &.is-filtering.nb-dropdown .nb-dropdown__trigger {
+    background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+    color: var(--accent-color);
+  }
+
   &.nb-dropdown .nb-dropdown__caret {
     display: none;
+  }
+
+  // The label remains for screen readers and the tooltip, not for the eye.
+  .nb-sr-only {
+    border: 0;
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 }
 
 .nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator) > .nb-datagrid__filter-input {
-  padding-left: 42px;
+  padding-left: 34px;
 }
 
 .nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator)
   > .nb-datagrid__filter-date
   .nb-date-picker__trigger {
-  padding-left: 42px;
+  padding-left: 34px;
 }
 
 .nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator)
   > .nb-datagrid__filter-range
   .nb-date-range-picker__trigger {
-  padding-left: 42px;
+  padding-left: 34px;
 }
 
 .nb-datagrid__filter-between-inputs {
   display: grid;
   gap: 2px;
   grid-template-rows: repeat(2, minmax(24px, auto));
-  padding-left: 42px;
+  padding-left: 34px;
   width: 100%;
 
   .nb-datagrid__filter-input {
@@ -830,7 +851,7 @@
 }
 
 .nb-datagrid__filter-wrap:has(.nb-datagrid__filter-operator) > .nb-datagrid__filter-between-inputs {
-  padding-left: 42px;
+  padding-left: 34px;
 }
 
 .nb-datagrid__filter-select {

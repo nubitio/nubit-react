@@ -854,6 +854,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const activeFilterCount = Object.values(filterInputs).filter(
     (value) => value.trim() !== '',
   ).length;
+  // With the header filter row on desktop, a lone "Filters" button only repeats it. Keep the bar
+  // where it adds something: preset chips, the mobile sheet, active filters to clear, or grids
+  // without a header row.
+  const hasFilterPresets = (options.filterPresets?.length ?? 0) > 0;
+  const showFiltersButton = !(options.filterRow ?? true) || isMobile || hasFilterPresets;
+  const showShortcutBar = showFiltersButton || activeFilterCount > 0;
   // Card field resolution: explicit `cardRole` hints win; otherwise the first
   // non-date column becomes the title and the next four become primary rows.
   const cardFields = visibleFields.filter((field) => field.cardRole !== 'hidden');
@@ -1085,7 +1091,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               />
             </div>
           )}
-          {options.filterToolbarFields && (
+          {options.filterToolbarFields && showShortcutBar && (
             <div className="nb-datagrid__filter-tools">
               <div
                 className="nb-datagrid__filter-shortcuts"
@@ -1112,10 +1118,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     }}
                   />
                 ))}
-                <Button size="sm" onClick={() => setFilterSheetOpen(true)}>
-                  {t('grid.filters')}
-                  {activeFilterCount ? ` (${activeFilterCount})` : ''}
-                </Button>
+                {showFiltersButton && (
+                  <Button size="sm" onClick={() => setFilterSheetOpen(true)}>
+                    {t('grid.filters')}
+                    {activeFilterCount ? ` (${activeFilterCount})` : ''}
+                  </Button>
+                )}
                 {activeFilterCount > 0 && (
                   <Button
                     size="sm"

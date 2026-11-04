@@ -33,6 +33,11 @@ export interface AppDropdownProps {
   menuHeader?: ReactNode;
   menuFooter?: ReactNode;
   onOpenChange?: (open: boolean) => void;
+  /**
+   * Renders the trigger as this icon alone. The selected label stays available to assistive
+   * technology and as the tooltip, so the current choice is never icon-only.
+   */
+  triggerIcon?: string;
 }
 
 export function AppDropdown({
@@ -54,6 +59,7 @@ export function AppDropdown({
   menuHeader,
   menuFooter,
   onOpenChange,
+  triggerIcon,
 }: AppDropdownProps) {
   const generatedId = useId();
   const id = idProp ?? generatedId;
@@ -62,6 +68,11 @@ export function AppDropdown({
   const selected = options.find((option) => option.value === value);
   const labelled = !!label && (showFieldLabel || variant === 'toolbar');
   const message = error ?? helpText;
+  const triggerIconClass = triggerIcon?.startsWith('ph ')
+    ? triggerIcon
+    : triggerIcon?.startsWith('ph-')
+      ? `ph ${triggerIcon}`
+      : `ph ph-${triggerIcon}`;
   const iconClass = icon?.startsWith('ph ')
     ? icon
     : icon?.startsWith('ph-')
@@ -116,13 +127,20 @@ export function AppDropdown({
               }
             }}
             aria-label={ariaLabel}
+            title={triggerIcon ? (ariaLabel ?? selected?.label) : undefined}
             aria-labelledby={
               ariaLabel ? undefined : labelled ? `${id}-label ${id}-value` : `${id}-value`
             }
             aria-describedby={message ? `${id}-message` : undefined}
             aria-invalid={!!error || undefined}
           >
-            <span className="nb-dropdown__value" id={`${id}-value`}>
+            {triggerIcon && (
+              <i className={`${triggerIconClass} nb-dropdown__trigger-icon`} aria-hidden="true" />
+            )}
+            <span
+              className={`nb-dropdown__value${triggerIcon ? ' nb-sr-only' : ''}`}
+              id={`${id}-value`}
+            >
               {selected?.selectedLabel ?? selected?.label ?? placeholder}
             </span>
             <i className="ph ph-caret-down nb-dropdown__caret" aria-hidden="true" />

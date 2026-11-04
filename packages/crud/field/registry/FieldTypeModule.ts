@@ -115,6 +115,12 @@ export interface FilterCellProps {
   onBetweenInputChange(start: string, end: string): void;
   onSelectChange(value: string): void;
   onOperatorChange(operator: string): void;
+  /**
+   * Distinguishes the same field's editor when the grid renders it in more than one place
+   * (header filter row, toolbar editors, filter sheet), so element ids stay unique. The
+   * filter sheet is the canonical instance and carries no scope.
+   */
+  idScope?: string;
 }
 
 /** Everything an inline detail-grid cell editor needs, supplied by the detail grid. */

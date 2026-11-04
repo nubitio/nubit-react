@@ -558,6 +558,7 @@
 .nb-datagrid__sort-button,
 .nb-datagrid__column-label {
   align-items: center;
+  min-height: 24px; // WCAG 2.5.8 minimum target
   color: inherit;
   display: inline-flex;
   font-size: inherit;

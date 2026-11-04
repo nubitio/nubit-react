@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge, type BadgeVariant } from '@nubitio/ui';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import { FilterValueDropdown } from '../filterHelpers';
+import { FilterValueDropdown, filterControlId } from '../filterHelpers';
 import { NativeEnumSelect } from '../../../form/LookupControls';
 import {
   defaultBuildFilterTerms,
@@ -61,20 +61,23 @@ export const enumTypeModule: FieldTypeModule = {
       onChange={(nextValue) => setFieldValue(field.name, nextValue)}
     />
   ),
-  FilterCellRender: ({ field, value, t, onSelectChange }) => (
-    <FilterValueDropdown
-      id={`nb-datagrid-filter-${field.name}`}
-      ariaLabel={t('grid.filterColumn', { column: field.label })}
-      value={value}
-      className="nb-datagrid__filter-select"
-      placeholder={t('grid.allFilter')}
-      options={(field.data ?? []).map((item) => ({
-        value: String(item['value'] ?? ''),
-        label: String(item['text'] ?? item['value'] ?? ''),
-      }))}
-      onChange={onSelectChange}
-    />
-  ),
+  FilterCellRender: (cell) => {
+    const { field, value, t, onSelectChange } = cell;
+    return (
+      <FilterValueDropdown
+        id={filterControlId(cell)}
+        ariaLabel={t('grid.filterColumn', { column: field.label })}
+        value={value}
+        className="nb-datagrid__filter-select"
+        placeholder={t('grid.allFilter')}
+        options={(field.data ?? []).map((item) => ({
+          value: String(item['value'] ?? ''),
+          label: String(item['text'] ?? item['value'] ?? ''),
+        }))}
+        onChange={onSelectChange}
+      />
+    );
+  },
   DetailCellRender: ({ field, value, errorClass, allowUpdating, onChange }) => (
     <NativeEnumSelect
       className={`nb-form__control${errorClass}`}

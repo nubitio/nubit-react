@@ -5,6 +5,15 @@ import type { FilterOperator } from './FieldTypeModule';
 
 export const FILTER_RESET_OPERATOR = '__reset_filter__';
 
+/** Unique element id for a filter control; see `FilterCellProps.idScope`. */
+export function filterControlId(
+  cell: Pick<FilterCellProps, 'field' | 'idScope'>,
+  kind: 'value' | 'operator' = 'value',
+): string {
+  const scope = cell.idScope ? `-${cell.idScope}` : '';
+  return `nb-datagrid-filter${scope}${kind === 'operator' ? '-op' : ''}-${cell.field.name}`;
+}
+
 export function getFilterOperatorLabel(value: string, t: FieldTranslator): string {
   switch (value) {
     case 'contains':
@@ -107,7 +116,7 @@ export function OperatorFilterCell({
     >
       {operators.length > 1 ? (
         <AppDropdown
-          id={`nb-datagrid-filter-op-${field.name}`}
+          id={filterControlId(cell, 'operator')}
           ariaLabel={`${t('grid.filterColumn', { column: field.label })}: ${getFilterOperatorLabel(operator, t)}`}
           value={operator}
           options={[

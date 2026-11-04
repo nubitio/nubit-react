@@ -550,9 +550,10 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     }
   };
 
-  const renderFilterCell = (field: Field) => (
+  const renderFilterCell = (field: Field, idScope?: string) => (
     <FilterCell
       field={field}
+      idScope={idScope}
       operator={operatorFor(field)}
       remoteOptions={filterRemoteOptions[field.name] ?? []}
       value={filterInputs[field.name] ?? ''}
@@ -1129,7 +1130,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   {toolbarFilterFields.map((field) => (
                     <div key={field.name} className="nb-datagrid__filter-editor">
                       <span className="nb-datagrid__sheet-label">{field.label}</span>
-                      {renderFilterCell(field)}
+                      {renderFilterCell(field, 'toolbar')}
                     </div>
                   ))}
                 </div>
@@ -1547,7 +1548,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                                 .join(' ') || undefined
                             }
                           >
-                            {field.filterable ? renderFilterCell(field) : null}
+                            {field.filterable ? renderFilterCell(field, 'row') : null}
                           </td>
                         );
                       })}

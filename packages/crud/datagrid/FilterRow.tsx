@@ -53,6 +53,7 @@ export function FilterCell({
   onBetweenInputChange,
   onSelectChange,
   onOperatorChange,
+  idScope,
 }: {
   field: Field;
   operator: string;
@@ -63,6 +64,7 @@ export function FilterCell({
   onBetweenInputChange: (start: string, end: string) => void;
   onSelectChange: (value: string) => void;
   onOperatorChange: (operator: string) => void;
+  idScope?: string;
 }) {
   const httpClient = useCoreHttpClient();
   const { t } = useCoreTranslation();
@@ -80,6 +82,7 @@ export function FilterCell({
     onBetweenInputChange,
     onSelectChange,
     onOperatorChange,
+    idScope,
   };
 
   return (

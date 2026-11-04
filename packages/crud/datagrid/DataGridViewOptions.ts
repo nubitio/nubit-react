@@ -109,7 +109,12 @@ export interface DataGridViewOptions {
   appearance?: 'panel' | 'page';
   /** Enum/entity fields exposed as quick chips, sharing the table's filters. */
   quickFilterFields?: string[];
-  /** Fields shown in a compact filter toolbar; mobile uses the filter sheet. */
+  /**
+   * Opts the grid into the shortcut bar (`filterPresets` chips and the "Filters" button) and
+   * keeps the listed fields filterable from the filter sheet even when their column is hidden.
+   * The boxed field editors this prop used to render above the table are gone: use `filterRow`
+   * for inline column filters.
+   */
   filterToolbarFields?: string[];
   /** Shortcuts applied to the same filter state as the row and sheet. */
   filterPresets?: { key: string; label: string; field: string; operator: string; value: string }[];

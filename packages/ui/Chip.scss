@@ -28,6 +28,8 @@
 
   // size: sm (default = md)
   &--sm {
+    // 24px keeps the target above the WCAG 2.5.8 minimum.
+    min-height: 24px;
     padding: 0.2rem 0.6rem;
     font-size: var(--font-size-xs);
     gap: 0.25rem;

@@ -4,7 +4,7 @@
 // Height system:
 //   .nb-button         min-height: --control-height (28px) — toolbar buttons
 //   .nb-button--form   min-height: --control-height-form (34px) — form submit actions
-//   .nb-button--sm     min-height: 22px — compact auxiliary actions
+//   .nb-button--sm     min-height: 24px — compact auxiliary actions (WCAG 2.5.8 minimum target)
 //
 // Border-radius: --radius-md (6px) — unified with input controls for visual harmony.
 // Font-size: --font-size-md (14px) — matches form labels, clear scan at arm's length.
@@ -128,7 +128,7 @@
 .nb-button--sm {
   font-size: var(--font-size-xs);
   letter-spacing: 0;
-  min-height: 22px;
+  min-height: 24px;
   padding: 0 var(--space-2);
 }
 

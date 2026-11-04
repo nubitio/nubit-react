@@ -1,6 +1,6 @@
 import React from 'react';
 import type { FieldTypeModule } from '../FieldTypeModule';
-import { FilterValueDropdown } from '../filterHelpers';
+import { FilterValueDropdown, filterControlId } from '../filterHelpers';
 import { defaultBuildFilterTerms, EQUALITY_OPERATORS, getEnumDisplayValue, KEEP } from '../shared';
 
 export const switchTypeModule: FieldTypeModule = {
@@ -32,18 +32,21 @@ export const switchTypeModule: FieldTypeModule = {
       <span className="nb-form__toggle-label">{field.label}</span>
     </label>
   ),
-  FilterCellRender: ({ field, value, t, onSelectChange }) => (
-    <FilterValueDropdown
-      id={`nb-datagrid-filter-${field.name}`}
-      ariaLabel={t('grid.filterColumn', { column: field.label })}
-      value={value}
-      className="nb-datagrid__filter-select"
-      placeholder={t('grid.allFilter')}
-      options={(field.data ?? []).map((item) => ({
-        value: String(item['value'] ?? ''),
-        label: String(item['text'] ?? item['value'] ?? ''),
-      }))}
-      onChange={onSelectChange}
-    />
-  ),
+  FilterCellRender: (cell) => {
+    const { field, value, t, onSelectChange } = cell;
+    return (
+      <FilterValueDropdown
+        id={filterControlId(cell)}
+        ariaLabel={t('grid.filterColumn', { column: field.label })}
+        value={value}
+        className="nb-datagrid__filter-select"
+        placeholder={t('grid.allFilter')}
+        options={(field.data ?? []).map((item) => ({
+          value: String(item['value'] ?? ''),
+          label: String(item['text'] ?? item['value'] ?? ''),
+        }))}
+        onChange={onSelectChange}
+      />
+    );
+  },
 };

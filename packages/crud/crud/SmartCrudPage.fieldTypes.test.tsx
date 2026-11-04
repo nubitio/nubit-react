@@ -209,9 +209,17 @@ describe('grid filter row per field type', () => {
     // DATE gets the date picker editor.
     expect(container.querySelector('.nb-datagrid__filter-date')).not.toBeNull();
     // ENUM gets the all-values dropdown (AppDropdown renders derived ids).
-    expect(container.querySelector('#nb-datagrid-filter-status-value')).not.toBeNull();
+    expect(container.querySelector('#nb-datagrid-filter-row-status-value')).not.toBeNull();
     // Comparison operator dropdowns exist for number columns.
-    expect(container.querySelector('#nb-datagrid-filter-op-qty-value')).not.toBeNull();
+    expect(container.querySelector('#nb-datagrid-filter-row-op-qty-value')).not.toBeNull();
+  });
+
+  it('keeps element ids unique across the filter row and the other filter surfaces', async () => {
+    const { container } = renderPage('/', createRef<FormHandle>(), http, loadSpy);
+    await waitFor(() => expect(container.textContent).toContain('Laptop'));
+
+    const ids = [...container.querySelectorAll('[id]')].map((element) => element.id);
+    expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);
   });
 });
 

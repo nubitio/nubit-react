@@ -68,6 +68,11 @@ export function AppDropdown({
   const selected = options.find((option) => option.value === value);
   const labelled = !!label && (showFieldLabel || variant === 'toolbar');
   const message = error ?? helpText;
+  const triggerIconClass = triggerIcon?.startsWith('ph ')
+    ? triggerIcon
+    : triggerIcon?.startsWith('ph-')
+      ? `ph ${triggerIcon}`
+      : `ph ph-${triggerIcon}`;
   const iconClass = icon?.startsWith('ph ')
     ? icon
     : icon?.startsWith('ph-')
@@ -130,10 +135,7 @@ export function AppDropdown({
             aria-invalid={!!error || undefined}
           >
             {triggerIcon && (
-              <i
-                className={`${triggerIcon.startsWith('ph') ? '' : 'ph '}${triggerIcon} nb-dropdown__trigger-icon`}
-                aria-hidden="true"
-              />
+              <i className={`${triggerIconClass} nb-dropdown__trigger-icon`} aria-hidden="true" />
             )}
             <span
               className={`nb-dropdown__value${triggerIcon ? ' nb-sr-only' : ''}`}

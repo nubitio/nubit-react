@@ -219,7 +219,7 @@ describe('grid filter row per field type', () => {
     await waitFor(() => expect(container.textContent).toContain('Laptop'));
 
     const trigger = container.querySelector('#nb-datagrid-filter-row-op-qty');
-    expect(trigger?.querySelector('.ph-funnel-simple')).not.toBeNull();
+    expect(trigger?.querySelector('i.ph.ph-funnel-simple')).not.toBeNull();
     expect(trigger?.getAttribute('aria-label')).toMatch(/:/);
     expect(trigger?.getAttribute('title')).toBe(trigger?.getAttribute('aria-label'));
   });

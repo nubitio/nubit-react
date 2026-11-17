@@ -1,5 +1,20 @@
 # `@nubitio/views` — composed screens
 
+> **Status: archived (2026-11-17). This package will not be built.**
+> `@nubitio/views` was a proposal for a new package of composed screens. The consuming app
+> (`nubit-erp`) decided against it: only one app would use it, every change would cost a
+> release cycle, and the owner does not want to maintain more libraries. The components are
+> built inside `nubit-erp` instead (`assets/shared/ui`), with no changes to this repo. See
+> `nubit-erp` ADR-019, amendment of 2026-11-17.
+>
+> Kept as a record. **Appendix A (spike results)** and the behaviour rules in §3–§4 are still
+> accurate and were reused as a checklist; the package boundaries, the wiring checklist and
+> the "export headless symbols from `crud`" prerequisite (§1–§2) no longer apply.
+>
+> One correction to the text below: it says the `@nubitio/*` packages are shared by every
+> Nubit product. Their consumers are `nubit-control`, `nubit-erp`, `nubit-erp-site` and
+> `aqp-net`; Inbox and Billing do not use them.
+
 Status: **proposal** (companion to `nubit-erp` ADR-019). Nothing here is
 implemented yet. Names marked _working name_ may change before the first
 pre-release.

@@ -51,7 +51,7 @@
   }
 
   &--active {
-    color: var(--accent-color);
+    color: var(--accent-on-subtle, var(--accent-color));
     background: var(--accent-subtle, color-mix(in srgb, var(--accent-color) 10%, #fff));
     box-shadow: var(--shadow-sm);
   }

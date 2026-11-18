@@ -52,7 +52,7 @@
   &:not(:disabled):focus-visible {
     background: var(--surface-1);
     border-color: var(--accent-color);
-    color: var(--accent-color);
+    color: var(--accent-on-subtle, var(--accent-color));
   }
 }
 

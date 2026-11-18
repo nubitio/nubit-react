@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   RadioGroup,
+  SegmentedControl,
   Tabs,
   Spinner,
   Progress,
@@ -86,6 +87,7 @@ export function ShowcasePage() {
   const [updates, setUpdates] = useState(true);
   const [channel, setChannel] = useState('email');
   const [activeTab, setActiveTab] = useState('general');
+  const [displayMode, setDisplayMode] = useState('list');
   const [country, setCountry] = useState<string | null>('pe');
   const [countries, setCountries] = useState(['pe']);
   const [contact, setContact] = useState<string | null>(null);
@@ -203,6 +205,18 @@ export function ShowcasePage() {
                 <i className="ph ph-plus" /> With icon
               </Button>
             </div>
+          </section>
+          <section className="showcase__section">
+            <h2>Segmented control</h2>
+            <SegmentedControl
+              ariaLabel="Display mode"
+              value={displayMode}
+              onChange={setDisplayMode}
+              options={[
+                { value: 'list', label: 'List' },
+                { value: 'grid', label: 'Grid' },
+              ]}
+            />
           </section>
 
           <section className="showcase__section">

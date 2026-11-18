@@ -5,6 +5,58 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`${colorScheme} UI controls`, () => {
     test.use({ colorScheme });
 
+    test('selected segmented control and secondary hover text meet WCAG AA contrast', async ({
+      page,
+    }) => {
+      await page.goto('/showcase?visualStyle=nubit', { waitUntil: 'networkidle' });
+
+      const activeSegment = page.getByRole('group', { name: 'Display mode' }).getByRole('button', {
+        name: 'List',
+      });
+      await expect(activeSegment).toHaveAttribute('aria-pressed', 'true');
+      const secondary = page.getByRole('button', { name: 'Secondary', exact: true });
+      await secondary.hover();
+
+      const contrast = await page.evaluate(() => {
+        const ratio = (foreground: string, background: string) => {
+          const luminance = (color: string) => {
+            const channels =
+              color
+                .match(/[\d.]+/g)
+                ?.slice(0, 3)
+                .map(Number) ?? [];
+            const [r, g, b] = channels.map((channel) => {
+              const normalized = channel / 255;
+              return normalized <= 0.04045
+                ? normalized / 12.92
+                : ((normalized + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          };
+          const [lighter, darker] = [luminance(foreground), luminance(background)].sort(
+            (a, b) => b - a,
+          );
+          return (lighter + 0.05) / (darker + 0.05);
+        };
+        const colors = (selector: string) => {
+          const element = document.querySelector<HTMLElement>(selector);
+          if (!element) throw new Error(`Missing element: ${selector}`);
+          const style = getComputedStyle(element);
+          return { color: style.color, background: style.backgroundColor };
+        };
+
+        const active = colors('.nb-segmented-control__btn--active');
+        const secondaryHover = colors('.nb-button--secondary');
+        return {
+          active: ratio(active.color, active.background),
+          secondaryHover: ratio(secondaryHover.color, secondaryHover.background),
+        };
+      });
+
+      expect(contrast.active).toBeGreaterThanOrEqual(4.5);
+      expect(contrast.secondaryHover).toBeGreaterThanOrEqual(4.5);
+    });
+
     test('mobile selection cards and popups fit the available width', async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 800 });
       await page.goto('/showcase', { waitUntil: 'networkidle' });

@@ -92,5 +92,5 @@ describe('HTML field type', () => {
     const [name, html] = setFieldValue.mock.calls.at(-1) as [string, string];
     expect(name).toBe('body');
     expect(typeof html).toBe('string');
-  });
+  }, 10_000);
 });

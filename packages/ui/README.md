@@ -52,11 +52,14 @@ alongside the existing `--surface-*`, `--text-*`, etc. component vocabulary;
 consumers do not need to rewrite existing components. Source design:
 `m124loXKRsHFvZcrYkoTbk`, semantic-token frame `11:341`.
 
-- **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
-- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`
-- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`, `TimePicker`
+- **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `KpiMetricRow`, `Card`, `Alert`, `CollapsibleSection`, `FeatureGate`
+- **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`, `SearchableAppDropdown`, `useFloatingPanel`, `useConfirm`
+- **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `FileDropzone`, `DatePicker`, `DateRangePicker`, `TimePicker`
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`
-- **Layout** — `AppToolbar`
+- **Layout** — `Page`, `PageHeader`, `Stack`, `Row`, `Cluster`, `Grid`, `Col`, `Section`, `FormLayout`, `FormActions`, `AppToolbar`
+- **Data display** — `DataTable`, `Pagination`, `RowActions`, `DescriptionList`, `Timeline`, `FilterPanel`, `HubPanel`, `OperationCardGrid`, `Code`, `Text`
+- **Navigation** — `ScopeTabs`, `SegmentedControl`
+- **i18n** — `UiStringsProvider`, `EN_UI_STRINGS`, `ES_UI_STRINGS`
 - **Selection and navigation** — `Checkbox` (native, including mixed state), `RadioGroup` (native radios), `Tabs` (controlled, keyboard navigation)
 - **Loading** — `Spinner`, `Progress` (native determinate or indeterminate progress)
 

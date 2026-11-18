@@ -11,8 +11,8 @@
  * So the control test here is not decoration: awaiting the editor is the only
  * thing that proves the lazy boundary still resolves.
  */
-import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Suspense } from 'react';
 import { FieldType } from '../../FieldType';
 import { getFieldTypeModule } from '../registry';
@@ -22,6 +22,8 @@ import type { FieldControlProps } from '../FieldTypeModule';
 const mod = getFieldTypeModule(FieldType.HTML);
 
 const field = (): Field => ({ name: 'body', label: 'Body', type: FieldType.HTML }) as Field;
+
+afterEach(cleanup);
 
 describe('HTML field type', () => {
   it('reduces stored markup to plain text for the grid and the filter', () => {

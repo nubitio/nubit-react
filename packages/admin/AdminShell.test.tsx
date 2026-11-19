@@ -27,7 +27,7 @@ const items: AdminMenuItem[] = [
 
 function Shell({ children }: { children?: React.ReactNode }) {
   return (
-    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter>
       <AdminShell title="Test App" menuItems={items}>
         {children ?? <div>main content</div>}
       </AdminShell>
@@ -191,7 +191,7 @@ describe('AdminShell slots', () => {
 
   it('renders footer slot', () => {
     render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter>
         <AdminShell title="T" menuItems={[]} footer={<span>My Footer</span>}>
           content
         </AdminShell>
@@ -202,7 +202,7 @@ describe('AdminShell slots', () => {
 
   it('renders theme switcher slot', () => {
     render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter>
         <AdminShell
           title="T"
           menuItems={[]}

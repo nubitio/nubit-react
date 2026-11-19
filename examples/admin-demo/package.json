@@ -16,27 +16,27 @@
     "@fontsource/inter": "^5.3.0",
     "@fontsource/lexend": "^5.3.0",
     "@fontsource/syne": "^5.3.0",
-    "@nubitio/devextreme": "workspace:*",
     "@nubitio/core": "workspace:*",
+    "@nubitio/devextreme": "workspace:*",
     "@nubitio/react-admin": "workspace:*",
     "@nubitio/ui": "workspace:*",
     "@phosphor-icons/web": "^2.1.2",
     "@tanstack/react-query": "^5.108.0",
     "devextreme": "^26.1.6",
-    "devextreme-react": "^24.2.16",
-    "i18next": "^23.16.8",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "react-i18next": "^15.7.4",
-    "react-router-dom": "^6.30.6"
+    "devextreme-react": "^26.1.6",
+    "i18next": "^27.2.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.3",
+    "react-router-dom": "^7.18.6"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^4.7.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.4.3"
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8"
   }
 }

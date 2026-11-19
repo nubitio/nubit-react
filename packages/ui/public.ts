@@ -182,3 +182,8 @@ export type { TimePickerProps } from './TimePicker';
 
 export { DetailLayout } from './DetailLayout';
 export type { DetailLayoutProps } from './DetailLayout';
+
+export { TreeList } from './TreeList';
+export type { TreeListColumn, TreeListMoveEvent, TreeListProps } from './TreeList';
+export { buildTreeListModel, flattenVisibleTree, getDescendantIds } from './treeListModel';
+export type { TreeListModelOptions, TreeNode, TreeNodeId } from './treeListModel';

@@ -15,6 +15,7 @@ import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { CrudDrawerSize } from '../view/drawerSizes';
 import type { DetailSummaryOptions, SummaryItem } from '../summary';
 import type { CardViewConfig } from '../datagrid/CardView';
+import type { TreeListViewConfig } from '../datagrid/DataGridViewOptions';
 
 /**
  * URL-based deep-linking and filter sync configuration for SmartCrudPage.
@@ -211,6 +212,8 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   mode?: 'normal' | 'minimal';
   paging?: boolean;
   cardView?: CardViewConfig;
+  /** Native hierarchical renderer for parent-linked or nested resources. */
+  treeList?: TreeListViewConfig;
   gridAppearance?: 'panel' | 'page';
   quickFilterFields?: string[];
   /** Show the inline column filter row in the grid header. */

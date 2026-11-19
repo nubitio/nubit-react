@@ -29,6 +29,7 @@ import {
   ThemeSwitcher,
   Timeline,
   TimelineItem,
+  TreeList,
   Toggle,
 } from '@nubitio/react-admin';
 import type { ComboboxLoader } from '@nubitio/react-admin';
@@ -45,6 +46,26 @@ const contacts = [
   { value: 'grace', label: 'Grace Hopper' },
   { value: 'linus', label: 'Linus Torvalds' },
   { value: 'margaret', label: 'Margaret Hamilton' },
+];
+const accountTree = [
+  {
+    id: '1',
+    code: '1',
+    name: 'Assets',
+    children: [
+      {
+        id: '11',
+        code: '11',
+        name: 'Current assets',
+        children: [
+          { id: '1101', code: '1101', name: 'Cash and cash equivalents' },
+          { id: '1102', code: '1102', name: 'Accounts receivable' },
+        ],
+      },
+      { id: '12', code: '12', name: 'Non-current assets' },
+    ],
+  },
+  { id: '2', code: '2', name: 'Liabilities' },
 ];
 
 /** In-memory async provider keeps the showcase usable without a demo server. */
@@ -296,6 +317,19 @@ export function ShowcasePage() {
           </section>
 
           <section className="showcase__section showcase__section--wide">
+            <h2>Hierarchical data</h2>
+            <TreeList
+              ariaLabel="Chart of accounts example"
+              items={accountTree}
+              getId={(account) => account.id}
+              getChildren={(account) => account.children}
+              columns={[
+                { id: 'code', header: 'Code', width: 120 },
+                { id: 'name', header: 'Account', sortable: true },
+              ]}
+              defaultExpandedIds={new Set(['1', '11'])}
+            />
+
             <h2>Timelines</h2>
             <Timeline variant="stepper" orientation="horizontal" aria-label="Checkout steps">
               <TimelineItem status="complete" title="Cart" marker={<i className="ph ph-check" />} />

@@ -93,4 +93,29 @@ describe('useGridDataLoader', () => {
     expect(hook.current.gridSummary).toEqual({ amount: 10 });
     expect(load).not.toHaveBeenCalled();
   });
+
+  it('appends hierarchy root terms to the active server filters', async () => {
+    const load = vi.fn().mockResolvedValue(result(1));
+    const source = { load } as ResourceStore;
+    const fields: Field[] = [];
+
+    renderHook(() =>
+      useGridDataLoader({
+        source,
+        fields,
+        filters: {},
+        filterOperators: {},
+        sort: [],
+        page: 0,
+        pageSize: 20,
+        paging: true,
+        manualLoad: false,
+        extraFilter: [['parentId', '=', null]],
+        onContentReady: () => {},
+      }),
+    );
+
+    await waitFor(() => expect(load).toHaveBeenCalledOnce());
+    expect(load.mock.calls[0]?.[0].filter).toEqual([['parentId', '=', null]]);
+  });
 });

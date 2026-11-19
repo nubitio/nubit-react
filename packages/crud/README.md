@@ -111,6 +111,47 @@ section; duplicate assignments mount only once. `renderAfter` receives read-only
 current form data and must not perform side effects. It can display summaries,
 but pricing/tax/stock rules remain in the application and backend.
 
+### Hierarchical resources
+
+Use the native TreeList for parent-linked resources such as a chart of accounts,
+categories or warehouses. The collection endpoint must support filtering root
+records by the configured parent field; child collections are loaded lazily
+through the resource store using that same field. Hydra serializes filter
+tuples directly. Plain REST filters are intentionally ignored by default, so
+configure `createRestResourceStore`'s `serializeFilter` callback to translate
+them into the endpoint's query dialect:
+
+```tsx
+const accounts = defineResource('/api/accounts', {
+  title: 'Chart of accounts',
+  fields: [
+    textField('code').label('Code'),
+    textField('name').label('Account'),
+    textField('parentId').hidden(),
+    checkboxField('hasChildren').hidden(),
+  ],
+  treeList: {
+    parentIdField: 'parentId',
+    hasChildrenField: 'hasChildren',
+    rootValue: null,
+    onMove: async ({ item, newParent, index }) => {
+      // Call the application's validated move operation.
+    },
+  },
+});
+```
+
+`TreeList` uses the resource's identity field as node ID, applies ordinary
+resource filters/sort to root and child loads, shares CRUD row actions and
+permission checks, and reports hierarchical selection to the page. Set
+`childrenField` instead when the API returns nested children. Reparenting is
+disabled unless `treeList.onMove` is supplied; the backend remains responsible
+for cycle prevention, account/posting rules and persistence. The configured
+`parentIdField` must expose scalar parent IDs (not serialized relation objects).
+Child loading follows server pages (`childrenPageSize`, default 500) and fails
+explicitly at `maxChildren` (default 10,000) rather than silently truncating a
+large branch.
+
 Page mode already has a persistent footer. `formPage` extends that footer rather
 than adding a second save flow; saving disables its built-in actions. Wire both
 list and record routes with `crudRoute()` and `routing.routeParam` when using

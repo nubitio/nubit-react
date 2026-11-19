@@ -177,6 +177,7 @@ export {
 } from './view';
 export type {
   CrudDataGridView,
+  CrudDataGridView as CrudTreeListView,
   CrudFormView,
   CrudFormShellProps,
   CrudViewComponents,
@@ -233,6 +234,7 @@ export type {
   DataGridSelectionChangedEvent,
   DataGridSummaryItem,
   DataGridViewOptions,
+  TreeListViewConfig,
 } from './datagrid/DataGridViewOptions';
 export type {
   ColumnGroupDef,

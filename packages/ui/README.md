@@ -59,6 +59,50 @@ consumers do not need to rewrite existing components. Source design:
 - **Layout** — `AppToolbar`
 - **Selection and navigation** — `Checkbox` (native, including mixed state), `RadioGroup` (native radios), `Tabs` (controlled, keyboard navigation)
 - **Loading** — `Spinner`, `Progress` (native determinate or indeterminate progress)
+- **Hierarchical data** — `TreeList` (flat `parentId` or nested data, expansion, lazy child loading, selection, filtering, sorting, row actions, inline edit hooks and row move callbacks)
+
+### TreeList
+
+`TreeList` is a framework-owned, renderer-neutral hierarchical table. It has no
+DevExtreme dependency. Give it flat parent-linked records, nested records, or
+independent roots in either shape:
+
+```tsx
+<TreeList
+  ariaLabel="Chart of accounts"
+  items={accounts}
+  getId={(account) => account.id}
+  getParentId={(account) => account.parentId}
+  columns={[
+    { id: 'code', header: 'Code', sortable: true },
+    { id: 'name', header: 'Account', sortable: true },
+  ]}
+  hasChildren={(account) => account.hasChildren}
+  loadChildren={(account, { signal }) => accountStore.loadChildren(account.id, { signal })}
+  withParent={(child, parent) => ({ ...child, parentId: parent.id })}
+  selectionMode="multiple"
+  onMove={({ item, newParent, index }) => moveAccount(item, newParent, index)}
+/>
+```
+
+Flat records need unique IDs and a parent ID for every non-root node. Missing
+parents, duplicate IDs and cycles throw instead of silently hiding records.
+Nested records use `getChildren`; do not supply both nested children and a
+`parentId` relationship for the same node. Lazy loading receives an
+`AbortSignal`; pass `withParent` when returned flat children do not include their
+own parent ID. Expansion and selection can be controlled by the consumer or
+managed internally.
+
+Selection can include loaded descendants. Sorting and search apply to loaded
+records; server-backed query semantics remain the responsibility of the CRUD
+resource integration. `editable` and `onEdit` provide an inline-edit hook, while
+`onMove` reports a proposed parent and index—the application/backend must
+validate and persist the move. This keeps domain rules (such as account posting
+levels or warehouse constraints) out of the visual component.
+
+The component uses semantic table/treegrid markup, keyboard row navigation,
+theme tokens, density settings and localized UI strings. Custom cell renderers
+and row action menus allow applications to establish their own visual language.
 
 ### Selection, tabs and loading
 

@@ -49,6 +49,38 @@ describe('createRestResourceStore', () => {
     expect(url.searchParams.get('q')).toBe('foo');
   });
 
+  it('serializes TreeList root/child filters when the REST dialect configures it', async () => {
+    const calls = stubFetch(() => ({ body: { items: [], total: 0 } }));
+    const store = createRestResourceStore({
+      serializeFilter: (filter) => ({
+        filter: JSON.stringify(filter),
+      }),
+    })({ url: '/api/accounts', idField: 'id' });
+
+    await store.load({
+      filter: [['parentId', '=', null]],
+      sort: [{ selector: 'code', desc: false }],
+      skip: 0,
+      take: 500,
+    });
+    await store.load({
+      filter: [['parentId', '=', 42]],
+      sort: [{ selector: 'code', desc: false }],
+      skip: 500,
+      take: 500,
+    });
+
+    const root = new URL(calls[0], 'http://test');
+    expect(JSON.parse(root.searchParams.get('filter')!)).toEqual([['parentId', '=', null]]);
+    expect(root.searchParams.get('page')).toBe('1');
+    expect(root.searchParams.get('pageSize')).toBe('500');
+
+    const children = new URL(calls[1], 'http://test');
+    expect(JSON.parse(children.searchParams.get('filter')!)).toEqual([['parentId', '=', 42]]);
+    expect(children.searchParams.get('page')).toBe('2');
+    expect(children.searchParams.get('sort')).toBe('code');
+  });
+
   it('reads totals from arrays, X-Total-Count and enveloped bodies', async () => {
     const factory = createRestResourceStore();
 

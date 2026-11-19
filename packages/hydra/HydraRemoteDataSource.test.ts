@@ -132,6 +132,43 @@ describe('HydraRemoteDataSource.makeFilterRules', () => {
 // ── load ──────────────────────────────────────────────────────────────────────
 
 describe('HydraRemoteDataSource.load', () => {
+  it('passes TreeList root and child filters through the Hydra query dialect', async () => {
+    const requests: Array<{ params?: Record<string, unknown> }> = [];
+    const get = vi.fn(async (_url: string, config?: { params?: Record<string, unknown> }) => {
+      requests.push(config ?? {});
+      return {
+        data: { 'hydra:member': [], 'hydra:totalItems': 0 },
+        headers: new Headers(),
+      };
+    });
+    const ds = makeSource({ httpClient: { get } as unknown as CoreHttpClient });
+
+    await ds.load({
+      filter: [['parentId', '=', null]],
+      sort: [{ selector: 'code', desc: false }],
+      skip: 0,
+      take: 500,
+    });
+    expect(requests[0]?.params).toMatchObject({
+      filter: [['parentId', '=', null]],
+      sort: [{ selector: 'code', desc: false }],
+      page: 1,
+      itemsPerPage: 500,
+    });
+
+    await ds.load({
+      filter: [['parentId', '=', 42]],
+      sort: [{ selector: 'code', desc: false }],
+      skip: 500,
+      take: 500,
+    });
+    expect(requests[1]?.params).toMatchObject({
+      filter: [['parentId', '=', 42]],
+      page: 2,
+      itemsPerPage: 500,
+    });
+  });
+
   protocolFixtures.responseCases.forEach((fixture) => {
     it(`satisfies protocol fixture: ${fixture.name}`, async () => {
       const httpClient = {

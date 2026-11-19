@@ -16,6 +16,7 @@ interface GridDataLoaderOptions {
   manualLoad: boolean;
   data?: DataRecord[];
   suppliedGridSummary?: Record<string, unknown> | null;
+  extraFilter?: unknown[][];
   onContentReady: () => void;
 }
 
@@ -35,6 +36,7 @@ export function useGridDataLoader({
   manualLoad,
   data,
   suppliedGridSummary,
+  extraFilter,
   onContentReady,
 }: GridDataLoaderOptions) {
   const [rows, setRows] = useState<DataRecord[]>([]);
@@ -60,7 +62,7 @@ export function useGridDataLoader({
     setIsLoading(true);
     const sequence = ++loadSequence.current;
     const loadOptions: ResourceLoadOptions = {
-      filter: buildFilterExpression(filters, filterOperators, fields),
+      filter: [...buildFilterExpression(filters, filterOperators, fields), ...(extraFilter ?? [])],
       sort,
     };
     if (paging) {
@@ -92,6 +94,7 @@ export function useGridDataLoader({
   }, [
     data,
     fields,
+    extraFilter,
     filterOperators,
     filters,
     manualLoad,

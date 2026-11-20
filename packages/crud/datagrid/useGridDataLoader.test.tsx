@@ -4,6 +4,7 @@ import type { DataRecord } from '@nubitio/core';
 import type { ResourceLoadResult, ResourceStore } from '../data/ResourceStore';
 import type { Field } from '../field/Field';
 import { useGridDataLoader } from './useGridDataLoader';
+import { textField } from '../field/FieldBuilders';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -21,6 +22,44 @@ const result = (id: number): ResourceLoadResult<DataRecord> => ({
 });
 
 describe('useGridDataLoader', () => {
+  it('sends multi-field quick search alongside column filters and pagination', async () => {
+    const load = vi.fn().mockResolvedValue(result(1));
+    const source = { load } as ResourceStore;
+    const search = { searchExpr: ['name', 'code'], searchValue: 'acme' };
+    const fields = [textField().name('status').build()];
+    const filters = { status: 'active' };
+    const filterOperators = { status: '=' };
+    const sort: Array<{ selector: string; desc: boolean }> = [];
+    const onContentReady = () => {};
+
+    renderHook(() =>
+      useGridDataLoader({
+        source,
+        fields,
+        filters,
+        filterOperators,
+        sort,
+        page: 1,
+        pageSize: 20,
+        paging: true,
+        manualLoad: false,
+        search,
+        onContentReady,
+      }),
+    );
+
+    await waitFor(() =>
+      expect(load).toHaveBeenCalledWith({
+        filter: [['status', '=', 'active']],
+        sort: [],
+        skip: 20,
+        take: 20,
+        searchExpr: ['name', 'code'],
+        searchValue: 'acme',
+      }),
+    );
+  });
+
   it('keeps the newest response when an older request finishes last', async () => {
     const first = deferred<ResourceLoadResult>();
     const second = deferred<ResourceLoadResult>();
@@ -92,5 +131,30 @@ describe('useGridDataLoader', () => {
     await waitFor(() => expect(hook.current.rows).toEqual(data));
     expect(hook.current.gridSummary).toEqual({ amount: 10 });
     expect(load).not.toHaveBeenCalled();
+  });
+
+  it('appends hierarchy root terms to the active server filters', async () => {
+    const load = vi.fn().mockResolvedValue(result(1));
+    const source = { load } as ResourceStore;
+    const fields: Field[] = [];
+
+    renderHook(() =>
+      useGridDataLoader({
+        source,
+        fields,
+        filters: {},
+        filterOperators: {},
+        sort: [],
+        page: 0,
+        pageSize: 20,
+        paging: true,
+        manualLoad: false,
+        extraFilter: [['parentId', '=', null]],
+        onContentReady: () => {},
+      }),
+    );
+
+    await waitFor(() => expect(load).toHaveBeenCalledOnce());
+    expect(load.mock.calls[0]?.[0].filter).toEqual([['parentId', '=', null]]);
   });
 });

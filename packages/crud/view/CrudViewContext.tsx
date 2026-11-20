@@ -16,11 +16,14 @@ export type CrudFormView = ForwardRefExoticComponent<FormViewOptions & RefAttrib
 
 export interface CrudViewComponents {
   DataGridView: CrudDataGridView;
+  /** Native hierarchical view; adapter providers can override it independently. */
+  TreeListView: CrudDataGridView;
   FormView: CrudFormView;
 }
 
 const defaultViews: CrudViewComponents = {
   DataGridView: NativeDataGridView,
+  TreeListView: NativeDataGridView,
   FormView: NativeFormView,
 };
 
@@ -36,9 +39,10 @@ export function CrudViewProvider({ children, views }: CrudViewProviderProps) {
   const value = useMemo(
     () => ({
       DataGridView: views?.DataGridView ?? defaultViews.DataGridView,
+      TreeListView: views?.TreeListView ?? defaultViews.TreeListView,
       FormView: views?.FormView ?? defaultViews.FormView,
     }),
-    [views?.DataGridView, views?.FormView],
+    [views?.DataGridView, views?.TreeListView, views?.FormView],
   );
 
   return <CrudViewContext.Provider value={value}>{children}</CrudViewContext.Provider>;

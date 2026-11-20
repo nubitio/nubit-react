@@ -162,6 +162,35 @@ afterEach(() => {
 });
 
 describe('CRUD engine ↔ RestAdapter wiring', () => {
+  it('keeps column filters without adding another search box to page-style tables', async () => {
+    renderPage('/', createRef<FormHandle>(), http, loadSpy, {
+      ...resource,
+      gridAppearance: 'page',
+      filterRow: true,
+    });
+
+    expect(await screen.findByRole('textbox', { name: 'Filter Name' })).not.toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
+  });
+
+  it('wires configured search and compact density through to the card grid', async () => {
+    const { container } = renderPage('/', createRef<FormHandle>(), http, loadSpy, {
+      ...resource,
+      cardView: { defaultView: 'cards', density: 'compact' },
+      filterRow: false,
+      quickSearch: { searchExpr: ['name', 'sku'], placeholder: 'Find a product' },
+    });
+
+    const input = await screen.findByRole('searchbox', { name: 'Find a product' });
+    expect(container.querySelector('.nb-datagrid--cards-compact')).not.toBeNull();
+    fireEvent.change(input, { target: { value: 'Laptop' } });
+    await waitFor(() =>
+      expect(loadSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ searchExpr: ['name', 'sku'], searchValue: 'Laptop', filter: [] }),
+      ),
+    );
+  });
+
   it('hydrates a page-mode deep link before editing and does not reload on field changes', async () => {
     const formRef = createRef<FormHandle>();
     http.get.mockResolvedValue(okResponse({ id: 7, name: 'Loaded product' }));

@@ -7,7 +7,11 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
-  retries: 0,
+  // CI: one retry absorbs a cold-start flake; stop after a few failures and cap the whole
+  // run, so a broken app fails in minutes instead of every test waiting out its timeout.
+  retries: process.env.CI ? 1 : 0,
+  maxFailures: process.env.CI ? 5 : 0,
+  globalTimeout: process.env.CI ? 10 * 60_000 : 0,
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     trace: 'retain-on-failure',

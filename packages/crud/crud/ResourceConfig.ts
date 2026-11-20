@@ -15,6 +15,8 @@ import type { BackendAdapter } from '../adapter/BackendAdapter';
 import type { CrudDrawerSize } from '../view/drawerSizes';
 import type { DetailSummaryOptions, SummaryItem } from '../summary';
 import type { CardViewConfig } from '../datagrid/CardView';
+import type { GridQuickSearchConfig } from '../datagrid/GridQuickSearch';
+import type { TreeListViewConfig } from '../datagrid/DataGridViewOptions';
 
 /**
  * URL-based deep-linking and filter sync configuration for SmartCrudPage.
@@ -211,10 +213,14 @@ export interface ResourceConfig<T extends DataRecord = DataRecord> {
   mode?: 'normal' | 'minimal';
   paging?: boolean;
   cardView?: CardViewConfig;
+  /** Native hierarchical renderer for parent-linked or nested resources. */
+  treeList?: TreeListViewConfig;
   gridAppearance?: 'panel' | 'page';
   quickFilterFields?: string[];
   /** Show the inline column filter row in the grid header. */
   filterRow?: boolean;
+  /** Multi-field quick search; false disables the automatic single-field search in cards. */
+  quickSearch?: GridQuickSearchConfig | false;
   /** See `DataGridViewOptions.filterToolbarFields`: shortcut bar plus sheet-only fields. */
   filterToolbarFields?: string[];
   /** Shortcuts applied to the same filter state as the row and sheet. */

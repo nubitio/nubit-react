@@ -177,6 +177,7 @@ export {
 } from './view';
 export type {
   CrudDataGridView,
+  CrudDataGridView as CrudTreeListView,
   CrudFormView,
   CrudFormShellProps,
   CrudViewComponents,
@@ -233,6 +234,7 @@ export type {
   DataGridSelectionChangedEvent,
   DataGridSummaryItem,
   DataGridViewOptions,
+  TreeListViewConfig,
 } from './datagrid/DataGridViewOptions';
 export type {
   ColumnGroupDef,
@@ -303,3 +305,4 @@ export type {
 export type { DataRecord } from '@nubitio/core';
 export type { GridData } from '@nubitio/core';
 export type { CardViewConfig, CardViewContext } from './datagrid/CardView';
+export type { GridQuickSearchConfig } from './datagrid/GridQuickSearch';

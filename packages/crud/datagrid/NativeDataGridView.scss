@@ -1765,6 +1765,39 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   }
 }
 
+.nb-datagrid--cards-compact {
+  .nb-datagrid__cards {
+    gap: var(--space-2);
+  }
+
+  .nb-datagrid__card-body,
+  .nb-datagrid__card--skeleton {
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .nb-datagrid__card--media {
+    .nb-datagrid__card-body {
+      padding: 0;
+    }
+
+    .nb-datagrid__card-copy {
+      padding: var(--space-2);
+    }
+  }
+
+  .nb-datagrid__card-media {
+    height: 96px;
+  }
+
+  @media (min-width: 768px) {
+    .nb-datagrid__cards {
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+      padding: var(--space-2);
+    }
+  }
+}
+
 .nb-datagrid__card-title {
   color: var(--text-primary);
   font-size: var(--font-size-sm);

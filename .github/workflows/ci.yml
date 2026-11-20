@@ -12,6 +12,8 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # A healthy run takes ~3 min; cap it so a hang cannot hold the PR for hours.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -60,6 +62,9 @@ jobs:
   e2e:
     name: E2E + accessibility (WCAG 2.1 AA)
     runs-on: ubuntu-latest
+    # ~3 min when healthy. Without a cap, a broken app made all 50 tests wait out their
+    # 60 s timeout (~25 min) before failing.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
 

@@ -1,5 +1,13 @@
 import { forwardRef } from 'react';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  ComponentPropsWithoutRef,
+  ElementType,
+  MouseEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+} from 'react';
 import './Button.scss';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
@@ -78,3 +86,74 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     </button>
   );
 });
+
+interface ButtonLinkOwnProps {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  icon?: string;
+  /** Renders a non-interactive, `aria-disabled` link. */
+  disabled?: boolean;
+  children?: ReactNode;
+}
+
+export type ButtonLinkProps<C extends ElementType = 'a'> = ButtonLinkOwnProps & {
+  /**
+   * Element or component to render, e.g. a router `Link`. Defaults to `a`. Its own
+   * props (`to`, …) are accepted alongside.
+   */
+  as?: C;
+} & Omit<ComponentPropsWithoutRef<C>, keyof ButtonLinkOwnProps | 'as'>;
+
+type ButtonLinkComponent = <C extends ElementType = 'a'>(
+  props: ButtonLinkProps<C> & { ref?: Ref<Element> },
+) => ReactElement | null;
+
+/** A link that looks like a `Button`: use it for navigation, `Button` for actions. */
+export const ButtonLink = forwardRef(function ButtonLink(
+  {
+    variant = 'secondary',
+    size = 'md',
+    fullWidth = false,
+    icon,
+    disabled = false,
+    as,
+    className,
+    children,
+    onClick,
+    ...props
+  }: ButtonLinkProps<ElementType> & {
+    className?: string;
+    onClick?: (e: MouseEvent<HTMLElement>) => void;
+  },
+  ref: Ref<Element>,
+) {
+  const Component: ElementType = as ?? 'a';
+  return (
+    <Component
+      {...props}
+      ref={ref}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : props.tabIndex}
+      onClick={(event: MouseEvent<HTMLElement>) => {
+        if (disabled) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
+      className={cx(
+        'nb-button',
+        'nb-button--link',
+        `nb-button--${variant}`,
+        size === 'sm' && 'nb-button--sm',
+        fullWidth && 'nb-button--full',
+        disabled && 'nb-button--disabled',
+        className,
+      )}
+    >
+      {icon ? <i className={icon} aria-hidden="true" /> : null}
+      {children}
+    </Component>
+  );
+}) as ButtonLinkComponent;

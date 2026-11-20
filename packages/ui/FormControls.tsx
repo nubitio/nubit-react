@@ -15,6 +15,11 @@ export interface FormFieldProps extends LabelHTMLAttributes<HTMLLabelElement> {
   label?: ReactNode;
   error?: ReactNode;
   helpText?: ReactNode;
+  /**
+   * Marks the label with a required asterisk. Visual only: also set `required`
+   * on the control itself so assistive tech and native validation know.
+   */
+  required?: boolean;
   children: ReactNode;
 }
 
@@ -22,12 +27,17 @@ export const FormField = ({
   label,
   error,
   helpText,
+  required,
   children,
   className,
   ...props
 }: FormFieldProps) => (
   <label {...props} className={cx('nb-form-field', !!error && 'nb-form-field--error', className)}>
-    {label && <span className="nb-form-field__label">{label}</span>}
+    {label && (
+      <span className={cx('nb-form-field__label', required && 'nb-form-field__label--required')}>
+        {label}
+      </span>
+    )}
     {children}
     {error ? (
       <span className="nb-form-field__error" role="alert">

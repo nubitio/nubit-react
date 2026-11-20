@@ -305,3 +305,4 @@ export type {
 export type { DataRecord } from '@nubitio/core';
 export type { GridData } from '@nubitio/core';
 export type { CardViewConfig, CardViewContext } from './datagrid/CardView';
+export type { GridQuickSearchConfig } from './datagrid/GridQuickSearch';

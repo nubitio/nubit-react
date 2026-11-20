@@ -3,6 +3,7 @@ import type { DataRecord } from '@nubitio/core';
 import type { Field } from '../field/Field';
 import type { ResourceLoadOptions, ResourceStore } from '../data/ResourceStore';
 import { buildFilterExpression } from './FilterRow';
+import { matchesQuickSearch, type GridSearchQuery } from './GridQuickSearch';
 
 interface GridDataLoaderOptions {
   source: ResourceStore;
@@ -17,6 +18,7 @@ interface GridDataLoaderOptions {
   data?: DataRecord[];
   suppliedGridSummary?: Record<string, unknown> | null;
   extraFilter?: unknown[][];
+  search?: GridSearchQuery;
   onContentReady: () => void;
 }
 
@@ -37,6 +39,7 @@ export function useGridDataLoader({
   data,
   suppliedGridSummary,
   extraFilter,
+  search,
   onContentReady,
 }: GridDataLoaderOptions) {
   const [rows, setRows] = useState<DataRecord[]>([]);
@@ -49,13 +52,14 @@ export function useGridDataLoader({
 
   const loadRows = useCallback(async () => {
     if (data) {
-      rowsRef.current = data;
-      setRows(data);
-      setTotalCount(data.length);
-      setGridSummary(suppliedGridSummary ?? null);
+      const result = search ? data.filter((row) => matchesQuickSearch(row, search)) : data;
+      rowsRef.current = result;
+      setRows(result);
+      setTotalCount(result.length);
+      setGridSummary(search ? null : (suppliedGridSummary ?? null));
       setIsLoading(false);
       onContentReady();
-      return data;
+      return result;
     }
     if (manualLoad) return rowsRef.current;
 
@@ -64,6 +68,7 @@ export function useGridDataLoader({
     const loadOptions: ResourceLoadOptions = {
       filter: [...buildFilterExpression(filters, filterOperators, fields), ...(extraFilter ?? [])],
       sort,
+      ...search,
     };
     if (paging) {
       loadOptions.skip = page * pageSize;
@@ -102,6 +107,7 @@ export function useGridDataLoader({
     page,
     pageSize,
     paging,
+    search,
     sort,
     source,
     suppliedGridSummary,

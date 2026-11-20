@@ -66,8 +66,14 @@ remain owned by the same grid. Mobile keeps its existing card presentation:
 defineResource('/api/products', {
   gridAppearance: 'page', // opt-in unframed toolbar and page heading
   quickFilterFields: ['category'], // enum/entity shortcuts into the same server query
+  quickSearch: {
+    searchExpr: ['name', 'sku', 'code'],
+    showIn: 'cards', // default; can also be 'table' or 'both'
+    placeholder: 'Search by name, SKU or code',
+  },
   cardView: {
     defaultView: 'cards', // default: 'table'
+    density: 'compact', // default: 'comfortable'
     renderMedia: ({ row }) => <ProductImage product={row} />,
     renderContent: ({ row }) => <ProductCardContent product={row} />,
   },
@@ -92,6 +98,14 @@ defineResource('/api/products', {
   },
 });
 ```
+
+Page-style tables no longer add a quick-search input automatically. Cards
+without an explicit `quickSearch` retain the native single-column search when
+column filtering is enabled. Use `quickSearch: false` to disable it entirely.
+An explicit configuration works independently of `filterRow`; it sends
+`searchExpr` and the entered `searchValue` to the resource store alongside
+the existing column filters. Hydra matches any of the listed fields. For
+in-memory rows the same setting uses case-insensitive substring matching.
 
 `renderContent` returns **non-interactive content**: the engine supplies the
 accessible open button, selection controls and permission-aware actions. Inline

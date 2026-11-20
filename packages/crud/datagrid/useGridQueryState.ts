@@ -22,6 +22,10 @@ export interface GridQueryState {
   /** What the filter editors display, which runs ahead of `filters` while typing. */
   filterInputs: Record<string, string>;
   filterOperators: Record<string, string>;
+  searchInput: string;
+  searchValue: string;
+  setSearchInput: (value: string) => void;
+  clearSearch: () => void;
   sort: SortRule[];
   page: number;
   pageSize: number;
@@ -70,6 +74,8 @@ export function useGridQueryState({
 }: GridQueryStateOptions): GridQueryState {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
+  const [searchInput, setSearchInputState] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [filterOperators, setFilterOperators] = useState<Record<string, string>>(() =>
     computeDefaultOperators(fields),
   );
@@ -78,6 +84,7 @@ export function useGridQueryState({
   const [pageSize, setPageSizeState] = useState(initialPageSize ?? 20);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onFilterChangeRef = useRef(onFilterChange);
   useEffect(() => {
     onFilterChangeRef.current = onFilterChange;
@@ -85,7 +92,36 @@ export function useGridQueryState({
 
   // A debounce still in flight when the grid unmounts would set state on a
   // dead component; the pending timer is dropped instead.
-  useEffect(() => () => clearTimeout(debounceRef.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(debounceRef.current);
+      clearTimeout(searchDebounceRef.current);
+    },
+    [],
+  );
+
+  const clearSearch = useCallback(() => {
+    clearTimeout(searchDebounceRef.current);
+    setSearchInputState('');
+    setSearchValue('');
+    setPage(0);
+  }, []);
+
+  const setSearchInput = useCallback(
+    (value: string) => {
+      if (value === '') {
+        clearSearch();
+        return;
+      }
+      setSearchInputState(value);
+      clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        setSearchValue(value.trim());
+        setPage(0);
+      }, FILTER_DEBOUNCE_MS);
+    },
+    [clearSearch],
+  );
 
   const commit = useCallback((nextInputs: Record<string, string>) => {
     setFilters(nextInputs);
@@ -205,12 +241,13 @@ export function useGridQueryState({
   // onFilterChange: the caller drove the change and already knows.
   const resetQuery = useCallback(() => {
     clearTimeout(debounceRef.current);
+    clearSearch();
     setFilters({});
     setFilterInputs({});
     setFilterOperators(computeDefaultOperators(fields));
     setSort([]);
     setPage(0);
-  }, [fields]);
+  }, [clearSearch, fields]);
 
   const replaceFilters = useCallback(
     (nextFilters: Record<string, string>, nextOperators: Record<string, string>) => {
@@ -228,6 +265,10 @@ export function useGridQueryState({
       filters,
       filterInputs,
       filterOperators,
+      searchInput,
+      searchValue,
+      setSearchInput,
+      clearSearch,
       sort,
       page,
       pageSize,
@@ -250,6 +291,10 @@ export function useGridQueryState({
       filters,
       filterInputs,
       filterOperators,
+      searchInput,
+      searchValue,
+      setSearchInput,
+      clearSearch,
       sort,
       page,
       pageSize,

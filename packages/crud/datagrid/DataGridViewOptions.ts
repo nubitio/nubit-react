@@ -12,6 +12,7 @@ import type {
 } from '../crud/ResourceConfig';
 import type { ColumnGroupDef } from './ColumnGroup';
 import type { CardViewConfig } from './CardView';
+import type { GridQuickSearchConfig } from './GridQuickSearch';
 
 export interface DataGridSelectionChangedEvent {
   selectedRowsData?: DataRecord[];
@@ -104,6 +105,8 @@ export interface DataGridViewOptions {
   /** Custom batch persistence. Defaults to PATCHing each row to url/id when omitted. */
   onBatchSave?: (rows: DataRecord[]) => void | Promise<void>;
   filterRow?: boolean;
+  /** Multi-field quick search; false disables the automatic single-field search in cards. */
+  quickSearch?: GridQuickSearchConfig | false;
   headerFilter?: boolean;
   manualLoad?: boolean;
   /** Bulk actions rendered inline in the datagrid toolbar when rows are selected. */

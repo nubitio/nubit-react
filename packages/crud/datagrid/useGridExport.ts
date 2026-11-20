@@ -3,6 +3,7 @@ import type { Field } from '../field/Field';
 import type { ResourceLoadOptions, ResourceStore } from '../data/ResourceStore';
 import { buildFilterExpression } from './FilterRow';
 import { downloadBlob } from './downloadBlob';
+import type { GridSearchQuery } from './GridQuickSearch';
 
 interface GridExportOptions {
   source: ResourceStore;
@@ -10,6 +11,7 @@ interface GridExportOptions {
   filters: Record<string, string>;
   filterOperators: Record<string, string>;
   sort: Array<{ selector: string; desc: boolean }>;
+  search?: GridSearchQuery;
 }
 
 /** Downloads every row matching the grid's current filters/sort (not just the current page). */
@@ -19,6 +21,7 @@ export function useGridExport({
   filters,
   filterOperators,
   sort,
+  search,
 }: GridExportOptions) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<unknown>(null);
@@ -33,6 +36,7 @@ export function useGridExport({
     const loadOptions: ResourceLoadOptions = {
       filter: buildFilterExpression(filters, filterOperators, fields),
       sort,
+      ...search,
     };
 
     try {
@@ -47,7 +51,7 @@ export function useGridExport({
     } finally {
       setIsExporting(false);
     }
-  }, [fields, filterOperators, filters, sort, source]);
+  }, [fields, filterOperators, filters, search, sort, source]);
 
   return {
     isExporting,

@@ -47,6 +47,7 @@ import {
   joinBetweenValue,
 } from './FilterRow';
 import { useGridQueryState } from './useGridQueryState';
+import { resolveQuickSearch } from './GridQuickSearch';
 import { getCellText, getIdField, renderCell } from './cellRendering';
 import { DetailGridSection } from './DetailGridSection';
 import { canEditFieldInline, useInlineEdit } from './useInlineEdit';
@@ -123,6 +124,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     filters,
     filterInputs,
     filterOperators,
+    searchInput,
+    searchValue,
+    setSearchInput,
     sort,
     page,
     pageSize,
@@ -162,6 +166,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   const renderCardContent = options.cardView?.renderContent;
   const renderCardMedia = renderCardContent ? options.cardView?.renderMedia : undefined;
   const pageAppearance = options.appearance === 'page';
+  const quickSearch = options.treeList
+    ? undefined
+    : resolveQuickSearch(options.quickSearch, showCards);
+  const searchExpr = quickSearch?.searchExpr;
+  const search = useMemo(
+    () => (searchExpr && searchValue ? { searchExpr, searchValue } : undefined),
+    [searchExpr, searchValue],
+  );
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [expandedCardKeys, setExpandedCardKeys] = useState<Set<unknown>>(() => new Set());
   const [openRowMenu, setOpenRowMenu] = useState<{
@@ -220,6 +232,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     page,
     pageSize,
     paging: options.paging ?? true,
+    search,
     manualLoad: options.manualLoad ?? false,
     extraFilter: options.treeList
       ? [[options.treeList.parentIdField, '=', options.treeList.rootValue ?? null]]
@@ -269,6 +282,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     filters,
     filterOperators,
     sort,
+    search,
   });
 
   const notifySelectionChanged = useCallback(
@@ -982,15 +996,33 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
     return [...bulkSelection, ...(toolbar.selection ?? [])];
   }, [options, t, toolbar.selection]);
-  // Quick search targets the first text-like filterable column. Columns with a
-  // formatter are skipped: their displayed text differs from the raw value, so
-  // a contains-filter on them would not match what the user sees.
-  const quickSearchField =
-    showCards || pageAppearance
+  // Keep the existing single-column search in cards for resources that have
+  // not configured a multi-field search. On tables the filter row is enough.
+  const automaticSearchField =
+    options.quickSearch === undefined && showCards && (options.filterRow ?? true)
       ? filterableFields.find(
           (field) => getDefaultFilterOperator(field) === 'contains' && !field.formatter,
         )
       : undefined;
+  const quickFilterColumns =
+    (showCards || pageAppearance) && (options.filterRow ?? true)
+      ? filterableFields.filter(
+          (field) =>
+            options.quickFilterFields?.includes(field.name) &&
+            (field.type === FieldType.ENTITY || field.type === FieldType.ENUM),
+        )
+      : [];
+  const quickSearchValue = automaticSearchField
+    ? (filterInputs[automaticSearchField.name] ?? '')
+    : searchInput;
+  const updateQuickSearch = (value: string) => {
+    if (automaticSearchField) {
+      if (value === '') clearFilter(automaticSearchField);
+      else applyFilterInputDebounced(automaticSearchField, value);
+    } else {
+      setSearchInput(value);
+    }
+  };
 
   const renderRowMenuContent = () => {
     if (!openRowMenu) return null;
@@ -1017,7 +1049,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       >
         <div
           aria-busy={isGridLoading}
-          className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}${showCards ? ' nb-datagrid--cards' : ''}${pageAppearance ? ' nb-datagrid--page' : ''}`}
+          className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}${showCards ? ' nb-datagrid--cards' : ''}${showCards && options.cardView?.density === 'compact' ? ' nb-datagrid--cards-compact' : ''}${pageAppearance ? ' nb-datagrid--page' : ''}`}
         >
           {options.aboveGrid ? (
             <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
@@ -1049,6 +1081,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   value={desktopView}
                   onChange={(value) => {
                     closeRowMenu();
+                    if (searchValue && options.quickSearch) setPage(0);
                     setDesktopView(value);
                   }}
                   options={[
@@ -1118,44 +1151,45 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               </span>
             </div>
           )}
-          {(showCards || pageAppearance) && quickSearchField && (options.filterRow ?? true) && (
+          {(quickSearch || automaticSearchField || quickFilterColumns.length > 0) && (
             <div className="nb-datagrid__filter-bar">
-              <div className="nb-datagrid__quick-search">
-                <i
-                  className="ph ph-magnifying-glass nb-datagrid__quick-search-icon"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  className="nb-datagrid__quick-search-input"
-                  placeholder={t('grid.searchPlaceholder', { column: quickSearchField.label })}
-                  aria-label={t('grid.filterColumn', { column: quickSearchField.label })}
-                  value={filterInputs[quickSearchField.name] ?? ''}
-                  onChange={(event) =>
-                    applyFilterInputDebounced(quickSearchField, event.target.value)
-                  }
-                />
-                {(filterInputs[quickSearchField.name] ?? '') !== '' && (
-                  <button
-                    type="button"
-                    className="nb-datagrid__quick-search-clear"
-                    aria-label={t('grid.clearFilter')}
-                    onClick={() => {
-                      const nextInputs = { ...filterInputs };
-                      delete nextInputs[quickSearchField.name];
-                      applyFilterInputsImmediate(nextInputs);
-                    }}
-                  >
-                    <i className="ph ph-x" aria-hidden="true" />
-                  </button>
-                )}
-              </div>
+              {(quickSearch || automaticSearchField) && (
+                <div className="nb-datagrid__quick-search">
+                  <i
+                    className="ph ph-magnifying-glass nb-datagrid__quick-search-icon"
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="search"
+                    className="nb-datagrid__quick-search-input"
+                    placeholder={
+                      quickSearch?.placeholder ??
+                      (automaticSearchField
+                        ? t('grid.searchPlaceholder', { column: automaticSearchField.label })
+                        : t('grid.quickSearch'))
+                    }
+                    aria-label={
+                      automaticSearchField
+                        ? t('grid.filterColumn', { column: automaticSearchField.label })
+                        : (quickSearch?.placeholder ?? t('grid.quickSearch'))
+                    }
+                    value={quickSearchValue}
+                    onChange={(event) => updateQuickSearch(event.target.value)}
+                  />
+                  {quickSearchValue !== '' && (
+                    <button
+                      type="button"
+                      className="nb-datagrid__quick-search-clear"
+                      aria-label={t('grid.clearFilter')}
+                      onClick={() => updateQuickSearch('')}
+                    >
+                      <i className="ph ph-x" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )}
               <GridQuickFilters
-                fields={filterableFields.filter(
-                  (field) =>
-                    options.quickFilterFields?.includes(field.name) &&
-                    (field.type === FieldType.ENTITY || field.type === FieldType.ENUM),
-                )}
+                fields={quickFilterColumns}
                 values={filterInputs}
                 operators={filterOperators}
                 remoteOptions={filterRemoteOptions}
@@ -1271,9 +1305,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     ? (row) => Boolean(row[options.treeList!.hasChildrenField!])
                     : undefined
                 }
-                loadChildren={
-                  options.treeList.childrenField ? undefined : loadTreeChildren
-                }
+                loadChildren={options.treeList.childrenField ? undefined : loadTreeChildren}
                 withParent={(child, parent) => ({
                   ...child,
                   [options.treeList!.parentIdField]: getRowKey(parent),

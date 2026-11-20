@@ -10,6 +10,8 @@ export interface CardViewContext {
 /** Native grid presentation: shares the table's query, selection, permissions and pager. */
 export interface CardViewConfig {
   defaultView?: 'table' | 'cards';
+  /** Compact cards reduce spacing and media height without changing actions or data. */
+  density?: 'comfortable' | 'compact';
   /** Labels consecutive server-ordered rows on the current page; does not regroup or sort data. */
   groupBy?: (row: Readonly<DataRecord>) => { key: string; label: ReactNode };
   /** Promote an existing permitted row action; all other actions remain in the menu. */

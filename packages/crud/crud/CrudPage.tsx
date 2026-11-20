@@ -771,6 +771,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         appearance={resolvedResource.gridAppearance}
         quickFilterFields={resolvedResource.quickFilterFields}
         filterRow={resolvedResource.filterRow}
+        quickSearch={resolvedResource.quickSearch}
         filterToolbarFields={resolvedResource.filterToolbarFields}
         filterPresets={resolvedResource.filterPresets}
         treeList={resolvedResource.treeList}

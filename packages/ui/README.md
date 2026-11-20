@@ -52,7 +52,7 @@ alongside the existing `--surface-*`, `--text-*`, etc. component vocabulary;
 consumers do not need to rewrite existing components. Source design:
 `m124loXKRsHFvZcrYkoTbk`, semantic-token frame `11:341`.
 
-- **Primitives** — `Button`, `IconButton`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
+- **Primitives** — `Button`, `ButtonLink`, `IconButton`, `QuantityStepper`, `Badge`, `Chip`, `Toggle`, `Avatar`, `Skeleton`, `EmptyState`, `StatCard`, `Card`, `CollapsibleSection`
 - **Overlays** — `AppDialog`, `ConfirmDialog`, `Drawer`, `Popover`, `ContextMenu`, `AppDropdown`
 - **Form controls** — `TextField`, `TextAreaField`, `SelectField`, `FormField`, `DatePicker`, `DateRangePicker`, `TimePicker`
 - **Theming** — `ThemeProvider`, `ThemeSwitcher`, `DensityProvider`, `useAccentColor`, `SettingsPanel`

@@ -208,3 +208,25 @@ describe('AppDialog footer', () => {
     expect(container.querySelector('.nb-dialog__footer')).toBeNull();
   });
 });
+
+// ── flush ─────────────────────────────────────────────────────────────────────
+
+describe('AppDialog flush', () => {
+  it('marks the dialog so the body loses its padding and scrolling', () => {
+    render(
+      <AppDialog title="Settings" visible flush onClose={noop}>
+        <span>content</span>
+      </AppDialog>,
+    );
+    expect(screen.getByRole('dialog').classList.contains('nb-dialog--flush')).toBe(true);
+  });
+
+  it('keeps the padded body by default', () => {
+    render(
+      <AppDialog title="Settings" visible onClose={noop}>
+        <span>content</span>
+      </AppDialog>,
+    );
+    expect(screen.getByRole('dialog').classList.contains('nb-dialog--flush')).toBe(false);
+  });
+});

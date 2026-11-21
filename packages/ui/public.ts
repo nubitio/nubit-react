@@ -36,7 +36,12 @@ export type {
 export { FileDropzone } from './FileDropzone';
 export type { FileDropzoneLabels, FileDropzoneProps, FileDropzoneValue } from './FileDropzone';
 export { AppDropdown } from './AppDropdown';
-export type { AppDropdownOption, AppDropdownProps, AppDropdownVariant } from './AppDropdown';
+export type {
+  AppDropdownMenuWidth,
+  AppDropdownOption,
+  AppDropdownProps,
+  AppDropdownVariant,
+} from './AppDropdown';
 export { SearchableAppDropdown } from './SearchableAppDropdown';
 export type { SearchableAppDropdownProps } from './SearchableAppDropdown';
 export { ThemeProvider, ThemeContext, useTheme } from './theme/ThemeProvider';

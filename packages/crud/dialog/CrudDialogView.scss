@@ -33,6 +33,11 @@
     padding: 0;
   }
 
+  // `flush`: the content owns its insets; the body keeps scrolling if it is taller than the dialog.
+  &.nb-crud-dialog--flush .nb-dialog__body {
+    padding: 0;
+  }
+
   // fit-content variant — used when the body is a self-contained view
   // (e.g. a datagrid lookup). Remove padding so the view fills edge-to-edge.
   &.fit-content {

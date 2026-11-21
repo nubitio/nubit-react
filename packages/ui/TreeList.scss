@@ -25,9 +25,16 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       color: var(--text-primary);
+      font: inherit;
       min-height: 36px;
       padding: 0 var(--space-3);
       width: 100%;
+
+      &:focus-visible {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--focus-ring-color);
+        outline: none;
+      }
     }
   }
 
@@ -118,6 +125,15 @@
     vertical-align: middle;
   }
 
+  // The expand button and the spacer that stands in for it on leaves share one box, so labels line up
+  // at the same depth whether or not a row has children.
+  &__indent .nb-icon-button {
+    height: 28px;
+    min-width: 28px;
+    padding: 0;
+    width: 28px;
+  }
+
   &__spacer {
     display: inline-block;
     height: 28px;
@@ -156,6 +172,32 @@
     position: absolute;
     white-space: nowrap;
     width: 1px;
+  }
+
+  // Presentation options (see the matching props)
+  &--borderless {
+    border: 0;
+    border-radius: 0;
+  }
+
+  &--no-row-lines &__table td {
+    border-bottom: 0;
+  }
+
+  &--striped &__table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--surface-2) 55%, var(--surface-1));
+  }
+
+  &--no-hover &__table tbody tr:hover {
+    background: transparent;
+  }
+
+  &--no-hover#{&}--striped &__table tbody tr:hover {
+    background: color-mix(in srgb, var(--surface-2) 55%, var(--surface-1));
+  }
+
+  &--no-selection-tint &__table tbody tr[aria-selected='true'] {
+    background: transparent;
   }
 
   &--compact &__table td {

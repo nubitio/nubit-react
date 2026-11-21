@@ -39,6 +39,11 @@ export interface CrudDialogViewOptions {
   negativeText?: string;
   footerVisible?: boolean;
   fitContent?: boolean;
+  /**
+   * Remove the body padding so content (tabs, a tree, a grid) reaches the dialog's edges and owns its
+   * own insets. The body still scrolls when the content is taller than the dialog.
+   */
+  flush?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
   onCancel?: () => void;
@@ -142,7 +147,13 @@ export const CrudDialogView = forwardRef<CrudDialogViewEvents, CrudDialogViewOpt
         closeOnOutsideClick={false}
         keepMounted
         rootClassName="nb-crud-dialog-root"
-        className={['nb-crud-dialog', options.fitContent ? 'fit-content' : 'form-popup'].join(' ')}
+        className={[
+          'nb-crud-dialog',
+          options.fitContent ? 'fit-content' : 'form-popup',
+          options.flush && 'nb-crud-dialog--flush',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         headerClassName="nb-crud-dialog__header"
         titleClassName="nb-crud-dialog__title"
         bodyClassName="nb-crud-dialog__body"

@@ -105,6 +105,25 @@
     cursor: not-allowed;
     opacity: 0.55;
   }
+
+  // Browser autofill (history, saved values) paints its own light background and ignores the
+  // theme, leaving a white field in dark mode. Repaint it with the control's surface and text
+  // colours; the inset shadow is the only way to override the autofill background.
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    box-shadow: 0 0 0 1000px var(--surface-1) inset;
+    caret-color: var(--text-primary);
+    transition: background-color 9999s ease-out;
+  }
+
+  // The inset shadow replaces the focus ring, so draw the ring again on top of it.
+  &:-webkit-autofill:focus {
+    box-shadow:
+      0 0 0 1000px var(--surface-1) inset,
+      0 0 0 3px var(--focus-ring-color);
+  }
 }
 
 // ── Validation states ──────────────────────────────────────────────────────────
@@ -115,6 +134,12 @@
 
   &:focus {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--error-color) 22%, transparent);
+  }
+
+  &:-webkit-autofill:focus {
+    box-shadow:
+      0 0 0 1000px var(--surface-1) inset,
+      0 0 0 3px color-mix(in srgb, var(--error-color) 22%, transparent);
   }
 }
 

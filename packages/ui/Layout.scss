@@ -321,6 +321,15 @@
   border: 1px solid var(--border-color);
 }
 
+// The icon is top-aligned so multi-line messages keep it on the first line. Give it the height of
+// one text line so a single-line message and its icon share a centre.
+.nb-alert > i {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 1lh;
+}
+
 .nb-alert--danger {
   border-color: color-mix(in srgb, var(--error-color) 35%, var(--border-color));
   background: color-mix(in srgb, var(--error-color) 8%, var(--surface-1));

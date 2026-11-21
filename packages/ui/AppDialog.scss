@@ -128,6 +128,14 @@
   padding: var(--space-4);
 }
 
+// `flush`: the content owns its layout and scrolling. The compact-density rule below this one is
+// more specific than a lone class, so it is repeated for `flush`.
+.nb-dialog--flush .nb-dialog__body,
+html[data-density='compact'] .nb-dialog--flush .nb-dialog__body {
+  overflow: hidden;
+  padding: 0;
+}
+
 // ── Footer ─────────────────────────────────────────────────────────────────────
 // Action buttons live here. border-subtle keeps it subordinate to the header.
 

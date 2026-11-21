@@ -26,6 +26,8 @@ export interface AdminShellProps {
   menuItems: AdminMenuItem[];
   headerActions?: AdminHeaderAction[];
   renderUserMenu?: (props: { close: () => void }) => React.ReactNode;
+  /** Photo or initials for the user menu button; see `AdminHeader`. */
+  userAvatar?: React.ReactNode;
   renderThemeSwitcher?: () => React.ReactNode;
   footer?: React.ReactNode;
   /** Workspace places the sidebar alongside the header on large screens. */
@@ -44,6 +46,7 @@ export const AdminShell = ({
   menuItems,
   headerActions,
   renderUserMenu,
+  userAvatar,
   renderThemeSwitcher,
   footer,
   variant = 'default',
@@ -155,6 +158,7 @@ export const AdminShell = ({
         actions={headerActions}
         content={headerContent}
         renderUserMenu={renderUserMenu}
+        userAvatar={userAvatar}
         renderThemeSwitcher={renderThemeSwitcher}
       />
       <div className={bodyClassName}>

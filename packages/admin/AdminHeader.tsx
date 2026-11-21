@@ -20,6 +20,11 @@ export interface AdminHeaderProps {
   /** Search, command trigger or other application-owned header content. */
   content?: React.ReactNode;
   renderUserMenu?: (props: { close: () => void }) => React.ReactNode;
+  /**
+   * Shown in the user menu button instead of the generic person icon: a photo or initials, so the
+   * header tells whose session this is. The button keeps its label and menu behaviour.
+   */
+  userAvatar?: React.ReactNode;
   renderThemeSwitcher?: () => React.ReactNode;
 }
 
@@ -68,20 +73,35 @@ function ActionPopover({ action }: { action: AdminHeaderAction }) {
 // ---------------------------------------------------------------------------
 function UserMenuPopover({
   renderUserMenu,
+  userAvatar,
 }: {
   renderUserMenu: (props: { close: () => void }) => React.ReactNode;
+  userAvatar?: React.ReactNode;
 }) {
   const strings = useUiStrings();
   const { open, toggle, setOpen, containerRef } = useFloatingPanel();
 
   return (
     <div className="nb-admin-header-popover" ref={containerRef}>
-      <IconButton
-        icon="ph ph-user-circle"
-        label={strings.userMenu}
-        aria-expanded={open}
-        onClick={toggle}
-      />
+      {userAvatar ? (
+        // IconButton takes an icon class; an avatar is arbitrary content, so this mirrors its markup.
+        <button
+          type="button"
+          className="nb-icon-button nb-admin-user-button"
+          aria-label={strings.userMenu}
+          aria-expanded={open}
+          onClick={toggle}
+        >
+          {userAvatar}
+        </button>
+      ) : (
+        <IconButton
+          icon="ph ph-user-circle"
+          label={strings.userMenu}
+          aria-expanded={open}
+          onClick={toggle}
+        />
+      )}
       {open && (
         <div className="nb-admin-header-popover__panel" role="dialog" aria-label={strings.userMenu}>
           {renderUserMenu({ close: () => setOpen(false) })}
@@ -102,6 +122,7 @@ export const AdminHeader = ({
   actions = [],
   content,
   renderUserMenu,
+  userAvatar,
   renderThemeSwitcher,
 }: AdminHeaderProps) => {
   const strings = useUiStrings();
@@ -126,7 +147,9 @@ export const AdminHeader = ({
           {actions.map((action) => (
             <ActionPopover key={action.id} action={action} />
           ))}
-          {renderUserMenu && <UserMenuPopover renderUserMenu={renderUserMenu} />}
+          {renderUserMenu && (
+            <UserMenuPopover renderUserMenu={renderUserMenu} userAvatar={userAvatar} />
+          )}
         </div>
       </div>
     </header>

@@ -143,6 +143,37 @@ describe('AdminHeader user menu', () => {
     expect(screen.getByLabelText('User menu')).toBeDefined();
   });
 
+  it('shows the avatar in the trigger instead of the generic icon, keeping its label', () => {
+    render(
+      <AdminHeader
+        renderUserMenu={() => <div>user menu content</div>}
+        userAvatar={<img alt="Ana" src="/ana.png" />}
+      />,
+    );
+    const trigger = screen.getByLabelText('User menu');
+    expect(trigger.querySelector('img')?.getAttribute('src')).toBe('/ana.png');
+    expect(trigger.querySelector('.ph-user-circle')).toBeNull();
+  });
+
+  it('opens the user menu from the avatar trigger', () => {
+    render(
+      <AdminHeader
+        renderUserMenu={() => <div>user menu content</div>}
+        userAvatar={<span>AN</span>}
+      />,
+    );
+    const trigger = screen.getByLabelText('User menu');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText('user menu content')).toBeDefined();
+  });
+
+  it('keeps the generic icon without an avatar', () => {
+    render(<AdminHeader renderUserMenu={() => <div>user menu content</div>} />);
+    expect(screen.getByLabelText('User menu').querySelector('.ph-user-circle')).not.toBeNull();
+  });
+
   it('opens user menu on click', () => {
     render(<AdminHeader renderUserMenu={() => <div>user menu content</div>} />);
     fireEvent.click(screen.getByLabelText('User menu'));

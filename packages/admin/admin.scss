@@ -152,6 +152,14 @@
   width: var(--side-panel-min-width);
 }
 
+// The user menu button when it carries an avatar: the avatar is the content, so no icon padding.
+.nb-admin-user-button {
+  border-radius: 50%;
+  height: auto;
+  min-width: 0;
+  padding: var(--space-1);
+}
+
 .nb-admin-messages {
   position: relative;
 }

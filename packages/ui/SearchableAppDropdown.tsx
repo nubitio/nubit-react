@@ -27,7 +27,14 @@ const toOption = (option: AppDropdownOption): ComboboxOption => ({
           {option.iconText}
         </span>
       )}
-      {option.label}
+      {option.description ? (
+        <span className="nb-dropdown__option-text">
+          <span className="nb-dropdown__option-label">{option.label}</span>
+          <span className="nb-dropdown__option-description">{option.description}</span>
+        </span>
+      ) : (
+        option.label
+      )}
     </span>
   ),
 });
@@ -50,6 +57,7 @@ export function SearchableAppDropdown({
   variant,
   icon: _icon,
   menuMinWidth: _menuMinWidth,
+  menuWidth,
   menuHeader: _header,
   menuFooter: _footer,
   ...rest
@@ -76,6 +84,7 @@ export function SearchableAppDropdown({
         variant={variant}
         icon={_icon}
         menuMinWidth={_menuMinWidth}
+        menuWidth={menuWidth}
         menuHeader={_header}
         menuFooter={_footer}
       />

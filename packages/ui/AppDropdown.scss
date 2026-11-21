@@ -186,6 +186,24 @@
   min-width: 0;
 }
 
+.nb-dropdown__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nb-dropdown__option-description {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular, 400);
+  line-height: 1.35;
+}
+
+.nb-dropdown__option--active .nb-dropdown__option-description {
+  color: color-mix(in srgb, var(--accent-color) 70%, var(--text-secondary));
+}
+
 .nb-dropdown__option-icon {
   color: var(--text-tertiary);
   flex: 0 0 28px;
@@ -223,6 +241,20 @@
 
 .nb-dropdown__menu {
   max-height: min(280px, var(--available-height));
+}
+
+// `menuWidth="content"`: the menu fits its widest option instead of copying the trigger's width.
+.nb-dropdown-positioner--content {
+  min-width: var(--anchor-width);
+  width: max-content;
+}
+
+.nb-dropdown__menu--fit {
+  max-width: min(480px, calc(100vw - 16px));
+}
+
+.nb-dropdown__menu--fit .nb-dropdown__option-label {
+  white-space: nowrap;
 }
 
 .nb-dropdown__option[data-highlighted] {

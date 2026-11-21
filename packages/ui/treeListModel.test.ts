@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildTreeListModel, flattenVisibleTree, getDescendantIds } from './treeListModel';
+import {
+  buildTreeListModel,
+  flattenVisibleTree,
+  getDescendantIds,
+  getParentIds,
+  getSelectionStates,
+  reconcileSelection,
+} from './treeListModel';
 
 interface Item {
   id: number;
@@ -52,5 +59,49 @@ describe('buildTreeListModel', () => {
         options,
       ),
     ).toThrow(/cycle/);
+  });
+});
+
+describe('recursive selection', () => {
+  // 1 ─ 2, 3 ─ (3 ─ 4, 5)      6 (a leaf root)
+  const tree = buildTreeListModel<Item>(
+    [{ id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }, { id: 5 }] }] }, { id: 6 }],
+    options,
+  );
+
+  it('reads membership alone when it is not recursive', () => {
+    const states = getSelectionStates(tree, new Set([1]), false);
+    expect(states.get(1)).toBe('checked');
+    expect(states.get(2)).toBe('unchecked');
+  });
+
+  it('derives a parent from its children: all, some or none', () => {
+    const all = getSelectionStates(tree, new Set([2, 4, 5]), true);
+    expect(all.get(3)).toBe('checked');
+    expect(all.get(1)).toBe('checked');
+
+    const some = getSelectionStates(tree, new Set([4]), true);
+    expect(some.get(3)).toBe('indeterminate');
+    expect(some.get(1)).toBe('indeterminate');
+    expect(some.get(2)).toBe('unchecked');
+
+    const none = getSelectionStates(tree, new Set([6]), true);
+    expect(none.get(1)).toBe('unchecked');
+    expect(none.get(6)).toBe('checked');
+  });
+
+  it('ignores the id of a parent that its children contradict', () => {
+    expect(getSelectionStates(tree, new Set([1, 3]), true).get(1)).toBe('unchecked');
+  });
+
+  it('reconciles parents so a parent is in the set exactly when all of its children are', () => {
+    expect([...reconcileSelection(tree, new Set([2, 4, 5])).values()].sort()).toEqual(
+      [1, 2, 3, 4, 5].sort(),
+    );
+    expect([...reconcileSelection(tree, new Set([1, 3, 4])).values()].sort()).toEqual([4]);
+  });
+
+  it('lists the nodes that can be expanded', () => {
+    expect([...getParentIds(tree)].sort()).toEqual([1, 3]);
   });
 });

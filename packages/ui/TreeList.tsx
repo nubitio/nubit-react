@@ -5,7 +5,14 @@ import { Checkbox } from './Checkbox';
 import { RowActions } from './RowActions';
 import type { ContextMenuItem } from './ContextMenu';
 import { useUiStrings } from './UiStrings';
-import { buildTreeListModel, flattenVisibleTree, getDescendantIds } from './treeListModel';
+import {
+  buildTreeListModel,
+  flattenVisibleTree,
+  getDescendantIds,
+  getParentIds,
+  getSelectionStates,
+  reconcileSelection,
+} from './treeListModel';
 import type { TreeListModelOptions, TreeNode, TreeNodeId } from './treeListModel';
 import './TreeList.scss';
 
@@ -52,6 +59,34 @@ export interface TreeListProps<T> extends TreeListModelOptions<T> {
   onSelectedItemsChange?: (items: readonly T[]) => void;
   /** Include all currently loaded descendants when toggling a node checkbox. */
   selectDescendants?: boolean;
+  /**
+   * Recursive selection (`selectionMode="multiple"`): a node with children reads from them, checked
+   * when all are and indeterminate when only some are, and toggling it toggles every descendant.
+   * `selectedIds` then holds a parent exactly when all of its children are in.
+   */
+  recursiveSelection?: boolean;
+  /** Select-all checkbox in the header, with multiple selection. Default true. */
+  allowSelectAll?: boolean;
+  /** Tint selected rows. Default true; turn off when the checkboxes already say it. */
+  highlightSelectedRows?: boolean;
+  /** Tint the row under the pointer. Default true. */
+  hoverStateEnabled?: boolean;
+  /** Lines between rows. Default true. */
+  showRowLines?: boolean;
+  /** The header row with column titles (and the select-all checkbox). Default true. */
+  showColumnHeaders?: boolean;
+  /** The outer border and rounded corners; turn off inside a card or dialog. Default true. */
+  showBorders?: boolean;
+  /** Alternating row backgrounds. Default false. */
+  rowAlternationEnabled?: boolean;
+  /** Open every node that has children at first, and any that arrive later. Default false. */
+  autoExpandAll?: boolean;
+  /** Names a row for assistive technology (its checkbox and expand button). Defaults to the first column's text. */
+  getRowLabel?: (item: T) => string;
+  /** Placeholder of the search field. */
+  filterPlaceholder?: string;
+  /** Height at which the rows scroll under a fixed header. */
+  maxHeight?: number | string;
   rowActions?: (item: T) => ContextMenuItem[];
   onRowActivate?: (item: T) => void;
   onMove?: (event: TreeListMoveEvent<T>) => void | Promise<void>;
@@ -141,6 +176,18 @@ export function TreeList<T>({
   onSelectedIdsChange,
   onSelectedItemsChange,
   selectDescendants = true,
+  recursiveSelection = false,
+  allowSelectAll = true,
+  highlightSelectedRows = true,
+  hoverStateEnabled = true,
+  showRowLines = true,
+  showColumnHeaders = true,
+  showBorders = true,
+  rowAlternationEnabled = false,
+  autoExpandAll = false,
+  getRowLabel,
+  filterPlaceholder,
+  maxHeight,
   rowActions,
   onRowActivate,
   onMove,
@@ -159,7 +206,14 @@ export function TreeList<T>({
 }: TreeListProps<T>): React.JSX.Element {
   const strings = useUiStrings();
   const [localItems, setLocalItems] = useState<readonly T[]>(items);
-  const [localExpandedIds, setLocalExpandedIds] = useState(defaultExpandedIds);
+  // Parents already opened by `autoExpandAll`, so one the user folds stays folded.
+  const autoExpanded = useRef<Set<TreeNodeId> | null>(null);
+  const [localExpandedIds, setLocalExpandedIds] = useState<ReadonlySet<TreeNodeId>>(() => {
+    if (!autoExpandAll) return defaultExpandedIds;
+    const initial = getParentIds(buildTreeListModel(items, { getId, getParentId, getChildren }));
+    autoExpanded.current = new Set(initial);
+    return new Set([...defaultExpandedIds, ...initial]);
+  });
   const [localSelectedIds, setLocalSelectedIds] = useState(defaultSelectedIds);
   const [localFilter, setLocalFilter] = useState('');
   const [sort, setSort] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
@@ -215,6 +269,19 @@ export function TreeList<T>({
     [expandedIds, filter, filterExpandedIds, sortedTree],
   );
   const effectiveExpandedIds = filter.trim() ? filterExpandedIds : expandedIds;
+  React.useEffect(() => {
+    if (!autoExpandAll || controlledExpandedIds !== undefined) return;
+    const seen = (autoExpanded.current ??= new Set());
+    const fresh = [...getParentIds(tree)].filter((id) => !seen.has(id));
+    if (fresh.length === 0) return;
+    fresh.forEach((id) => seen.add(id));
+    setLocalExpandedIds((current) => new Set([...current, ...fresh]));
+  }, [autoExpandAll, controlledExpandedIds, tree]);
+  const recursive = recursiveSelection && selectionMode === 'multiple';
+  const selectionStates = useMemo(
+    () => getSelectionStates(tree, selectedIds, recursive),
+    [recursive, selectedIds, tree],
+  );
   const nodeById = useMemo(() => {
     const result = new Map<TreeNodeId, TreeNode<T>>();
     const visit = (node: TreeNode<T>): void => {
@@ -303,6 +370,17 @@ export function TreeList<T>({
   );
 
   const toggleSelected = (node: TreeNode<T>): void => {
+    if (recursive) {
+      // An indeterminate parent selects everything below it, like a checked one clears it.
+      const select = selectionStates.get(node.id) !== 'checked';
+      const ids = new Set(selectedIds);
+      for (const id of [node.id, ...getDescendantIds(node)]) {
+        if (select) ids.add(id);
+        else ids.delete(id);
+      }
+      updateSelected(reconcileSelection(tree, ids));
+      return;
+    }
     const next = new Set(selectionMode === 'single' ? [] : selectedIds);
     if (selectedIds.has(node.id)) next.delete(node.id);
     else next.add(node.id);
@@ -402,14 +480,30 @@ export function TreeList<T>({
     if (event.key === 'Enter' && visibleNodes[index]) onRowActivate?.(visibleNodes[index].item);
   };
 
-  const classNames = ['nb-tree-list', `nb-tree-list--${density}`, className]
+  const classNames = [
+    'nb-tree-list',
+    `nb-tree-list--${density}`,
+    !showBorders && 'nb-tree-list--borderless',
+    !showRowLines && 'nb-tree-list--no-row-lines',
+    !hoverStateEnabled && 'nb-tree-list--no-hover',
+    !highlightSelectedRows && 'nb-tree-list--no-selection-tint',
+    rowAlternationEnabled && 'nb-tree-list--striped',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
   const hasSelection = selectionMode !== 'none';
+  const stateOf = (id: TreeNodeId) => selectionStates.get(id) ?? 'unchecked';
   const allVisibleSelected =
-    visibleNodes.length > 0 && visibleNodes.every((node) => selectedIds.has(node.id));
+    visibleNodes.length > 0 && visibleNodes.every((node) => stateOf(node.id) === 'checked');
   const someVisibleSelected =
-    !allVisibleSelected && visibleNodes.some((node) => selectedIds.has(node.id));
+    !allVisibleSelected && visibleNodes.some((node) => stateOf(node.id) !== 'unchecked');
+  const rowLabel = (item: T): string => {
+    const custom = getRowLabel?.(item);
+    if (custom) return custom;
+    const first = columns[0] ? String(itemValue(columns[0], item) ?? '').trim() : '';
+    return first || String(getId(item));
+  };
 
   return (
     <div className={classNames} data-testid={testId}>
@@ -420,7 +514,7 @@ export function TreeList<T>({
             <input
               type="search"
               value={filter}
-              placeholder={strings.treeListFilter}
+              placeholder={filterPlaceholder ?? strings.treeListFilter}
               onChange={(event) => updateFilter(event.currentTarget.value)}
             />
           </label>
@@ -453,79 +547,84 @@ export function TreeList<T>({
       {!loading && visibleNodes.length === 0 ? (
         <div className="nb-tree-list__empty">{emptyState ?? strings.treeListEmpty}</div>
       ) : (
-        <div className="nb-tree-list__scroll">
+        <div
+          className="nb-tree-list__scroll"
+          style={maxHeight === undefined ? undefined : { maxHeight }}
+        >
           <table
             className="nb-tree-list__table"
             role="treegrid"
             aria-label={ariaLabel}
             aria-busy={loading || loadingIds.size > 0}
           >
-            <thead>
-              <tr>
-                {hasSelection && (
-                  <th className="nb-tree-list__selection-cell">
-                    {selectionMode === 'multiple' && (
-                      <Checkbox
-                        aria-label={strings.treeListSelectAll}
-                        checked={allVisibleSelected}
-                        indeterminate={someVisibleSelected}
-                        onChange={() => {
-                          const next = new Set(selectedIds);
-                          for (const node of visibleNodes) {
-                            if (allVisibleSelected) next.delete(node.id);
-                            else next.add(node.id);
+            {showColumnHeaders && (
+              <thead>
+                <tr>
+                  {hasSelection && (
+                    <th className="nb-tree-list__selection-cell">
+                      {selectionMode === 'multiple' && allowSelectAll && (
+                        <Checkbox
+                          aria-label={strings.treeListSelectAll}
+                          checked={allVisibleSelected}
+                          indeterminate={someVisibleSelected}
+                          onChange={() => {
+                            const next = new Set(selectedIds);
+                            for (const node of visibleNodes) {
+                              if (allVisibleSelected) next.delete(node.id);
+                              else next.add(node.id);
+                            }
+                            updateSelected(recursive ? reconcileSelection(tree, next) : next);
+                          }}
+                        />
+                      )}
+                    </th>
+                  )}
+                  {columns.map((column, index) => (
+                    <th
+                      key={column.id}
+                      scope="col"
+                      aria-sort={
+                        sort?.columnId === column.id
+                          ? sort.direction === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : undefined
+                      }
+                      style={column.width ? { width: column.width } : undefined}
+                      className={`nb-tree-list__align--${column.align ?? 'start'}`}
+                    >
+                      {column.sortable === false || index === 0 ? (
+                        column.header
+                      ) : (
+                        <button
+                          type="button"
+                          className="nb-tree-list__sort"
+                          onClick={() =>
+                            setSort((current) =>
+                              current?.columnId === column.id
+                                ? current.direction === 'asc'
+                                  ? { columnId: column.id, direction: 'desc' }
+                                  : null
+                                : { columnId: column.id, direction: 'asc' },
+                            )
                           }
-                          updateSelected(next);
-                        }}
-                      />
-                    )}
-                  </th>
-                )}
-                {columns.map((column, index) => (
-                  <th
-                    key={column.id}
-                    scope="col"
-                    aria-sort={
-                      sort?.columnId === column.id
-                        ? sort.direction === 'asc'
-                          ? 'ascending'
-                          : 'descending'
-                        : undefined
-                    }
-                    style={column.width ? { width: column.width } : undefined}
-                    className={`nb-tree-list__align--${column.align ?? 'start'}`}
-                  >
-                    {column.sortable === false || index === 0 ? (
-                      column.header
-                    ) : (
-                      <button
-                        type="button"
-                        className="nb-tree-list__sort"
-                        onClick={() =>
-                          setSort((current) =>
-                            current?.columnId === column.id
-                              ? current.direction === 'asc'
-                                ? { columnId: column.id, direction: 'desc' }
-                                : null
-                              : { columnId: column.id, direction: 'asc' },
-                          )
-                        }
-                      >
-                        {column.header}
-                        <span aria-hidden="true">
-                          {sort?.columnId === column.id
-                            ? sort.direction === 'asc'
-                              ? '↑'
-                              : '↓'
-                            : '↕'}
-                        </span>
-                      </button>
-                    )}
-                  </th>
-                ))}
-                {rowActions && <th scope="col" aria-label={strings.rowActions} />}
-              </tr>
-            </thead>
+                        >
+                          {column.header}
+                          <span aria-hidden="true">
+                            {sort?.columnId === column.id
+                              ? sort.direction === 'asc'
+                                ? '↑'
+                                : '↓'
+                              : '↕'}
+                          </span>
+                        </button>
+                      )}
+                    </th>
+                  ))}
+                  {rowActions && <th scope="col" aria-label={strings.rowActions} />}
+                </tr>
+              </thead>
+            )}
             <tbody
               onDragOver={(event) => {
                 if (onMove && event.target === event.currentTarget) {
@@ -546,7 +645,8 @@ export function TreeList<T>({
                 const canExpand =
                   node.children.length > 0 ||
                   (hasChildren ? hasChildren(node.item) : !!loadChildren);
-                const selected = selectedIds.has(node.id);
+                const selectionState = stateOf(node.id);
+                const selected = selectionState === 'checked';
                 const parent = getParentId?.(node.item);
                 return (
                   <tr
@@ -594,8 +694,9 @@ export function TreeList<T>({
                     {hasSelection && (
                       <td className="nb-tree-list__selection-cell">
                         <Checkbox
-                          aria-label={`${strings.treeListSelect} ${String(getId(node.item))}`}
+                          aria-label={`${strings.treeListSelect} ${rowLabel(node.item)}`}
                           checked={selected}
+                          indeterminate={selectionState === 'indeterminate'}
                           onClick={(event) => event.stopPropagation()}
                           onChange={() => toggleSelected(node)}
                         />
@@ -634,7 +735,7 @@ export function TreeList<T>({
                                         ? 'ph ph-caret-down'
                                         : 'ph ph-caret-right'
                                   }
-                                  label={`${expanded ? strings.treeListCollapse : strings.treeListExpand} ${String(getId(node.item))}`}
+                                  label={`${expanded ? strings.treeListCollapse : strings.treeListExpand} ${rowLabel(node.item)}`}
                                   disabled={loadingIds.has(node.id)}
                                   onClick={(event) => {
                                     event.stopPropagation();

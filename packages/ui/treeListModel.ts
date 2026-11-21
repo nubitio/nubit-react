@@ -122,3 +122,66 @@ export function getDescendantIds<T>(node: TreeNode<T>): TreeNodeId[] {
   visit(node);
   return ids;
 }
+
+export type TreeSelectionState = 'checked' | 'unchecked' | 'indeterminate';
+
+/**
+ * Selection state of every node. Without `recursive` it is just membership of `selected`. With it, a
+ * node that has children reads from them: checked when all are, indeterminate when only some are,
+ * whatever its own id says. That is the "recursive selection" of a tree grid.
+ */
+export function getSelectionStates<T>(
+  roots: readonly TreeNode<T>[],
+  selected: ReadonlySet<TreeNodeId>,
+  recursive: boolean,
+): Map<TreeNodeId, TreeSelectionState> {
+  const states = new Map<TreeNodeId, TreeSelectionState>();
+  const visit = (node: TreeNode<T>): TreeSelectionState => {
+    const childStates = node.children.map(visit);
+    let state: TreeSelectionState;
+    if (!recursive || node.children.length === 0) {
+      state = selected.has(node.id) ? 'checked' : 'unchecked';
+    } else if (childStates.every((child) => child === 'checked')) {
+      state = 'checked';
+    } else if (childStates.every((child) => child === 'unchecked')) {
+      state = 'unchecked';
+    } else {
+      state = 'indeterminate';
+    }
+    states.set(node.id, state);
+    return state;
+  };
+  roots.forEach(visit);
+  return states;
+}
+
+/**
+ * For recursive selection: returns `selected` with every node that has children set to match them,
+ * so the emitted ids contain a parent exactly when all of its children are in.
+ */
+export function reconcileSelection<T>(
+  roots: readonly TreeNode<T>[],
+  selected: ReadonlySet<TreeNodeId>,
+): Set<TreeNodeId> {
+  const next = new Set(selected);
+  const states = getSelectionStates(roots, next, true);
+  const visit = (node: TreeNode<T>): void => {
+    node.children.forEach(visit);
+    if (node.children.length === 0) return;
+    if (states.get(node.id) === 'checked') next.add(node.id);
+    else next.delete(node.id);
+  };
+  roots.forEach(visit);
+  return next;
+}
+
+/** Every id that has at least one child: what "expand all" opens. */
+export function getParentIds<T>(roots: readonly TreeNode<T>[]): Set<TreeNodeId> {
+  const ids = new Set<TreeNodeId>();
+  const visit = (node: TreeNode<T>): void => {
+    if (node.children.length > 0) ids.add(node.id);
+    node.children.forEach(visit);
+  };
+  roots.forEach(visit);
+  return ids;
+}

@@ -29,6 +29,8 @@ export interface AuditTrailConfig<T extends DataRecord = DataRecord> {
   drawerSize?: CrudDrawerSize;
   /** Adds a row-menu action that opens the audit drawer. Default true. */
   rowAction?: boolean;
+  /** Adds the "Historial" button to the grid header toolbar. Default true. */
+  toolbarButton?: boolean;
 }
 
 export function createAuditFieldLabelResolver(

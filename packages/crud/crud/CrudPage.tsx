@@ -584,7 +584,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         emit,
       }) ?? {};
 
-    if (!hasAuditTrail) return base;
+    if (!hasAuditTrail || resolvedResource.auditTrail?.toolbarButton === false) return base;
 
     return {
       ...base,

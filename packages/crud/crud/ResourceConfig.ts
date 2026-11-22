@@ -68,6 +68,8 @@ export interface ResourceToolbarAction {
   permission?: string;
   visible?: boolean;
   disabled?: boolean;
+  /** Render as an icon button (label becomes the tooltip) regardless of grid appearance. */
+  iconOnly?: boolean;
   onClick?: () => void;
 }
 

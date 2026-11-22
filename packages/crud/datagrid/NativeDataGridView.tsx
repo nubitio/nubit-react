@@ -1103,7 +1103,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               {toolbar.utility
                 ?.filter((action) => isToolbarActionVisible(action, toolbarPermissions))
                 .map((action, index) =>
-                  renderToolbarButton(action, index, !pageAppearance || isMobile),
+                  renderToolbarButton(
+                    action,
+                    index,
+                    action.iconOnly === true || !pageAppearance || isMobile,
+                  ),
                 )}
               {showCards && (options.filterRow ?? true) && filterableFields.length > 0 && (
                 <span className="nb-datagrid__mobile-filter">

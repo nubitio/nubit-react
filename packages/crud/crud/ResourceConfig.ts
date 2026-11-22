@@ -80,6 +80,11 @@ export interface ResourceToolbarItems {
   primary?: ResourceToolbarAction[];
   selection?: ResourceToolbarAction[];
   utility?: ResourceToolbarAction[];
+  /**
+   * Cap on utility actions shown inline in the header; the rest go to a "more" (three dots)
+   * menu that keeps their text. Whatever does not fit the header collapses there on its own.
+   */
+  maxInlineUtility?: number;
   showRefresh?: boolean;
 }
 

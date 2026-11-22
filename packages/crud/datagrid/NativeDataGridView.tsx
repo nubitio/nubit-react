@@ -15,10 +15,12 @@ import {
   AppDropdown,
   AppDialog,
   Button,
+  ContextMenu,
   ConfirmDialog,
   Chip,
   IconButton,
   SegmentedControl,
+  TextField,
   TreeList,
   useOverlayContainer,
 } from '@nubitio/ui';
@@ -74,7 +76,12 @@ import {
   lockColumnWidth,
   PAGE_SIZE_OPTIONS,
 } from './gridLayoutUtils';
-import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gridFieldUtils';
+import {
+  isCellEditMode,
+  isDateLikeField,
+  normalizeIcon,
+  resolveInlineEditToolbar,
+} from './gridFieldUtils';
 import {
   buildToolbar,
   isToolbarActionVisible,
@@ -83,6 +90,7 @@ import {
   SelectionActionsMenu,
 } from './gridToolbar';
 import { useGridDataLoader } from './useGridDataLoader';
+import { useToolbarOverflow } from './useToolbarOverflow';
 import { useGridExport } from './useGridExport';
 import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
 import { useAutoColumnWidths } from './useAutoColumnWidths';
@@ -974,6 +982,17 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     canExport,
     isExporting,
   });
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const utilityActions = (toolbar.utility ?? []).filter((action) =>
+    isToolbarActionVisible(action, toolbarPermissions),
+  );
+  const overflowCount = useToolbarOverflow(
+    toolbarRef,
+    utilityActions.length,
+    options.toolbar?.maxInlineUtility,
+  );
+  const inlineUtility = utilityActions.slice(0, utilityActions.length - overflowCount);
+  const overflowUtility = utilityActions.slice(utilityActions.length - overflowCount);
   // A failed export reuses the grid's own error row rather than inventing a
   // second surface; a caller-supplied errorMessage still wins, since it is
   // about the data the user is looking at.
@@ -1055,7 +1074,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
           ) : null}
           {(options.toolbarVisible ?? true) && options.mode !== 'minimal' && (
-            <div className="nb-datagrid__toolbar">
+            <div className="nb-datagrid__toolbar" ref={toolbarRef}>
               {options.hasBackButton && (
                 <IconButton
                   icon="ph ph-arrow-left"
@@ -1100,15 +1119,28 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 actions={selectionActions}
                 permissions={toolbarPermissions}
               />
-              {toolbar.utility
-                ?.filter((action) => isToolbarActionVisible(action, toolbarPermissions))
-                .map((action, index) =>
-                  renderToolbarButton(
-                    action,
-                    index,
-                    action.iconOnly === true || !pageAppearance || isMobile,
-                  ),
-                )}
+              {inlineUtility.map((action, index) =>
+                renderToolbarButton(
+                  action,
+                  index,
+                  action.iconOnly === true || !pageAppearance || isMobile,
+                ),
+              )}
+              {overflowUtility.length > 0 && (
+                <ContextMenu
+                  triggerLabel={t('grid.buttonActions')}
+                  items={overflowUtility.map((action) => {
+                    const icon = normalizeIcon(action.icon);
+                    return {
+                      label: action.text || action.hint || '',
+                      icon: icon ? `ph ${icon}` : undefined,
+                      disabled: action.disabled,
+                      danger: action.type === 'danger',
+                      onClick: action.onClick,
+                    };
+                  })}
+                />
+              )}
               {showCards && (options.filterRow ?? true) && filterableFields.length > 0 && (
                 <span className="nb-datagrid__mobile-filter">
                   <IconButton
@@ -1163,7 +1195,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                     className="ph ph-magnifying-glass nb-datagrid__quick-search-icon"
                     aria-hidden="true"
                   />
-                  <input
+                  <TextField
                     type="search"
                     className="nb-datagrid__quick-search-input"
                     placeholder={

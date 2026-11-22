@@ -1648,7 +1648,7 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   .nb-datagrid__card-side > .nb-icon-button {
     background: var(--surface-1);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
   }
   .nb-datagrid__card-check {
     position: absolute;
@@ -1683,6 +1683,8 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
+
+  margin-bottom: var(--space-3);
 
   .nb-datagrid__quick-search {
     flex: 1 1 280px;
@@ -2104,8 +2106,9 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
 }
 
 // The field itself is the shared `.nb-input`; only room for the icon and the clear button.
-.nb-datagrid__quick-search-input {
-  padding-left: calc(var(--space-3) + 1.5em);
+// Doubled selector: `.nb-input` sets its own padding and may load after this file.
+.nb-datagrid__quick-search .nb-datagrid__quick-search-input {
+  padding-left: calc(var(--space-3) + 1.25em + var(--space-2));
   padding-right: calc(var(--space-2) + 28px);
 
   &::-webkit-search-cancel-button {

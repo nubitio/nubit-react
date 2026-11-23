@@ -146,8 +146,22 @@
 // ── Variants ───────────────────────────────────────────────────────────────────
 
 .nb-select {
-  appearance: auto;
-  padding-right: var(--space-5);
+  appearance: none;
+  background-color: var(--surface-1);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
+    linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: pointer;
+  padding-right: calc(var(--space-5) + var(--space-2));
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 
 .nb-textarea {

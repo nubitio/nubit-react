@@ -109,9 +109,9 @@
     &::after {
       content: '';
       position: absolute;
-      right: var(--space-3);
+      right: 0;
       bottom: 0;
-      left: var(--space-3);
+      left: 0;
       height: 2px;
       border-radius: 2px 2px 0 0;
       background: var(--accent-color);
@@ -174,7 +174,7 @@
   // Title + tabs share one row. No card chrome — a single hairline under the
   // whole row separates header from content.
   .nb-feature-hub__tabs-card {
-    align-items: center;
+    align-items: stretch;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border-subtle, var(--border-color));
@@ -186,11 +186,12 @@
     gap: var(--space-2) var(--space-5);
     justify-content: space-between;
     min-width: 0;
-    padding: 0 0 var(--space-2);
+    padding: 0;
     width: 100%;
   }
 
   .nb-feature-hub__title {
+    align-self: center;
     font-size: var(--font-size-xl);
     line-height: 1.2;
     margin: 0;
@@ -219,8 +220,8 @@
     }
 
     &--active::after {
-      right: var(--space-2);
-      left: var(--space-2);
+      right: 0;
+      left: 0;
     }
   }
 

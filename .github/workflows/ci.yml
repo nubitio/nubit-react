@@ -12,12 +12,14 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # A healthy run takes ~3 min; cap it so a hang cannot hold the PR for hours.
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -60,12 +62,15 @@ jobs:
   e2e:
     name: E2E + accessibility (WCAG 2.1 AA)
     runs-on: ubuntu-latest
+    # ~3 min when healthy. Without a cap, a broken app made all 50 tests wait out their
+    # 60 s timeout (~25 min) before failing.
+    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -83,7 +88,7 @@ jobs:
 
       - name: Upload traces on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces
           path: examples/admin-demo/test-results/

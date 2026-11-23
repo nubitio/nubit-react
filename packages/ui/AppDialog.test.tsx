@@ -1,5 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { AppDialog } from './AppDialog';
 
@@ -206,5 +208,55 @@ describe('AppDialog footer', () => {
       </AppDialog>,
     );
     expect(container.querySelector('.nb-dialog__footer')).toBeNull();
+  });
+});
+
+// ── flush ─────────────────────────────────────────────────────────────────────
+
+describe('AppDialog flush', () => {
+  it('marks the dialog so the body loses its padding and scrolling', () => {
+    render(
+      <AppDialog title="Settings" visible flush onClose={noop}>
+        <span>content</span>
+      </AppDialog>,
+    );
+    expect(screen.getByRole('dialog').classList.contains('nb-dialog--flush')).toBe(true);
+  });
+
+  it('keeps the padded body by default', () => {
+    render(
+      <AppDialog title="Settings" visible onClose={noop}>
+        <span>content</span>
+      </AppDialog>,
+    );
+    expect(screen.getByRole('dialog').classList.contains('nb-dialog--flush')).toBe(false);
+  });
+});
+
+describe('AppDialog flush and nested dialogs', () => {
+  it("a dialog opened inside a flush one is not itself flush, and its body is not the flush dialog's", () => {
+    render(
+      <AppDialog title="Outer" visible flush onClose={noop}>
+        <AppDialog title="Inner" visible onClose={noop}>
+          <span>inner content</span>
+        </AppDialog>
+      </AppDialog>,
+    );
+    const outer = screen.getByRole('dialog', { name: 'Outer' });
+    const inner = screen.getByRole('dialog', { name: 'Inner' });
+    expect(outer.classList.contains('nb-dialog--flush')).toBe(true);
+    expect(inner.classList.contains('nb-dialog--flush')).toBe(false);
+    // The flush rule targets the body that is a direct child of the flush dialog: only the outer one.
+    expect(outer.querySelectorAll(':scope > .nb-dialog__body')).toHaveLength(1);
+    expect(inner.querySelectorAll(':scope > .nb-dialog__body')).toHaveLength(1);
+    expect(inner.parentElement?.closest('.nb-dialog--flush')).toBe(outer);
+  });
+
+  it("keeps the flush rules to the dialog's own body (child combinator), not any descendant", () => {
+    // jsdom does not evaluate our stylesheet, so guard the selector itself: a descendant selector
+    // here strips the padding of every dialog opened from inside a flush one.
+    const css = readFileSync(join(process.cwd(), 'packages/ui/AppDialog.scss'), 'utf8');
+    expect(css).toContain('.nb-dialog--flush > .nb-dialog__body');
+    expect(css).not.toMatch(/\.nb-dialog--flush\s+\.nb-dialog__body/);
   });
 });

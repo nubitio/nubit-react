@@ -16,6 +16,11 @@ export interface AppDialogProps {
   maxWidth?: number | string;
   height?: number | string;
   fullScreen?: boolean;
+  /**
+   * Drops the body's padding and its own scrolling, so content that lays itself out (a side list
+   * beside a detail pane) can reach the dialog's edges. The content must scroll by itself.
+   */
+  flush?: boolean;
   showCloseButton?: boolean;
   /** Accessible label for the close button. Defaults to UiStrings `close`. */
   closeLabel?: string;
@@ -55,6 +60,7 @@ export const AppDialog = ({
   maxWidth,
   height,
   fullScreen = false,
+  flush = false,
   showCloseButton = true,
   closeLabel,
   scrimLabel,
@@ -81,7 +87,12 @@ export const AppDialog = ({
       open={isVisible}
       onClose={onClose}
       rootClassName={joinClassNames('nb-dialog-root', rootClassName)}
-      className={joinClassNames('nb-dialog', fullScreen && 'nb-dialog--fullscreen', className)}
+      className={joinClassNames(
+        'nb-dialog',
+        fullScreen && 'nb-dialog--fullscreen',
+        flush && 'nb-dialog--flush',
+        className,
+      )}
       scrimClassName="nb-dialog__scrim"
       scrimLabel={resolvedScrimLabel}
       labelledBy={titleId}

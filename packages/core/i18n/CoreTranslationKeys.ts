@@ -87,6 +87,7 @@ export interface CoreTranslationKeys {
   'grid.clearFilters': string;
   'grid.done': string;
   'grid.searchPlaceholder': string;
+  'grid.quickSearch': string;
   'grid.showMore': string;
   'grid.showLess': string;
   'grid.presentation': string;

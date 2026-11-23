@@ -218,3 +218,15 @@
     transform: rotate(360deg);
   }
 }
+
+// ── Link rendered as a button ─────────────────────────────────────────────────
+
+.nb-button--link {
+  text-decoration: none;
+
+  &.nb-button--disabled {
+    cursor: default;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}

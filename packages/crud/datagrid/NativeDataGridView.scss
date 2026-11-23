@@ -1647,6 +1647,8 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   }
   .nb-datagrid__card-side > .nb-icon-button {
     background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
   }
   .nb-datagrid__card-check {
     position: absolute;
@@ -1682,8 +1684,11 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   gap: var(--space-2);
   align-items: center;
 
+  margin-bottom: var(--space-3);
+
   .nb-datagrid__quick-search {
     flex: 1 1 280px;
+    margin-bottom: 0;
     min-width: 0;
   }
 }
@@ -1762,6 +1767,39 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   .nb-datagrid--cards .nb-datagrid__table-wrap {
     background: transparent;
     border: 0;
+  }
+}
+
+.nb-datagrid--cards-compact {
+  .nb-datagrid__cards {
+    gap: var(--space-2);
+  }
+
+  .nb-datagrid__card-body,
+  .nb-datagrid__card--skeleton {
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .nb-datagrid__card--media {
+    .nb-datagrid__card-body {
+      padding: 0;
+    }
+
+    .nb-datagrid__card-copy {
+      padding: var(--space-2);
+    }
+  }
+
+  .nb-datagrid__card-media {
+    height: 96px;
+  }
+
+  @media (min-width: 768px) {
+    .nb-datagrid__cards {
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+      padding: var(--space-2);
+    }
   }
 }
 
@@ -2054,31 +2092,24 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
 
 .nb-datagrid__quick-search {
   align-items: center;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
   display: flex;
   flex: 0 0 auto;
-  gap: var(--space-2);
   margin-bottom: var(--space-2);
-  padding: 0 var(--space-3);
+  position: relative;
 }
 
 .nb-datagrid__quick-search-icon {
   color: var(--text-tertiary);
-  flex: 0 0 auto;
+  left: var(--space-3);
+  pointer-events: none;
+  position: absolute;
 }
 
-.nb-datagrid__quick-search-input {
-  background: transparent;
-  border: 0;
-  color: var(--text-primary);
-  flex: 1 1 auto;
-  font: inherit;
-  font-size: var(--font-size-sm);
-  height: 40px;
-  min-width: 0;
-  outline: none;
+// The field itself is the shared `.nb-input`; only room for the icon and the clear button.
+// Doubled selector: `.nb-input` sets its own padding and may load after this file.
+.nb-datagrid__quick-search .nb-datagrid__quick-search-input {
+  padding-left: calc(var(--space-3) + 1.25em + var(--space-2));
+  padding-right: calc(var(--space-2) + 28px);
 
   &::-webkit-search-cancel-button {
     display: none;
@@ -2096,6 +2127,8 @@ html[data-density='compact'] .nb-datagrid .nb-badge {
   flex: 0 0 auto;
   height: 28px;
   justify-content: center;
+  position: absolute;
+  right: var(--space-2);
   width: 28px;
 
   &:hover {

@@ -66,8 +66,14 @@ remain owned by the same grid. Mobile keeps its existing card presentation:
 defineResource('/api/products', {
   gridAppearance: 'page', // opt-in unframed toolbar and page heading
   quickFilterFields: ['category'], // enum/entity shortcuts into the same server query
+  quickSearch: {
+    searchExpr: ['name', 'sku', 'code'],
+    showIn: 'cards', // default; can also be 'table' or 'both'
+    placeholder: 'Search by name, SKU or code',
+  },
   cardView: {
     defaultView: 'cards', // default: 'table'
+    density: 'compact', // default: 'comfortable'
     renderMedia: ({ row }) => <ProductImage product={row} />,
     renderContent: ({ row }) => <ProductCardContent product={row} />,
   },
@@ -93,6 +99,14 @@ defineResource('/api/products', {
 });
 ```
 
+Page-style tables no longer add a quick-search input automatically. Cards
+without an explicit `quickSearch` retain the native single-column search when
+column filtering is enabled. Use `quickSearch: false` to disable it entirely.
+An explicit configuration works independently of `filterRow`; it sends
+`searchExpr` and the entered `searchValue` to the resource store alongside
+the existing column filters. Hydra matches any of the listed fields. For
+in-memory rows the same setting uses case-insensitive substring matching.
+
 `renderContent` returns **non-interactive content**: the engine supplies the
 accessible open button, selection controls and permission-aware actions. Inline
 row/cell/batch editing disables the desktop cards toggle. Omitting `renderContent`
@@ -110,6 +124,47 @@ drawers; sidebar controls use a single column. Missing fields go into an overflo
 section; duplicate assignments mount only once. `renderAfter` receives read-only
 current form data and must not perform side effects. It can display summaries,
 but pricing/tax/stock rules remain in the application and backend.
+
+### Hierarchical resources
+
+Use the native TreeList for parent-linked resources such as a chart of accounts,
+categories or warehouses. The collection endpoint must support filtering root
+records by the configured parent field; child collections are loaded lazily
+through the resource store using that same field. Hydra serializes filter
+tuples directly. Plain REST filters are intentionally ignored by default, so
+configure `createRestResourceStore`'s `serializeFilter` callback to translate
+them into the endpoint's query dialect:
+
+```tsx
+const accounts = defineResource('/api/accounts', {
+  title: 'Chart of accounts',
+  fields: [
+    textField('code').label('Code'),
+    textField('name').label('Account'),
+    textField('parentId').hidden(),
+    checkboxField('hasChildren').hidden(),
+  ],
+  treeList: {
+    parentIdField: 'parentId',
+    hasChildrenField: 'hasChildren',
+    rootValue: null,
+    onMove: async ({ item, newParent, index }) => {
+      // Call the application's validated move operation.
+    },
+  },
+});
+```
+
+`TreeList` uses the resource's identity field as node ID, applies ordinary
+resource filters/sort to root and child loads, shares CRUD row actions and
+permission checks, and reports hierarchical selection to the page. Set
+`childrenField` instead when the API returns nested children. Reparenting is
+disabled unless `treeList.onMove` is supplied; the backend remains responsible
+for cycle prevention, account/posting rules and persistence. The configured
+`parentIdField` must expose scalar parent IDs (not serialized relation objects).
+Child loading follows server pages (`childrenPageSize`, default 500) and fails
+explicitly at `maxChildren` (default 10,000) rather than silently truncating a
+large branch.
 
 Page mode already has a persistent footer. `formPage` extends that footer rather
 than adding a second save flow; saving disables its built-in actions. Wire both

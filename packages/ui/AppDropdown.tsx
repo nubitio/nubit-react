@@ -8,10 +8,18 @@ export interface AppDropdownOption {
   label: string;
   selectedLabel?: string;
   iconText?: string;
+  /** Secondary line under the label in the menu. The trigger still shows only the label. */
+  description?: ReactNode;
   disabled?: boolean;
 }
 
 export type AppDropdownVariant = 'form' | 'toolbar' | 'compact';
+
+/**
+ * How wide the menu is. `anchor` (default) matches the trigger; `content` fits the widest option
+ * (never narrower than the trigger), so short labels stay on one line in a narrow trigger.
+ */
+export type AppDropdownMenuWidth = 'anchor' | 'content';
 
 export interface AppDropdownProps {
   id?: string;
@@ -28,6 +36,7 @@ export interface AppDropdownProps {
   /** When true, wraps the control in a form-field label (form variant only). */
   showFieldLabel?: boolean;
   menuMinWidth?: number;
+  menuWidth?: AppDropdownMenuWidth;
   error?: ReactNode;
   helpText?: ReactNode;
   menuHeader?: ReactNode;
@@ -54,6 +63,7 @@ export function AppDropdown({
   className,
   showFieldLabel = variant === 'form',
   menuMinWidth,
+  menuWidth = 'anchor',
   error,
   helpText,
   menuHeader,
@@ -150,7 +160,9 @@ export function AppDropdown({
               align="start"
               sideOffset={4}
               alignItemWithTrigger={false}
-              className="nb-dropdown-positioner"
+              className={`nb-dropdown-positioner${
+                menuWidth === 'content' ? ' nb-dropdown-positioner--content' : ''
+              }`}
               style={{ minWidth: menuMinWidth }}
             >
               <Select.Popup
@@ -162,7 +174,9 @@ export function AppDropdown({
                     onOpenChange?.(false);
                   }
                 }}
-                className={`nb-dropdown__menu nb-dropdown__menu--${variant}`}
+                className={`nb-dropdown__menu nb-dropdown__menu--${variant}${
+                  menuWidth === 'content' ? ' nb-dropdown__menu--fit' : ''
+                }`}
               >
                 {menuHeader}
                 <Select.List className="nb-dropdown__menu-list">
@@ -182,7 +196,16 @@ export function AppDropdown({
                             {option.iconText}
                           </span>
                         )}
-                        <span>{option.label}</span>
+                        {option.description ? (
+                          <span className="nb-dropdown__option-text">
+                            <span className="nb-dropdown__option-label">{option.label}</span>
+                            <span className="nb-dropdown__option-description">
+                              {option.description}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="nb-dropdown__option-label">{option.label}</span>
+                        )}
                       </Select.ItemText>
                       <Select.ItemIndicator className="nb-dropdown__selected" aria-hidden="true">
                         <i className="ph ph-check" />

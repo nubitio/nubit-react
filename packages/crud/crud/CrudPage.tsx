@@ -180,7 +180,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
     permissions,
     selectionState,
   } = useCrudPage(resolvedInputResource, externalFormRef);
-  const { DataGridView, FormView } = useCrudViews();
+  const { DataGridView, TreeListView, FormView } = useCrudViews();
+  const ActiveDataGridView = resolvedResource.treeList ? TreeListView : DataGridView;
   const httpClient = useCoreHttpClient();
   const storeFactory = useResourceStoreFactory();
   const [formBusy, setFormBusy] = useState(false);
@@ -239,7 +240,8 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   // onEdit(row) for them exactly like non-inline grids — so hiding the
   // dialog for those two modes left both "Nuevo" and clicking a row to edit
   // silently doing nothing (the dialog they both need was never rendered).
-  const hasInlineReplacementForDialog = resolvedResource.editMode === 'row';
+  const hasInlineReplacementForDialog =
+    !resolvedResource.treeList && resolvedResource.editMode === 'row';
 
   const viewMode = useMemo(
     () => resolveViewMode(resolvedResource.viewMode),
@@ -582,7 +584,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         emit,
       }) ?? {};
 
-    if (!hasAuditTrail) return base;
+    if (!hasAuditTrail || resolvedResource.auditTrail?.toolbarButton === false) return base;
 
     return {
       ...base,
@@ -720,7 +722,7 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
           />
         </section>
       )}
-      <DataGridView
+      <ActiveDataGridView
         ref={gridRef}
         id={resolvedResource.id}
         title={resolvedResource.title}
@@ -769,8 +771,10 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         appearance={resolvedResource.gridAppearance}
         quickFilterFields={resolvedResource.quickFilterFields}
         filterRow={resolvedResource.filterRow}
+        quickSearch={resolvedResource.quickSearch}
         filterToolbarFields={resolvedResource.filterToolbarFields}
         filterPresets={resolvedResource.filterPresets}
+        treeList={resolvedResource.treeList}
       />
       {!hasInlineReplacementForDialog && (
         <CrudFormShell

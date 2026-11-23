@@ -12,12 +12,34 @@ import type {
 } from '../crud/ResourceConfig';
 import type { ColumnGroupDef } from './ColumnGroup';
 import type { CardViewConfig } from './CardView';
+import type { GridQuickSearchConfig } from './GridQuickSearch';
 
 export interface DataGridSelectionChangedEvent {
   selectedRowsData?: DataRecord[];
 }
 
 export type DataGridSummaryItem = SummaryItem;
+
+export interface TreeListViewConfig {
+  /** Parent foreign-key field. Root records use `rootValue` (defaults to null). */
+  parentIdField: string;
+  rootValue?: string | number | null;
+  /** Optional nested children field instead of flat parentId records. */
+  childrenField?: string;
+  /** Server-provided hint for children not currently loaded. */
+  hasChildrenField?: string;
+  /** Page size used while fetching all direct children (default 500). */
+  childrenPageSize?: number;
+  /** Safety cap per expanded node; exceeding it fails instead of truncating (default 10000). */
+  maxChildren?: number;
+  /** Persist a proposed drag-and-drop move in application/domain code. */
+  onMove?: (event: {
+    item: DataRecord;
+    newParent: DataRecord | null;
+    index: number;
+    position: 'before' | 'inside' | 'after';
+  }) => void | Promise<void>;
+}
 
 export interface DataGridViewOptions {
   id: string;
@@ -83,6 +105,8 @@ export interface DataGridViewOptions {
   /** Custom batch persistence. Defaults to PATCHing each row to url/id when omitted. */
   onBatchSave?: (rows: DataRecord[]) => void | Promise<void>;
   filterRow?: boolean;
+  /** Multi-field quick search; false disables the automatic single-field search in cards. */
+  quickSearch?: GridQuickSearchConfig | false;
   headerFilter?: boolean;
   manualLoad?: boolean;
   /** Bulk actions rendered inline in the datagrid toolbar when rows are selected. */
@@ -118,4 +142,6 @@ export interface DataGridViewOptions {
   filterToolbarFields?: string[];
   /** Shortcuts applied to the same filter state as the row and sheet. */
   filterPresets?: { key: string; label: string; field: string; operator: string; value: string }[];
+  /** Render the resource as a hierarchical TreeList instead of a flat grid. */
+  treeList?: TreeListViewConfig;
 }

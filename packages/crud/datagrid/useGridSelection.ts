@@ -30,6 +30,13 @@ export function useGridSelection({ rows, getRowKey, multiple, onChange }: GridSe
     },
     [applySelection, getRowKey, multiple, selectedKeys],
   );
+  const replaceSelection = useCallback(
+    (records: DataRecord[]) => {
+      setSelectedKeys(records.map((row) => getRowKey(row)));
+      onChange(records);
+    },
+    [getRowKey, onChange],
+  );
   const selectedRows = useMemo(
     () => rows.filter((row) => selectedKeys.includes(getRowKey(row))),
     [getRowKey, rows, selectedKeys],
@@ -47,6 +54,7 @@ export function useGridSelection({ rows, getRowKey, multiple, onChange }: GridSe
     selectedKeys,
     selectedRows,
     selectRow,
+    replaceSelection,
     allPageSelected,
     somePageSelected,
     toggleSelectAll,

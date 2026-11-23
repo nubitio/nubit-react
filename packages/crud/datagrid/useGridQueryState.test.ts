@@ -110,6 +110,30 @@ describe('useGridQueryState', () => {
     });
   });
 
+  it('commits quick search independently of column filters and resets pagination', () => {
+    const { result } = setup();
+
+    act(() => {
+      result.current.setPage(3);
+      result.current.setSearchInput('  Acme  ');
+      result.current.applyFilterInputDebounced(price, '20');
+    });
+    expect(result.current.searchInput).toBe('  Acme  ');
+    expect(result.current.searchValue).toBe('');
+    expect(result.current.page).toBe(3);
+
+    act(() => vi.advanceTimersByTime(FILTER_DEBOUNCE_MS));
+    expect(result.current.searchValue).toBe('Acme');
+    expect(result.current.filters).toEqual({ price: '20' });
+    expect(result.current.page).toBe(0);
+
+    act(() => result.current.setSearchInput('Other'));
+    act(() => result.current.setSearchInput(''));
+    act(() => vi.advanceTimersByTime(FILTER_DEBOUNCE_MS));
+    expect(result.current.searchValue).toBe('');
+    expect(result.current.filters).toEqual({ price: '20' });
+  });
+
   describe('pagination', () => {
     it('steps forward and backward within bounds', () => {
       const { result } = setup();

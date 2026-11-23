@@ -106,6 +106,15 @@ export interface UiStrings {
   featureRequiresPlan: string;
   /** FeatureGate upgrade prompt: link to the plans page. */
   viewPlans: string;
+  /** TreeList search field, empty state and tree interaction labels. */
+  treeListFilter: string;
+  treeListEmpty: string;
+  treeListExpand: string;
+  treeListCollapse: string;
+  treeListSelect: string;
+  treeListSelectAll: string;
+  treeListEdit: string;
+  treeListMoveFailed: string;
 }
 
 export const EN_UI_STRINGS: UiStrings = {
@@ -179,6 +188,14 @@ export const EN_UI_STRINGS: UiStrings = {
   featureUnavailable: 'This feature is not available on your current plan.',
   featureRequiresPlan: 'This feature requires the {plan} plan. Upgrade your plan to unlock it.',
   viewPlans: 'View plans',
+  treeListFilter: 'Filter rows',
+  treeListEmpty: 'No rows to display',
+  treeListExpand: 'Expand',
+  treeListCollapse: 'Collapse',
+  treeListSelect: 'Select row',
+  treeListSelectAll: 'Select all visible rows',
+  treeListEdit: 'Edit',
+  treeListMoveFailed: 'The row could not be moved.',
 };
 
 export const ES_UI_STRINGS: UiStrings = {
@@ -253,6 +270,14 @@ export const ES_UI_STRINGS: UiStrings = {
   featureRequiresPlan:
     'Esta función requiere el plan {plan}. Actualiza tu plan para desbloquearla.',
   viewPlans: 'Ver planes',
+  treeListFilter: 'Filtrar filas',
+  treeListEmpty: 'No hay filas para mostrar',
+  treeListExpand: 'Expandir',
+  treeListCollapse: 'Contraer',
+  treeListSelect: 'Seleccionar fila',
+  treeListSelectAll: 'Seleccionar todas las filas visibles',
+  treeListEdit: 'Editar',
+  treeListMoveFailed: 'No se pudo mover la fila.',
 };
 
 const UiStringsContext = createContext<UiStrings>(EN_UI_STRINGS);

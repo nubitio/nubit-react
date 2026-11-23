@@ -15,12 +15,16 @@ import {
   AppDropdown,
   AppDialog,
   Button,
+  ContextMenu,
   ConfirmDialog,
   Chip,
   IconButton,
   SegmentedControl,
+  TextField,
+  TreeList,
   useOverlayContainer,
 } from '@nubitio/ui';
+import type { ContextMenuItem } from '@nubitio/ui';
 import { useResourceStoreFactory } from '../data/ResourceStore';
 import { fieldKeyValue, fieldTextValue } from '../form/fieldOptionSource';
 import { getFilterOperatorLabel } from '../field/registry/filterHelpers';
@@ -45,6 +49,7 @@ import {
   joinBetweenValue,
 } from './FilterRow';
 import { useGridQueryState } from './useGridQueryState';
+import { resolveQuickSearch } from './GridQuickSearch';
 import { getCellText, getIdField, renderCell } from './cellRendering';
 import { DetailGridSection } from './DetailGridSection';
 import { canEditFieldInline, useInlineEdit } from './useInlineEdit';
@@ -71,7 +76,12 @@ import {
   lockColumnWidth,
   PAGE_SIZE_OPTIONS,
 } from './gridLayoutUtils';
-import { isCellEditMode, isDateLikeField, resolveInlineEditToolbar } from './gridFieldUtils';
+import {
+  isCellEditMode,
+  isDateLikeField,
+  normalizeIcon,
+  resolveInlineEditToolbar,
+} from './gridFieldUtils';
 import {
   buildToolbar,
   isToolbarActionVisible,
@@ -80,6 +90,7 @@ import {
   SelectionActionsMenu,
 } from './gridToolbar';
 import { useGridDataLoader } from './useGridDataLoader';
+import { useToolbarOverflow } from './useToolbarOverflow';
 import { useGridExport } from './useGridExport';
 import { useSynchronizedGridScroll } from './useSynchronizedGridScroll';
 import { useAutoColumnWidths } from './useAutoColumnWidths';
@@ -121,6 +132,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     filters,
     filterInputs,
     filterOperators,
+    searchInput,
+    searchValue,
+    setSearchInput,
     sort,
     page,
     pageSize,
@@ -154,11 +168,20 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     options.cardView?.defaultView ?? 'table',
   );
   const canShowDesktopCards =
-    !!options.cardView && (!options.editMode || options.editMode === 'popup');
-  const showCards = isMobile || (canShowDesktopCards && desktopView === 'cards');
+    !options.treeList && !!options.cardView && (!options.editMode || options.editMode === 'popup');
+  const showCards =
+    !options.treeList && (isMobile || (canShowDesktopCards && desktopView === 'cards'));
   const renderCardContent = options.cardView?.renderContent;
   const renderCardMedia = renderCardContent ? options.cardView?.renderMedia : undefined;
   const pageAppearance = options.appearance === 'page';
+  const quickSearch = options.treeList
+    ? undefined
+    : resolveQuickSearch(options.quickSearch, showCards);
+  const searchExpr = quickSearch?.searchExpr;
+  const search = useMemo(
+    () => (searchExpr && searchValue ? { searchExpr, searchValue } : undefined),
+    [searchExpr, searchValue],
+  );
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [expandedCardKeys, setExpandedCardKeys] = useState<Set<unknown>>(() => new Set());
   const [openRowMenu, setOpenRowMenu] = useState<{
@@ -217,11 +240,49 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     page,
     pageSize,
     paging: options.paging ?? true,
+    search,
     manualLoad: options.manualLoad ?? false,
+    extraFilter: options.treeList
+      ? [[options.treeList.parentIdField, '=', options.treeList.rootValue ?? null]]
+      : undefined,
     data: options.data,
     suppliedGridSummary: options.gridSummary,
     onContentReady: notifyContentReady,
   });
+
+  const loadTreeChildren = useCallback(
+    async (parent: DataRecord, { signal }: { signal: AbortSignal }): Promise<DataRecord[]> => {
+      const treeConfig = options.treeList;
+      if (!treeConfig) return [];
+      const parentId = getRowKey(parent);
+      const take = Math.max(1, Math.floor(treeConfig.childrenPageSize ?? 500));
+      const maxChildren = Math.max(1, Math.floor(treeConfig.maxChildren ?? 10_000));
+      const children: DataRecord[] = [];
+      for (let skip = 0; skip <= maxChildren; skip += take) {
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+        const requested = Math.min(take, maxChildren + 1 - skip);
+        const result = await source.load({
+          filter: [
+            ...buildFilterExpression(filters, filterOperators, options.fields),
+            [treeConfig.parentIdField, '=', parentId],
+          ],
+          sort,
+          skip,
+          take: requested,
+          signal,
+        });
+        children.push(...result.data);
+        if (children.length > maxChildren) {
+          throw new Error(
+            `TreeList node exceeds the configured maxChildren limit (${maxChildren}).`,
+          );
+        }
+        if (result.data.length < requested) return children;
+      }
+      return children;
+    },
+    [filterOperators, filters, getRowKey, options.fields, options.treeList, sort, source],
+  );
 
   const { isExporting, runExport, canExport, exportError, clearExportError } = useGridExport({
     source,
@@ -229,6 +290,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     filters,
     filterOperators,
     sort,
+    search,
   });
 
   const notifySelectionChanged = useCallback(
@@ -246,6 +308,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     somePageSelected,
     toggleSelectAll,
     resetSelection,
+    replaceSelection,
   } = useGridSelection({
     rows,
     getRowKey,
@@ -387,11 +450,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   ]);
 
   const canInlineEditMode =
-    options.editMode === 'row' || options.editMode === 'cell' || options.editMode === 'batch';
-  const cellEditMode = isCellEditMode(options.editMode);
-  const rowInlineMode = options.editMode === 'row';
-  const inlineEditToolbar = resolveInlineEditToolbar(options.editMode, options.inlineEditToolbar);
-  const showRowInlineActions = options.inlineRowActions ?? rowInlineMode;
+    !options.treeList &&
+    (options.editMode === 'row' || options.editMode === 'cell' || options.editMode === 'batch');
+  const cellEditMode = !options.treeList && isCellEditMode(options.editMode);
+  const rowInlineMode = !options.treeList && options.editMode === 'row';
+  const inlineEditToolbar = options.treeList
+    ? { save: false, revert: false }
+    : resolveInlineEditToolbar(options.editMode, options.inlineEditToolbar);
+  const showRowInlineActions = !options.treeList && (options.inlineRowActions ?? rowInlineMode);
 
   const inlineEdit = useInlineEdit({
     mode: cellEditMode ? 'batch' : 'row',
@@ -535,8 +601,37 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       requestDelete: () => setConfirmRow(row),
     });
 
+  const treeListColumns = useMemo(
+    () =>
+      visibleFields.map((field) => ({
+        id: field.name,
+        header: field.label,
+        sortable: field.sortable,
+        value: (row: DataRecord) => row[field.name],
+        render: (row: DataRecord) => renderCell(field, row, 0, 0),
+      })),
+    [visibleFields],
+  );
+  const treeSelectedIds = useMemo(() => new Set(selectedKeys), [selectedKeys]);
+  const treeRowActions = (row: DataRecord): ContextMenuItem[] =>
+    buildRowActions(row)
+      .filter((action) => isToolbarActionVisible(action, toolbarPermissions))
+      .map((action) => ({
+        label: action.text,
+        icon: action.icon,
+        danger: action.type === 'danger',
+        disabled: action.disabled,
+        onClick: action.onClick,
+      }));
+
   const openRow = (row: DataRecord) => {
-    if (options.allowEdit && rowEditable(row) && rowInlineMode && canInlineEditMode) {
+    if (
+      !options.treeList &&
+      options.allowEdit &&
+      rowEditable(row) &&
+      rowInlineMode &&
+      canInlineEditMode
+    ) {
       inlineEdit.startEdit(row);
       return;
     }
@@ -887,6 +982,17 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     canExport,
     isExporting,
   });
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const utilityActions = (toolbar.utility ?? []).filter((action) =>
+    isToolbarActionVisible(action, toolbarPermissions),
+  );
+  const overflowCount = useToolbarOverflow(
+    toolbarRef,
+    utilityActions.length,
+    options.toolbar?.maxInlineUtility,
+  );
+  const inlineUtility = utilityActions.slice(0, utilityActions.length - overflowCount);
+  const overflowUtility = utilityActions.slice(utilityActions.length - overflowCount);
   // A failed export reuses the grid's own error row rather than inventing a
   // second surface; a caller-supplied errorMessage still wins, since it is
   // about the data the user is looking at.
@@ -909,15 +1015,33 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
 
     return [...bulkSelection, ...(toolbar.selection ?? [])];
   }, [options, t, toolbar.selection]);
-  // Quick search targets the first text-like filterable column. Columns with a
-  // formatter are skipped: their displayed text differs from the raw value, so
-  // a contains-filter on them would not match what the user sees.
-  const quickSearchField =
-    showCards || pageAppearance
+  // Keep the existing single-column search in cards for resources that have
+  // not configured a multi-field search. On tables the filter row is enough.
+  const automaticSearchField =
+    options.quickSearch === undefined && showCards && (options.filterRow ?? true)
       ? filterableFields.find(
           (field) => getDefaultFilterOperator(field) === 'contains' && !field.formatter,
         )
       : undefined;
+  const quickFilterColumns =
+    (showCards || pageAppearance) && (options.filterRow ?? true)
+      ? filterableFields.filter(
+          (field) =>
+            options.quickFilterFields?.includes(field.name) &&
+            (field.type === FieldType.ENTITY || field.type === FieldType.ENUM),
+        )
+      : [];
+  const quickSearchValue = automaticSearchField
+    ? (filterInputs[automaticSearchField.name] ?? '')
+    : searchInput;
+  const updateQuickSearch = (value: string) => {
+    if (automaticSearchField) {
+      if (value === '') clearFilter(automaticSearchField);
+      else applyFilterInputDebounced(automaticSearchField, value);
+    } else {
+      setSearchInput(value);
+    }
+  };
 
   const renderRowMenuContent = () => {
     if (!openRowMenu) return null;
@@ -932,8 +1056,9 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
     totalCount > 0
       ? t('grid.recordRange', { start: pageStart, end: pageEnd, total: totalCount })
       : t('grid.noRecordCount');
+  const selectedCount = options.treeList ? selectedKeys.length : selectedRows.length;
   const selectedCountLabel =
-    selectedRows.length > 0 ? t('grid.selectedCount', { count: selectedRows.length }) : null;
+    selectedCount > 0 ? t('grid.selectedCount', { count: selectedCount }) : null;
   const pageStatusLabel =
     totalPages > 0 ? t('grid.pageStatus', { page: page + 1, total: totalPages }) : null;
   return (
@@ -943,13 +1068,13 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
       >
         <div
           aria-busy={isGridLoading}
-          className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}${showCards ? ' nb-datagrid--cards' : ''}${pageAppearance ? ' nb-datagrid--page' : ''}`}
+          className={`grid theme-dependent nb-datagrid${options.zebraRows ? ' nb-datagrid--zebra' : ''}${showCards ? ' nb-datagrid--cards' : ''}${showCards && options.cardView?.density === 'compact' ? ' nb-datagrid--cards-compact' : ''}${pageAppearance ? ' nb-datagrid--page' : ''}`}
         >
           {options.aboveGrid ? (
             <div className="nb-datagrid__above-grid">{options.aboveGrid}</div>
           ) : null}
           {(options.toolbarVisible ?? true) && options.mode !== 'minimal' && (
-            <div className="nb-datagrid__toolbar">
+            <div className="nb-datagrid__toolbar" ref={toolbarRef}>
               {options.hasBackButton && (
                 <IconButton
                   icon="ph ph-arrow-left"
@@ -975,6 +1100,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   value={desktopView}
                   onChange={(value) => {
                     closeRowMenu();
+                    if (searchValue && options.quickSearch) setPage(0);
                     setDesktopView(value);
                   }}
                   options={[
@@ -989,15 +1115,32 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 .map((action, index) => renderToolbarButton(action, index))}
               <SelectionActionsMenu
                 actionsLabel={t('grid.buttonActions')}
-                selectedCount={selectedRows.length}
+                selectedCount={selectedCount}
                 actions={selectionActions}
                 permissions={toolbarPermissions}
               />
-              {toolbar.utility
-                ?.filter((action) => isToolbarActionVisible(action, toolbarPermissions))
-                .map((action, index) =>
-                  renderToolbarButton(action, index, !pageAppearance || isMobile),
-                )}
+              {inlineUtility.map((action, index) =>
+                renderToolbarButton(
+                  action,
+                  index,
+                  action.iconOnly === true || !pageAppearance || isMobile,
+                ),
+              )}
+              {overflowUtility.length > 0 && (
+                <ContextMenu
+                  triggerLabel={t('grid.buttonActions')}
+                  items={overflowUtility.map((action) => {
+                    const icon = normalizeIcon(action.icon);
+                    return {
+                      label: action.text || action.hint || '',
+                      icon: icon ? `ph ${icon}` : undefined,
+                      disabled: action.disabled,
+                      danger: action.type === 'danger',
+                      onClick: action.onClick,
+                    };
+                  })}
+                />
+              )}
               {showCards && (options.filterRow ?? true) && filterableFields.length > 0 && (
                 <span className="nb-datagrid__mobile-filter">
                   <IconButton
@@ -1044,44 +1187,45 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
               </span>
             </div>
           )}
-          {(showCards || pageAppearance) && quickSearchField && (options.filterRow ?? true) && (
+          {(quickSearch || automaticSearchField || quickFilterColumns.length > 0) && (
             <div className="nb-datagrid__filter-bar">
-              <div className="nb-datagrid__quick-search">
-                <i
-                  className="ph ph-magnifying-glass nb-datagrid__quick-search-icon"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  className="nb-datagrid__quick-search-input"
-                  placeholder={t('grid.searchPlaceholder', { column: quickSearchField.label })}
-                  aria-label={t('grid.filterColumn', { column: quickSearchField.label })}
-                  value={filterInputs[quickSearchField.name] ?? ''}
-                  onChange={(event) =>
-                    applyFilterInputDebounced(quickSearchField, event.target.value)
-                  }
-                />
-                {(filterInputs[quickSearchField.name] ?? '') !== '' && (
-                  <button
-                    type="button"
-                    className="nb-datagrid__quick-search-clear"
-                    aria-label={t('grid.clearFilter')}
-                    onClick={() => {
-                      const nextInputs = { ...filterInputs };
-                      delete nextInputs[quickSearchField.name];
-                      applyFilterInputsImmediate(nextInputs);
-                    }}
-                  >
-                    <i className="ph ph-x" aria-hidden="true" />
-                  </button>
-                )}
-              </div>
+              {(quickSearch || automaticSearchField) && (
+                <div className="nb-datagrid__quick-search">
+                  <i
+                    className="ph ph-magnifying-glass nb-datagrid__quick-search-icon"
+                    aria-hidden="true"
+                  />
+                  <TextField
+                    type="search"
+                    className="nb-datagrid__quick-search-input"
+                    placeholder={
+                      quickSearch?.placeholder ??
+                      (automaticSearchField
+                        ? t('grid.searchPlaceholder', { column: automaticSearchField.label })
+                        : t('grid.quickSearch'))
+                    }
+                    aria-label={
+                      automaticSearchField
+                        ? t('grid.filterColumn', { column: automaticSearchField.label })
+                        : (quickSearch?.placeholder ?? t('grid.quickSearch'))
+                    }
+                    value={quickSearchValue}
+                    onChange={(event) => updateQuickSearch(event.target.value)}
+                  />
+                  {quickSearchValue !== '' && (
+                    <button
+                      type="button"
+                      className="nb-datagrid__quick-search-clear"
+                      aria-label={t('grid.clearFilter')}
+                      onClick={() => updateQuickSearch('')}
+                    >
+                      <i className="ph ph-x" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )}
               <GridQuickFilters
-                fields={filterableFields.filter(
-                  (field) =>
-                    options.quickFilterFields?.includes(field.name) &&
-                    (field.type === FieldType.ENTITY || field.type === FieldType.ENUM),
-                )}
+                fields={quickFilterColumns}
                 values={filterInputs}
                 operators={filterOperators}
                 remoteOptions={filterRemoteOptions}
@@ -1173,7 +1317,56 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             </div>
           )}
           <div className="nb-datagrid__table-wrap" ref={tableWrapRef}>
-            {showCards ? (
+            {options.treeList ? (
+              <TreeList
+                ariaLabel={options.title}
+                items={rows}
+                getId={(row) => getRowKey(row)}
+                getParentId={(row) => {
+                  const parent = row[options.treeList!.parentIdField];
+                  return parent == null || parent === options.treeList!.rootValue
+                    ? null
+                    : (parent as string | number);
+                }}
+                getChildren={
+                  options.treeList.childrenField
+                    ? (row) => {
+                        const children = row[options.treeList!.childrenField!];
+                        return Array.isArray(children) ? (children as DataRecord[]) : [];
+                      }
+                    : undefined
+                }
+                hasChildren={
+                  options.treeList.hasChildrenField
+                    ? (row) => Boolean(row[options.treeList!.hasChildrenField!])
+                    : undefined
+                }
+                loadChildren={options.treeList.childrenField ? undefined : loadTreeChildren}
+                withParent={(child, parent) => ({
+                  ...child,
+                  [options.treeList!.parentIdField]: getRowKey(parent),
+                })}
+                columns={treeListColumns}
+                filterable={false}
+                selectionMode={options.selectionMode === 'multiple' ? 'multiple' : 'none'}
+                selectedIds={treeSelectedIds}
+                onSelectedItemsChange={(records) => replaceSelection([...records])}
+                rowActions={treeRowActions}
+                onRowActivate={(row) => openRow(row)}
+                onMove={
+                  options.treeList.onMove
+                    ? async (event) => {
+                        await options.treeList!.onMove?.(event);
+                        await loadRows();
+                      }
+                    : undefined
+                }
+                loading={isGridLoading}
+                error={loadError ? t('grid.loadErrorDescription') : undefined}
+                emptyState={t('grid.noRecords')}
+                testId={`${options.id}-tree-list`}
+              />
+            ) : showCards ? (
               <ul className="nb-datagrid__cards" aria-label={options.title} ref={cardsRef}>
                 {rows.length === 0 && isGridLoading
                   ? Array.from({ length: 6 }, (_, i) => (
@@ -1928,7 +2121,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 />
               </table>
             )}
-            {rows.length === 0 && !isGridLoading && (
+            {!options.treeList && rows.length === 0 && !isGridLoading && (
               <GridEmptyStateView
                 emptyState={options.emptyState}
                 error={loadError}
@@ -1943,7 +2136,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                 fallbackTitle={t('grid.noRecords')}
               />
             )}
-            {!showCards && (
+            {!showCards && !options.treeList && (
               <div
                 ref={hScrollRef}
                 className={`nb-datagrid__hscroll${layoutWidth > containerWidth ? '' : ' nb-datagrid__hscroll--hidden'}`}

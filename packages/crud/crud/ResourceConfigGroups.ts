@@ -3,6 +3,7 @@ import type { ColumnPreset } from './ColumnPreset';
 import type { ColumnGroupDef } from '../datagrid/ColumnGroup';
 import type { FormLayout } from '../form/FormLayout';
 import type { SummaryItem } from '../summary';
+import type { TreeListViewConfig } from '../datagrid/DataGridViewOptions';
 import type {
   CrudViewMode,
   CrudViewModeConfig,
@@ -36,6 +37,7 @@ export interface ResourceGridGroup {
   columnPresets?: ColumnPreset[];
   columnGroupDefs?: ColumnGroupDef[];
   defaultPreset?: string;
+  treeList?: TreeListViewConfig;
 }
 
 export interface ResourceConfigGroups {
@@ -69,6 +71,7 @@ export function flattenResourceGroups(groups: ResourceConfigGroups): Record<stri
     ...(groups.grid?.defaultPreset !== undefined
       ? { defaultPreset: groups.grid.defaultPreset }
       : {}),
+    ...(groups.grid?.treeList !== undefined ? { treeList: groups.grid.treeList } : {}),
     ...(groups.routing !== undefined ? { routing: groups.routing } : {}),
   };
 }

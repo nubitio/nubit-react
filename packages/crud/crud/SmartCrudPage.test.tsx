@@ -335,6 +335,23 @@ describe('CRUD engine ↔ RestAdapter wiring', () => {
   });
 });
 
+describe("viewMode: 'page' grid delete", () => {
+  it('deletes from the list even though the form shell is not mounted', async () => {
+    const formRef = createRef<FormHandle>();
+    renderPage('/', formRef, http, loadSpy, { ...resource, viewMode: 'page' });
+
+    // List showing: the page shell is closed, so FormView (and formRef) is unmounted.
+    const row = (await screen.findByText('Laptop')).closest('tr') as HTMLElement;
+    expect(formRef.current).toBeNull();
+
+    fireEvent.keyDown(row, { key: 'Delete' });
+    fireEvent.click(await screen.findByRole('button', { name: /buttonDelete|delete/i }));
+
+    await waitFor(() => expect(http.delete).toHaveBeenCalledTimes(1));
+    expect(http.delete).toHaveBeenCalledWith(`${API_URL}/1`);
+  });
+});
+
 describe("editMode: 'batch' still renders the add/edit dialog", () => {
   it('create → POST still fires with editMode "batch" (form actually mounts)', async () => {
     const formRef = createRef<FormHandle>();

@@ -7,6 +7,8 @@ import { resolveViewMode } from '../view/viewMode';
 import { useCrudPage } from './useCrudPage';
 import { useCoreTranslation, useEvents, useCoreHttpClient } from '@nubitio/core';
 import { useResourceStoreFactory } from '../data/ResourceStore';
+import { useFormSubmit } from '../form/useFormSubmit';
+import type { UseFormSubmitAccessors } from '../form/FormSubmitAccessors';
 import { HydraAdapter } from '../adapter/HydraAdapter';
 import type { ResourceConfig, ResourceRowActions, ResourceToolbarAction } from './ResourceConfig';
 import type { BulkAction } from './BulkAction';
@@ -27,6 +29,14 @@ import { resolveResourceToolbar } from './resolveResourceToolbar';
 import type { SmartCrudOperation } from './fieldOperationSemantics';
 import { ColumnChooserButton } from './ColumnChooserButton';
 import { useColumnChooser } from './useColumnChooser';
+
+const DETACHED_ACCESSORS: UseFormSubmitAccessors = {
+  getDetailRows: () => [],
+  getFieldValue: () => undefined,
+  getFormData: () => ({}),
+  getUploadedFiles: () => [],
+  isEditMode: () => false,
+};
 
 type GridSelectionChange = {
   selectedRowsData?: unknown[];
@@ -279,6 +289,29 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
   const refreshGrid = useCallback(() => {
     gridRef.current?.refresh();
   }, [gridRef]);
+
+  // In `page` view mode the form shell unmounts while the list is showing, so
+  // `formRef.current` is null and a grid delete would silently do nothing. This
+  // detached submitter performs the same DELETE (same confirmation-free path,
+  // notifications and callbacks as FormView) without needing the form mounted.
+  const { handleDelete: deleteWithoutForm } = useFormSubmit(
+    {
+      url: resolvedResource.apiUrl,
+      fields: formFields,
+      detailPropertyName: '',
+      events,
+      httpClient,
+      adapter: resolvedResource.adapter,
+      onDeleteSuccess: (response) => {
+        resolvedResource.onDeleteSuccess?.(response as T);
+        refreshGrid();
+      },
+      onDeleteError: resolvedResource.onDeleteError,
+    },
+    DETACHED_ACCESSORS,
+    emit,
+    () => true,
+  );
 
   const resetDialogOperation = useCallback(() => {
     closeDialog();
@@ -750,7 +783,9 @@ const CrudPageInner = <T extends DataRecord = DataRecord>({
         onAdd={requestNew}
         onEdit={requestEdit}
         onView={requestView}
-        onDelete={(row) => formRef.current?.deleteRow(row)}
+        onDelete={(row) =>
+          formRef.current ? formRef.current.deleteRow(row) : deleteWithoutForm({ row })
+        }
         selectionMode={hasMultipleSelection ? 'multiple' : 'single'}
         onSelectionChanged={handleSelectionChanged}
         editMode={resolvedResource.editMode}

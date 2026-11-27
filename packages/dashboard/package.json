@@ -60,7 +60,7 @@
     "recharts": "^3.0.0"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5.108.0",
+    "@tanstack/react-query": "^5.108.4",
     "react-router-dom": "^7.18.6",
     "recharts": "^3.11.0"
   },

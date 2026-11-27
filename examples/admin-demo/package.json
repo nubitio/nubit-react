@@ -24,7 +24,7 @@
     "@tanstack/react-query": "^5.108.0",
     "devextreme": "^26.1.6",
     "devextreme-react": "^26.1.6",
-    "i18next": "^27.2.2",
+    "i18next": "^27.2.7",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-i18next": "^18.0.3",

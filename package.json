@@ -45,7 +45,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "happy-dom": "^21.0.4",
-    "i18next": "^27.2.2",
+    "i18next": "^27.2.7",
     "prettier": "^3.10.1",
     "publint": "^0.3.25",
     "react": "^19.3.1",

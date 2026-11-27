@@ -1180,13 +1180,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   onClick={() => void inlineEdit.saveAll()}
                 />
               )}
-              {toolbar.showRefresh !== false && (options.refreshPlacement ?? 'toolbar') === 'toolbar' && (
-                <IconButton
-                  icon="ph ph-arrow-clockwise"
-                  label={t('grid.buttonRefresh')}
-                  onClick={() => void loadRows()}
-                />
-              )}
+              {toolbar.showRefresh !== false &&
+                (options.refreshPlacement ?? 'toolbar') === 'toolbar' && (
+                  <IconButton
+                    icon="ph ph-arrow-clockwise"
+                    label={t('grid.buttonRefresh')}
+                    onClick={() => void loadRows()}
+                  />
+                )}
             </div>
           )}
           {cellEditMode && hasPendingInlineEdits && !inlineEditToolbar && (

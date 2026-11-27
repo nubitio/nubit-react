@@ -44,6 +44,8 @@ export interface TreeListViewConfig {
 export interface DataGridViewOptions {
   id: string;
   title: string;
+  /** Hide the title/count heading while keeping the grid toolbar and controls. */
+  headingVisible?: boolean;
   url: string;
   /** Controlled rows. When provided, the grid renders this data instead of loading from url. */
   data?: DataRecord[];
@@ -131,6 +133,8 @@ export interface DataGridViewOptions {
   cardView?: CardViewConfig;
   /** Page heading and unframed toolbar; panel remains the default. */
   appearance?: 'panel' | 'page';
+  /** Place the grid refresh control in the pager/footer instead of the toolbar. */
+  refreshPlacement?: 'toolbar' | 'footer' | 'hidden';
   /** Enum/entity fields exposed as quick chips, sharing the table's filters. */
   quickFilterFields?: string[];
   /**

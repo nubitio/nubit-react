@@ -817,8 +817,11 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
   ) => {
     const sortRule = sort.find((rule) => rule.selector === field.name);
     const width = getColumnWidth(field, resolvedColWidths);
+    const headerJustification =
+      field.align === 'right' ? 'flex-end' : field.align === 'center' ? 'center' : 'flex-start';
     const hasActiveFilter = Boolean((filterInputs[field.name] ?? '').trim());
     const headerClassName = [
+      `nb-datagrid__header-cell--align-${field.align ?? 'left'}`,
       sortRule ? 'nb-datagrid__header-cell--sorted' : '',
       hasActiveFilter ? 'nb-datagrid__header-cell--filtered' : '',
       buildGroupBoundaryClassName(fieldGroupBoundaries[field.name]),
@@ -843,6 +846,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
           <button
             type="button"
             className="nb-datagrid__sort-button"
+            style={{ justifyContent: headerJustification }}
             aria-label={t('grid.sortColumn', { column: field.label })}
             onClick={() => toggleSort(field)}
           >
@@ -857,7 +861,12 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
             )}
           </button>
         ) : (
-          <span className="nb-datagrid__column-label">{field.label}</span>
+          <span
+            className="nb-datagrid__column-label"
+            style={{ justifyContent: headerJustification }}
+          >
+            {field.label}
+          </span>
         )}
         <span
           className="nb-datagrid__col-resize"
@@ -1082,7 +1091,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   onClick={() => (options.onBack ? options.onBack() : navigate(-1))}
                 />
               )}
-              {options.mode === 'full' || !options.mode ? (
+              {(options.mode === 'full' || !options.mode) && options.headingVisible !== false ? (
                 pageAppearance ? (
                   <div className="nb-datagrid__heading">
                     <h1>{options.title}</h1>
@@ -1171,7 +1180,7 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
                   onClick={() => void inlineEdit.saveAll()}
                 />
               )}
-              {toolbar.showRefresh !== false && (
+              {toolbar.showRefresh !== false && (options.refreshPlacement ?? 'toolbar') === 'toolbar' && (
                 <IconButton
                   icon="ph ph-arrow-clockwise"
                   label={t('grid.buttonRefresh')}
@@ -2182,6 +2191,14 @@ export const NativeDataGridView = forwardRef<GridHandle, DataGridViewOptions>((o
           {(options.paging ?? true) && (
             <div className="nb-datagrid__pager">
               <div className="nb-datagrid__pager-status" aria-live="polite">
+                {options.refreshPlacement === 'footer' && (
+                  <IconButton
+                    className="nb-datagrid__pager-refresh"
+                    icon="ph ph-arrow-clockwise"
+                    label={t('grid.buttonRefresh')}
+                    onClick={() => void loadRows()}
+                  />
+                )}
                 <span className="nb-datagrid__pager-info">{recordRangeLabel}</span>
                 {selectedCountLabel && (
                   <span className="nb-datagrid__pager-selected">{selectedCountLabel}</span>

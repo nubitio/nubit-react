@@ -28,17 +28,17 @@
   // per component. (Was 'Syne'; the redesign is one typeface end to end.)
   --font-family-display: var(--font-family-sans);
 
-  // Scale: 11 → 12 → 13 → 14 → 16 → 20 → 24 → 28 → 32 → 40
+  // Scale: 11 → 12 → 13 → 14 → 16 → 18 → 22 → 26 → 30 → 36
   --font-size-xxs: 11px; // timestamps, badge labels, filter operators
   --font-size-xs: 12px; // column headers (uppercase), secondary metadata, labels
   --font-size-sm: 13px; // grid rows, form field values, dropdown options
   --font-size-md: 14px; // form labels, toolbar titles, button text
   --font-size-lg: 16px; // body-lg, section intro
-  --font-size-xl: 20px; // page subtitle, card title
-  --font-size-2xl: 24px; // page title, dialog title, KPI numbers
-  --font-size-3xl: 28px; // dashboard section titles
-  --font-size-4xl: 32px; // hero titles
-  --font-size-5xl: 40px; // large KPI hero values
+  --font-size-xl: 18px; // page title, card title
+  --font-size-2xl: 22px; // dialog title, KPI numbers
+  --font-size-3xl: 26px; // dashboard section titles
+  --font-size-4xl: 30px; // hero titles
+  --font-size-5xl: 36px; // large KPI hero values
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;

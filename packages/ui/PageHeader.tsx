@@ -21,6 +21,9 @@ export interface PageHeaderProps {
   breadcrumb?: PageHeaderBreadcrumb;
   /** Custom breadcrumb node (e.g. react-router Link). Takes precedence over breadcrumb. */
   breadcrumbSlot?: ReactNode;
+  /** Render a history-aware return action before the title. */
+  onBack?: () => void;
+  backLabel?: string;
   badge?: PageHeaderBadge;
   actions?: ReactNode;
   className?: string;
@@ -32,12 +35,20 @@ export function PageHeader({
   metadata,
   breadcrumb,
   breadcrumbSlot,
+  onBack,
+  backLabel = 'Volver',
   badge,
   actions,
   className,
 }: PageHeaderProps) {
   const breadcrumbNode =
     breadcrumbSlot ??
+    (onBack ? (
+      <button type="button" className="nb-page-header__breadcrumb" onClick={onBack}>
+        <i className="ph ph-arrow-left" aria-hidden />
+        {backLabel}
+      </button>
+    ) : null) ??
     (breadcrumb ? (
       <a href={breadcrumb.href} className="nb-page-header__breadcrumb">
         <i className="ph ph-arrow-left" aria-hidden />

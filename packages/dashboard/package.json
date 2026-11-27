@@ -62,7 +62,7 @@
   "devDependencies": {
     "@tanstack/react-query": "^5.108.0",
     "react-router-dom": "^7.18.6",
-    "recharts": "^3.11.0"
+    "recharts": "^3.11.1"
   },
   "peerDependenciesMeta": {
     "recharts": {
